@@ -2,20 +2,18 @@ package fr.polytechnique.cmap.cnam
 
 import java.util.HashMap
 
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 
 import scala.reflect.ClassTag
 import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
-import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.types.LongType
-import org.apache.spark.sql.types.DataType
-import org.apache.spark.sql.types.StringType
-
+import org.apache.spark.sql.types.{AnyDataType, _}
 import org.apache.spark.sql.functions._
-
-import scalaz._
-import Scalaz._
+import org.apache.spark.SparkContext._
+//import scalaz._
+//import Scalaz._
 import scala.tools.nsc.util.HashSet
 
 /**
@@ -29,16 +27,52 @@ object Statistics {
 
   import sqlContext.implicits._
 
-  class CustomAggStatistics extends UserDefinedAggregateFunction {
+  def findMedian(srcDF: DataFrame, colName: String): Double = {
 
-//    var freq_colOccur = Map[Long, Int]()
-//    def mapFrequency(inputColValue: Long) = {
-//
-//      if(freq_colOccur.contains(inputColValue))
-//        freq_colOccur += (inputColValue -> (freq_colOccur.get(inputColValue).get + 1))
-//      else
-//        freq_colOccur += (inputColValue -> 1)
-//    }
+    // 'filter(! srcDF(colName).isin(""))' is used to remove empty columns.
+    // If we are switching to scala 2.11, we can use spar_csv 2.11 and consider empty columns as null
+    val sortedAsRdd = srcDF.select(colName).filter(!srcDF(colName).isin("")).sort(asc(colName)).map(x=> x.get(0))
+
+    val test = sortedAsRdd.collect()
+
+    val sorted_ValueAskey = sortedAsRdd.zipWithIndex().map(_.swap) //    {  case (v, idx) => (idx, v) }
+
+    val count = sorted_ValueAskey.count()
+
+    val median: Double = if (count % 2 == 0) {
+      val l = count / 2 - 1
+      val r = l + 1
+      // [Quick fix, this may not be the cleaner way] String can be casted to any other types,
+      // so first cast the type to string and then to needed double.
+      (sorted_ValueAskey.lookup(l).head.toString.toDouble + sorted_ValueAskey.lookup(r).head.toString.toDouble) / 2
+    } else sorted_ValueAskey.lookup(count / 2).head.toString.toDouble
+
+    median
+  }
+
+  def mapNbOccurrencesToColValues(srcDF: DataFrame, colName: String): RDD[(Long, Any)] = {
+
+    val mappedrdd = srcDF.select(colName).filter(!srcDF(colName).isin("")).groupBy(colName).count().map(x => (x.getLong(1), x.get(0)))
+
+    val testValue = mappedrdd.collect()
+    mappedrdd
+  }
+
+  def findMostOccurrenceValues(srcDF: DataFrame, colName: String, nb: Int = 5): Iterable[(Any, Long)] = {
+
+    val mappedRDD = mapNbOccurrencesToColValues(srcDF, colName).sortByKey(false) // false => sort descending (Most Occurrences)
+
+    mappedRDD.take(nb).map(_.swap)
+  }
+
+  def findLeastOccurrenceValues(srcDF: DataFrame, colName: String, nb: Int = 5): Iterable[(Any, Long)] = {
+
+    val mappedRDD = mapNbOccurrencesToColValues(srcDF, colName).sortByKey(true) // true => sort ascending (Least Occurrences)
+
+    mappedRDD.take(nb).map(_.swap)
+  }
+
+  class UDAFAvgSumMaxMinNull() extends UserDefinedAggregateFunction {
 
     override def inputSchema: StructType = new StructType().add("doubleInput", LongType)
 
@@ -48,17 +82,14 @@ object Statistics {
       buffer(2) = 0L
       buffer(3) = 0L
       buffer(4) = 0L
-      buffer(5) =
-//      buffer(5) = Map[Long, Long]()
     }
 
     override def bufferSchema: StructType = {
       new StructType().add("sumInput", LongType)
-      .add("countInter", LongType)
-      .add("maxField", LongType)
-      .add("minField", LongType)
-      .add("NULLField", LongType)
-//      .add("DistinctField", LongType)
+        .add("countInter", LongType)
+        .add("maxField", LongType)
+        .add("minField", LongType)
+        .add("NULLField", LongType)
     }
 
     override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
@@ -68,16 +99,6 @@ object Statistics {
         buffer(1) = buffer.getLong(1) + 1
         buffer(2) = if (inputColValue > buffer.getLong(2)) inputColValue else buffer.getLong(2)
         buffer(3) = if (inputColValue < buffer.getLong(3)) inputColValue else buffer.getLong(3)
-//        buffer(5) = mapFrequency(inputColValue)
-////        var freq_colOccur = buffer.getMap[Long, Long](5)
-//
-//          if(freq_colOccur.contains(inputColValue))
-//            freq_colOccur += (inputColValue -> (freq_colOccur.get(inputColValue).get + 1L))
-//          else
-//            freq_colOccur += (inputColValue -> 1L)
-//
-//        buffer(5) = freq_colOccur
-
       }
       else
         buffer(4) = buffer.getLong(4) + 1
@@ -90,13 +111,6 @@ object Statistics {
       buffer1(2) = if (buffer2.getLong(2) > buffer1.getLong(2)) buffer2.getLong(2) else buffer1.getLong(2)
       buffer1(3) = if (buffer2.getLong(3) < buffer1.getLong(3)) buffer2.getLong(3) else buffer1.getLong(3)
       buffer1(4) = buffer1.getLong(4) + buffer2.getLong(4)
-
-//      val map1 = buffer1.getMap[Long, Long](5)
-//      val map2 = buffer2.getMap(5)
-//
-//      buffer1(5) = map1 //|+| map2
-//      buffer1(5) = map1.merged(map2)({ case ((k,v1),(_,v2)) => (k,v1+v2) })
-//      map1 ++ map2.map{ case (k,v) => k -> (v + map1.getOrElse(k,0)) }
     }
 
     override def evaluate(buffer: Row): Any = {
@@ -105,7 +119,6 @@ object Statistics {
         buffer.getLong(2),
         buffer.getLong(3),
         buffer.getLong(4)
-//        buffer.getMap(5)
         ).toString()
     }
 
@@ -160,27 +173,35 @@ object Statistics {
     }
   }
 
-  implicit class Statistic(src: DataFrame){
+  implicit class Statistic(srcDF: DataFrame){
 
-    val customAggStatistics = new CustomAggStatistics()
+    val avg_sum_max_min_null = new UDAFAvgSumMaxMinNull()
 
     def newDescribe() = {
-      val src_columns = src.describe()..columns
+      val src_columns = srcDF.columns
 
       val colSize = src_columns.size
 
       val statistics: Array[Array[Row]] = new Array(colSize)
 
+      var listOfAgg = Map[String, String]()
       for(i <- 0 to colSize - 1 )
         {
           val colName: String = src_columns(i)
-          statistics(i) = src.select(colName).agg(customAggStatistics(src(colName))).collect()
-          src.groupBy("BEN_NAI_MOI").count.agg(max(src("count")))//.groupBy("count").max("count") show
+//          statistics(i) = srcDF.select(colName).agg(avg_sum_max_min_null(srcDF(colName))).collect()
+//          val listOfAgg = Map(colName -> "min",
+//            colName -> "min",
+//            colName -> "max")
+          statistics(i) = srcDF.agg(min(colName), max(colName), avg(colName), count(colName), sum(colName)).collect()
         }
+
+
+      srcDF.groupBy("BEN_NAI_MOI").count.agg(max(srcDF("count")))//.groupBy("count").max("count") show
 
       for(i <- 0 to colSize - 1 )
       {
-        println( src_columns(i) + "[Avg, Count, Max, Min, #NULL] : " + statistics(i).to)
+        println( src_columns(i) + "[Min, Max, Mean, Count, Sum] : " + statistics(i).to)
+//        println( src_columns(i) + "[Avg, Count, Max, Min, Null] : " + statistics(i).to)
       }
 
     }
