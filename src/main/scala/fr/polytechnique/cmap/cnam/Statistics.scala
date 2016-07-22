@@ -10,12 +10,13 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.types._
 
+// import org.apache.spark.sql.types.{DataType, LongType, StringType, StructType, NumericType}
 /**
   * Created by sathiya on 28/06/16.
   */
 
 //case class CustomStatisticsCase(Min: String, Max: String, Avg: Double, Count: Long, Sum: Double, nbNull: Long, Median: Double, MaxOccur: String, MinOccur: String, ColName: String)
-case class CustomStatisticsCase(Min: String, Max: String, Avg: Double, Count: Long, Sum: Double, Median: Double, MaxOccur: String, MinOccur: String, ColName: String)
+case class CustomStatisticsCase(Min: String, Max: String, Count: Long, Avg: Double, Sum: Double, MaxOccur: String, MinOccur: String, ColName: String)
 
 object Statistics {
 
@@ -24,7 +25,6 @@ object Statistics {
     val sc = SparkContext.getOrCreate(sparkConf)
     sc
   }
-
 
   def findMedian(srcDF: DataFrame, colName: String): Double = {
 
@@ -73,7 +73,7 @@ object Statistics {
 
   class UDAFNbNull() extends UserDefinedAggregateFunction {
 
-    override def inputSchema: StructType = new StructType().add("InputInput", LongType)
+    override def inputSchema: StructType = new StructType().add("InputInput", StringType)//AnyDataType)
 
     override def initialize(buffer: MutableAggregationBuffer): Unit = {
       buffer(0) = 0L
@@ -84,7 +84,7 @@ object Statistics {
     }
 
     override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-      if(input.isNullAt(0)){
+      if(input.isNullAt(0) || input.get(0).equals("")){
         buffer(0) = buffer.getLong(0) + 1
       }
       else {}
@@ -102,13 +102,17 @@ object Statistics {
 
     override def deterministic: Boolean = true
 
-    /* Small try to mix the Malformed class name Exception */
+    /* A small try to mix the Malformed class name Exception */
 //    override def toString: String = {
-//      s"""${"UDAFNbNull"}(${""})"""
+//      //      s"""${udaf.name}(${children.mkString(",")})"""
+//      s"""${"UDAFNbNull"}(${inputSchema.fieldNames.mkString(",")})"""
 //    }
-
   }
 
+  /**
+    * This UDAF will compute Count, Sum, Avg, Min, Max and Null in a single pass.
+    * However, this method is still under experimentation.
+    */
   class UDAFAvgSumMaxMinNull() extends UserDefinedAggregateFunction {
 
     override def inputSchema: StructType = new StructType().add("doubleInput", LongType)
@@ -116,8 +120,8 @@ object Statistics {
     override def initialize(buffer: MutableAggregationBuffer): Unit = {
       buffer(0) = 0L
       buffer(1) = 0L
-      buffer(2) = 0L
-      buffer(3) = 0L
+      buffer(2) = -1L
+      buffer(3) = -1L
       buffer(4) = 0L
     }
 
@@ -134,8 +138,9 @@ object Statistics {
         val inputColValue = input.getLong(0)
         buffer(0) = buffer.getLong(0) + inputColValue
         buffer(1) = buffer.getLong(1) + 1
-        buffer(2) = if (inputColValue > buffer.getLong(2)) inputColValue else buffer.getLong(2)
-        buffer(3) = if (inputColValue < buffer.getLong(3)) inputColValue else buffer.getLong(3)
+        // buffer(1) is already incremented by 1 in the previous step.
+        buffer(2) = if(buffer(1) == 1L) inputColValue else { if (inputColValue > buffer.getLong(2)) inputColValue else buffer.getLong(2) }
+        buffer(3) = if(buffer(1) == 1L) inputColValue else { if (inputColValue < buffer.getLong(3)) inputColValue else buffer.getLong(3) }
       }
       else
         buffer(4) = buffer.getLong(4) + 1
@@ -143,10 +148,13 @@ object Statistics {
     }
 
     override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
+      // we should keep these 2 computation before we compute count: buffer1(1)
+      buffer1(2) = if(!(buffer1.getLong(1) == 0L || buffer2.getLong(1) == 0L)) {if (buffer2.getLong(2) > buffer1.getLong(2)) buffer2.getLong(2) else buffer1.getLong(2)} else {if(buffer1.getLong(1) == 0L) buffer2.getLong(2) else buffer1.getLong(2)}
+      buffer1(3) = if(!(buffer1.getLong(1) == 0L || buffer2.getLong(1) == 0L)) {if (buffer2.getLong(3) < buffer1.getLong(3)) buffer2.getLong(3) else buffer1.getLong(3)} else {if(buffer1.getLong(1) == 0L) buffer2.getLong(3) else buffer1.getLong(3)}
+
       buffer1(0) = buffer1.getLong(0) + buffer2.getLong(0)
       buffer1(1) = buffer1.getLong(1) + buffer2.getLong(1)
-      buffer1(2) = if (buffer2.getLong(2) > buffer1.getLong(2)) buffer2.getLong(2) else buffer1.getLong(2)
-      buffer1(3) = if (buffer2.getLong(3) < buffer1.getLong(3)) buffer2.getLong(3) else buffer1.getLong(3)
+
       buffer1(4) = buffer1.getLong(4) + buffer2.getLong(4)
     }
 
@@ -212,8 +220,8 @@ object Statistics {
 
   implicit class CustomStatistics(val srcDF: DataFrame){
 
-    def newDescribe(): DataFrame = {
-      val src_columns = srcDF.columns
+    def newDescribe(inputColumns: String*): DataFrame = {
+      val src_columns = if(inputColumns.isEmpty) srcDF.columns.toList else inputColumns.toList
 
       val colSize = src_columns.size
 
@@ -228,18 +236,28 @@ object Statistics {
       var statistics = sqlContext.createDataFrame(sc.emptyRDD[Row], schema)
 
       val nbNullVal = new UDAFNbNull()
+
+      val dfCount = srcDF.count()
 //      val avg_sum_max_min_null = new UDAFAvgSumMaxMinNull()
 
       for(i <- 0 to colSize - 1 ) {
         val colName: String = src_columns(i)
 
         if (schemaDataTypes.apply(colName).dataType.isInstanceOf[NumericType]) {
-          lazy val median = 0//findMedian(srcDF, colName)
+          //lazy val median = 0//findMedian(srcDF, colName)
           lazy val maxOccur = findMostOccurrenceValues(srcDF, colName).mkString
           lazy val minOccur = findLeastOccurrenceValues(srcDF, colName).mkString
-          statistics = statistics.unionAll(srcDF.select(colName).agg(min(colName), max(colName), avg(colName), count(colName), sum(colName)).withColumn("median", lit(median)).withColumn("MaxOccurence", lit(maxOccur)).withColumn("MinOccurence", lit(minOccur)).withColumn("ColName", lit(colName)))
-          //statistics = statistics.unionAll(srcDF.select(colName).agg(min(colName), max(colName), avg(colName), count(colName), sum(colName), nbNullVal(srcDF(colName))).withColumn("median", lit(median)).withColumn("MaxOccurence", lit(maxOccur)).withColumn("MinOccurence", lit(minOccur)).withColumn("ColName", lit(colName)))
+          statistics = statistics.unionAll(srcDF.select(colName).agg(min(colName), max(colName), count(colName), avg(colName), sum(colName)).withColumn("MaxOccurence", lit(maxOccur)).withColumn("MinOccurence", lit(minOccur)).withColumn("ColName", lit(colName)))
+//          statistics = statistics.unionAll(srcDF.select(colName).agg(min(colName), max(colName), avg(colName), count(colName), sum(colName), nbNullVal(srcDF(colName))).withColumn("median", lit(median)).withColumn("MaxOccurence", lit(maxOccur)).withColumn("MinOccurence", lit(minOccur)).withColumn("ColName", lit(colName)))
         }
+
+        else {
+          lazy val maxOccur = findMostOccurrenceValues(srcDF, colName).mkString
+          lazy val minOccur = findLeastOccurrenceValues(srcDF, colName).mkString
+          statistics = statistics.unionAll(srcDF.select(colName).agg(min(colName), max(colName), count(colName)).withColumn("Avg", lit("XX")).withColumn("Sum", lit("XX")).withColumn("MaxOccurence", lit(maxOccur)).withColumn("MinOccurence", lit(minOccur)).withColumn("ColName", lit(colName)))
+//          (Min: String, Max: String, Avg: Double, Count: Long, Sum: Double, MaxOccur: String, MinOccur: String, ColName: String)
+        }
+
       }
 
       return statistics
