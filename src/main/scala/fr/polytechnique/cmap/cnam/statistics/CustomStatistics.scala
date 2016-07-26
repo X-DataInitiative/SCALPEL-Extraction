@@ -66,20 +66,39 @@ object CustomStatistics {
 
       val colSize = src_columns.size
 
-      val schemaCusStat = ScalaReflection.schemaFor[CaseReusableAggFunctions].dataType.asInstanceOf[StructType]
-
       val schemaDataTypes = srcDF.schema
 
-      var outputDF = sqlContext.createDataFrame(sc.emptyRDD[Row], schemaCusStat)
+//      val schemaCusStat = ScalaReflection.schemaFor[CaseReusableAggFunctions].dataType.asInstanceOf[StructType]
+//
+//      var outputDF = sqlContext.createDataFrame(sc.emptyRDD[Row], schemaCusStat)
+//
+//      for (i <- 0 to colSize - 1) {
+//        val colName: String = src_columns(i)
+//
+//        if (schemaDataTypes.apply(colName).dataType.isInstanceOf[NumericType])
+//          outputDF = outputDF.unionAll(srcDF.select(colName).agg(min(colName), max(colName), count(colName), sum(when(srcDF(colName).isNull || srcDF(colName) === "",1).otherwise(0)), avg(colName), sum(colName)).withColumn("ColName", lit(colName))) //  || srcDF(colName) === ""
+//        else
+//          outputDF = outputDF.unionAll(srcDF.select(colName).agg(min(colName), max(colName), count(colName), sum(when(srcDF(colName).isNull || srcDF(colName) === "",1).otherwise(0))).withColumn("Avg", lit("NA")).withColumn("Sum", lit("NA")).withColumn("ColName", lit(colName)))
+//      }
 
-      for (i <- 0 to colSize - 1) {
-        val colName: String = src_columns(i)
-
-        if (schemaDataTypes.apply(colName).dataType.isInstanceOf[NumericType])
-          outputDF = outputDF.unionAll(srcDF.select(colName).agg(min(colName), max(colName), count(colName), sum(when(srcDF(colName).isNull || srcDF(colName) === "",1).otherwise(0)), avg(colName), sum(colName)).withColumn("ColName", lit(colName))) //  || srcDF(colName) === ""
-        else
-          outputDF = outputDF.unionAll(srcDF.select(colName).agg(min(colName), max(colName), count(colName), sum(when(srcDF(colName).isNull || srcDF(colName) === "",1).otherwise(0))).withColumn("Avg", lit("NA")).withColumn("Sum", lit("NA")).withColumn("ColName", lit(colName)))
-      }
+      val outputDF = src_columns.map{
+        case colName if schemaDataTypes.apply(colName).dataType.isInstanceOf[NumericType] =>
+          srcDF.select(colName).agg(min(colName),
+                                    max(colName),
+                                    count(colName),
+                                    sum(when(srcDF(colName).isNull || srcDF(colName) === "",1).otherwise(0)),
+                                    avg(colName),
+                                    sum(colName)
+                                   ).withColumn("ColName", lit(colName))
+        case colName =>
+          srcDF.select(colName).agg(min(colName),
+                                    max(colName),
+                                    count(colName),
+                                    sum(when(srcDF(colName).isNull || srcDF(colName) === "",1).otherwise(0))
+                                    ).withColumn("Avg", lit("NA"))
+                                     .withColumn("Sum", lit("NA"))
+                                     .withColumn("ColName", lit(colName))
+      }.reduce(_.unionAll(_))
 
       val maxOccur: Map[String, String] = src_columns.map(colName => (colName, StatisticsUsingMapReduce.findMostOccurrenceValues(srcDF, colName).mkString)).toMap
       val minOccur: Map[String, String] = src_columns.map(colName => (colName, StatisticsUsingMapReduce.findLeastOccurrenceValues(srcDF, colName).mkString)).toMap
