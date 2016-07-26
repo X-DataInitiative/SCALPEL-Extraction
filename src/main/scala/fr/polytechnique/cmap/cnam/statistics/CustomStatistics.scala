@@ -28,18 +28,6 @@ import org.apache.spark.sql.types._ // import org.apache.spark.sql.types.{DataTy
   */
 case class CaseDescribeFunctionColumns(Min: String, Max: String, Count: Long, NullValues: Long, Avg: String, Sum: String, MaxOccur: String, MinOccur: String, ColName: String)
 
-/**
-  * This case class represents some of the available agg functions that can reused while computing output dataframe.
- *
-  * @param Min
-  * @param Max
-  * @param Count
-  * @param Avg
-  * @param Sum
-  * @param ColName
-  */
-case class CaseReusableAggFunctions(Min: String, Max: String, Count: Long, NullValues: Long, Avg: String, Sum: String, ColName: String)
-
 object CustomStatistics {
 
   /** WE MAY NEED TO PUT THIS FUNCTION INSIDE UTILITIES LATER.
