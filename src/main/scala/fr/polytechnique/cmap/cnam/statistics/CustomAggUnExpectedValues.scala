@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.statistics
 
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
-import org.apache.spark.sql.types.{DataType, LongType, StringType, StructType}
+import org.apache.spark.sql.types._
 
 import scala.reflect.ClassTag
 
@@ -18,9 +18,11 @@ import scala.reflect.ClassTag
   * @param expectedValues List of expected values
   * @tparam T Type of the given column.
   */
-class CustomAggUnExpectedValues[T: ClassTag](expectedValues: Set[T]) extends UserDefinedAggregateFunction {
+class CustomAggUnexpectedValues[T: ClassTag](expectedValues: Set[T]) extends UserDefinedAggregateFunction {
 
-  override def inputSchema: StructType = new StructType().add("input", LongType) //TODO: We may need to change the type to String.
+  val castedExpectedValues = expectedValues.map(_.toString)
+
+  override def inputSchema: StructType = new StructType().add("input", StringType) //TODO: We may need to change the type to String.
 
   override def initialize(buffer: MutableAggregationBuffer): Unit = {
     buffer(0) = 0L
@@ -32,7 +34,7 @@ class CustomAggUnExpectedValues[T: ClassTag](expectedValues: Set[T]) extends Use
 
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
 
-    if (!expectedValues.contains(input.getAs[T](0))) {
+    if (!castedExpectedValues.contains(input.getString(0))) { // if (!expectedValues.find( _ == input.getAs[T](0)).isDefined) {
       buffer(0) = buffer.getLong(0) + 1
     }
   }
@@ -42,11 +44,10 @@ class CustomAggUnExpectedValues[T: ClassTag](expectedValues: Set[T]) extends Use
   }
 
   override def evaluate(buffer: Row): Any = {
-    (buffer.getLong(0)
-      ).toString()
+    buffer.getLong(0)
   }
 
-  override def dataType: DataType = StringType
+  override def dataType: DataType = LongType
 
   override def deterministic: Boolean = true
 }

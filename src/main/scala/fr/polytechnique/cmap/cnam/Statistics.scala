@@ -8,17 +8,11 @@ import scala.reflect.ClassTag
 import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.catalyst.ScalaReflection
-import org.apache.spark.sql.types._
-
-import scala.collection.mutable.ListBuffer
-
-// import org.apache.spark.sql.types.{DataType, LongType, StringType, StructType, NumericType}
+import org.apache.spark.sql.types._ // import org.apache.spark.sql.types.{DataType, LongType, StringType, StructType, NumericType}
 
 /**
   * Created by sathiya on 28/06/16.
   */
-
-//case class CustomStatisticsCase(Min: String, Max: String, Avg: Double, Count: Long, Sum: Double, nbNull: Long, Median: Double, MaxOccur: String, MinOccur: String, ColName: String)
 
 /**
   * This case class represents needed (statistics) columns for the output dataframe.
@@ -32,17 +26,24 @@ import scala.collection.mutable.ListBuffer
   * @param MinOccur
   * @param ColName
   */
-case class CustomStatisticsCase(Min: String, Max: String, Count: Long, Avg: String, Sum: String, MaxOccur: String, MinOccur: String, ColName: String)
+case class CaseDescribeFunctionColumns(Min: String, Max: String, Count: Long, Avg: String, Sum: String, MaxOccur: String, MinOccur: String, ColName: String)
 
+/**
+  * This case class represents some of the available agg functions that can reused while computing output dataframe.
+  * @param Min
+  * @param Max
+  * @param Count
+  * @param Avg
+  * @param Sum
+  * @param ColName
+  */
 case class ReusableAggFunctions(Min: String, Max: String, Count: Long, Avg: String, Sum: String, ColName: String)
-
-//case class NbUnexpectedValues(Count_Unexpected: Long, ColName: String)
 
 object Statistics {
 
   /**
     * Only one SparkContext can exists for a given application.
-    * This method gets helps not to recreate a new Spark Context if one already exists.
+    * This method helps not to recreate a new Spark Context if one already exists.
     *
     * @return SparkContext
     */
@@ -127,49 +128,6 @@ object Statistics {
 
     mappedRDD.take(nb).map(_.swap)
   }
-
-  /** This function is deprecated. As this function can be replaced by:
-    *  df.agg(sum(when($"colName".isNull || $"colName" === "",1).otherwise(0))) show
-    *
-    * This UDAF computes the number of null/empty values in a given column of a dataframe.
-    */
-//  class UDAFNbNull() extends UserDefinedAggregateFunction {
-//
-//    override def inputSchema: StructType = new StructType().add("InputInput", StringType) // We should not use numeric type as Input Schema, else the date values will be converted to Integer.
-//
-//    override def initialize(buffer: MutableAggregationBuffer): Unit = {
-//      buffer(0) = 0L
-//    }
-//
-//    override def bufferSchema: StructType = {
-//      new StructType().add("nullCount", LongType)
-//    }
-//
-//    override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-//      if (input.isNullAt(0) || input.get(0).equals("")) {
-//        buffer(0) = buffer.getLong(0) + 1
-//      }
-//      else {}
-//    }
-//
-//    override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
-//      buffer1(0) = buffer1.getLong(0) + buffer2.getLong(0)
-//    }
-//
-//    override def evaluate(buffer: Row): Any = {
-//      buffer.getLong(0)
-//    }
-//
-//    override def dataType: DataType = LongType
-//
-//    override def deterministic: Boolean = true
-//
-//    /* A small try to mix the Malformed class name Exception */
-//    //    override def toString: String = {
-//    //      //      s"""${udaf.name}(${children.mkString(",")})"""
-//    //      s"""${"UDAFNbNull"}(${inputSchema.fieldNames.mkString(",")})"""
-//    //    }
-//  }
 
   /**
     * This UDAF will compute Count, Sum, Avg, Min, Max and Null in a single pass.
@@ -310,7 +268,7 @@ object Statistics {
   implicit class CustomStatistics(val srcDF: DataFrame) {
 
     val sc = getSparkContext()
-    val sqlContext = new SQLContext(sc)
+    val sqlContext = srcDF.sqlContext
 
     import sqlContext.implicits._
 
@@ -319,11 +277,11 @@ object Statistics {
 
       val colSize = src_columns.size
 
-      val schema_cusStat = ScalaReflection.schemaFor[ReusableAggFunctions].dataType.asInstanceOf[StructType]
+      val schemaCusStat = ScalaReflection.schemaFor[ReusableAggFunctions].dataType.asInstanceOf[StructType]
 
       val schemaDataTypes = srcDF.schema
 
-      var outputDF = sqlContext.createDataFrame(sc.emptyRDD[Row], schema_cusStat)
+      var outputDF = sqlContext.createDataFrame(sc.emptyRDD[Row], schemaCusStat)
 
       var maxOccur = Map[String, String]()
       var minOccur = Map[String, String]()
@@ -343,20 +301,28 @@ object Statistics {
         minOccur += (colName -> findLeastOccurrenceValues(srcDF, colName).mkString)
       }
 
-      return outputDF.map((R:Row) => CustomStatisticsCase(R.getString(0), R.getString(1), R.getLong(2), R.getString(3), R.getString(4), maxOccur.get(R.getString(5)).get, minOccur.get(R.getString(5)).get, R.getString(5))).toDF()
+      return outputDF.map((R:Row) => CaseDescribeFunctionColumns(R.getString(0),
+                                                          R.getString(1),
+                                                          R.getLong(2),
+                                                          R.getString(3),
+                                                          R.getString(4),
+                                                          maxOccur.get(R.getString(5)).get,
+                                                          minOccur.get(R.getString(5)).get,
+                                                          R.getString(5)
+                                                          )).toDF()
     }
 
     def computeUDAF(udafObject: UserDefinedAggregateFunction, metricName_output: String, inputColumns: Seq[String]): DataFrame = {
-      val src_columns = if (inputColumns.isEmpty) srcDF.columns.toList else inputColumns.toList
+      val srcDfColumns = if (inputColumns.isEmpty) srcDF.columns.toList else inputColumns.toList
 
-      val colSize = src_columns.size
+      val colSize = srcDfColumns.size
 
       val schema_outputDF = new StructType().add(metricName_output, LongType).add("ColName", StringType)
 
       var outputDF = sqlContext.createDataFrame(sc.emptyRDD[Row], schema_outputDF)
 
       for (i <- 0 to colSize - 1) {
-        val colName: String = src_columns(i)
+        val colName: String = srcDfColumns(i)
 
         outputDF = outputDF.unionAll(srcDF.select(colName).agg(udafObject(srcDF(colName))).withColumn("ColName", lit(colName)))
       }
@@ -367,17 +333,18 @@ object Statistics {
     def countUnexpectedValues[T: ClassTag](expectedValues: Set[T], inputColumns: String*): DataFrame = {
 
       val nbUnexpectedVals = new CustomAggUnExpectedValues(expectedValues)
-      val metricName_output = "Count_Unexpected"
-      return computeUDAF(nbUnexpectedVals, metricName_output, inputColumns)
+      val outputColTitle = "Count_Unexpected"
+      return computeUDAF(nbUnexpectedVals, outputColTitle, inputColumns)
     }
 
     def countExpectedValues[T: ClassTag](expectedValues: Set[T], inputColumns: String*): DataFrame = {
 
       val nbExpectedVals = new CustomAggExpectedValues(expectedValues)
-      val metricName_output = "Count_Expected"
-      return computeUDAF(nbExpectedVals, metricName_output, inputColumns)
+      val outputColTitle = "Count_Expected"
+      return computeUDAF(nbExpectedVals, outputColTitle, inputColumns)
     }
 
+    // DELETE COMMENTED CODE LATER.
 //    def countNullValues(inputColumns: String*): DataFrame = {
 //
 //      val nbNullVal = new UDAFNbNull()
@@ -411,7 +378,50 @@ object Statistics {
 //
 //      return unexpecVal
 //    }
-
   }
 
+
+  /**     DELETE COMMENTED CODE LATER.
+    * This function is deprecated. As this function can be replaced by:
+    *  df.agg(sum(when($"colName".isNull || $"colName" === "",1).otherwise(0))) show
+    *
+    * This UDAF computes the number of null/empty values in a given column of a dataframe.
+    */
+  //  class UDAFNbNull() extends UserDefinedAggregateFunction {
+  //
+  //    override def inputSchema: StructType = new StructType().add("InputInput", StringType) // We should not use numeric type as Input Schema, else the date values will be converted to Integer.
+  //
+  //    override def initialize(buffer: MutableAggregationBuffer): Unit = {
+  //      buffer(0) = 0L
+  //    }
+  //
+  //    override def bufferSchema: StructType = {
+  //      new StructType().add("nullCount", LongType)
+  //    }
+  //
+  //    override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
+  //      if (input.isNullAt(0) || input.get(0).equals("")) {
+  //        buffer(0) = buffer.getLong(0) + 1
+  //      }
+  //      else {}
+  //    }
+  //
+  //    override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
+  //      buffer1(0) = buffer1.getLong(0) + buffer2.getLong(0)
+  //    }
+  //
+  //    override def evaluate(buffer: Row): Any = {
+  //      buffer.getLong(0)
+  //    }
+  //
+  //    override def dataType: DataType = LongType
+  //
+  //    override def deterministic: Boolean = true
+  //
+  //    /* A small try to mix the Malformed class name Exception */
+  //    //    override def toString: String = {
+  //    //      //      s"""${udaf.name}(${children.mkString(",")})"""
+  //    //      s"""${"UDAFNbNull"}(${inputSchema.fieldNames.mkString(",")})"""
+  //    //    }
+  //  }
 }

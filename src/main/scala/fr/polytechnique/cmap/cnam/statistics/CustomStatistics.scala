@@ -103,8 +103,15 @@ object CustomStatistics {
       )).toDF()
     }
 
-    def computeUDAF(udafObject: UserDefinedAggregateFunction, metricName_output: String, inputColumns: Seq[String]):
-    DataFrame = {
+    /**
+      * This is a centralized function to compute any UDAF.
+      *
+      * @param udafObject object of the UDAF that we would like to compute.
+      * @param metricName_output column name for the computed metric.
+      * @param inputColumns set of column names on which the UDAF should be applied.
+      * @return dataframe that is composed of the computer metric and the column name
+      */
+    private def computeUDAF(udafObject: UserDefinedAggregateFunction, metricName_output: String, inputColumns: Seq[String]): DataFrame = {
       val srcDfColumns = if (inputColumns.isEmpty) srcDF.columns.toList
       else inputColumns.toList
 
@@ -123,18 +130,58 @@ object CustomStatistics {
       return outputDF
     }
 
-    def countUnexpectedValues[T: ClassTag](expectedValues: Set[T], inputColumns: String*): DataFrame = {
+    /** This function counts number of unexpected values in a column <i> using UDAF </i>
+      *
+      * @param expectedValues set of expected values
+      * @param inputColumns names of the input columns that have the same expected values
+      * @tparam T
+      * @return dataframe that is composed of the number of unexpected values on each input columns
+      */
+    def countUnexpectedValues_usingUDAF[T: ClassTag](expectedValues: Set[T], inputColumns: String*): DataFrame = {
 
-      val nbUnexpectedVals = new CustomAggUnExpectedValues(expectedValues)
+      val nbUnexpectedVals = new CustomAggUnexpectedValues(expectedValues)
       val outputColTitle = "Count_Unexpected"
       return computeUDAF(nbUnexpectedVals, outputColTitle, inputColumns)
     }
 
-    def countExpectedValues[T: ClassTag](expectedValues: Set[T], inputColumns: String*): DataFrame = {
+    /** Same as the previous function, but counts expected values instead of unexpected values <i> using UDAF </i>
+      *
+      * @param expectedValues
+      * @param inputColumns
+      * @tparam T
+      * @return
+      */
+    def countExpectedValues_usingUDAF[T: ClassTag](expectedValues: Set[T], inputColumns: String*): DataFrame = {
 
       val nbExpectedVals = new CustomAggExpectedValues(expectedValues)
       val outputColTitle = "Count_Expected"
       return computeUDAF(nbExpectedVals, outputColTitle, inputColumns)
+    }
+
+    /** This is centralized function for the following two functions that does same as the previous two, but <i>without</i> UDAF
+      * After performance comparison, we can deprecate the method that is slow and can be eventually removed.
+      * @param colName
+      * @param expectedValues
+      * @param choice
+      * @tparam T
+      * @return
+      */
+    private def countExpectedOrUnexpectedValues[T: ClassTag](colName: String, expectedValues: Set[T], choice: Boolean): DataFrame = {
+
+      val castedExpectedValues = expectedValues.map(_.toString).toList
+      val isInExpectedValues = srcDF.col(colName).cast(StringType).isin(castedExpectedValues: _*) //.cast(IntegerType)
+
+      val columnToAggregate = if (choice) isInExpectedValues.cast(IntegerType) else not(isInExpectedValues).cast(IntegerType)
+
+      srcDF.select(colName).agg(sum(columnToAggregate)).toDF(if(choice) "ExpectedValues" else "UnexpectedValues").withColumn("ColName", lit(colName))
+    }
+
+    def countUnexpectedValues[T: ClassTag](colName: String, expectedValues: Set[T]): DataFrame = {
+      return countExpectedOrUnexpectedValues(colName, expectedValues, false)
+    }
+
+    def countExpectedValues[T: ClassTag](colName: String, expectedValues: Set[T]): DataFrame = {
+      return countExpectedOrUnexpectedValues(colName, expectedValues, true)
     }
   }
 }

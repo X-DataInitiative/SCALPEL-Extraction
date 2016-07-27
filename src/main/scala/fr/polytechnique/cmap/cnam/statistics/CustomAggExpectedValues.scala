@@ -16,11 +16,11 @@ import scala.reflect.ClassTag
   * @param expectedValues
   * @tparam T type of the given column.
   */
-class CustomAggExpectedValues[T: ClassTag](expectedValues: Set[T]) extends CustomAggUnExpectedValues(expectedValues) {
+class CustomAggExpectedValues[T: ClassTag](expectedValues: Set[T]) extends CustomAggUnexpectedValues[T](expectedValues) {
 
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
 
-    if (expectedValues.contains(input.getAs(0))) {
+    if (castedExpectedValues.contains(input.getAs(0))) {
       buffer(0) = buffer.getLong(0) + 1
     }
   }

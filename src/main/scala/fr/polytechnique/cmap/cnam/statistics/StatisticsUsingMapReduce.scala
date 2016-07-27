@@ -50,7 +50,7 @@ object StatisticsUsingMapReduce {
     */
   def mapNbOccurrencesToColValues(srcDF: DataFrame, colName: String): RDD[(Long, Any)] = {
 
-    val mappedrdd = srcDF.select(colName).filter(!srcDF(colName).isin("")).groupBy(colName).count().map(x => (x.getLong(1), x.get(0)))
+    val mappedrdd = srcDF.select(colName).filter(!srcDF(colName) === "" && srcDF(colName).isNotNull).groupBy(colName).count().map(x => (x.getLong(1), x.get(0)))
 
     mappedrdd
   }
