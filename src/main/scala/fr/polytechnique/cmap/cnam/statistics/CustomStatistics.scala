@@ -28,7 +28,7 @@ case class CaseDescribeFunctionColumns(Min: String, Max: String, Count: Long, Av
 
 object CustomStatistics {
 
-  /** WE MAY NEED TO PUT THIS FUNCTION INSIDE UTILITIES LATER.
+  /** WE MAY NEED TO PUT THIS FUNCTION INSIDE UTILITIES/ MAIN LATER.
     * Only one SparkContext can exists for a given application.
     * This method helps not to recreate a new Spark Context if one already exists.
     *

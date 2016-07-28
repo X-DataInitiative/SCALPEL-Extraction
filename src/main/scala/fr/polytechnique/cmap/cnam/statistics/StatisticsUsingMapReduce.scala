@@ -26,17 +26,19 @@ object StatisticsUsingMapReduce {
     // If we are switching to scala 2.11, we can use spar_csv 2.11 and consider empty columns as null
     val sortedAsRdd = srcDF.select(colName).filter(!srcDF(colName).isin("")).sort(asc(colName)).map(x => x.get(0))
 
-    val sorted_ValueAskey = sortedAsRdd.zipWithIndex().map(_.swap) //    {  case (v, idx) => (idx, v) }
+    val sortedValuesAsKey = sortedAsRdd.zipWithIndex().map(_.swap)
 
-    val count = sorted_ValueAskey.count()
+    val count = sortedValuesAsKey.count()
+
+    def sortedValuesAsKeyAtPosition(x: Long): Double = return sortedValuesAsKey.lookup(x).head.toString.toDouble
 
     val median: Double = if (count % 2 == 0) {
       val l = count / 2 - 1
       val r = l + 1
       // [Quick fix, this may not be the cleaner way] String can be casted to any other types,
       // so first cast the type to string and then to needed double.
-      (sorted_ValueAskey.lookup(l).head.toString.toDouble + sorted_ValueAskey.lookup(r).head.toString.toDouble) / 2
-    } else sorted_ValueAskey.lookup(count / 2).head.toString.toDouble
+      (sortedValuesAsKeyAtPosition(l) + sortedValuesAsKeyAtPosition(r)) / 2
+    } else sortedValuesAsKeyAtPosition(count/2)
 
     median
   }
@@ -50,7 +52,12 @@ object StatisticsUsingMapReduce {
     */
   def mapNbOccurrencesToColValues(srcDF: DataFrame, colName: String): RDD[(Long, Any)] = {
 
-    val mappedrdd = srcDF.select(colName).filter((srcDF(colName).isNotNull) && not(col(colName).isin(""))).groupBy(colName).count().map(x => (x.getLong(1), x.get(0)))
+    val mappedrdd = { srcDF.select(colName)
+      .filter((srcDF(colName).isNotNull) && not(col(colName).isin("")))
+      .groupBy(colName)
+      .count()
+      .map(x => (x.getLong(1), x.get(0)))
+    }
 
     mappedrdd
   }
