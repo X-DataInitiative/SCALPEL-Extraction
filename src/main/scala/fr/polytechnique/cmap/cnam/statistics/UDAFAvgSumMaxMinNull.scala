@@ -54,6 +54,7 @@ class UDAFAvgSumMaxMinNull() extends UserDefinedAggregateFunction {
 
   override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
     // we should keep these 2 computation before we compute count: buffer1(1)
+    // During merge function, there could be a new chunck with default values (-1L)
     buffer1(2) = if (!(buffer1.getLong(1) == 0L || buffer2.getLong(1) == 0L)) {
       if (buffer2.getLong(2) > buffer1.getLong(2)) buffer2.getLong(2) else buffer1.getLong(2)
     } else {
