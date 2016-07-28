@@ -18,9 +18,10 @@ import scala.reflect.ClassTag
   */
 class CustomAggExpectedValues[T: ClassTag](expectedValues: Set[T]) extends CustomAggUnexpectedValues[T](expectedValues) {
 
+  val castedExpectedValues_expected = expectedValues.map(_.toString)
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
 
-    if (castedExpectedValues.contains(input.getAs(0))) {
+    if (castedExpectedValues_expected.contains(input.getString(0))) {
       buffer(0) = buffer.getLong(0) + 1
     }
   }

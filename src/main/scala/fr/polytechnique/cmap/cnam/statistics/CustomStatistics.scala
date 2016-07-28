@@ -1,14 +1,12 @@
 package fr.polytechnique.cmap.cnam.statistics
 
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql._
-
-import scala.reflect.ClassTag
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.catalyst.ScalaReflection
+import org.apache.spark.sql.{DataFrame, _}
 import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
-import org.apache.spark.sql.types._ // import org.apache.spark.sql.types.{DataType, LongType, StringType, StructType, NumericType}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
+import org.apache.spark.{SparkConf, SparkContext}
+
+import scala.reflect.ClassTag // import org.apache.spark.sql.types.{DataType, LongType, StringType, StructType, NumericType}
 
 /**
   * Created by sathiya on 26/07/16.
@@ -26,7 +24,7 @@ import org.apache.spark.sql.types._ // import org.apache.spark.sql.types.{DataTy
   * @param MinOccur
   * @param ColName
   */
-case class CaseDescribeFunctionColumns(Min: String, Max: String, Count: Long, NullValues: Long, Avg: String, Sum: String, MaxOccur: String, MinOccur: String, ColName: String)
+case class CaseDescribeFunctionColumns(Min: String, Max: String, Count: Long, Avg: String, Sum: String, MaxOccur: String, MinOccur: String, ColName: String)
 
 object CustomStatistics {
 
@@ -71,21 +69,19 @@ object CustomStatistics {
 
       val outputDF = src_columns.map{
         case colName if schemaDataTypes.apply(colName).dataType.isInstanceOf[NumericType] =>
-          srcDF.select(colName).agg(min(colName),
-                                    max(colName),
-                                    count(colName),
-                                    sum(when(srcDF(colName).isNull || srcDF(colName) === "",1).otherwise(0)),
-                                    avg(colName),
-                                    sum(colName)
-                                   ).withColumn("ColName", lit(colName))
+          srcDF.select(colName).filter(!col(colName).isin("")).agg(min(colName),
+                                                                   max(colName),
+                                                                   count(colName), //sum(when(srcDF(colName).isNull || srcDF(colName) === lit(""),1).otherwise(0)),
+                                                                   avg(colName),
+                                                                   sum(colName)
+                                                                  ).withColumn("ColName", lit(colName))
         case colName =>
-          srcDF.select(colName).agg(min(colName),
-                                    max(colName),
-                                    count(colName),
-                                    sum(when(srcDF(colName).isNull || srcDF(colName) === "",1).otherwise(0))
-                                    ).withColumn("Avg", lit("NA"))
-                                     .withColumn("Sum", lit("NA"))
-                                     .withColumn("ColName", lit(colName))
+          srcDF.select(colName).filter(!col(colName).isin("")).agg(min(colName),
+                                                                   max(colName),
+                                                                   count(colName) // sum(when(srcDF(colName).isNull || srcDF(colName) === lit(""),1).otherwise(0))
+                                                                  ).withColumn("Avg", lit("NA"))
+                                                                   .withColumn("Sum", lit("NA"))
+                                                                   .withColumn("ColName", lit(colName))
       }.reduce(_.unionAll(_))
 
       val maxOccur: Map[String, String] = src_columns.map(colName => (colName, StatisticsUsingMapReduce.findMostOccurrenceValues(srcDF, colName).mkString)).toMap
@@ -93,13 +89,12 @@ object CustomStatistics {
 
       return outputDF.map((R: Row) => CaseDescribeFunctionColumns(R.getString(0),
         R.getString(1),
-        R.getLong(2),
-        R.getLong(3),
+        R.getLong(2), // R.getLong(3),
+        R.getString(3),
         R.getString(4),
-        R.getString(5),
-        maxOccur.get(R.getString(6)).get,
-        minOccur.get(R.getString(6)).get,
-        R.getString(6)
+        maxOccur.get(R.getString(5)).get,
+        minOccur.get(R.getString(5)).get,
+        R.getString(5)
       )).toDF()
     }
 
@@ -173,7 +168,7 @@ object CustomStatistics {
 
       val columnToAggregate = if (choice) isInExpectedValues.cast(IntegerType) else not(isInExpectedValues).cast(IntegerType)
 
-      srcDF.select(colName).agg(sum(columnToAggregate)).toDF(if(choice) "ExpectedValues" else "UnexpectedValues").withColumn("ColName", lit(colName))
+      srcDF.filter((col(colName).isNotNull) && not(col(colName).isin(""))).select(colName).agg(sum(columnToAggregate)).toDF(if(choice) "ExpectedValues" else "UnexpectedValues").withColumn("ColName", lit(colName))
     }
 
     def countUnexpectedValues[T: ClassTag](colName: String, expectedValues: Set[T]): DataFrame = {
