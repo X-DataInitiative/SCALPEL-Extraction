@@ -9,5 +9,4 @@ case class Patient(
     patientID: String,
     gender: Int,
     birthDate: Timestamp,
-    deathDate: Option[Timestamp]) {
-}
+    deathDate: Option[Timestamp])
