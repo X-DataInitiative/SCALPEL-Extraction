@@ -9,7 +9,7 @@ import org.scalatest.{FunSuite, GivenWhenThen}
   */
 class CustomStatisticsSuite extends FunSuite with GivenWhenThen {
 
-  val sc = CustomStatistics.getSparkContext()
+  val sc = CustomStatistics.getSparkContext(master = "local")
 
   test("Test getSparkContext Function"){
     assert(sc.isInstanceOf[SparkContext])
@@ -19,12 +19,15 @@ class CustomStatisticsSuite extends FunSuite with GivenWhenThen {
   import sqlContext.implicits._
 
   val srcFilePath: String = "src/test/resources/IR_BEN_R.csv"
+  // The older versions of the csv package don't convert empty values to null.
+  // So the functions should give consistent output whether or not
+  // the csv package converts empty values to null.
   val srcDF = { sqlContext.read.format("com.databricks.spark.csv")
     .option("header", "true")
     .option("inferSchema", "true")
     .option("delimiter", ";")
-    .option("treatEmptyValuesAsNulls", "true") // In the older version of the csv package, it is not possible to consider empty values as null.
-    .option("nullValue", "")                   // So the functions should give consistent output whether or not the csv package converts empty values to null.
+    .option("treatEmptyValuesAsNulls", "true")
+    .option("nullValue", "")
     .load(srcFilePath)
   }
 
@@ -70,7 +73,7 @@ class CustomStatisticsSuite extends FunSuite with GivenWhenThen {
     val cols = Array("BEN_DCD_DTE", "NUM_ENQ")
 
     Then("Statistics should be computed only on the specified columns without exception")
-    val resultColumns = srcDF.customDescribe(cols: _*) //.persist
+    val resultColumns = srcDF.customDescribe(cols: _*)
     assert(resultColumns.collect().toSet == expectedResultColumns.collect().toSet)
 
 
@@ -101,23 +104,78 @@ class CustomStatisticsSuite extends FunSuite with GivenWhenThen {
 
     When("Applying on a Integer column")
     Then("The function should work correctly")
-    assert(combinedDF_withNull.countUnexpectedValues("BEN_DTE_INS", (1950 to 1960).toSet).first().get(0) == 5)
-    assert(combinedDF_withNull.countExpectedValues("BEN_DTE_INS", (1950 to 1960).toSet).first().get(0) == 1)
+    assert(combinedDF_withNull.countUnexpectedValues("BEN_DTE_INS", (1950 to 1960).toSet)
+                              .first().get(0) == 5)
+    assert(combinedDF_withNull.countExpectedValues("BEN_DTE_INS", (1950 to 1960).toSet)
+                              .first().get(0) == 1)
 
     When("Applying on a Integer column expecting double value")
     Then("The function should still work correctly")
-    assert(combinedDF_withNull.countUnexpectedValues("BEN_DTE_INS", Set(1970.0)).first().get(0) == 6)
-    assert(combinedDF_withNull.countExpectedValues("BEN_DTE_INS", Set(1970.0)).first().get(0) == 0)
+    assert(combinedDF_withNull.countUnexpectedValues("BEN_DTE_INS", Set(1970.0))
+                              .first().get(0) == 6)
+    assert(combinedDF_withNull.countExpectedValues("BEN_DTE_INS", Set(1970.0))
+                              .first().get(0) == 0)
 
     When("Applying on a Double column")
     Then("The function should still work correctly")
-    assert(combinedDF_withNull.select($"BEN_DTE_INS" cast("double")).countUnexpectedValues("BEN_DTE_INS", Set(1970.0)).first().get(0) == 3)
-    assert(combinedDF_withNull.select($"BEN_DTE_INS" cast("double")).countExpectedValues("BEN_DTE_INS", Set(1970.0)).first().get(0) == 3)
+    assert(combinedDF_withNull.select($"BEN_DTE_INS" cast("double"))
+                              .countUnexpectedValues("BEN_DTE_INS", Set(1970.0))
+                              .first().get(0) == 3)
+    assert(combinedDF_withNull.select($"BEN_DTE_INS" cast("double"))
+                              .countExpectedValues("BEN_DTE_INS", Set(1970.0))
+                              .first().get(0) == 3)
 
     When("Applying on a on Integer column with null Values")
     Then("The function should still work correctly")
-    assert(combinedDF_withNull.countUnexpectedValues("BEN_DTE_INS", (1970 to 1975).toSet).first().get(0) == 1)
-    assert(combinedDF_withNull.countExpectedValues("BEN_DTE_INS", (1970 to 1975).toSet).first().get(0) == 5)
+    assert(combinedDF_withNull.countUnexpectedValues("BEN_DTE_INS", (1970 to 1975).toSet)
+                              .first().get(0) == 1)
+    assert(combinedDF_withNull.countExpectedValues("BEN_DTE_INS", (1970 to 1975).toSet)
+                              .first().get(0) == 5)
+  }
+
+  test("UDAF countUnexpectedValues && countExpectedValues") {
+
+    import fr.polytechnique.cmap.cnam.statistics.CustomStatistics._
+
+    // Given scrDF
+    When("Applying on a String column")
+    Then("The function should still work correctly")
+    assert(srcDF.countUnexpectedValuesUsingUDAF(Set("CODE1234"), "ORG_CLE_NEW").first().get(0) == 0)
+    assert(srcDF.countExpectedValuesUsingUDAF(Set("CODE1234"), "ORG_CLE_NEW").first().get(0) == 2)
+
+    // Given a DF with Null values
+    val testDF_withNull = sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975)).toDF("BEN_DTE_INS")
+    val combinedDF_withNull = srcDF.select("BEN_DTE_INS").unionAll(testDF_withNull)
+
+    When("Applying on a Integer column")
+    Then("The function should work correctly")
+    assert(combinedDF_withNull.countUnexpectedValuesUsingUDAF((1950 to 1960).toSet, "BEN_DTE_INS")
+                              .first().get(0) == 5)
+    assert(combinedDF_withNull.countExpectedValuesUsingUDAF((1950 to 1960).toSet, "BEN_DTE_INS")
+                              .first().get(0) == 1)
+
+    When("Applying on a Integer column expecting double value")
+    Then("The function should still work correctly")
+    assert(combinedDF_withNull.countUnexpectedValuesUsingUDAF(Set(1970.0), "BEN_DTE_INS")
+                              .first().get(0) == 6)
+    assert(combinedDF_withNull.countExpectedValuesUsingUDAF(Set(1970.0), "BEN_DTE_INS")
+                              .first().get(0) == 0)
+
+    When("Applying on a Double column")
+    Then("The function should still work correctly")
+    assert(combinedDF_withNull.select($"BEN_DTE_INS" cast("double"))
+                              .countUnexpectedValuesUsingUDAF(Set(1970.0), "BEN_DTE_INS")
+                              .first().get(0) == 3)
+    assert(combinedDF_withNull.select($"BEN_DTE_INS" cast("double"))
+                              .countExpectedValuesUsingUDAF(Set(1970.0), "BEN_DTE_INS")
+                              .first().get(0) == 3)
+
+    When("Applying on a on Integer column with null Values")
+    Then("The function should still work correctly")
+    assert(combinedDF_withNull.countUnexpectedValuesUsingUDAF((1970 to 1975).toSet, "BEN_DTE_INS")
+                              .first().get(0) == 1)
+    assert(combinedDF_withNull.countExpectedValuesUsingUDAF((1970 to 1975).toSet, "BEN_DTE_INS")
+                              .first().get(0) == 5)
   }
 
 }

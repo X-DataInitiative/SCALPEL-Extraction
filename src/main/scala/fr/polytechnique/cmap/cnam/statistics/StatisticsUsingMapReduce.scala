@@ -10,10 +10,13 @@ import org.apache.spark.sql.functions._
 object StatisticsUsingMapReduce {
 
   /**
-    * This method takes a dataframe and a column name as input and computes median for the given column name.
+    * THIS FUNCTION IS CURRENTLY DEPRECATED. IN FUTURE, WE MIGHT BE USING SOME APPROXIMATION METHOD.
     *
-    * This method filters out the empty columns, sort the values by ascending order and convet the df to rdd.
-    * With the help of the zipWithIndex method, the median is calculated:
+    * This method takes a dataframe and a column name as input and computes median
+    * for the given column name.
+    *
+    * This method filters out the empty columns, sort the values by ascending order
+    * and convet the df to rdd. With the help of the zipWithIndex method, the median is calculated:
     * val median = (df.count %2 == 0) ? (average of the two middle values) else (value at the middle position)
     *
     * @param srcDF
@@ -24,13 +27,20 @@ object StatisticsUsingMapReduce {
 
     // 'filter(! srcDF(colName).isin(""))' is used to remove empty columns.
     // If we are switching to scala 2.11, we can use spar_csv 2.11 and consider empty columns as null
-    val sortedAsRdd = srcDF.select(colName).filter(!srcDF(colName).isin("")).sort(asc(colName)).map(x => x.get(0))
+    val sortedAsRdd = {
+      srcDF.select(colName)
+      .filter(!srcDF(colName).isin(""))
+      .sort(asc(colName))
+      .map(x => x.get(0))
+    }
 
     val sortedValuesAsKey = sortedAsRdd.zipWithIndex().map(_.swap)
 
     val count = sortedValuesAsKey.count()
 
-    def sortedValuesAsKeyAtPosition(x: Long): Double = return sortedValuesAsKey.lookup(x).head.toString.toDouble
+    def sortedValuesAsKeyAtPosition(x: Long): Double = {
+      return sortedValuesAsKey.lookup(x).head.toString.toDouble
+    }
 
     val median: Double = if (count % 2 == 0) {
       val l = count / 2 - 1
@@ -44,15 +54,18 @@ object StatisticsUsingMapReduce {
   }
 
   /**
-    * This method does groupBy on a given column name of a df and counts the number of occurrence of each value.
+    * This method does groupBy on a given column name of a df and counts the number of
+    * occurrence of each value.
     *
     * @param srcDF
     * @param colName
     * @return a dataframe with the count as the first column and the actual value as the second column.
     */
-  def mapNbOccurrencesToColValues(srcDF: DataFrame, colName: String): RDD[(Long, Any)] = {
+  def mapNbOccurrencesToColValues(srcDF: DataFrame,
+                                  colName: String): RDD[(Long, Any)] = {
 
-    val mappedrdd = { srcDF.select(colName)
+    val mappedrdd = {
+      srcDF.select(colName)
       .filter((srcDF(colName).isNotNull) && not(col(colName).isin("")))
       .groupBy(colName)
       .count()
@@ -70,7 +83,9 @@ object StatisticsUsingMapReduce {
     * @param nb number of top most occurrence values to return (by default 1).
     * @return first nb rows in the sorted dataframe.
     */
-  def findMostOccurrenceValues(srcDF: DataFrame, colName: String, nb: Int = 1): Iterable[(Any, Long)] = {
+  def findMostOccurrenceValues(srcDF: DataFrame,
+                               colName: String,
+                               nb: Int = 1): Iterable[(Any, Long)] = {
 
     val mappedRDD = mapNbOccurrencesToColValues(srcDF, colName).sortByKey(false) // false => sort descending (Most Occurrences)
 
@@ -85,7 +100,9 @@ object StatisticsUsingMapReduce {
     * @param nb number of <i>least</i> occurrence values to return (by default 1).
     * @return
     */
-  def findLeastOccurrenceValues(srcDF: DataFrame, colName: String, nb: Int = 1): Iterable[(Any, Long)] = {
+  def findLeastOccurrenceValues(srcDF: DataFrame,
+                                colName: String,
+                                nb: Int = 1): Iterable[(Any, Long)] = {
 
     val mappedRDD = mapNbOccurrencesToColValues(srcDF, colName).sortByKey(true) // true => sort ascending (Least Occurrences)
 
