@@ -18,11 +18,13 @@ import scala.reflect.ClassTag
   * @param expectedValues List of expected values
   * @tparam T Type of the given column.
   */
-class CustomAggUnexpectedValues[T: ClassTag](expectedValues: Set[T]) extends UserDefinedAggregateFunction {
+class CustomAggUnexpectedValues[T: ClassTag](expectedValues: Set[T])
+  extends UserDefinedAggregateFunction {
 
-  val castedExpectedValues = expectedValues.map(_.toString)
+  // We should not consider null/empty as unexpected values
+  val castedExpectedValues = Set(null, "") ++ expectedValues.map(_.toString)
 
-  override def inputSchema: StructType = new StructType().add("input", StringType) //TODO: We may need to change the type to String.
+  override def inputSchema: StructType = new StructType().add("input", StringType)
 
   override def initialize(buffer: MutableAggregationBuffer): Unit = {
     buffer(0) = 0L
@@ -34,7 +36,7 @@ class CustomAggUnexpectedValues[T: ClassTag](expectedValues: Set[T]) extends Use
 
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
 
-    if (!castedExpectedValues.contains(input.getString(0))) { // if (!expectedValues.find( _ == input.getAs[T](0)).isDefined) {
+    if (!castedExpectedValues.contains(input.getString(0))) {
       buffer(0) = buffer.getLong(0) + 1
     }
   }
@@ -43,9 +45,7 @@ class CustomAggUnexpectedValues[T: ClassTag](expectedValues: Set[T]) extends Use
     buffer1(0) = buffer1.getLong(0) + buffer2.getLong(0)
   }
 
-  override def evaluate(buffer: Row): Any = {
-    buffer.getLong(0)
-  }
+  override def evaluate(buffer: Row): Any = buffer.getLong(0)
 
   override def dataType: DataType = LongType
 
