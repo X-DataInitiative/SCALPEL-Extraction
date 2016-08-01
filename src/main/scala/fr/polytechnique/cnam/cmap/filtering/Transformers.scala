@@ -23,7 +23,7 @@ object PatientsTransformer extends Transformer[Patient] {
 
     // todo: implement transformation
     sqlContext.createDataset[Patient](Seq[Patient]())
-  } d
+  }
 }
 
 // todo: Implement other transformer objects
