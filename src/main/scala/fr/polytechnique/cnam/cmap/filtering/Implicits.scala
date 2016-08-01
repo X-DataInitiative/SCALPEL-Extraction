@@ -13,8 +13,9 @@ package object implicits {
     *
     * @author Daniel de Paula
     */
-  implicit class EventsWriter(data: Dataset[FlatEvent]) {
-    def writeEvents (path: String): Unit = {
+  implicit class DataWriter[T](data: Dataset[T]) {
+    def writeData(path: String): Unit = {
+
     }
   }
 

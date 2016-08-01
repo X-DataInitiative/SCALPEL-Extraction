@@ -1,6 +1,6 @@
 package fr.polytechnique.cnam.cmap.filtering
 
-import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
+import org.apache.spark.sql.{DataFrame, Dataset}
 
 /**
   * @author Daniel de Paula
@@ -11,17 +11,34 @@ trait Transformer[T] {
 
 /**
   * Transformer object for patients data
+  * Note that all transformers should cache the DataFrames that are going to be used
   *
   * @author Daniel de Paula
   */
 object PatientsTransformer extends Transformer[Patient] {
 
   def transform(sources: Sources): Dataset[Patient] = {
-    val sqlContext = sources.dcir match { case Some(dcir: DataFrame) => dcir.sqlContext }
+    val dcir: DataFrame = sources.dcir.get.cache()
+    val sqlContext = dcir.sqlContext
 
     // todo: implement transformation
     sqlContext.createDataset[Patient](Seq[Patient]())
+  } d
+}
+
+// todo: Implement other transformer objects
+// Note that all transformers should cache the DataFrames that are going to be used
+
+object DrugEventsTransformer extends Transformer[FlatEvent] {
+
+  def transform(sources: Sources): Dataset[FlatEvent] = {
+
   }
 }
 
-// todo: Add other transformer objects
+object DiseaseEventsTransformer extends Transformer[FlatEvent] {
+
+  def transform(sources: Sources): Dataset[FlatEvent] = {
+
+  }
+}
