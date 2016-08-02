@@ -12,6 +12,7 @@ package object implicits {
     * Implicit class for writing the events to a parquet file
     *
     * @author Daniel de Paula
+    * @todo: We should decide if this class should stay here or in an object "Writer", importable by doing "import Writer._"
     */
   implicit class DataWriter[T](data: Dataset[T]) {
     def writeData(path: String): Unit = {
@@ -20,7 +21,7 @@ package object implicits {
   }
 
   /**
-    * Implicit class for extracting data using an sqlContext directly
+    * Implicit class for extracting data using an sqlContext directly (not as an argument)
     *
     * @author Daniel de Paula
     */

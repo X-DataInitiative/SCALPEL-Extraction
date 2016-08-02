@@ -20,25 +20,30 @@ object PatientsTransformer extends Transformer[Patient] {
   def transform(sources: Sources): Dataset[Patient] = {
     val dcir: DataFrame = sources.dcir.get.cache()
     val sqlContext = dcir.sqlContext
+    import sqlContext.implicits._
 
     // todo: implement transformation
     sqlContext.createDataset[Patient](Seq[Patient]())
   }
 }
 
-// todo: Implement other transformer objects
-// Note that all transformers should cache the DataFrames that are going to be used
+// todo: Implement other transformer objects.
+// Note that all transformers should cache the DataFrames that are going to be used */
 
+/*
 object DrugEventsTransformer extends Transformer[FlatEvent] {
 
   def transform(sources: Sources): Dataset[FlatEvent] = {
 
   }
 }
+*/
 
+/*
 object DiseaseEventsTransformer extends Transformer[FlatEvent] {
 
   def transform(sources: Sources): Dataset[FlatEvent] = {
 
   }
 }
+ */
