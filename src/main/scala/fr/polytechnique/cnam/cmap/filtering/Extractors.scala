@@ -1,39 +1,52 @@
 package fr.polytechnique.cnam.cmap.filtering
 
 import org.apache.spark.sql.{DataFrame, SQLContext}
+import org.apache.spark.sql.functions._
 
 /**
-  * Base trait for all Extractor classes
+  * Base class for all Extractor classes.
+  * Note that all Extractors need an sqlContext, so this attribute is defined in the base class.
   *
   * @author Daniel de Paula
   */
-trait Extractor {
-  def extract(path: String): DataFrame
-}
+abstract class Extractor(sqlContext: SQLContext) {
 
 /**
- * Extractor class for the DCIR table
- *
- * @author Daniel de Paula
- */
-class DcirExtractor(sqlContext: SQLContext) extends Extractor {
-
+  * The base IO operation for reading a table.
+  * All subclasses that override this method should call super.extract as the first operation.
+  */
   def extract(path: String): DataFrame = {
-    // todo: implement extraction
-    sqlContext.emptyDataFrame
+    sqlContext.read.parquet(path)
   }
 }
 
 /**
- * Extractor class for the P_MCO table
- *
- * @author Daniel de Paula
- */
-class PmsiMcoExtractor(sqlContext: SQLContext) extends Extractor {
+  * Extractor class for the DCIR table
+  *
+  * @author Daniel de Paula
+  */
+class DcirExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
 
-  def extract(path: String): DataFrame = {
+/**
+  * Reads and filters data from a DCIR file
+  */
+  override def extract(dcirPath: String): DataFrame = {
+    super.extract(dcirPath)
+      .where(col("BSE_PRS_NAT") !== 0)
+  }
+}
+
+/**
+  * Extractor class for the P_MCO table
+  *
+  * @author Daniel de Paula
+  */
+class PmsiMcoExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
+
+  override def extract(path: String): DataFrame = {
+    val rawDF = super.extract(path)
     // todo: implement extraction
-    sqlContext.emptyDataFrame
+    rawDF
   }
 }
 
@@ -43,11 +56,12 @@ class PmsiMcoExtractor(sqlContext: SQLContext) extends Extractor {
   * @author Daniel de Paula
   * @param sqlContext
   */
-class PmsiHadExtractor(sqlContext: SQLContext) extends Extractor {
+class PmsiHadExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
 
-  def extract(path: String): DataFrame = {
+  override def extract(path: String): DataFrame = {
+    val rawDF = super.extract(path)
     // todo: implement extraction
-    sqlContext.emptyDataFrame
+    rawDF
   }
 }
 
@@ -57,11 +71,12 @@ class PmsiHadExtractor(sqlContext: SQLContext) extends Extractor {
   * @author Daniel de Paula
   * @param sqlContext
   */
-class PmsiSsrExtractor(sqlContext: SQLContext) extends Extractor {
+class PmsiSsrExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
 
-  def extract(path: String): DataFrame = {
+  override def extract(path: String): DataFrame = {
+    val rawDF = super.extract(path)
     // todo: implement extraction
-    sqlContext.emptyDataFrame
+    rawDF
   }
 }
 
@@ -71,11 +86,12 @@ class PmsiSsrExtractor(sqlContext: SQLContext) extends Extractor {
   * @author Daniel de Paula
   * @param sqlContext
   */
-class IrBenExtractor(sqlContext: SQLContext) extends Extractor {
+class IrBenExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
 
-  def extract(path: String): DataFrame = {
+  override def extract(path: String): DataFrame = {
+    val rawDF = super.extract(path)
     // todo: implement extraction
-    sqlContext.emptyDataFrame
+    rawDF
   }
 }
 
@@ -85,11 +101,12 @@ class IrBenExtractor(sqlContext: SQLContext) extends Extractor {
   * @author Daniel de Paula
   * @param sqlContext
   */
-class IrImbExtractor(sqlContext: SQLContext) extends Extractor {
+class IrImbExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
 
-  def extract(path: String): DataFrame = {
+  override def extract(path: String): DataFrame = {
+    val rawDF = super.extract(path)
     // todo: implement extraction
-    sqlContext.emptyDataFrame
+    rawDF
   }
 }
 
@@ -99,13 +116,11 @@ class IrImbExtractor(sqlContext: SQLContext) extends Extractor {
   * @author Daniel de Paula
   * @param sqlContext
   */
-class IrPhaExtractor(sqlContext: SQLContext) extends Extractor {
+class IrPhaExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
 
-  def extract(path: String): DataFrame = {
+  override def extract(path: String): DataFrame = {
+    val rawDF = super.extract(path)
     // todo: implement extraction
-    sqlContext.emptyDataFrame
+    rawDF
   }
 }
-
-
-
