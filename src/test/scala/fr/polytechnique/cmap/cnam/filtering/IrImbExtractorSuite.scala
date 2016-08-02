@@ -6,15 +6,15 @@ import org.apache.spark.sql.DataFrame
 /**
   * @author Daniel de Paula
   */
-class IrBenExtractorSuite extends SharedContext {
+class IrImbExtractorSuite extends SharedContext {
 
-  "IrBenExtractor.extract" should "return a DataFrame with the correct schema" in {
+  "IrImbExtractor.extract" should "return a DataFrame with the correct schema" in {
     // Given
-    val path: String = "src/test/resources/expected/IR_BEN_R.parquet"
+    val path: String = "src/test/resources/expected/IR_IMB_R.parquet"
     val expected: DataFrame = sqlContext.read.parquet(path)
 
     // When
-    val result = new IrBenExtractor(sqlContext).extract(path)
+    val result = new IrImbExtractor(sqlContext).extract(path)
 
     // Then
     assert(result.schema == expected.schema)
@@ -26,7 +26,7 @@ class IrBenExtractorSuite extends SharedContext {
 
     // Then
     intercept[java.lang.AssertionError] {
-      new IrBenExtractor(sqlContext).extract(path).count
+      new IrImbExtractor(sqlContext).extract(path).count
     }
   }
 }
