@@ -1,4 +1,4 @@
-package fr.polytechnique.cnam.cmap.filtering
+package fr.polytechnique.cmap.cnam.filtering
 
 import org.apache.spark.sql.{DataFrame, Dataset}
 
