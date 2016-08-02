@@ -87,12 +87,7 @@ class PmsiSsrExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
   * @param sqlContext
   */
 class IrBenExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
-
-  override def extract(path: String): DataFrame = {
-    val rawDF = super.extract(path)
-    // todo: implement extraction
-    rawDF
-  }
+  override def extract(path: String): DataFrame = super.extract(path)
 }
 
 /**
