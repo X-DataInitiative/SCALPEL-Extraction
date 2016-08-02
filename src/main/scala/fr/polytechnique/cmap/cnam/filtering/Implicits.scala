@@ -1,4 +1,4 @@
-package fr.polytechnique.cnam.cmap.filtering
+package fr.polytechnique.cmap.cnam
 
 import com.typesafe.config.Config
 import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
@@ -6,7 +6,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
 /**
   * @author Daniel de Paula
   */
-package object implicits {
+package object filtering {
 
   /**
     * Implicit class for writing the events to a parquet file

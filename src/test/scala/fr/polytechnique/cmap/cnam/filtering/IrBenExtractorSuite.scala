@@ -1,8 +1,7 @@
-package fr.polytechnique.cnam.cmap.filtering
+package fr.polytechnique.cmap.cnam.filtering
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions.col
 
 /**
   * @author Daniel de Paula
@@ -27,7 +26,7 @@ class IrBenExtractorSuite extends SharedContext {
 
     // Then
     intercept[java.lang.AssertionError] {
-      new DcirExtractor(sqlContext).extract(path).count
+      new IrBenExtractor(sqlContext).extract(path).count
     }
   }
 }

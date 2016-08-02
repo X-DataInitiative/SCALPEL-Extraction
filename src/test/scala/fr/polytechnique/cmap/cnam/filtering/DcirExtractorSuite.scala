@@ -1,4 +1,4 @@
-package fr.polytechnique.cnam.cmap.filtering
+package fr.polytechnique.cmap.cnam.filtering
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import org.apache.spark.sql.DataFrame
@@ -25,7 +25,7 @@ class DcirExtractorSuite extends SharedContext {
     // Given
     val value = 0L
     val column = col("BSE_PRS_NAT")
-    val path: String = "src/test/resources/expected/DCIR "
+    val path: String = "src/test/resources/expected/DCIR"
 
     // When
     val result = new DcirExtractor(sqlContext).extract(path)
