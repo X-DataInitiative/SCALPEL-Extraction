@@ -11,7 +11,7 @@ class DcirExtractorSuite extends SharedContext {
 
   "DcirExtractor.extract" should "return a DataFrame with the correct schema" in {
     // Given
-    val path: String = "src/test/resources/expected/DCIR"
+    val path: String = "src/test/resources/expected/DCIR.parquet"
     val expected: DataFrame = sqlContext.read.parquet(path)
 
     // When
@@ -25,7 +25,7 @@ class DcirExtractorSuite extends SharedContext {
     // Given
     val value = 0L
     val column = col("BSE_PRS_NAT")
-    val path: String = "src/test/resources/expected/DCIR"
+    val path: String = "src/test/resources/expected/DCIR.parquet"
 
     // When
     val result = new DcirExtractor(sqlContext).extract(path)
