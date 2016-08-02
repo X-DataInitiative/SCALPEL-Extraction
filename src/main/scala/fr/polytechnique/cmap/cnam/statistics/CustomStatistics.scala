@@ -40,8 +40,13 @@ object CustomStatistics {
     *
     * @return SparkContext
     */
-  def getSparkContext(): SparkContext = {
-    val sparkConf = new SparkConf().setAppName("Jira Id CNAM 41").setMaster("local")
+  def getSparkContext(master: String = null): SparkContext = {
+
+    val sparkConf = new SparkConf().setAppName("Jira Id CNAM 41")
+
+    if(master != null)
+      sparkConf.setMaster(master)
+
     SparkContext.getOrCreate(sparkConf)
   }
 

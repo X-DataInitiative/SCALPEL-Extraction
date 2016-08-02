@@ -9,7 +9,7 @@ import org.scalatest.{FunSuite, GivenWhenThen}
   */
 class CustomStatisticsSuite extends FunSuite with GivenWhenThen {
 
-  val sc = CustomStatistics.getSparkContext()
+  val sc = CustomStatistics.getSparkContext(master = "local")
 
   test("Test getSparkContext Function"){
     assert(sc.isInstanceOf[SparkContext])
