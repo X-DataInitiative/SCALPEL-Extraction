@@ -13,7 +13,12 @@ class UDAFAvgCountMaxMinNullSuite extends CustomStatisticsSuite {
     val udafAllStatistics = new UDAFAvgSumMaxMinNull()
 
     Then("we should get right output")
-    val result_specified = srcDF.select("BEN_RES_COM").agg(udafAllStatistics($"BEN_RES_COM")).persist
+    val result_specified = {
+      srcDF.select("BEN_RES_COM")
+        .agg(udafAllStatistics($"BEN_RES_COM"))
+        .persist
+    }
+
     assert(result_specified.first().toSeq == Seq("(69.0,2,114,24,0)"))
   }
 }
