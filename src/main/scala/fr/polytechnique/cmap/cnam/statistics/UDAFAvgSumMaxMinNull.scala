@@ -25,7 +25,7 @@ class UDAFAvgSumMaxMinNull()
     buffer(4) = 0L
   }
 
-  override def bufferSchema: StructType = {Ø
+  override def bufferSchema: StructType = {
     new StructType().add("sumInput", LongType)
       .add("countInter", LongType)
       .add("maxField", LongType)
