@@ -40,7 +40,7 @@ class CustomStatisticsSuite extends FunSuite with GivenWhenThen {
         ("0", "0", 2L, "0.0", "0", "(0,2)", "(0,2)", "BEN_CDI_NIR"),
         (null, null, 0L, "NA", "NA", "", "", "BEN_DTE_INS"),
         ("01/01/2006", "25/01/2006", 2L, "NA", "NA", "(01/01/2006,1)", "(01/01/2006,1)", "BEN_DTE_MAJ"),
-        ("1969", "1975", 2L, "1972.0", "3944", "(1969,1)", "(1969,1)", "BEN_NAI_ANN"),
+        ("1959", "1975", 2L, "1967.0", "3934", "(1959,1)", "(1959,1)", "BEN_NAI_ANN"),
         ("1", "10", 2L, "5.5", "11", "(1,1)", "(1,1)", "BEN_NAI_MOI"),
         ("24", "114", 2L, "69.0", "138", "(114,1)", "(114,1)", "BEN_RES_COM"),
         ("75", "92", 2L, "83.5", "167", "(75,1)", "(75,1)", "BEN_RES_DPT"),
@@ -99,7 +99,11 @@ class CustomStatisticsSuite extends FunSuite with GivenWhenThen {
     assert(srcDF.countExpectedValues("ORG_CLE_NEW", Set("CODE1234")).first().get(0) == 2)
 
     // Given a DF with Null values
-    val testDF_withNull = sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975)).toDF("BEN_DTE_INS")
+    val testDF_withNull = {
+      sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
+        .toDF("BEN_DTE_INS")
+    }
+
     val combinedDF_withNull = srcDF.select("BEN_DTE_INS").unionAll(testDF_withNull)
 
     When("Applying on a Integer column")
@@ -140,11 +144,17 @@ class CustomStatisticsSuite extends FunSuite with GivenWhenThen {
     // Given scrDF
     When("Applying on a String column")
     Then("The function should still work correctly")
-    assert(srcDF.countUnexpectedValuesUsingUDAF(Set("CODE1234"), "ORG_CLE_NEW").first().get(0) == 0)
-    assert(srcDF.countExpectedValuesUsingUDAF(Set("CODE1234"), "ORG_CLE_NEW").first().get(0) == 2)
+    assert(srcDF.countUnexpectedValuesUsingUDAF(Set("CODE1234"), "ORG_CLE_NEW")
+                .first().get(0) == 0)
+    assert(srcDF.countExpectedValuesUsingUDAF(Set("CODE1234"), "ORG_CLE_NEW")
+                .first().get(0) == 2)
 
     // Given a DF with Null values
-    val testDF_withNull = sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975)).toDF("BEN_DTE_INS")
+    val testDF_withNull = {
+      sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
+        .toDF("BEN_DTE_INS")
+    }
+
     val combinedDF_withNull = srcDF.select("BEN_DTE_INS").unionAll(testDF_withNull)
 
     When("Applying on a Integer column")

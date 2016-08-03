@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.statistics
 
+import scala.reflect.ClassTag
+
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.MutableAggregationBuffer
-
-import scala.reflect.ClassTag
 
 /**
   * Created by sathiya on 26/07/16.

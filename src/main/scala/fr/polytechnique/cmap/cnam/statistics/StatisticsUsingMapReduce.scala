@@ -10,14 +10,17 @@ import org.apache.spark.sql.functions._
 object StatisticsUsingMapReduce {
 
   /**
-    * THIS FUNCTION IS CURRENTLY DEPRECATED. IN FUTURE, WE MIGHT BE USING SOME APPROXIMATION METHOD.
+    * THIS FUNCTION IS CURRENTLY DEPRECATED.
+    * IN FUTURE, WE MIGHT BE USING SOME APPROXIMATION METHOD.
     *
     * This method takes a dataframe and a column name as input and computes median
     * for the given column name.
     *
     * This method filters out the empty columns, sort the values by ascending order
-    * and convet the df to rdd. With the help of the zipWithIndex method, the median is calculated:
-    * val median = (df.count %2 == 0) ? (average of the two middle values) else (value at the middle position)
+    * and convet the df to rdd.
+    * With the help of the zipWithIndex method, the median is calculated:
+    * val median = (df.count %2 == 0) ? (average of the two middle values) else
+    * (value at the middle position)
     *
     * @param srcDF
     * @param colName Name of the column on which the median has to be computed.
@@ -25,8 +28,8 @@ object StatisticsUsingMapReduce {
     */
   def findMedian(srcDF: DataFrame, colName: String): Double = {
 
-    // 'filter(! srcDF(colName).isin(""))' is used to remove empty columns.
-    // If we are switching to scala 2.11, we can use spar_csv 2.11 and consider empty columns as null
+    // 'filter(! srcDF(colName).isin(""))' is used to remove empty columns. If we are
+    // switching to scala 2.11, we can use spar_csv 2.11 and consider empty columns as null
     val sortedAsRdd = {
       srcDF.select(colName)
       .filter(!srcDF(colName).isin(""))
@@ -59,7 +62,7 @@ object StatisticsUsingMapReduce {
     *
     * @param srcDF
     * @param colName
-    * @return a dataframe with the count as the first column and the actual value as the second column.
+    * @return DF with the count as the first column and the actual value as the second column.
     */
   def mapNbOccurrencesToColValues(srcDF: DataFrame,
                                   colName: String): RDD[(Long, Any)] = {
@@ -87,7 +90,7 @@ object StatisticsUsingMapReduce {
                                colName: String,
                                nb: Int = 1): Iterable[(Any, Long)] = {
 
-    val mappedRDD = mapNbOccurrencesToColValues(srcDF, colName).sortByKey(false) // false => sort descending (Most Occurrences)
+    val mappedRDD = mapNbOccurrencesToColValues(srcDF, colName).sortByKey(false) // (descending)
 
     mappedRDD.take(nb).map(_.swap)
   }
@@ -104,7 +107,7 @@ object StatisticsUsingMapReduce {
                                 colName: String,
                                 nb: Int = 1): Iterable[(Any, Long)] = {
 
-    val mappedRDD = mapNbOccurrencesToColValues(srcDF, colName).sortByKey(true) // true => sort ascending (Least Occurrences)
+    val mappedRDD = mapNbOccurrencesToColValues(srcDF, colName).sortByKey(true) // (ascending)
 
     mappedRDD.take(nb).map(_.swap)
   }
