@@ -69,26 +69,35 @@ object CustomStatistics {
 
       val outputDF = srcDfColumns.map{
         case colName if schemaDataTypes.apply(colName).dataType.isInstanceOf[NumericType] =>
-          srcDF.select(colName).filter(!col(colName).isin("")).agg(min(colName),
-                                                                   max(colName),
-                                                                   count(colName),
-                                                                   avg(colName),
-                                                                   sum(colName)
-                                                                  ).withColumn("ColName", lit(colName))
+          srcDF.select(colName)
+               .filter(!col(colName).isin(""))
+               .agg(
+                 min(colName),
+                 max(colName),
+                 count(colName),
+                 avg(colName),
+                 sum(colName)
+               ).withColumn("ColName", lit(colName))
+
         case colName =>
-          srcDF.select(colName).filter(!col(colName).isin("")).agg(min(colName),
-                                                                   max(colName),
-                                                                   count(colName)
-                                                                  ).withColumn("Avg", lit("NA"))
-                                                                   .withColumn("Sum", lit("NA"))
-                                                                   .withColumn("ColName", lit(colName))
+          srcDF.select(colName)
+            .filter(!col(colName).isin(""))
+            .agg(
+              min(colName),
+              max(colName),
+              count(colName)
+            ).withColumn("Avg", lit("NA"))
+             .withColumn("Sum", lit("NA"))
+             .withColumn("ColName", lit(colName))
       }.reduce(_.unionAll(_))
 
       val maxOccur: Map[String, String] = srcDfColumns.map(colName =>
-        (colName, StatisticsUsingMapReduce.findMostOccurrenceValues(srcDF, colName).mkString)).toMap
+        (colName, StatisticsUsingMapReduce.findMostOccurrenceValues(srcDF, colName)
+                                          .mkString)).toMap
 
       val minOccur: Map[String, String] = srcDfColumns.map(colName =>
-        (colName, StatisticsUsingMapReduce.findLeastOccurrenceValues(srcDF, colName).mkString)).toMap
+        (colName, StatisticsUsingMapReduce.findLeastOccurrenceValues(srcDF, colName)
+                                          .mkString)).toMap
 
       return outputDF.map((r: Row) => CaseDescribeFunctionColumns(r.getString(0),
         r.getString(1),
