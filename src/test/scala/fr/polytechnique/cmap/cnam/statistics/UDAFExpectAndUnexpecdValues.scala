@@ -7,7 +7,7 @@ class UDAFExpectAndUnexpecdValues extends CustomStatisticsSuite {
 
   import sqlContext.implicits._
 
-  test("test"){
+  test("Test for UDAFExpectAndUnexpecdValues"){
 
     // Given srcDF
     When("Applying on a String column")
@@ -19,8 +19,14 @@ class UDAFExpectAndUnexpecdValues extends CustomStatisticsSuite {
     assert(srcDF.agg(udafExpected_string(srcDF("ORG_CLE_NEW"))).first().get(0) == 2)
 
     // Given a DF with Null values
-    val testDF_withNull = sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975)).toDF("BEN_DTE_INS")
-    val combinedDF_withNull = srcDF.select("BEN_DTE_INS").unionAll(testDF_withNull)
+    val testDF_withNull = {
+      sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
+        .toDF("BEN_DTE_INS")
+    }
+    val combinedDF_withNull = {
+      srcDF.select("BEN_DTE_INS")
+        .unionAll(testDF_withNull)
+    }
 
     When("Applying on a Integer column")
     val udafUnexpected = new CustomAggUnexpectedValues((1950 to 1960).toSet)
