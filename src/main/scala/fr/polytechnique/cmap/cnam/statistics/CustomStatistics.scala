@@ -1,11 +1,12 @@
 package fr.polytechnique.cmap.cnam.statistics
 
-import org.apache.spark.sql.{DataFrame, _}
+import scala.reflect.ClassTag
+
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql._
 import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.{SparkConf, SparkContext}
-import scala.reflect.ClassTag
 
 /**
   * Created by sathiya on 26/07/16.
