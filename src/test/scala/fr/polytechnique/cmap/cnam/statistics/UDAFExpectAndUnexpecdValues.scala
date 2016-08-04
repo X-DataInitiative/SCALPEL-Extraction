@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.statistics
 /**
   * Created by sathiya on 29/07/16.
   */
-class UDAFExpectAndUnexpecdValues extends CustomStatisticsSuite {
+class UDAFExpectAndUnexpecdValues extends Config {
 
   import _sqlContext.implicits._
 

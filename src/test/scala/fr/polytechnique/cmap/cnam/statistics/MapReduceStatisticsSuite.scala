@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.statistics
 /**
   * Created by sathiya on 29/07/16.
   */
-class MapReduceStatisticsSuite extends CustomStatisticsSuite {
+class MapReduceStatisticsSuite extends Config {
 
   import _sqlContext.implicits._
 

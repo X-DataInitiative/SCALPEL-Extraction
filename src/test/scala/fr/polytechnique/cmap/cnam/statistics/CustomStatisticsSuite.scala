@@ -1,33 +1,12 @@
 package fr.polytechnique.cmap.cnam.statistics
 
-import fr.polytechnique.cmap.cnam.SharedContext
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.SQLContext
-import org.scalatest.{FunSuite, GivenWhenThen}
-
 /**
   * Created by sathiya on 29/07/16.
   */
-class CustomStatisticsSuite extends SharedContext {
 
-  val _sqlContext = sqlContext
+class CustomStatisticsSuite extends Config {
+
   import _sqlContext.implicits._
-  var srcDF : DataFrame = _
-
-  override def beforeAll() {
-    val srcFilePath: String = "src/test/resources/IR_BEN_R.csv"
-  // The older versions of the csv package don't convert empty values to null.
-  // So the functions should give consistent output whether or not
-  // the csv package converts empty values to null.
-     srcDF =  sqlContext.read.format("com.databricks.spark.csv")
-    .option("header", "true")
-    .option("inferSchema", "true")
-    .option("delimiter", ";")
-    .option("treatEmptyValuesAsNulls", "true")
-    .option("nullValue", "")
-    .load(srcFilePath)
-  }
-
   import fr.polytechnique.cmap.cnam.statistics.CustomStatistics._
 
   "customDescribe" should "compute statistics on all columns" in {
@@ -144,7 +123,6 @@ class CustomStatisticsSuite extends SharedContext {
   }
 
   it should "also return coirrect output in corner cases" in {
-
     // Given a DF with Null values
     val testDF_withNull = {
       sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))

@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.statistics
 /**
   * Created by sathiya on 29/07/16.
   */
-class UDAFAvgCountMaxMinNullSuite extends CustomStatisticsSuite {
+class UDAFAvgCountMaxMinNullSuite extends Config {
 
   import _sqlContext.implicits._
 
