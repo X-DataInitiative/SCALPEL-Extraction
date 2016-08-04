@@ -18,23 +18,25 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
 
   val conf = new SparkConf().setMaster("local").setAppName("test")
 
-  @transient private var _sc: SparkContext = _
-  @transient private var _sql: SQLContext = _
+  @transient private val _sc: SparkContext = SparkContext.getOrCreate(conf)
+  @transient private val _sql: SQLContext = new SQLContext(_sc)
 
   def sc: SparkContext = _sc
   def sqlContext: SQLContext = _sql
 
 
   override def beforeAll() {
-    _sc = new SparkContext(conf)
-    _sql = new SQLContext(_sc)
+//    _sc = new SparkContext(conf)
+//    _sql = new SQLContext(_sc)
     super.beforeAll()
   }
 
   override def afterAll() {
     try{
-      _sc.stop()
-      _sc = null
+      // While running multiple TestSuits in parallel,
+      // stoping _sc here will throw an error.
+//      _sc.stop()
+//      _sc = null
       System.clearProperty("spark.driver.port")
     } finally {
       super.afterAll()
