@@ -86,9 +86,7 @@ class PmsiSsrExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
   * @author Daniel de Paula
   * @param sqlContext
   */
-class IrBenExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
-  override def extract(path: String): DataFrame = super.extract(path)
-}
+class IrBenExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
 
 /**
   * Extractor class for the IR_IMB_R table
@@ -96,16 +94,11 @@ class IrBenExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
   * @author Daniel de Paula
   * @param sqlContext
   */
-class IrImbExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
-  override def extract(path: String): DataFrame = super.extract(path)
-}
-
+class IrImbExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
 /**
   * Extractor class for the IR_PHA_R table
   *
   * @author Daniel de Paula
   * @param sqlContext
   */
-class ErPhaExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
-  override def extract(path: String): DataFrame = super.extract(path)
-}
+class IrPhaExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
