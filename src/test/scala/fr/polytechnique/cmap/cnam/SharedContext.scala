@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam
 
-import org.scalatest._
 import org.apache.spark._
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
 import org.apache.spark.sql.SQLContext
+import org.scalatest._
 /**
   * Created by burq on 05/07/16.
   */
