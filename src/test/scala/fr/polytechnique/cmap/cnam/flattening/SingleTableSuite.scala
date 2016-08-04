@@ -54,6 +54,19 @@ class SingleTableSuite extends SharedContext {
     assert(result === expected)
   }
 
+  it should "return the ER_UCD_F dataframe" in {
+    // Given
+    val tableName: String = "ER_UCD_F"
+    val config: Config = FlatteningConfig.getTableConfig(tableName)
+    val expected = sqlContext.read.load("src/test/resources/expected/ER_UCD_F.parquet")
+
+    // When
+    val result = new SingleTable(config, sqlContext).df
+
+    // Then
+    assert(result === expected)
+  }
+
   it should "return the IR_IMB_R dataframe" in {
     // Given
     val tableName: String = "IR_IMB_R"

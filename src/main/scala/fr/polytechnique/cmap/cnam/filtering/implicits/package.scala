@@ -33,7 +33,7 @@ package object implicits {
     def extractPmsiSsr(path: String): DataFrame = new PmsiSsrExtractor(this.sqlContext).extract(path)
     def extractIrBen(path: String): DataFrame = new IrBenExtractor(this.sqlContext).extract(path)
     def extractIrImb(path: String): DataFrame = new IrImbExtractor(this.sqlContext).extract(path)
-    def extractIrPha(path: String): DataFrame = new IrPhaExtractor(this.sqlContext).extract(path)
+    def extractIrPha(path: String): DataFrame = new ErPhaExtractor(this.sqlContext).extract(path)
 
     def extractAll(pathConfig: Config): Sources = {
       new Sources(
