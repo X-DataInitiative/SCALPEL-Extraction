@@ -42,7 +42,7 @@ class RichDataFramesSuite extends SharedContext {
     val sqltx = sqlContext
     import sqltx.implicits._
     // Given
-    val df = sc.parallelize(Seq(1,2,3)).toDF("Interesting Column Name")
+    val df = sc.parallelize(Seq(1,2,3)).toDF("InterestingName")
     val spyDF = Mockito.spy(df)
 
     // When
