@@ -8,6 +8,7 @@ import org.apache.spark.sql.functions._
 import JoinedTable._
 import org.apache.spark.sql.types._
 import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.rdd._
 
 
 class JoinedAggregatedTable(config: Config, sqlContext: SQLContext){
