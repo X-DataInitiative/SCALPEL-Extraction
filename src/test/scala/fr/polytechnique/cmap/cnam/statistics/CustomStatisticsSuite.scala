@@ -73,7 +73,6 @@ class CustomStatisticsSuite extends Config {
 
   "countUnexpectedValues && countExpectedValues functions " should "return expected values" in {
 
-
     // When applying it on a column of String type
     assert(srcDF.countUnexpectedValues("ORG_CLE_NEW", Set("CODE1234")).first().get(0) == 0)
     assert(srcDF.countExpectedValues("ORG_CLE_NEW", Set("CODE1234")).first().get(0) == 2)
@@ -122,7 +121,7 @@ class CustomStatisticsSuite extends Config {
       .first().get(0) == 2)
   }
 
-  it should "also return coirrect output in corner cases" in {
+  it should "also return correct output in corner cases" in {
     // Given a DF with Null values
     val testDF_withNull = {
       sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
@@ -153,5 +152,4 @@ class CustomStatisticsSuite extends Config {
       .countExpectedValuesUsingUDAF(Set(1970.0), "BEN_DTE_INS")
       .first().get(0) == 3)
   }
-
 }
