@@ -84,7 +84,7 @@ object JoinedAggregatedTable {
   val path: String = FlatteningConfig.outputPath
   
   def aggregateDataFrame(data:DataFrame,aggregatedColumnName: String, sqlContext: SQLContext,_joinKeys:List[String] ): DataFrame={
-	val aggregatedRDD=aggregateColumnsPerKey(data,sqlContext)
+	val aggregatedRDD=aggregateColumnsPerKey(data,sqlContext,_joinKeys)
 	var newColumnsArray=Seq[StructField]()
 	var aggregatedColumnsArray=Seq[StructField]()
 	val columns=data.schema.toVector
