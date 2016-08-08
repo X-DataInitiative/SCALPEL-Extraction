@@ -3,30 +3,32 @@ package fr.polytechnique.cmap.cnam.filtering
 import fr.polytechnique.cmap.cnam.SharedContext
 import org.apache.spark.sql.DataFrame
 
-/**
-  * @author Daniel de Paula
-  */
-class IrBenExtractorSuite extends SharedContext {
 
-  "IrBenExtractor.extract" should "return a DataFrame with the correct schema" in {
+class ExtractorSuite extends SharedContext{
+
+  "extract" should "return the right dataframe" in {
     // Given
     val path: String = "src/test/resources/expected/IR_BEN_R.parquet"
-    val expected: DataFrame = sqlContext.read.parquet(path)
+    val expected: DataFrame = sqlContext.read.parquet("src/test/resources/expected/IR_BEN_R.parquet")
+
+    class TestExtractor extends Extractor(sqlContext)
+
+    val testExtractor = new TestExtractor()
 
     // When
-    val result = new IrBenExtractor(sqlContext).extract(path)
+    val result = testExtractor.extract(path)
 
     // Then
     assert(result.schema == expected.schema)
   }
 
-  it should "fail if the path is invalid" in {
+  it should "fail is path is invalid" in {
     // Given
     val path: String = "src/test/resources/expected/invalid_path.parquet"
 
     // Then
     intercept[java.lang.AssertionError] {
-      new IrBenExtractor(sqlContext).extract(path).count
+      new IrImbExtractor(sqlContext).extract(path).count
     }
   }
 }

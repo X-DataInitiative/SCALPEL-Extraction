@@ -7,28 +7,22 @@ import org.apache.spark.sql.functions._
   * Base class for all Extractor classes.
   * Note that all Extractors need an sqlContext, so this attribute is defined in the base class.
   *
-  * @author Daniel de Paula
   */
 abstract class Extractor(sqlContext: SQLContext) {
 
-/**
-  * The base IO operation for reading a table.
-  * All subclasses that override this method should call super.extract as the first operation.
-  */
-  def extract(path: String): DataFrame = {
-    sqlContext.read.parquet(path)
-  }
+  def extract(path: String): DataFrame = sqlContext.read.parquet(path)
+
 }
 
 /**
   * Extractor class for the DCIR table
   *
-  * @author Daniel de Paula
   */
 class DcirExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
 
 /**
   * Reads and filters data from a DCIR file
+  * The column "BSE_PRS_NAT" should never be 0
   */
   override def extract(dcirPath: String): DataFrame = {
     super.extract(dcirPath)
@@ -37,26 +31,31 @@ class DcirExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
 }
 
 /**
-  * Extractor class for the P_MCO table
+  * Extractor class for the MCO table
+  * This filtering is explained here
+  * https://datainitiative.atlassian.net/wiki/pages/viewpage.action?pageId=40304642
   *
-  * @author Daniel de Paula
   */
-class PmsiMcoExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
+class McoExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
+  val specialHospitals = List("130780521", "130783236", "130783293", "130784234", "130804297",
+    "600100101", "690783154", "690784137", "690784152", "690784178", "690787478", "750041543",
+    "750100018", "750100042", "750100075", "750100083", "750100091", "750100109", "750100125",
+    "750100166", "750100208", "750100216", "750100232", "750100273", "750100299", "750801441",
+    "750803447", "750803454", "830100558", "910100015", "910100023", "920100013", "920100021",
+    "920100039", "920100047", "920100054", "920100062", "930100011", "930100037", "930100045",
+    "940100027", "940100035", "940100043", "940100050", "940100068", "950100016")
 
   override def extract(path: String): DataFrame = {
-    val rawDF = super.extract(path)
-    // todo: implement extraction
-    rawDF
+    super.extract(path).filter(!col("ETA_NUM").isin(specialHospitals:_*))
   }
 }
+
 
 /**
   * Extractor class for the P_HAD table
   *
-  * @author Daniel de Paula
-  * @param sqlContext
   */
-class PmsiHadExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
+class HadExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
 
   override def extract(path: String): DataFrame = {
     val rawDF = super.extract(path)
@@ -68,10 +67,8 @@ class PmsiHadExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
 /**
   * Extractor class for the P_SSR table
   *
-  * @author Daniel de Paula
-  * @param sqlContext
   */
-class PmsiSsrExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
+class SsrExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
 
   override def extract(path: String): DataFrame = {
     val rawDF = super.extract(path)
@@ -83,22 +80,17 @@ class PmsiSsrExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
 /**
   * Extractor class for the IR_BEN_R table
   *
-  * @author Daniel de Paula
-  * @param sqlContext
   */
 class IrBenExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
 
 /**
   * Extractor class for the IR_IMB_R table
   *
-  * @author Daniel de Paula
-  * @param sqlContext
   */
 class IrImbExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
+
 /**
   * Extractor class for the IR_PHA_R table
   *
-  * @author Daniel de Paula
-  * @param sqlContext
   */
 class IrPhaExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
