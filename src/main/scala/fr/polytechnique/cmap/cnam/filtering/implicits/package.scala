@@ -38,6 +38,7 @@ package object implicits {
     def extractIrBen(path: String): DataFrame = new IrBenExtractor(this.sqlContext).extract(path)
     def extractIrImb(path: String): DataFrame = new IrImbExtractor(this.sqlContext).extract(path)
     def extractIrPha(path: String): DataFrame = new IrPhaExtractor(this.sqlContext).extract(path)
+    def extractDosages(path: String): DataFrame = new DrugDosageExtractor(this.sqlContext).extract(path)
 
     def extractAll(pathConfig: Config): Sources = {
       new Sources(
@@ -47,7 +48,8 @@ package object implicits {
         pmsiSsr = Some(extractPmsiSsr(pathConfig.getString("pmsiSsr"))),
         irBen = Some(extractIrBen(pathConfig.getString("irBen"))),
         irImb = Some(extractIrImb(pathConfig.getString("irImb"))),
-        irPha = Some(extractIrPha(pathConfig.getString("irPha")))
+        irPha = Some(extractIrPha(pathConfig.getString("irPha"))),
+        dosages = Some(extractDosages(pathConfig.getString("irPha")))
       )
     }
   }
