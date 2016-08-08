@@ -1,22 +1,13 @@
 package fr.polytechnique.cmap.cnam.filtering
 
 import fr.polytechnique.cmap.cnam.filtering.utilities.TransformerHelper
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types._
-
-/**
-  * @author Daniel de Paula
-  */
-trait Transformer[T] {
-  def transform(sources: Sources): Dataset[T]
-}
+import org.apache.spark.sql.types.{IntegerType, TimestampType}
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
 
 /**
   * Transformer object for patients data
   * Note that all transformers should cache the DataFrames that are going to be used
-  *
-  * @author Daniel de Paula
   */
 object PatientsTransformer extends Transformer[Patient] {
 
@@ -34,7 +25,7 @@ object PatientsTransformer extends Transformer[Patient] {
     val dcir: DataFrame = sources.dcir.get.cache()
 
     // Columns definition:
-    val patientIDCol = (col("NUM_ENQ"))
+    val patientIDCol = col("NUM_ENQ")
     val genderCol = col("BEN_SEX_COD")
     val deathDateCol = col("BEN_DCD_DTE")
     val ageCol = col("BEN_AMA_COD")
@@ -76,24 +67,3 @@ object PatientsTransformer extends Transformer[Patient] {
     patients
   }
 }
-
-// todo: Implement other transformer objects.
-// Note that all transformers should cache the DataFrames that are going to be used */
-
-/*
-object DrugEventsTransformer extends Transformer[FlatEvent] {
-
-  def transform(sources: Sources): Dataset[FlatEvent] = {
-
-  }
-}
-*/
-
-/*
-object DiseaseEventsTransformer extends Transformer[FlatEvent] {
-
-  def transform(sources: Sources): Dataset[FlatEvent] = {
-
-  }
-}
- */
