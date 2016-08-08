@@ -35,6 +35,6 @@ class PatientsTransformerSuite extends SharedContext {
     )
 
     // Then
-    assert(result.collect().toSeq == expectedResult)
+    assert(result.collect().toSeq.sortBy(_.patientID) == expectedResult.sortBy(_.patientID))
   }
 }

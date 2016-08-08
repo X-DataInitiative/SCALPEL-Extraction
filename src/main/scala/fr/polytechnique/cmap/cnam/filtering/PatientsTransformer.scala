@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import fr.polytechnique.cmap.cnam.filtering.utilities.TransformerHelper
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{IntegerType, TimestampType}
+import org.apache.spark.sql.types.{DoubleType, IntegerType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.filtering.utilities.TransformerHelper
 
 /**
   * Transformer object for patients data
@@ -11,12 +11,12 @@ import org.apache.spark.sql.{Column, DataFrame, Dataset}
   */
 object PatientsTransformer extends Transformer[Patient] {
 
-  private def estimateBirthDate(timestamp1: Column, timestamp2: Column) = {
+  private def estimateBirthDate(timestamp1: Column, timestamp2: Column, birthYear: Column) = {
     unix_timestamp(
       concat(
         month(TransformerHelper.getMeanTimestampColumn(timestamp1, timestamp2)),
         lit("-"),
-        first(col("birthYear"))
+        birthYear
       ), "MM-yyyy"
     ).cast(TimestampType)
   }
@@ -34,23 +34,38 @@ object PatientsTransformer extends Transformer[Patient] {
     val eventYearCol = year(eventDateCol)
     val birthYearCol = col("BEN_NAI_ANN")
 
+    // Data quality filters. Should we move to the extractor?
     val minAge = 18L
     val maxAge = 1000L
+    val minGender = 1L
+    val maxGender = 2L
+    val minYear = 1800L
+    val maxYear = 2100L
 
     val patientsWithAge: DataFrame = dcir
-      .where(ageCol.between(minAge, maxAge))
+      .where(
+        ageCol.between(minAge, maxAge) &&
+        genderCol.between(minGender, maxGender) &&
+        birthYearCol.between(minYear, maxYear) &&
+        ( year(deathDateCol).isNull || year(deathDateCol).between(minYear, maxYear) )
+      )
       .groupBy(patientIDCol, ageCol)
       .agg(
-        first(genderCol).cast(IntegerType).as("gender"), // we take any gender, as they should be the same
+        sum(lit(1)).as("rowCount"), // We will use it to find the appropriate gender and birth year
+        sum(genderCol).as("genderSum"), // We will use it to find the appropriate gender
+        sum(birthYearCol).as("birthYearSum"), // We will use it to find the appropriate birth year
         min(eventDateCol).as("minEventDate"), // the min event date for each age of a patient
         max(eventDateCol).as("maxEventDate"), // the max event date for each age of a patient
-        min(deathDateCol).cast(TimestampType).as("deathDate"),
-        first(birthYearCol).as("birthYear") // we take any birth year, as they should be the same
+        min(deathDateCol).cast(TimestampType).as("deathDate") // the earliest death date
       )
+
+    val avgGenderCol = round(sum(col("genderSum")) / sum(col("rowCount"))).cast(IntegerType)
+    val avgBirthYearCol = round(sum(col("birthYearSum")) / sum("rowCount")).cast(IntegerType)
 
     val birthDateAggCol: Column = estimateBirthDate(
       max(col("minEventDate")).cast(TimestampType),
-      min(col("maxEventDate")).cast(TimestampType)
+      min(col("maxEventDate")).cast(TimestampType),
+      avgBirthYearCol
     )
 
     import dcir.sqlContext.implicits._
@@ -58,9 +73,9 @@ object PatientsTransformer extends Transformer[Patient] {
     val patients: Dataset[Patient] = patientsWithAge
       .groupBy(patientIDCol.as("patientID"))
       .agg(
-        first(col("gender")).cast(IntegerType).as("gender"),
+        avgGenderCol.as("gender"),
         birthDateAggCol.as("birthDate"),
-        first("deathDate").as("deathDate")
+        first(col("deathDate")).as("deathDate")
       )
       .as[Patient]
 

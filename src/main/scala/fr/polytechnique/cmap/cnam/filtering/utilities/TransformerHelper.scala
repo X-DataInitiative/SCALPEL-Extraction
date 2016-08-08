@@ -1,7 +1,8 @@
 package fr.polytechnique.cmap.cnam.filtering.utilities
 
-import org.apache.spark.sql.Column
+import org.apache.spark.sql.{Column, DataFrame, Row}
 import org.apache.spark.sql.types.{LongType, TimestampType}
+import org.apache.spark.sql.functions._
 
 /**
   * Helper methods for the Transformer classes
