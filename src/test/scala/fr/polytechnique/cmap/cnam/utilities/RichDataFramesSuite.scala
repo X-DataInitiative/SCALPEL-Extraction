@@ -11,8 +11,8 @@ class RichDataFramesSuite extends SharedContext {
 
 
   "===" should "return true" in {
-    val sqltx = sqlContext
-    import sqltx.implicits._
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
     // Given
     val df1 = sc.parallelize(Seq(1,2,3)).toDF("toto")
     val df2 = sc.parallelize(Seq(1,3,2)).toDF("toto")
@@ -25,8 +25,8 @@ class RichDataFramesSuite extends SharedContext {
   }
 
   it should "return false" in {
-    val sqltx = sqlContext
-    import sqltx.implicits._
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
     // Given
     val df1 = sc.parallelize(Seq(1,2,4)).toDF("toto")
     val df2 = sc.parallelize(Seq(1,3,2)).toDF("toto")
@@ -39,8 +39,8 @@ class RichDataFramesSuite extends SharedContext {
   }
 
   "storeParquet" should "call the write method" in {
-    val sqltx = sqlContext
-    import sqltx.implicits._
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
     // Given
     val df = sc.parallelize(Seq(1,2,3)).toDF("InterestingName")
     val spyDF = Mockito.spy(df)

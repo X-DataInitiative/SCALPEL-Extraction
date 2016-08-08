@@ -82,7 +82,6 @@ class SingleTableSuite extends SharedContext {
 
   it should "fail when config is wrong" in {
     // Given
-    val tableName: String = "IR_BEN_Fake"
     FlatteningConfig.addTable(ConfigFactory.parseFile(new File("src/test/resources/fake.conf")))
     val config = FlatteningConfig.getTableConfig("IR_BEN_Fake")
 
