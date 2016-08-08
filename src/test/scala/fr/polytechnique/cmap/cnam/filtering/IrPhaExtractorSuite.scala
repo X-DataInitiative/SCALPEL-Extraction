@@ -8,7 +8,7 @@ import org.apache.spark.sql.DataFrame
   */
 class IrPhaExtractorSuite extends SharedContext {
 
-  "IrPhaExtractor.extract" should "return a DataFrame with the correct schema" in {
+  "ErPhaExtractor.extract" should "return a DataFrame with the correct schema" in {
     // Given
     val path: String = "src/test/resources/expected/IR_PHA_R.parquet"
     val expected: DataFrame = sqlContext.read.parquet(path)
