@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.statistics
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.{DataFrame, SQLContext}
 
 /**
   * Created by sathiya on 04/08/16.
@@ -10,16 +10,20 @@ import org.apache.spark.sql.SQLContext
   */
 trait Config extends SharedContext {
 
-  val _sqlContext: SQLContext = sqlContext
-  val srcFilePath: String = "src/test/resources/IR_BEN_R.csv"
-  // The older versions of the csv package don't convert empty values to null.
-  // So the functions should give consistent output whether or not
-  // the csv package converts empty values to null.
-  val srcDF = sqlContext.read.format("com.databricks.spark.csv")
-    .option("header", "true")
-    .option("inferSchema", "true")
-    .option("delimiter", ";")
-    .option("treatEmptyValuesAsNulls", "true")
-    .option("nullValue", "")
-    .load(srcFilePath)
+  def getSourceDF: DataFrame = {
+    val _sqlContext: SQLContext = sqlContext
+
+    val srcFilePath: String = "src/test/resources/IR_BEN_R.csv"
+    // The older versions of the csv package don't convert empty values to null.
+    // So the functions should give consistent output whether or not
+    // the csv package converts empty values to null.
+    val sourceDF = sqlContext.read.format("com.databricks.spark.csv")
+      .option("header", "true")
+      .option("inferSchema", "true")
+      .option("delimiter", ";")
+      .option("treatEmptyValuesAsNulls", "true")
+      .option("nullValue", "")
+      .load(srcFilePath)
+    sourceDF
+  }
 }

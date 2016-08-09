@@ -6,13 +6,18 @@ package fr.polytechnique.cmap.cnam.statistics
 
 class CustomStatisticsSuite extends Config {
 
-  import _sqlContext.implicits._
   import fr.polytechnique.cmap.cnam.statistics.CustomStatistics._
 
   "customDescribe" should "compute statistics on all columns" in {
 
+    val _sqlContext = sqlContext
+    import _sqlContext.implicits._
+
+    // Given
+    val givenDF = getSourceDF
+
     // When the column names are not specified
-    val result = srcDF.customDescribe()
+    val result = givenDF.customDescribe()
 
     // Then
     val expectedResult = {
@@ -22,8 +27,8 @@ class CustomStatisticsSuite extends Config {
         ("01/01/2006", "25/01/2006", 2L, "NA", "NA", "(01/01/2006,1)", "(01/01/2006,1)", "BEN_DTE_MAJ"),
         ("1959", "1975", 2L, "1967.0", "3934", "(1959,1)", "(1959,1)", "BEN_NAI_ANN"),
         ("1", "10", 2L, "5.5", "11", "(1,1)", "(1,1)", "BEN_NAI_MOI"),
-        ("24", "114", 2L, "69.0", "138", "(114,1)", "(114,1)", "BEN_RES_COM"),
-        ("75", "92", 2L, "83.5", "167", "(75,1)", "(75,1)", "BEN_RES_DPT"),
+        ("4", "114", 2L, "59.0", "118", "(114,1)", "(114,1)", "BEN_RES_COM"),
+        ("02A", "075", 2L, "NA", "NA", "(075,1)", "(075,1)", "BEN_RES_DPT"),
         ("1", "1", 2L, "1.0", "2", "(1,2)", "(1,2)", "BEN_RNG_GEM"),
         ("1", "2", 2L, "1.5", "3", "(1,1)", "(1,1)", "BEN_SEX_COD"),
         ("1", "1", 2L, "1.0", "2", "(1,2)", "(1,2)", "BEN_TOP_CNS"),
@@ -42,9 +47,15 @@ class CustomStatisticsSuite extends Config {
 
   it should "compute statistics on specified columns" in {
 
+    val _sqlContext = sqlContext
+    import _sqlContext.implicits._
+
+    // Given
+    val givenDF = getSourceDF
+
     // When
     val cols = Array("BEN_DCD_DTE", "NUM_ENQ")
-    val resultColumns = srcDF.customDescribe(cols: _*)
+    val resultColumns = givenDF.customDescribe(cols: _*)
 
     // Then
     val expectedResultColumns = {
@@ -57,99 +68,228 @@ class CustomStatisticsSuite extends Config {
     assert(resultColumns.collect().toSet == expectedResultColumns.collect().toSet)
   }
 
-  it should "throw an expection" in {
+  it should "throw an exception" in {
+
+    // Given
+    val givenDF = getSourceDF
 
     // When
     val invalidCols = Array("NUM_ENQ", "INVALID_COLUMN")
-    val thrown = intercept[java.lang.IllegalArgumentException] {
-      srcDF.customDescribe(invalidCols: _*).count
-    }
 
     // Then
+    val thrown = intercept[java.lang.IllegalArgumentException] {
+      givenDF.customDescribe(invalidCols: _*).count
+    }
+
     assert(thrown.getMessage.matches("Field \"[^\"]*\" does not exist."))
   }
 
 
-
   "countUnexpectedValues && countExpectedValues functions " should "return expected values" in {
 
-    // When applying it on a column of String type
-    assert(srcDF.countUnexpectedValues("ORG_CLE_NEW", Set("CODE1234")).first().get(0) == 0)
-    assert(srcDF.countExpectedValues("ORG_CLE_NEW", Set("CODE1234")).first().get(0) == 2)
+    // Given
+    val givenDF = getSourceDF
 
+    // When applying it on a column of String type
+    val resultUnexpectedValues = givenDF.countUnexpectedValues("ORG_CLE_NEW", Set("CODE1234"))
+    val resultExpectedValues = givenDF.countExpectedValues("ORG_CLE_NEW", Set("CODE1234"))
+
+    // Then
+    assert(resultUnexpectedValues.first().get(0) == 0)
+    assert(resultExpectedValues.first().get(0) == 2)
   }
 
-  it should "return correct output in corner cases such as" in {
+  it should "return correct output when the columns contain null values" in {
+
+    val _sqlContext = sqlContext
+    import _sqlContext.implicits._
 
     // Given a DF with Null values
-    val testDF_withNull = {
+    val testDfWithNull = {
       sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
         .toDF("BEN_DTE_INS")
     }
-    val combinedDF_withNull = {
-      srcDF.select("BEN_DTE_INS")
-        .unionAll(testDF_withNull)
+    val combinedDfWithNull = {
+      getSourceDF.select("BEN_DTE_INS")
+        .unionAll(testDfWithNull)
     }
 
     // When applying it on a column of Integer type
-    assert(combinedDF_withNull.countUnexpectedValues("BEN_DTE_INS", (1950 to 1960).toSet)
-      .first().get(0) == 5)
-    assert(combinedDF_withNull.countExpectedValues("BEN_DTE_INS", (1950 to 1960).toSet)
-      .first().get(0) == 1)
+    val resultUnexpectedValues = combinedDfWithNull.countUnexpectedValues(
+      "BEN_DTE_INS", (1950 to 1960).toSet)
 
+    val resultExpectedValues = combinedDfWithNull.countExpectedValues(
+      "BEN_DTE_INS", (1950 to 1960).toSet)
+
+    // Then
+    assert(resultUnexpectedValues.first().get(0) == 5)
+    assert(resultExpectedValues.first().get(0) == 1)
+  }
+
+  it should "return correct output when the column type is integer and expecting double values" in {
+
+    val _sqlContext = sqlContext
+    import _sqlContext.implicits._
+
+    // Given a DF with Null values
+    val testDfWithNull = {
+      sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
+        .toDF("BEN_DTE_INS")
+    }
+    val combinedDfWithNull = {
+      getSourceDF.select("BEN_DTE_INS")
+        .unionAll(testDfWithNull)
+    }
 
     // When applying it on a column of Integer type while expecting double value
-    assert(combinedDF_withNull.countUnexpectedValues("BEN_DTE_INS", Set(1970.0))
-      .first().get(0) == 6)
-    assert(combinedDF_withNull.countExpectedValues("BEN_DTE_INS", Set(1970.0))
-      .first().get(0) == 0)
+    val resultUnexpectedValues = combinedDfWithNull.countUnexpectedValues(
+      "BEN_DTE_INS", Set(1970.0))
+    val resultExpectedValues = combinedDfWithNull.countExpectedValues(
+      "BEN_DTE_INS", Set(1970.0))
+
+
+    // Then
+    assert(resultUnexpectedValues.first().get(0) == 6)
+    assert(resultExpectedValues.first().get(0) == 0)
+
+  }
+
+  it should "return correct output when the column type is Double" in {
+
+    val _sqlContext = sqlContext
+    import _sqlContext.implicits._
+
+    // Given a DF with Null values
+    val testDfWithNull = {
+      sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
+        .toDF("BEN_DTE_INS")
+    }
+    val combinedDfWithNull = {
+      getSourceDF.select("BEN_DTE_INS")
+        .unionAll(testDfWithNull)
+    }
 
     // When applying it on a column of Double type
-    assert(combinedDF_withNull.select($"BEN_DTE_INS" cast("double"))
+    val resultUnexpectedValues = {
+    combinedDfWithNull.select($"BEN_DTE_INS" cast("double"))
       .countUnexpectedValues("BEN_DTE_INS", Set(1970.0))
-      .first().get(0) == 3)
-    assert(combinedDF_withNull.select($"BEN_DTE_INS" cast("double"))
-      .countExpectedValues("BEN_DTE_INS", Set(1970.0))
-      .first().get(0) == 3)
+    }
+
+    val resultExpectedValues = {
+      combinedDfWithNull.select($"BEN_DTE_INS" cast("double"))
+        .countExpectedValues("BEN_DTE_INS", Set(1970.0))
+    }
+
+    // Then
+    assert(resultUnexpectedValues.first().get(0) == 3)
+    assert(resultExpectedValues.first().get(0) == 3)
   }
 
   "countUnexpectedValues && countExpectedValues using UDAF's" should "return expected values" in {
 
-    assert(srcDF.countUnexpectedValuesUsingUDAF(Set("CODE1234"), "ORG_CLE_NEW")
-      .first().get(0) == 0)
-    assert(srcDF.countExpectedValuesUsingUDAF(Set("CODE1234"), "ORG_CLE_NEW")
-      .first().get(0) == 2)
+    //Given
+    val givenDF = getSourceDF
+
+    //When
+    val resultUnexpectedValues = getSourceDF.countUnexpectedValuesUsingUDAF(
+      Set("CODE1234"), "ORG_CLE_NEW")
+    val resultExpectedValues = getSourceDF.countExpectedValuesUsingUDAF(
+      Set("CODE1234"), "ORG_CLE_NEW")
+
+    // Then
+    assert(resultUnexpectedValues.first().get(0) == 0)
+    assert(resultExpectedValues.first().get(0) == 2)
   }
 
-  it should "also return correct output in corner cases" in {
+
+  it should "return correct output when the columns contain null values" in {
+
+    val _sqlContext = sqlContext
+    import _sqlContext.implicits._
+
     // Given a DF with Null values
-    val testDF_withNull = {
+    val testDfWithNull = {
       sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
         .toDF("BEN_DTE_INS")
     }
-    val combinedDF_withNull = {
-      srcDF.select("BEN_DTE_INS")
-           .unionAll(testDF_withNull)
+    val combinedDfWithNull = {
+      getSourceDF.select("BEN_DTE_INS")
+        .unionAll(testDfWithNull)
     }
 
     // When applying it on a column of Integer type
-    assert(combinedDF_withNull.countUnexpectedValuesUsingUDAF((1950 to 1960).toSet, "BEN_DTE_INS")
-      .first().get(0) == 5)
-    assert(combinedDF_withNull.countExpectedValuesUsingUDAF((1950 to 1960).toSet, "BEN_DTE_INS")
-      .first().get(0) == 1)
+    val resultUnexpectedValues = combinedDfWithNull.countUnexpectedValuesUsingUDAF(
+      (1950 to 1960).toSet, "BEN_DTE_INS")
+
+    val resultExpectedValues = combinedDfWithNull.countExpectedValuesUsingUDAF(
+      (1950 to 1960).toSet, "BEN_DTE_INS")
+
+    // Then
+    assert(resultUnexpectedValues.first().get(0) == 5)
+    assert(resultExpectedValues.first().get(0) == 1)
+  }
+
+  it should "return correct output when the column type is integer and expecting double values" in {
+
+    val _sqlContext = sqlContext
+    import _sqlContext.implicits._
+
+    // Given a DF with Null values
+    val testDfWithNull = {
+      sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
+        .toDF("BEN_DTE_INS")
+    }
+    val combinedDfWithNull = {
+      getSourceDF.select("BEN_DTE_INS")
+        .unionAll(testDfWithNull)
+    }
 
     // When applying it on a column of Integer type while expecting double value
-    assert(combinedDF_withNull.countUnexpectedValuesUsingUDAF(Set(1970.0), "BEN_DTE_INS")
-      .first().get(0) == 6)
-    assert(combinedDF_withNull.countExpectedValuesUsingUDAF(Set(1970.0), "BEN_DTE_INS")
-      .first().get(0) == 0)
+    val resultUnexpectedValues = combinedDfWithNull
+      .countUnexpectedValuesUsingUDAF(
+      Set(1970.0), "BEN_DTE_INS")
+
+    val resultExpectedValues = combinedDfWithNull
+      .countExpectedValuesUsingUDAF(
+        Set(1970.0), "BEN_DTE_INS")
+
+
+    // Then
+    assert(resultUnexpectedValues.first().get(0) == 6)
+    assert(resultExpectedValues.first().get(0) == 0)
+
+  }
+
+  it should "return correct output when the column type is Double" in {
+
+    val _sqlContext = sqlContext
+    import _sqlContext.implicits._
+
+    // Given a DF with Null values
+    val testDfWithNull = {
+      sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
+        .toDF("BEN_DTE_INS")
+    }
+    val combinedDfWithNull = {
+      getSourceDF.select("BEN_DTE_INS")
+        .unionAll(testDfWithNull)
+    }
 
     // When applying it on a column of Double type
-    assert(combinedDF_withNull.select($"BEN_DTE_INS" cast("double"))
-      .countUnexpectedValuesUsingUDAF(Set(1970.0), "BEN_DTE_INS")
-      .first().get(0) == 3)
-    assert(combinedDF_withNull.select($"BEN_DTE_INS" cast("double"))
-      .countExpectedValuesUsingUDAF(Set(1970.0), "BEN_DTE_INS")
-      .first().get(0) == 3)
+    val resultUnexpectedValues = {
+      combinedDfWithNull
+        .select($"BEN_DTE_INS" cast("double"))
+        .countUnexpectedValuesUsingUDAF(Set(1970.0), "BEN_DTE_INS")
+    }
+
+    val resultExpectedValues = {
+      combinedDfWithNull
+        .select($"BEN_DTE_INS" cast("double"))
+        .countExpectedValuesUsingUDAF(Set(1970.0), "BEN_DTE_INS")
+    }
+
+    // Then
+    assert(resultUnexpectedValues.first().get(0) == 3)
+    assert(resultExpectedValues.first().get(0) == 3)
   }
 }

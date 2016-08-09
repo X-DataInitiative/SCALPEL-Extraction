@@ -39,68 +39,69 @@ object CustomStatistics {
     * Only one SparkContext can exists for a given application.
     * This method helps not to recreate a new Spark Context if one already exists.
     *
-    * @return SparkContext
     */
-  def getSparkContext(master: String = null): SparkContext = {
+  def getSparkContext(): SparkContext = {
 
     val sparkConf = new SparkConf().setAppName("Jira Id CNAM 41")
-
-    if(master != null)
-      sparkConf.setMaster(master)
 
     SparkContext.getOrCreate(sparkConf)
   }
 
-  implicit class Statistics(val srcDF: DataFrame) {
+  implicit class Statistics(val sourceDF: DataFrame) {
 
-    val sc = getSparkContext()
-    val sqlContext = srcDF.sqlContext
+    val sc = sourceDF.sqlContext.sparkContext
+    val sqlContext = sourceDF.sqlContext
 
     import sqlContext.implicits._
 
     def customDescribe(inputColumns: String*): DataFrame = {
+
       val srcDfColumns: List[String] = {
-        if (inputColumns.isEmpty) srcDF.columns.toList
+        if (inputColumns.isEmpty) sourceDF.columns.toList
         else inputColumns.toList
       }
 
-      val colSize = srcDfColumns.size
+      val schema: StructType = sourceDF.schema
 
-      val schemaDataTypes = srcDF.schema
-
-      val outputDF = srcDfColumns.map{
-        case colName if schemaDataTypes.apply(colName).dataType.isInstanceOf[NumericType] =>
-          srcDF.select(colName)
-               .filter(!col(colName).isin(""))
-               .agg(
-                 min(colName),
-                 max(colName),
-                 count(colName),
-                 avg(colName),
-                 sum(colName)
-               ).withColumn("ColName", lit(colName))
+      def computeAvailableAgg(schema: StructType,
+                              colName: String): DataFrame =
+        colName match {
+        case colName if schema.apply(colName).dataType.isInstanceOf[NumericType] =>
+          sourceDF.select(colName)
+                  .filter(!col(colName).isin(""))
+                  .agg(
+                    min(colName),
+                    max(colName),
+                    count(colName),
+                    avg(colName),
+                    sum(colName)
+                  ).withColumn("ColName", lit(colName))
 
         case colName =>
-          srcDF.select(colName)
+          sourceDF.select(colName)
             .filter(!col(colName).isin(""))
             .agg(
               min(colName),
               max(colName),
               count(colName)
             ).withColumn("Avg", lit("NA"))
-             .withColumn("Sum", lit("NA"))
-             .withColumn("ColName", lit(colName))
+            .withColumn("Sum", lit("NA"))
+            .withColumn("ColName", lit(colName))
+      }
+
+      val outputDF: DataFrame = srcDfColumns.map {
+        colName => computeAvailableAgg(schema, colName)
       }.reduce(_.unionAll(_))
 
       val maxOccur: Map[String, String] = srcDfColumns.map(colName =>
-        (colName, StatisticsUsingMapReduce.findMostOccurrenceValues(srcDF, colName)
+        (colName, StatisticsUsingMapReduce.findMostOccurrenceValues(sourceDF, colName)
                                           .mkString)).toMap
 
       val minOccur: Map[String, String] = srcDfColumns.map(colName =>
-        (colName, StatisticsUsingMapReduce.findLeastOccurrenceValues(srcDF, colName)
+        (colName, StatisticsUsingMapReduce.findLeastOccurrenceValues(sourceDF, colName)
                                           .mkString)).toMap
 
-      return outputDF.map((r: Row) => CaseDescribeFunctionColumns(r.getString(0),
+      outputDF.map((r: Row) => CaseDescribeFunctionColumns(r.getString(0),
         r.getString(1),
         r.getLong(2),
         r.getString(3),
@@ -112,38 +113,31 @@ object CustomStatistics {
     }
 
     /**
-      * This is a centralized function to compute any UDAF.
+      * This is a centralized function to compute any UDAF and return a dataframe
+      * that is composed of the computed metric and the column name.
       *
       * @param udafObject object of the UDAF that we would like to compute.
       * @param outputDfMetricName column name for the computed metric.
       * @param inputColumns set of column names on which the UDAF should be applied.
-      * @return dataframe that is composed of the computer metric and the column name
       */
     private def computeUDAF(udafObject: UserDefinedAggregateFunction,
                             outputDfMetricName: String,
                             inputColumns: Seq[String]): DataFrame = {
 
       val srcDfColumns = {
-        if (inputColumns.isEmpty) srcDF.columns.toList
+        if (inputColumns.isEmpty) sourceDF.columns.toList
         else inputColumns.toList
       }
 
-      val colSize = srcDfColumns.size
-
-      val outputDFSchema = new StructType().add(outputDfMetricName, LongType)
-                                           .add("ColName", StringType)
-
-      var outputDF = sqlContext.createDataFrame(sc.emptyRDD[Row], outputDFSchema)
-
-      for (i <- 0 to colSize - 1) {
-        val colName: String = srcDfColumns(i)
-
-        outputDF = outputDF.unionAll(srcDF.select(colName)
-                           .agg(udafObject(srcDF(colName)))
-                           .withColumn("ColName", lit(colName)))
+      def computeUDAF(colName: String): DataFrame = {
+        sourceDF.select(colName)
+                .agg(udafObject(sourceDF(colName)))
+                .withColumn("ColName", lit(colName))
       }
 
-      return outputDF
+      val outputDF = srcDfColumns.map(colName => computeUDAF(colName)).reduce(_.unionAll(_))
+
+      outputDF
     }
 
     /** This function counts number of unexpected values in a column <i> using UDAF </i>
@@ -151,14 +145,14 @@ object CustomStatistics {
       * @param expectedValues set of expected values
       * @param inputColumns names of the input columns that have the same expected values
       * @tparam T
-      * @return dataframe that is composed of the number of unexpected values on each input columns
       */
     def countUnexpectedValuesUsingUDAF[T: ClassTag](expectedValues: Set[T],
                                                     inputColumns: String*): DataFrame = {
 
-      val nbUnexpectedVals = new CustomAggUnexpectedValues(expectedValues)
+      val nbUnexpectedVals = new UDAFUnexpectedValues(expectedValues)
       val outputColTitle = "Count_Unexpected"
-      return computeUDAF(nbUnexpectedVals, outputColTitle, inputColumns)
+
+      computeUDAF(nbUnexpectedVals, outputColTitle, inputColumns)
     }
 
     /** Same as the previous function, but counts expected values instead of
@@ -167,14 +161,14 @@ object CustomStatistics {
       * @param expectedValues
       * @param inputColumns
       * @tparam T
-      * @return
       */
     def countExpectedValuesUsingUDAF[T: ClassTag](expectedValues: Set[T],
                                                   inputColumns: String*): DataFrame = {
 
-      val nbExpectedVals = new CustomAggExpectedValues(expectedValues)
+      val nbExpectedVals = new UDAFExpectedValues(expectedValues)
       val outputColTitle = "Count_Expected"
-      return computeUDAF(nbExpectedVals, outputColTitle, inputColumns)
+
+      computeUDAF(nbExpectedVals, outputColTitle, inputColumns)
     }
 
     /** This is centralized function for the following two functions that does same as
@@ -186,7 +180,6 @@ object CustomStatistics {
       * @param expectedValues
       * @param choice
       * @tparam T
-      * @return
       */
     private def countExpectedOrUnexpectedValues[T: ClassTag](colName: String,
                                                              expectedValues: Set[T],
@@ -194,7 +187,7 @@ object CustomStatistics {
 
       val castedExpectedValues = expectedValues.map(_.toString).toList
       val isInExpectedValues = {
-        srcDF.col(colName)
+        sourceDF.col(colName)
         .cast(StringType)
         .isin(castedExpectedValues: _*)
     }// Casting to IntegerType should not be done here.
@@ -204,23 +197,23 @@ object CustomStatistics {
         else not(isInExpectedValues).cast(IntegerType)
       }
 
-      srcDF.filter((col(colName).isNotNull) && not(col(colName).isin("")))
-        .select(colName)
-        .agg(sum(columnToAggregate))
-        .toDF(if(choice) "ExpectedValues" else "UnexpectedValues")
-        .withColumn("ColName", lit(colName))
+      sourceDF.filter((col(colName).isNotNull) && not(col(colName).isin("")))
+              .select(colName)
+              .agg(sum(columnToAggregate))
+              .toDF(if(choice) "ExpectedValues" else "UnexpectedValues")
+              .withColumn("ColName", lit(colName))
     }
 
     def countUnexpectedValues[T: ClassTag](colName: String,
                                            expectedValues: Set[T]): DataFrame = {
 
-      return countExpectedOrUnexpectedValues(colName, expectedValues, false)
+      countExpectedOrUnexpectedValues(colName, expectedValues, false)
     }
 
     def countExpectedValues[T: ClassTag](colName: String,
                                          expectedValues: Set[T]): DataFrame = {
 
-      return countExpectedOrUnexpectedValues(colName, expectedValues, true)
+      countExpectedOrUnexpectedValues(colName, expectedValues, true)
     }
   }
 }

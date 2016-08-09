@@ -1,28 +1,21 @@
 package fr.polytechnique.cmap.cnam.statistics
 
-import scala.reflect.ClassTag
-
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAggregateFunction}
-import org.apache.spark.sql.types._
+import org.apache.spark.sql.types.{DataType, LongType, StringType, StructType}
 
 /**
-  * Created by sathiya on 26/07/16.
+  * Created by sathiya on 09/08/16.
   */
 
 /**
-  * This UDAF takes a list of values in the constructor and counts the number of (column) values
-  * that are <i>not</i> in the list.
-  * The input schema for the UDAF is LongType.
-  *
-  * @param expectedValues List of expected values
-  * @tparam T Type of the given column.
+  * This is an abstract class to implement UDAF's that need to do some sort of counting
+  * on the column values. This class is equipped with necessary function, the implementing
+  * class just has to override the update function of this class with proper logic.
+  * The input column type is String and the output column type is Long.
   */
-class CustomAggUnexpectedValues[T: ClassTag](expectedValues: Set[T])
+abstract class AbstractUDAFCounterType
   extends UserDefinedAggregateFunction {
-
-  // We should not consider null/empty as unexpected values
-  val castedExpectedValues = Set(null, "") ++ expectedValues.map(_.toString)
 
   override def inputSchema: StructType = new StructType().add("input", StringType)
 
@@ -34,12 +27,7 @@ class CustomAggUnexpectedValues[T: ClassTag](expectedValues: Set[T])
     new StructType().add("countInter", LongType)
   }
 
-  override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
-
-    if (!castedExpectedValues.contains(input.getString(0))) {
-      buffer(0) = buffer.getLong(0) + 1
-    }
-  }
+  override def update(buffer: MutableAggregationBuffer, input: Row): Unit = ???
 
   override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
     buffer1(0) = buffer1.getLong(0) + buffer2.getLong(0)

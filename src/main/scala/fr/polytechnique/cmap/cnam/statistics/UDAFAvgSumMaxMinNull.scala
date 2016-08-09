@@ -26,11 +26,11 @@ class UDAFAvgSumMaxMinNull()
   }
 
   override def bufferSchema: StructType = {
-    new StructType().add("sumInput", LongType)
+    new StructType().add("sumInter", LongType)
       .add("countInter", LongType)
-      .add("maxField", LongType)
-      .add("minField", LongType)
-      .add("NULLField", LongType)
+      .add("maxInter", LongType)
+      .add("minInter", LongType)
+      .add("NULLInter", LongType)
   }
 
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {

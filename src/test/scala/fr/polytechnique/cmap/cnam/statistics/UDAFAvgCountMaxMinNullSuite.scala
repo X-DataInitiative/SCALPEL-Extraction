@@ -5,19 +5,23 @@ package fr.polytechnique.cmap.cnam.statistics
   */
 class UDAFAvgCountMaxMinNullSuite extends Config {
 
-  import _sqlContext.implicits._
+  "UDAFAvgSumMaxMinNullSuite" should "return correct output" in {
 
-  "Test UDAFAvgSumMaxMinNull" should "return correct output" in {
+    val _sqlContext = sqlContext
+    import _sqlContext.implicits._
 
     // Given
     val udafAllStatistics = new UDAFAvgSumMaxMinNull()
-    val result_specified = {
-      srcDF.select("BEN_RES_COM")
+    val resultSpecified = {
+      getSourceDF.select("BEN_RES_COM")
         .agg(udafAllStatistics($"BEN_RES_COM"))
         .persist
     }
 
+    // When
+    val result = resultSpecified.first().toSeq
+
     // then
-    assert(result_specified.first().toSeq == Seq("(69.0,2,114,24,0)"))
+    assert(result == Seq("(59.0,2,114,4,0)"))
   }
 }
