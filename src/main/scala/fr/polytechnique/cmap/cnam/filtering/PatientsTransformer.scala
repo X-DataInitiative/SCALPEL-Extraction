@@ -11,74 +11,97 @@ import fr.polytechnique.cmap.cnam.filtering.utilities.TransformerHelper
   */
 object PatientsTransformer extends Transformer[Patient] {
 
-  private def estimateBirthDate(timestamp1: Column, timestamp2: Column, birthYear: Column) = {
+  val minAge = 18
+  val maxAge = 1000
+  val minGender = 1
+  val maxGender = 2
+  val minYear = 1900
+  val maxYear = 2020
+
+  val dcirCols: List[Column] = List(
+    col("NUM_ENQ").as("patientID"),
+    when(
+      !col("BEN_SEX_COD").between(minGender, maxGender), null
+    ).otherwise(col("BEN_SEX_COD")).as("gender"),
+    col("BEN_AMA_COD").as("age"),
+    col("BEN_NAI_ANN").as("birthYear"),
+    col("EXE_SOI_DTD").as("eventDate"),
+    month(col("EXE_SOI_DTD")).as("eventMonth"),
+    year(col("EXE_SOI_DTD")).as("eventYear"),
+    col("BEN_DCD_DTE").as("deathDate")
+  )
+
+  def estimateBirthDate(ts1: Column, ts2: Column, birthYear: Column): Column = {
     unix_timestamp(
       concat(
-        month(TransformerHelper.getMeanTimestampColumn(timestamp1, timestamp2)),
+        month(TransformerHelper.getMeanTimestampColumn(ts1, ts2)),
         lit("-"),
         birthYear
       ), "MM-yyyy"
     ).cast(TimestampType)
   }
 
-  def transform(sources: Sources): Dataset[Patient] = {
-    val dcir: DataFrame = sources.dcir.get.cache()
+  def averageGender(genderSum: Column, genderCount: Column): Column = {
+    round(genderSum.cast(DoubleType) / genderCount).cast(IntegerType)
+  }
 
-    // Columns definition:
-    val patientIDCol = col("NUM_ENQ")
-    val genderCol = col("BEN_SEX_COD")
-    val deathDateCol = col("BEN_DCD_DTE")
-    val ageCol = col("BEN_AMA_COD")
-    val eventDateCol = col("EXE_SOI_DTD")
-    val eventMonthCol = month(eventDateCol)
-    val eventYearCol = year(eventDateCol)
-    val birthYearCol = col("BEN_NAI_ANN")
+  def selectFromDCIR(dcir: DataFrame): DataFrame = {
+    dcir.select(dcirCols: _*).where(
+      col("age").between(minAge, maxAge) &&
+      (col("deathDate").isNull || year(col("deathDate")).between(minYear, maxYear))
+    )
+  }
 
-    // Data quality filters. Should we move to the extractor?
-    val minAge = 18L
-    val maxAge = 1000L
-    val minGender = 1L
-    val maxGender = 2L
-    val minYear = 1800L
-    val maxYear = 2100L
+  def computeBirthYear(initialEvents: DataFrame): DataFrame = {
+    initialEvents
+      .groupBy(col("patientID"), col("birthYear")).agg(count("*").as("count"))
+      .orderBy(col("patientID"), col("count").desc)
+      .groupBy(col("patientID").as("patientID")).agg(first("birthYear").as("birthYear"))
+  }
 
-    val patientsWithAge: DataFrame = dcir
-      .where(
-        ageCol.between(minAge, maxAge) &&
-        genderCol.between(minGender, maxGender) &&
-        birthYearCol.between(minYear, maxYear) &&
-        ( year(deathDateCol).isNull || year(deathDateCol).between(minYear, maxYear) )
-      )
-      .groupBy(patientIDCol, ageCol)
+  def groupByIdAndAge(initialEvents: DataFrame): DataFrame = {
+    initialEvents
+      .groupBy(col("patientID"), col("age"))
       .agg(
-        sum(lit(1)).as("rowCount"), // We will use it to find the appropriate gender and birth year
-        sum(genderCol).as("genderSum"), // We will use it to find the appropriate gender
-        sum(birthYearCol).as("birthYearSum"), // We will use it to find the appropriate birth year
-        min(eventDateCol).as("minEventDate"), // the min event date for each age of a patient
-        max(eventDateCol).as("maxEventDate"), // the max event date for each age of a patient
-        min(deathDateCol).cast(TimestampType).as("deathDate") // the earliest death date
+        count("gender").as("genderCount"), // We will use it to find the appropriate gender
+        sum("gender").as("genderSum"), // We will use it to find the appropriate gender
+        min("eventDate").as("minEventDate"), // the min event date for each age of a patient
+        max("eventDate").as("maxEventDate"), // the max event date for each age of a patient
+        min("deathDate").cast(TimestampType).as("deathDate") // the earliest death date
       )
+  }
 
-    val avgGenderCol = round(sum(col("genderSum")) / sum(col("rowCount"))).cast(IntegerType)
-    val avgBirthYearCol = round(sum(col("birthYearSum")) / sum("rowCount")).cast(IntegerType)
+  def joinWithBirthYear(groupedByIdAndAge: DataFrame, birthYears: DataFrame): DataFrame = {
+    groupedByIdAndAge.as("p").join(birthYears.as("y"), "patientID")
+  }
+
+  def aggregatePatients(groupedWithBirthYear: DataFrame): Dataset[Patient] = {
 
     val birthDateAggCol: Column = estimateBirthDate(
       max(col("minEventDate")).cast(TimestampType),
       min(col("maxEventDate")).cast(TimestampType),
-      avgBirthYearCol
+      first(col("birthYear"))
     )
 
-    import dcir.sqlContext.implicits._
+    import groupedWithBirthYear.sqlContext.implicits._
 
-    val patients: Dataset[Patient] = patientsWithAge
-      .groupBy(patientIDCol.as("patientID"))
+    groupedWithBirthYear
+      .groupBy(col("patientID"))
       .agg(
-        avgGenderCol.as("gender"),
+        averageGender(sum(col("genderSum")), sum(col("genderCount"))).as("gender"),
         birthDateAggCol.as("birthDate"),
-        first(col("deathDate")).as("deathDate")
+        min(col("deathDate")).as("deathDate")
       )
       .as[Patient]
+  }
 
-    patients
+  def transform(sources: Sources): Dataset[Patient] = {
+    val dcir: DataFrame = sources.dcir.get.cache()
+
+    val dcirSelected = selectFromDCIR(dcir)
+    val withBirthYear = computeBirthYear(dcirSelected)
+    val grouped = groupByIdAndAge(dcirSelected)
+    val joined = joinWithBirthYear(grouped, withBirthYear)
+    aggregatePatients(joined)
   }
 }
