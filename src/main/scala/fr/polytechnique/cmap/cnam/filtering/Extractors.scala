@@ -105,9 +105,11 @@ class DrugDosageExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) 
       .format("com.databricks.spark.csv")
       .option("header", "true")
       .load(path)
-      .select(col("PHA_PRS_IDE"),
+      .select(
+        col("PHA_PRS_IDE"),
         col("MOLECULE_NAME"),
-        col("TOTAL_MG_PER_UNIT"))
+        col("TOTAL_MG_PER_UNIT")
+      )
   }
 
 }
