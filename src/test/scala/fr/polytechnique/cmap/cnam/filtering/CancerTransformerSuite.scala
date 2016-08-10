@@ -3,15 +3,12 @@ package fr.polytechnique.cmap.cnam.filtering
 import java.sql.Timestamp
 
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions._
+
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.filtering.CancerTransformer._
-import fr.polytechnique.cmap.cnam.filtering.Sources
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
 
-/**
-  * Created by burq on 09/08/16.
-  */
+
 class CancerTransformerSuite extends SharedContext {
 
   "extractCancer" should "filter out non-cancer lines" in {

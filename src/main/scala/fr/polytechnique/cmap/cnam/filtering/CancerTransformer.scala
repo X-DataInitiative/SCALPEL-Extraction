@@ -5,9 +5,6 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 
 
-/**
-  * Created by burq on 09/08/16.
-  */
 object CancerTransformer extends Transformer[Event] {
   private final val EncodingColumn: String = "MED_NCL_IDT"
   private final val DiagnoseColumn: String = "MED_MTF_COD"
