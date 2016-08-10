@@ -1,9 +1,13 @@
 package fr.polytechnique.cmap.cnam.filtering
 
+import java.sql.Timestamp
+
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.filtering.CancerTransformer._
+import fr.polytechnique.cmap.cnam.filtering.Sources
+import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
 
 /**
   * Created by burq on 09/08/16.
@@ -16,29 +20,35 @@ class CancerTransformerSuite extends SharedContext {
     val input: DataFrame = sqlContext.read.load("src/test/resources/expected/IR_IMB_R.parquet")
 
     // When
-    val result: DataFrame = input.extractCancer()
+    val result: DataFrame = input.extractCancer
 
     // Then
     assert(result.count == 1)
   }
 
-  "joinWithPatient" should "add patient info to the three lines" in {
+  "transform" should "return a pretty Dataset" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
     val input: DataFrame = sqlContext.read.load("src/test/resources/expected/IR_IMB_R.parquet")
-    val patient: DataFrame = Seq(
-      ("Patient_02", "2")
-    ).toDF("PatientID", "Gender")
+    val source = new Sources(irImb = Some(input))
+    val expected = Seq(
+      Event(
+        patientID = "Patient_02",
+        category = "disease",
+        eventId = "C67",
+        weight = 1,
+        start = Timestamp.valueOf("2006-03-13 00:00:00"),
+        end = None
+      )
+    ).toDF
 
     // When
-    val result = input.joinWithPatient(patient)
+    val result = CancerTransformer.transform(source)
 
     // Then
-    assert(result.columns.contains("PatientID"))
-    assert(result.columns.contains("Gender"))
-    assert(result.select(col("Gender").cast("int")).collect.map(_.getInt(0)) === Array(2,2,2))
-  }
+    assert(result.toDF === expected)
 
+  }
 }

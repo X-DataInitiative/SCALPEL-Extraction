@@ -1,52 +1,51 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import java.sql.Timestamp
-
-import org.apache.spark.sql.{DataFrame, Dataset, Column}
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.TimestampType
 
 
 /**
   * Created by burq on 09/08/16.
   */
-object CancerTransformer extends Transformer[FlatEvent] {
-  val EncodingColumn = "MED_NCL_IDT"
-  val DiagnoseColumn = "MED_MTF_COD"
-  val CancerCIM10 = "C67"
+object CancerTransformer extends Transformer[Event] {
+  private final val EncodingColumn: String = "MED_NCL_IDT"
+  private final val DiagnoseColumn: String = "MED_MTF_COD"
+  private final val IDColumn: String = "NUM_ENQ"
+  private final val StartColumn: String = "IMB_ALD_DTD"
+  private final val CancerCIM10 = "C67"
 
+  val inputColumns: List[Column] = List(
+    col(IDColumn),
+    col(EncodingColumn),
+    col(DiagnoseColumn),
+    col(StartColumn)
+  )
   val outputColumns: List[Column] = List(
-    col("PatientID").as("patientID"),
-    col("Gender").as("gender"),
-    col("BirthDate").as("birthDate"),
+    col(IDColumn).as("patientID"),
     lit("disease").as("category"),
-    lit("C67").as("eventID"),
+    lit("C67").as("eventId"),
     lit(1.00).as("weight"),
-    col("IMB_ALD_DTD").as("start")
+    col(StartColumn).cast(TimestampType).as("start"),
+    lit(null).cast(TimestampType).as("end")
   )
 
   implicit class CancerDataFrame(df: DataFrame) {
 
-    def extractCancer(): DataFrame = {
+    def extractCancer: DataFrame = {
       df.filter(col(EncodingColumn) === "CIM10")
         .filter(col(DiagnoseColumn) contains CancerCIM10)
     }
-
-    def joinWithPatient(other: DataFrame): DataFrame = {
-      df.withColumnRenamed("NUM_ENQ", "PatientID")
-        .join(other, "PatientID")
-    }
   }
 
-  override def transform(sources: Sources): Dataset[FlatEvent] = {
+  override def transform(sources: Sources): Dataset[Event] = {
 
     val irImbR: DataFrame = sources.irImb.get
-    val patient: DataFrame = ???
-
     import irImbR.sqlContext.implicits._
 
-    irImbR.extractCancer()
-      .joinWithPatient(patient)
+    irImbR.select(inputColumns:_*)
+      .extractCancer
       .select(outputColumns:_*)
-      .as[FlatEvent]
+      .as[Event]
   }
 }
