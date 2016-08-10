@@ -6,7 +6,7 @@ import java.sql.Timestamp
   * @author Daniel de Paula
   */
 case class Event(
-    patient: Patient,
+    patientID: String,
     category: String,
     eventId: String,
     weight: Double,

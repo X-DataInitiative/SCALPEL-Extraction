@@ -8,10 +8,10 @@ import org.apache.spark.sql.DataFrame
   * @author Daniel de Paula
   */
 class Sources(
-    val dcir: Option[DataFrame],
-    val pmsiMco: Option[DataFrame],
-    val pmsiHad: Option[DataFrame],
-    val pmsiSsr: Option[DataFrame],
-    val irBen: Option[DataFrame],
-    val irImb: Option[DataFrame],
-    val irPha: Option[DataFrame])
+    val dcir: Option[DataFrame] = None,
+    val pmsiMco: Option[DataFrame] = None,
+    val pmsiHad: Option[DataFrame] = None,
+    val pmsiSsr: Option[DataFrame] = None,
+    val irBen: Option[DataFrame] = None,
+    val irImb: Option[DataFrame] = None,
+    val irPha: Option[DataFrame] = None)
