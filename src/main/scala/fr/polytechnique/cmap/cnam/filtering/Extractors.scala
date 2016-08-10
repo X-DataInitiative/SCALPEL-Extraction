@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.{DataFrame, SQLContext}
+import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 import org.apache.spark.sql.functions._
 
 /**
@@ -94,3 +94,22 @@ class IrImbExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
   *
   */
 class IrPhaExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
+
+/**
+  * Extractor for the hand-generated CSV that list all the dosage
+  */
+class DrugDosageExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
+
+  override def extract(path: String): DataFrame = {
+    sqlContext.read
+      .format("com.databricks.spark.csv")
+      .option("header", "true")
+      .load(path)
+      .select(
+        col("PHA_PRS_IDE"),
+        col("MOLECULE_NAME"),
+        col("TOTAL_MG_PER_UNIT")
+      )
+  }
+
+}
