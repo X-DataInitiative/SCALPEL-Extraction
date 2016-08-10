@@ -22,6 +22,7 @@ object PatientsTransformer extends Transformer[Patient] {
   }
 
   implicit class PatientTransformerPipeline(data: DataFrame) {
+
     private final val MinAge = 18
     private final val MaxAge = 1000
     private final val MinGender = 1
@@ -29,20 +30,20 @@ object PatientsTransformer extends Transformer[Patient] {
     private final val MinYear = 1900
     private final val MaxYear = 2020
 
-    private final val DcirCols: List[Column] = List(
-      col("NUM_ENQ").as("patientID"),
-      when(
-        !col("BEN_SEX_COD").between(MinGender, MaxGender), null
-      ).otherwise(col("BEN_SEX_COD")).as("gender"),
-      col("BEN_AMA_COD").as("age"),
-      col("BEN_NAI_ANN").as("birthYear"),
-      col("EXE_SOI_DTD").as("eventDate"),
-      month(col("EXE_SOI_DTD")).as("eventMonth"),
-      year(col("EXE_SOI_DTD")).as("eventYear"),
-      col("BEN_DCD_DTE").as("deathDate")
-    )
-
     def selectFromDCIR: DataFrame = {
+      val DcirCols: List[Column] = List(
+        col("NUM_ENQ").as("patientID"),
+        when(
+          !col("BEN_SEX_COD").between(MinGender, MaxGender), null
+        ).otherwise(col("BEN_SEX_COD")).as("gender"),
+        col("BEN_AMA_COD").as("age"),
+        col("BEN_NAI_ANN").as("birthYear"),
+        col("EXE_SOI_DTD").as("eventDate"),
+        month(col("EXE_SOI_DTD")).as("eventMonth"),
+        year(col("EXE_SOI_DTD")).as("eventYear"),
+        col("BEN_DCD_DTE").as("deathDate")
+      )
+
       data.select(DcirCols: _*).where(
         col("age").between(MinAge, MaxAge) &&
           (col("deathDate").isNull || year(col("deathDate")).between(MinYear, MaxYear))
@@ -50,6 +51,7 @@ object PatientsTransformer extends Transformer[Patient] {
     }
 
     def findBirthYears: DataFrame = {
+
       data
         .groupBy(col("patientID"), col("birthYear")).agg(count("*").as("count"))
         .orderBy(col("patientID"), col("count").desc)
