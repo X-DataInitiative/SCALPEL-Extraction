@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam
 import org.apache.spark._
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.hive.test.TestHiveContext
 import org.scalatest._
 /**
   * Created by burq on 05/07/16.
@@ -19,15 +19,17 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
   val conf = new SparkConf().setMaster("local").setAppName("test")
 
   @transient private var _sc: SparkContext = _
-  @transient private var _sql: SQLContext = _
+
+  // We use hiveContext instead of sqlContext because it is more complete (e.g. Window functions).
+  // The tradeoff is the overhead of the hive package.
+  @transient private var _sql: TestHiveContext = _
 
   def sc: SparkContext = _sc
-  def sqlContext: SQLContext = _sql
-
+  def sqlContext: TestHiveContext = _sql
 
   override def beforeAll() {
     _sc = new SparkContext(conf)
-    _sql = new SQLContext(_sc)
+    _sql = new TestHiveContext(_sc)
     super.beforeAll()
   }
 
@@ -39,6 +41,5 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
     } finally {
       super.afterAll()
     }
-
   }
 }
