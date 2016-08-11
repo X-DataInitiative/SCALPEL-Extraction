@@ -2,6 +2,8 @@ package fr.polytechnique.cmap.cnam.filtering
 
 import java.sql.Timestamp
 
+import fr.polytechnique.cmap.cnam.exceptions.WrongMatchException
+
 /**
   * @author Daniel de Paula
   */
@@ -18,7 +20,11 @@ case class FlatEvent(
 
 object FlatEvent {
 
-  def convert(event: Event, patient: Patient): FlatEvent = {
+  def merge(event: Event, patient: Patient): FlatEvent = {
+
+    if(event.patientID != patient.patientID){
+      throw WrongMatchException(event.patientID + " is different than " + patient.patientID)
+    }
     FlatEvent(
       patientID = patient.patientID,
       gender = patient.gender,

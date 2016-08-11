@@ -16,7 +16,7 @@ class FlatEventSuite extends SharedContext {
         "theSponge", "412", 42.00, Timestamp.valueOf("2001-01-01 00:00:00"), None)
 
       // When
-      val result = FlatEvent.convert(event, patient)
+      val result = FlatEvent.merge(event, patient)
 
       // Then
       assert(result == expected)

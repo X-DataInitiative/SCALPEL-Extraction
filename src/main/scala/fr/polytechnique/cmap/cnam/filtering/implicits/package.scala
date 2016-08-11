@@ -18,7 +18,7 @@ package object implicits {
 
       data.as("left")
         .joinWith(patient.as("right"), $"left.patientID" === $"right.patientID")
-        .map((FlatEvent.convert _).tupled)
+        .map((FlatEvent.merge _).tupled)
         .toDF()
         .write
         .parquet(path)
