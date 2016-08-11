@@ -1,11 +1,8 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import java.sql.Timestamp
-
-import org.apache.spark.sql.{Column, DataFrame, Dataset, SQLContext}
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{ DataFrame, Dataset, SQLContext}
 import com.typesafe.config.Config
-import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
+
 
 package object implicits {
 
@@ -14,22 +11,10 @@ package object implicits {
     *
     * todo: We should decide if this class should stay here or in an object "Writer", importable by doing "import Writer._"
     */
-  implicit class DataWriter(data: Dataset[Event]) {
+  implicit class FlatEventWriter(data: Dataset[Event]) {
 
     def writeFlatEvent(patient: Dataset[Patient], path: String): Unit = {
       import data.sqlContext.implicits._
-
-      val flatEventColumns: List[Column] = List(
-        col("patientID"),
-        col("gender"),
-        col("birthDate"),
-        col("deathDate"),
-        col("category"),
-        col("eventId"),
-        col("weight"),
-        col("start"),
-        col("end")
-      )
 
       data.as("left")
         .joinWith(patient.as("right"), $"left.patientID" === $"right.patientID")
