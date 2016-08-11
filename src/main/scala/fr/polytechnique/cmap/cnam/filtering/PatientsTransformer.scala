@@ -1,8 +1,9 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{IntegerType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import org.apache.spark.sql.expressions.Window
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types._
 import fr.polytechnique.cmap.cnam.filtering.utilities.TransformerHelper
 
 /**
@@ -23,53 +24,65 @@ object PatientsTransformer extends Transformer[Patient] {
 
   implicit class PatientTransformerPipeline(data: DataFrame) {
 
-    private final val MinAge = 18
-    private final val MaxAge = 1000
-    private final val MinGender = 1
-    private final val MaxGender = 2
-    private final val MinYear = 1900
-    private final val MaxYear = 2020
+    final val MinAge = 18
+    final val MaxAge = 1000
+    final val MinGender = 1
+    final val MaxGender = 2
+    final val MinYear = 1900
+    final val MaxYear = 2020
 
     def selectFromDCIR: DataFrame = {
-      val DcirCols: List[Column] = List(
-        col("NUM_ENQ").as("patientID"),
+      val dcirCols: List[Column] = List(
+        col("NUM_ENQ").cast(StringType).as("patientID"),
         when(
+          // Invalid values of gender will be set to null in order to allow the "average" gender to
+          //   be calculated and then the correct gender to be found
           !col("BEN_SEX_COD").between(MinGender, MaxGender), null
-        ).otherwise(col("BEN_SEX_COD")).as("gender"),
-        col("BEN_AMA_COD").as("age"),
-        col("BEN_NAI_ANN").as("birthYear"),
-        col("EXE_SOI_DTD").as("eventDate"),
-        month(col("EXE_SOI_DTD")).as("eventMonth"),
-        year(col("EXE_SOI_DTD")).as("eventYear"),
-        col("BEN_DCD_DTE").as("deathDate")
+        ).otherwise(col("BEN_SEX_COD")).cast(IntegerType).as("gender"),
+        col("BEN_AMA_COD").cast(IntegerType).as("age"),
+        col("BEN_NAI_ANN").cast(StringType).as("birthYear"),
+        col("EXE_SOI_DTD").cast(DateType).as("eventDate"),
+        month(col("EXE_SOI_DTD")).cast(IntegerType).as("eventMonth"),
+        year(col("EXE_SOI_DTD")).cast(IntegerType).as("eventYear"),
+        col("BEN_DCD_DTE").cast(DateType).as("deathDate")
       )
 
-      data.select(DcirCols: _*).where(
+      data.select(dcirCols: _*).where(
         col("age").between(MinAge, MaxAge) &&
           (col("deathDate").isNull || year(col("deathDate")).between(MinYear, MaxYear))
       )
     }
 
+    // The birth year for each patient is found by grouping by patientId and birthYear and then
+    //   by taking the most frequent birth year for each patient.
     def findBirthYears: DataFrame = {
-
+      val window = Window.partitionBy(col("patientID")).orderBy(col("count").desc, col("birthYear"))
       data
         .groupBy(col("patientID"), col("birthYear")).agg(count("*").as("count"))
-        .orderBy(col("patientID"), col("count").desc)
-        .groupBy(col("patientID").as("patientID")).agg(first("birthYear").as("birthYear"))
+        // "first" is only deterministic when applied over an ordered window:
+        .select(col("patientID"), first(col("birthYear")).over(window).as("birthYear"))
+        .distinct
     }
 
+    // After selecting the data, the next step is to group by patientId and age, because we need to
+    //   estimate the birthDate ant we use min(eventDate) and max(eventDate) for each age to achieve
+    //   that.
     def groupByIdAndAge: DataFrame = {
       data
         .groupBy(col("patientID"), col("age"))
         .agg(
-          count("gender").as("genderCount"), // We will use it to find the appropriate gender
-          sum("gender").as("genderSum"), // We will use it to find the appropriate gender
+          count("gender").as("genderCount"), // We will use it to find the appropriate gender (avg)
+          sum("gender").as("genderSum"), // We will use it to find the appropriate gender (avg)
           min("eventDate").as("minEventDate"), // the min event date for each age of a patient
           max("eventDate").as("maxEventDate"), // the max event date for each age of a patient
-          min("deathDate").cast(TimestampType).as("deathDate") // the earliest death date
+          min("deathDate").as("deathDate") // the earliest death date
         )
     }
 
+    // Then we aggregate again by taking the mean between the closest dates where the age changed.
+    // For example, if the patient was 60yo when an event happened on Apr/2010 and he was 61yo when
+    //   another event happened on Jun/2010, we calculate the mean and estimate his birthday as
+    //   being in May of the year found in "findBirthYears"
     def estimateFields: Dataset[Patient] = {
       val birthDateAggCol: Column = estimateBirthDateCol(
         max(col("minEventDate")).cast(TimestampType),
@@ -81,9 +94,13 @@ object PatientsTransformer extends Transformer[Patient] {
       data
         .groupBy(col("patientID"))
         .agg(
+          // Here we calculate the average of gender values and then we round. So, if 1 is more
+          //   common, the average will be less than 1.5 and the final value will be 1. The same is
+          //   valid for the case where 2 is more common. This is the reason why we set invalid
+          //   values for gender to null.
           round(sum(col("genderSum")) / sum(col("genderCount"))).cast(IntegerType).as("gender"),
           birthDateAggCol.as("birthDate"),
-          min(col("deathDate")).as("deathDate")
+          min(col("deathDate")).cast(TimestampType).as("deathDate")
         )
         .as[Patient]
     }
