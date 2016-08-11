@@ -14,9 +14,11 @@ package object implicits {
     *
     * todo: We should decide if this class should stay here or in an object "Writer", importable by doing "import Writer._"
     */
-  implicit class DataWriter[Event](data: Dataset[Event]) {
+  implicit class DataWriter(data: Dataset[Event]) {
 
     def writeFlatEvent(patient: Dataset[Patient], path: String): Unit = {
+      import data.sqlContext.implicits._
+
       val flatEventColumns: List[Column] = List(
         col("patientID"),
         col("gender"),
@@ -29,11 +31,10 @@ package object implicits {
         col("end")
       )
 
-      data.toDF
-        .join(patient.toDF, "patientID")
-        .select(
-          flatEventColumns:_*
-        )
+      data.as("left")
+        .joinWith(patient.as("right"), $"left.patientID" === $"right.patientID")
+        .map((FlatEvent.convert _).tupled)
+        .toDF()
         .write
         .parquet(path)
     }
