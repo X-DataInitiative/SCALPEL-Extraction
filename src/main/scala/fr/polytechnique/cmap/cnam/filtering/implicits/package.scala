@@ -1,7 +1,8 @@
 package fr.polytechnique.cmap.cnam.filtering
 
+import org.apache.spark.sql.{ DataFrame, Dataset, SQLContext}
 import com.typesafe.config.Config
-import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
+
 
 package object implicits {
 
@@ -10,9 +11,17 @@ package object implicits {
     *
     * todo: We should decide if this class should stay here or in an object "Writer", importable by doing "import Writer._"
     */
-  implicit class DataWriter[T](data: Dataset[T]) {
-    def writeData(path: String): Unit = {
+  implicit class FlatEventWriter(data: Dataset[Event]) {
 
+    def writeFlatEvent(patient: Dataset[Patient], path: String): Unit = {
+      import data.sqlContext.implicits._
+
+      data.as("left")
+        .joinWith(patient.as("right"), $"left.patientID" === $"right.patientID")
+        .map((FlatEvent.merge _).tupled)
+        .toDF()
+        .write
+        .parquet(path)
     }
   }
 
