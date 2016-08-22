@@ -1,12 +1,12 @@
 package fr.polytechnique.cmap.cnam.statistics
 
-import org.apache.spark.sql.{DataFrame, _}
+import scala.reflect.ClassTag
+
+import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql._
 import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.{SparkConf, SparkContext}
-
-import scala.reflect.ClassTag // import org.apache.spark.sql.types.{DataType, LongType, StringType, StructType, NumericType}
 
 /**
   * Created by sathiya on 26/07/16.
@@ -24,7 +24,14 @@ import scala.reflect.ClassTag // import org.apache.spark.sql.types.{DataType, Lo
   * @param MinOccur
   * @param ColName
   */
-case class CaseDescribeFunctionColumns(Min: String, Max: String, Count: Long, Avg: String, Sum: String, MaxOccur: String, MinOccur: String, ColName: String)
+case class CaseDescribeFunctionColumns(Min: String,
+                                       Max: String,
+                                       Count: Long,
+                                       Avg: String,
+                                       Sum: String,
+                                       MaxOccur: String,
+                                       MinOccur: String,
+                                       ColName: String)
 
 object CustomStatistics {
 
@@ -32,97 +39,114 @@ object CustomStatistics {
     * Only one SparkContext can exists for a given application.
     * This method helps not to recreate a new Spark Context if one already exists.
     *
-    * @return SparkContext
     */
-  def getSparkContext(): SparkContext = {
-    val sparkConf = new SparkConf().setAppName("SampleTest").setMaster("local") //.setMaster("mesos://localhost:5050") // mesos://localhost:1234 spark://ec2-52-51-45-139.eu-west-1.compute.amazonaws.com:7077
-    val sc = SparkContext.getOrCreate(sparkConf)
-    sc
-  }
+//  def getSparkContext(): SparkContext = {
+//
+//    val sparkConf = new SparkConf().setAppName("Jira Id CNAM 41")
+//
+//    SparkContext.getOrCreate(sparkConf)
+//  }
 
-  implicit class Statistics(val srcDF: DataFrame) {
+  implicit class Statistics(val df: DataFrame) {
 
-    val sc = getSparkContext()
-    val sqlContext = srcDF.sqlContext
-
+    val sqlContext = df.sqlContext
+    val sc = sqlContext.sparkContext
     import sqlContext.implicits._
 
-    def newDescribe(inputColumns: String*): DataFrame = {
-      val src_columns: List[String] = if (inputColumns.isEmpty) srcDF.columns.toList else inputColumns.toList
+    def customDescribe(columnNames: String*): DataFrame = {
 
-      val colSize = src_columns.size
+      val inputColumns: List[String] = {
+        if (columnNames.isEmpty) df.columns.toList
+        else columnNames.toList
+      }
 
-      val schemaDataTypes = srcDF.schema
+      def computeAvailableAgg(schema: StructType,
+                              colName: String): DataFrame =
+        colName match {
+            // todo if-then-else ?
+        case colName if schema.apply(colName).dataType.isInstanceOf[NumericType] =>
+          df.select(colName)
+                  .filter(!col(colName).isin(""))
+                  .agg(
+                    min(colName),
+                    max(colName),
+                    count(colName),
+                    avg(colName),
+                    sum(colName)
+                  ).withColumn("ColName", lit(colName))
 
-//      val schemaCusStat = ScalaReflection.schemaFor[CaseReusableAggFunctions].dataType.asInstanceOf[StructType]
-//
-//      var outputDF = sqlContext.createDataFrame(sc.emptyRDD[Row], schemaCusStat)
-//
-//      for (i <- 0 to colSize - 1) {
-//        val colName: String = src_columns(i)
-//
-//        if (schemaDataTypes.apply(colName).dataType.isInstanceOf[NumericType])
-//          outputDF = outputDF.unionAll(srcDF.select(colName).agg(min(colName), max(colName), count(colName), sum(when(srcDF(colName).isNull || srcDF(colName) === "",1).otherwise(0)), avg(colName), sum(colName)).withColumn("ColName", lit(colName))) //  || srcDF(colName) === ""
-//        else
-//          outputDF = outputDF.unionAll(srcDF.select(colName).agg(min(colName), max(colName), count(colName), sum(when(srcDF(colName).isNull || srcDF(colName) === "",1).otherwise(0))).withColumn("Avg", lit("NA")).withColumn("Sum", lit("NA")).withColumn("ColName", lit(colName)))
-//      }
-
-      val outputDF = src_columns.map{
-        case colName if schemaDataTypes.apply(colName).dataType.isInstanceOf[NumericType] =>
-          srcDF.select(colName).filter(!col(colName).isin("")).agg(min(colName),
-                                                                   max(colName),
-                                                                   count(colName), //sum(when(srcDF(colName).isNull || srcDF(colName) === lit(""),1).otherwise(0)),
-                                                                   avg(colName),
-                                                                   sum(colName)
-                                                                  ).withColumn("ColName", lit(colName))
         case colName =>
-          srcDF.select(colName).filter(!col(colName).isin("")).agg(min(colName),
-                                                                   max(colName),
-                                                                   count(colName) // sum(when(srcDF(colName).isNull || srcDF(colName) === lit(""),1).otherwise(0))
-                                                                  ).withColumn("Avg", lit("NA"))
-                                                                   .withColumn("Sum", lit("NA"))
-                                                                   .withColumn("ColName", lit(colName))
-      }.reduce(_.unionAll(_))
+          df.select(colName)
+            .filter(!col(colName).isin(""))
+            .agg(
+              min(colName),
+              max(colName),
+              count(colName)
+            ).withColumn("Avg", lit("NA"))
+            .withColumn("Sum", lit("NA"))
+            .withColumn("ColName", lit(colName))
+      }
 
-      val maxOccur: Map[String, String] = src_columns.map(colName => (colName, StatisticsUsingMapReduce.findMostOccurrenceValues(srcDF, colName).mkString)).toMap
-      val minOccur: Map[String, String] = src_columns.map(colName => (colName, StatisticsUsingMapReduce.findLeastOccurrenceValues(srcDF, colName).mkString)).toMap
+      val outputDF: DataFrame = inputColumns
+        .map(computeAvailableAgg(df.schema, _))
+        .reduce(_.unionAll(_))
 
-      return outputDF.map((R: Row) => CaseDescribeFunctionColumns(R.getString(0),
-        R.getString(1),
-        R.getLong(2), // R.getLong(3),
-        R.getString(3),
-        R.getString(4),
-        maxOccur.get(R.getString(5)).get,
-        minOccur.get(R.getString(5)).get,
-        R.getString(5)
+      val maxOccur: Map[String, String] = inputColumns
+        .map{
+          name =>
+            val mostOccurrent: String = StatisticsUsingMapReduce
+              .findMostOccurrenceValues(df, name)
+              .mkString
+
+            (name, mostOccurrent)
+        }.toMap
+
+      val minOccur: Map[String, String] = inputColumns.map{
+        name =>
+          val leastOccurent: String = StatisticsUsingMapReduce
+            .findLeastOccurrenceValues(df, name)
+            .mkString
+
+          (name, leastOccurent)
+      }.toMap
+
+      outputDF.map((r: Row) => CaseDescribeFunctionColumns(r.getString(0),
+        r.getString(1),
+        r.getLong(2),
+        r.getString(3),
+        r.getString(4),
+        maxOccur.get(r.getString(5)).get,
+        minOccur.get(r.getString(5)).get,
+        r.getString(5)
       )).toDF()
     }
 
     /**
-      * This is a centralized function to compute any UDAF.
+      * This is a centralized function to compute any UDAF and return a dataframe
+      * that is composed of the computed metric and the column name.
       *
       * @param udafObject object of the UDAF that we would like to compute.
-      * @param metricName_output column name for the computed metric.
-      * @param inputColumns set of column names on which the UDAF should be applied.
-      * @return dataframe that is composed of the computer metric and the column name
+      * @param resultColumnName column name for the computed metric.
+      * @param columnNames set of column names on which the UDAF should be applied.
       */
-    private def computeUDAF(udafObject: UserDefinedAggregateFunction, metricName_output: String, inputColumns: Seq[String]): DataFrame = {
-      val srcDfColumns = if (inputColumns.isEmpty) srcDF.columns.toList
-      else inputColumns.toList
+    private def computeUDAF(udafObject: UserDefinedAggregateFunction,
+                            resultColumnName: String,
+                            columnNames: Seq[String]): DataFrame = {
 
-      val colSize = srcDfColumns.size
-
-      val schema_outputDF = new StructType().add(metricName_output, LongType).add("ColName", StringType)
-
-      var outputDF = sqlContext.createDataFrame(sc.emptyRDD[Row], schema_outputDF)
-
-      for (i <- 0 to colSize - 1) {
-        val colName: String = srcDfColumns(i)
-
-        outputDF = outputDF.unionAll(srcDF.select(colName).agg(udafObject(srcDF(colName))).withColumn("ColName", lit(colName)))
+      val inputColumns = {
+        if (columnNames.isEmpty) df.columns.toList
+        else columnNames.toList
       }
 
-      return outputDF
+      def computeUDAF(colName: String): DataFrame = {
+        df.select(colName)
+                .agg(udafObject(df(colName)))
+                .withColumn("ColName", lit(colName))
+      }
+
+      inputColumns
+        .map(computeUDAF(_))
+        .reduce(_.unionAll(_))
     }
 
     /** This function counts number of unexpected values in a column <i> using UDAF </i>
@@ -130,53 +154,77 @@ object CustomStatistics {
       * @param expectedValues set of expected values
       * @param inputColumns names of the input columns that have the same expected values
       * @tparam T
-      * @return dataframe that is composed of the number of unexpected values on each input columns
       */
-    def countUnexpectedValues_usingUDAF[T: ClassTag](expectedValues: Set[T], inputColumns: String*): DataFrame = {
+    def countUnexpectedValuesUsingUDAF[T: ClassTag](expectedValues: Set[T],
+                                                    inputColumns: String*): DataFrame = {
 
-      val nbUnexpectedVals = new CustomAggUnexpectedValues(expectedValues)
-      val outputColTitle = "Count_Unexpected"
-      return computeUDAF(nbUnexpectedVals, outputColTitle, inputColumns)
+      val udaf = new UDAFUnexpectedValues(expectedValues)
+      val columnName = "Count_Unexpected"
+
+      computeUDAF(udaf, columnName, inputColumns)
     }
 
-    /** Same as the previous function, but counts expected values instead of unexpected values <i> using UDAF </i>
+    /** Same as the previous function, but counts expected values instead of
+      * unexpected values <i> using UDAF </i>
       *
       * @param expectedValues
       * @param inputColumns
       * @tparam T
-      * @return
       */
-    def countExpectedValues_usingUDAF[T: ClassTag](expectedValues: Set[T], inputColumns: String*): DataFrame = {
+    def countExpectedValuesUsingUDAF[T: ClassTag](expectedValues: Set[T],
+                                                  inputColumns: String*): DataFrame = {
 
-      val nbExpectedVals = new CustomAggExpectedValues(expectedValues)
-      val outputColTitle = "Count_Expected"
-      return computeUDAF(nbExpectedVals, outputColTitle, inputColumns)
+      val udaf = new UDAFExpectedValues(expectedValues)
+      val columnName = "Count_Expected"
+
+      computeUDAF(udaf, columnName, inputColumns)
     }
 
-    /** This is centralized function for the following two functions that does same as the previous two, but <i>without</i> UDAF
-      * After performance comparison, we can deprecate the method that is slow and can be eventually removed.
+    /** This is centralized function for the following two functions that does same as
+      * the previous two, but <i>without</i> UDAF
+      * After performance comparison, we can deprecate the method that is slow and
+      * can be eventually removed.
+      *
       * @param colName
       * @param expectedValues
-      * @param choice
+      * @param isExpected
       * @tparam T
-      * @return
       */
-    private def countExpectedOrUnexpectedValues[T: ClassTag](colName: String, expectedValues: Set[T], choice: Boolean): DataFrame = {
+    private def countExpectedOrUnexpectedValues[T: ClassTag](colName: String,
+                                                             expectedValues: Set[T],
+                                                             isExpected: Boolean): DataFrame = {
 
       val castedExpectedValues = expectedValues.map(_.toString).toList
-      val isInExpectedValues = srcDF.col(colName).cast(StringType).isin(castedExpectedValues: _*) //.cast(IntegerType)
+      val isInExpectedValues = {
+        df.col(colName)
+        .cast(StringType)
+        .isin(castedExpectedValues: _*)
+      }// Casting to IntegerType should not be done here.
 
-      val columnToAggregate = if (choice) isInExpectedValues.cast(IntegerType) else not(isInExpectedValues).cast(IntegerType)
+      val columnToAggregate = {
+        if (isExpected) isInExpectedValues.cast(IntegerType)
+        else not(isInExpectedValues).cast(IntegerType)
+      }
 
-      srcDF.filter((col(colName).isNotNull) && not(col(colName).isin(""))).select(colName).agg(sum(columnToAggregate)).toDF(if(choice) "ExpectedValues" else "UnexpectedValues").withColumn("ColName", lit(colName))
+      val outputColName: String = if (isExpected) "ExpectedValues" else "UnexpectedValues"
+
+      df.filter((col(colName).isNotNull) && not(col(colName).isin("")))
+              .select(colName)
+              .agg(sum(columnToAggregate))
+              .toDF(outputColName)
+              .withColumn("ColName", lit(colName))
     }
 
-    def countUnexpectedValues[T: ClassTag](colName: String, expectedValues: Set[T]): DataFrame = {
-      return countExpectedOrUnexpectedValues(colName, expectedValues, false)
+    def countUnexpectedValues[T: ClassTag](colName: String,
+                                           expectedValues: Set[T]): DataFrame = {
+
+      countExpectedOrUnexpectedValues(colName, expectedValues, false)
     }
 
-    def countExpectedValues[T: ClassTag](colName: String, expectedValues: Set[T]): DataFrame = {
-      return countExpectedOrUnexpectedValues(colName, expectedValues, true)
+    def countExpectedValues[T: ClassTag](colName: String,
+                                         expectedValues: Set[T]): DataFrame = {
+
+      countExpectedOrUnexpectedValues(colName, expectedValues, true)
     }
   }
 }

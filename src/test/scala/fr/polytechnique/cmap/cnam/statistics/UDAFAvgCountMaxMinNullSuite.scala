@@ -3,17 +3,23 @@ package fr.polytechnique.cmap.cnam.statistics
 /**
   * Created by sathiya on 29/07/16.
   */
-class UDAFAvgCountMaxMinNullSuite extends CustomStatisticsSuite {
+class UDAFAvgCountMaxMinNullSuite extends Config {
 
-  import sqlContext.implicits._
+  "UDAFAvgSumMaxMinNullSuite" should "return correct output" in {
 
-  test("Test UDAFAvgSumMaxMinNull") {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
 
-    When("We compute UDAFAvgSumMaxMinNull")
+    // Given
     val udafAllStatistics = new UDAFAvgSumMaxMinNull()
+    val columnName: String = "BEN_RES_COM"
 
-    Then("we should get right output")
-    val result_specified = srcDF.select("BEN_RES_COM").agg(udafAllStatistics($"BEN_RES_COM")).persist
-    assert(result_specified.first().toSeq == Seq("(69.0,2,114,24,0)"))
+    // When
+    val resultDF = getSourceDF.select(columnName)
+      .agg(udafAllStatistics($"BEN_RES_COM"))
+    val result = resultDF.first().toSeq
+
+    // then
+    assert(result == Seq("(59.0,2,114,4,0)"))
   }
 }
