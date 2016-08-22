@@ -14,4 +14,5 @@ class Sources(
     val pmsiSsr: Option[DataFrame] = None,
     val irBen: Option[DataFrame] = None,
     val irImb: Option[DataFrame] = None,
-    val irPha: Option[DataFrame] = None)
+    val irPha: Option[DataFrame] = None,
+    val dosages: Option[DataFrame] = None)
