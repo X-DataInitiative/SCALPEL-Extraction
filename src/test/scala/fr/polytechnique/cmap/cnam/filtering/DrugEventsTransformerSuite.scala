@@ -6,6 +6,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.IntegerType
 
 
 class DrugEventsTransformerSuite extends SharedContext {
@@ -33,7 +34,7 @@ class DrugEventsTransformerSuite extends SharedContext {
       .select(
         col("PHA_PRS_IDE").as("CIP07"),
         col("MOLECULE_NAME"),
-        col("TOTAL_MG_PER_UNIT")
+        col("TOTAL_MG_PER_UNIT").cast(IntegerType)
       )
     val expected = Seq(
       ("patient", "3541848", "3400935418487", "GLICLAZIDE", 900),

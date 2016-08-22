@@ -88,11 +88,21 @@ object StatisticsUsingMapReduce {
     */
   def findMostOccurrenceValues(sourceDF: DataFrame,
                                columnName: String,
-                               nbResults: Int = 1): Iterable[(Any, Long)] = {
+                               nbResults: Int*): Iterable[(Any, Long)] = {
 
     val mappedRDD = mapNbOccurrencesToColValues(sourceDF, columnName).sortByKey(false) // (descending)
 
-    mappedRDD.take(nbResults).map(_.swap)
+    if (nbResults == 1 || mappedRDD.take(1).isEmpty)
+      mappedRDD.take(1).map(_.swap)
+    else
+      {
+        // There can be more tha one values that occurs same number of times.
+        val nbTime = mappedRDD.first._1
+        mappedRDD.filter(_._1 == nbTime)
+          .map(_.swap)
+          .collect()
+          .sortWith(_._1.toString < _._1.toString)
+      }
   }
 
   /**
@@ -104,11 +114,20 @@ object StatisticsUsingMapReduce {
     */
   def findLeastOccurrenceValues(sourceDF: DataFrame,
                                 columnName: String,
-                                nbResults: Int = 1): Iterable[(Any, Long)] = {
+                                nbResults: Int*): Iterable[(Any, Long)] = {
 
     val mappedRDD = mapNbOccurrencesToColValues(sourceDF, columnName).sortByKey(true) // (ascending)
 
-    mappedRDD.take(nbResults).map(_.swap)
+    if (nbResults == 1 || mappedRDD.take(1).isEmpty)
+      mappedRDD.take(1).map(_.swap)
+    else
+    {
+      // There can be more tha one values that occurs same number of times.
+      val nbTime = mappedRDD.first()._1
+      mappedRDD.filter(_._1 == nbTime)
+        .map(_.swap)
+        .collect()
+        .sortWith(_._1.toString < _._1.toString)
+    }
   }
-
 }
