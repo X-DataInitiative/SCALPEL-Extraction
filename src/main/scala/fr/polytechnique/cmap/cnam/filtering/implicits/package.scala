@@ -43,13 +43,13 @@ package object implicits {
     def extractAll(pathConfig: Config): Sources = {
       new Sources(
         dcir = Some(extractDcir(pathConfig.getString("dcir"))),
-        pmsiMco = Some(extractPmsiMco(pathConfig.getString("pmsiMco"))),
-        pmsiHad = Some(extractPmsiHad(pathConfig.getString("pmsiHad"))),
-        pmsiSsr = Some(extractPmsiSsr(pathConfig.getString("pmsiSsr"))),
+        // pmsiMco = Some(extractPmsiMco(pathConfig.getString("pmsiMco"))),
+        // pmsiHad = Some(extractPmsiHad(pathConfig.getString("pmsiHad"))),
+        // pmsiSsr = Some(extractPmsiSsr(pathConfig.getString("pmsiSsr"))),
         irBen = Some(extractIrBen(pathConfig.getString("irBen"))),
         irImb = Some(extractIrImb(pathConfig.getString("irImb"))),
         irPha = Some(extractIrPha(pathConfig.getString("irPha"))),
-        dosages = Some(extractDosages(pathConfig.getString("irPha")))
+        dosages = Some(extractDosages(pathConfig.getString("dosages")))
       )
     }
   }
