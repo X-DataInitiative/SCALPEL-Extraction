@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import org.apache.spark.sql.{Column, DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 
@@ -8,44 +8,93 @@ import org.apache.spark.sql.types.TimestampType
   *
   */
 object CancerTransformer extends Transformer[Event] {
-  private final val EncodingColumn: String = "MED_NCL_IDT"
-  private final val DiagnoseColumn: String = "MED_MTF_COD"
-  private final val PatientIDColumn: String = "NUM_ENQ"
-  private final val StartTimeColumn: String = "IMB_ALD_DTD"
-  private final val CancerCode: String = "C67"
+  private final val DiseaseCode: String = "C67"
 
-  val inputColumns: List[Column] = List(
-    col(PatientIDColumn),
-    col(EncodingColumn),
-    col(DiagnoseColumn),
-    col(StartTimeColumn)
+  val imbInputColumns: List[Column] = List(
+    col("NUM_ENQ").as("patientID"),
+    col("MED_NCL_IDT").as("imbEncoding"),
+    col("MED_MTF_COD").as("disease"),
+    col("IMB_ALD_DTD").as("eventDate")
   )
 
+  val mcoInputColumns: List[Column] = List(
+    col("NUM_ENQ").as("patientID"),
+    col("`MCO_D.ASS_DGN`").as("diseaseAss"),
+    col("`MCO_UM.DGN_PAL`").as("diseasePalUm"),
+    col("`MCO_UM.DGN_REL`").as("diseaseRelUm"),
+    col("`MCO_B.DGN_PAL`").as("diseasePal"),
+    col("`MCO_B.DGN_REL`").as("diseaseRel"),
+    col("`MCO_B.SOR_MOI`").as("stayMonthEndDate"),
+    col("`MCO_B.SOR_ANN`").as("stayYearEndDate"),
+    col("`MCO_B.SEJ_NBJ`").as("stayLength"),
+    col("`MCO_B.ENT_DAT`").as("stayStartDate"),
+    col("`MCO_B.SOR_DAT`").as("stayEndDate")
+  )
+
+  val mcoDiseaseColumns: List[Column] =
+    mcoInputColumns.filter(x => x.toString.contains("disease"))
+
+  val mcoNonDiseaseColumns: List[Column] =
+    mcoInputColumns.filter(x => !x.toString.contains("disease"))
+
   val outputColumns: List[Column] = List(
-    col(PatientIDColumn).as("patientID"),
+    col("patientID"),
     lit("disease").as("category"),
-    lit("C67").as("eventId"),
+    lit(DiseaseCode).as("eventId"),
     lit(1.00).as("weight"),
-    col(StartTimeColumn).cast(TimestampType).as("start"),
+    col("eventDate").cast(TimestampType).as("start"),
     lit(null).cast(TimestampType).as("end")
   )
 
-  implicit class CancerDataFrame(df: DataFrame) {
+  implicit class imbDataFrame(df: DataFrame) {
 
-    def extractCancer: DataFrame = {
-      df.filter(col(EncodingColumn) === "CIM10")
-        .filter(col(DiagnoseColumn) contains CancerCode)
+    def extractImbDisease: DataFrame = {
+      df.filter(col("imbEncoding") === "CIM10")
+        .filter(col("disease") contains DiseaseCode)
     }
+
+  }
+
+  implicit class pmsiMcoDataFrame(df: DataFrame) {
+
+    def estimateEventDate: DataFrame = {
+      val dayInMs = 24L * 60 * 60
+
+      df.withColumn("timeDelta", col("stayLength") * dayInMs)
+        .withColumn("estimStayStartDate", col("stayEndDate") - col("timeDelta"))
+        .withColumn("estimStayStartDateWoDays",
+          unix_timestamp(
+            concat_ws("-", col("stayYearEndDate"), col("stayMonthEndDate"), lit("01 00:00:00"))
+              - col("timeDelta")
+          )
+        )
+        .withColumn("eventDate",
+          coalesce(col("stayStartDate"), col("estimStayStartDate"), col("estimStayStartDateWoDays"))
+        )
+    }
+
   }
 
   override def transform(sources: Sources): Dataset[Event] = {
 
-    val irImbR: DataFrame = sources.irImb.get
-    import irImbR.sqlContext.implicits._
+    val irImb: DataFrame = sources.irImb.get
+    val pmsiMco: DataFrame = sources.pmsiMco.get
 
-    irImbR.select(inputColumns:_*)
-      .extractCancer
-      .select(outputColumns:_*)
+    import irImb.sqlContext.implicits._
+
+    val imbDiseases = irImb.select(imbInputColumns: _*)
+      .extractImbDisease
+      .select(outputColumns: _*)
       .as[Event]
+
+    val mcoDiseases = pmsiMco.select(mcoNonDiseaseColumns: _*, concat_ws(" ", mcoDiseaseColumns: _*)
+      .as("disease"))
+      .filter(col("disease") contains DiseaseCode)
+      .estimateEventDate
+      .na.drop(Seq("patientId", "eventDate"))
+      .select(outputColumns: _*)
+      .as[Event]
+
+    imbDiseases.union(mcoDiseases)
   }
 }

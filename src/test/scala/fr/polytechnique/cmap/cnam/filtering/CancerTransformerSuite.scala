@@ -17,7 +17,7 @@ class CancerTransformerSuite extends SharedContext {
     val input: DataFrame = sqlContext.read.load("src/test/resources/expected/IR_IMB_R.parquet")
 
     // When
-    val result: DataFrame = input.extractCancer
+    val result: DataFrame = input.extractImbDisease
 
     // Then
     assert(result.count == 1)
