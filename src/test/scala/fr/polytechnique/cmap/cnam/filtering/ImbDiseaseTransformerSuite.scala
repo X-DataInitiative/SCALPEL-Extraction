@@ -5,19 +5,20 @@ import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.filtering.CancerTransformer._
+import fr.polytechnique.cmap.cnam.filtering.ImbDiseaseTransformer._
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
 
 
-class CancerTransformerSuite extends SharedContext {
+class ImbDiseaseTransformerSuite extends SharedContext {
 
-  "extractCancer" should "filter out non-cancer lines" in {
+  "extractImbDisease" should "filter out lines that does not contain the right DiseaseCode" in {
 
     // Given
-    val input: DataFrame = sqlContext.read.load("src/test/resources/expected/IR_IMB_R.parquet")
+    val input: DataFrame = sqlContext.read
+      .load("src/test/resources/expected/IR_IMB_R.parquet")
 
     // When
-    val result: DataFrame = input.extractImbDisease
+    val result: DataFrame = input.select(ImbDiseaseTransformer.imbInputColumns:_*).extractImbDisease
 
     // Then
     assert(result.count == 1)
@@ -42,7 +43,7 @@ class CancerTransformerSuite extends SharedContext {
     ).toDF
 
     // When
-    val result = CancerTransformer.transform(source)
+    val result = ImbDiseaseTransformer.transform(source)
 
     // Then
     assert(result.toDF === expected)
