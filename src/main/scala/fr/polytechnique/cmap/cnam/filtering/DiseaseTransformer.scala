@@ -1,11 +1,11 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import org.apache.spark.sql.{Column, Dataset}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 
 /**
-  * This transformer looks for CIM10 code starting with C67 in IR_IMB_R
+  * This trait contains the skeleton of the output events and the target disease code
   */
 trait DiseaseTransformer extends Transformer[Event] {
   final val DiseaseCode  = "C67"
@@ -22,9 +22,7 @@ trait DiseaseTransformer extends Transformer[Event] {
 }
 
 /**
-  * While we don't have a TransformerPipeline.
-  *
-  * This feels weird though
+  * This transformer looks for CIM10 code starting with C67 in IR_IMB_R and PMSI expected.MCO
  */
 object DiseaseTransformer extends DiseaseTransformer {
 
@@ -33,8 +31,6 @@ object DiseaseTransformer extends DiseaseTransformer {
       ImbDiseaseTransformer,
       McoDiseaseTransformer)
 
-    transformers.map(t => t.transform(sources))
-      .reduce((dataset, otherDataset) => dataset.union(otherDataset))
-
+    transformers.map(_.transform(sources)).reduce(_.union(_))
   }
 }

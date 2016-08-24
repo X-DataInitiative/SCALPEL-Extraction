@@ -67,7 +67,29 @@ class MainSuite extends SharedContext {
         Timestamp.valueOf("2006-01-05 00:00:00"), None),
       FlatEvent("Patient_02", 1, Timestamp.valueOf("1959-01-01 00:00:00"),
         Some(Timestamp.valueOf("2009-03-13 00:00:00")), "disease", "C67", 1.0,
-        Timestamp.valueOf("2006-03-13 00:00:00"), None)
+        Timestamp.valueOf("2006-03-13 00:00:00"), None),
+      FlatEvent("Patient_02", 1, Timestamp.valueOf("1959-01-01 00:00:00"),
+        Some(Timestamp.valueOf("2009-03-13 00:00:00")), "disease", "C67", 1.0,
+        Timestamp.valueOf("2006-03-13 00:00:00"), None),
+      FlatEvent("Patient_02", 1, Timestamp.valueOf("1959-01-01 00:00:00"),
+        Some(Timestamp.valueOf("2009-03-13 00:00:00")), "disease", "C67", 1.0,
+        Timestamp.valueOf("2005-12-29 00:00:00"), None),
+      FlatEvent("Patient_02", 1, Timestamp.valueOf("1959-01-01 00:00:00"),
+        Some(Timestamp.valueOf("2009-03-13 00:00:00")), "disease", "C67", 1.0,
+        Timestamp.valueOf("2005-12-24 00:00:00"), None),
+      FlatEvent("Patient_02", 1, Timestamp.valueOf("1959-01-01 00:00:00"),
+        Some(Timestamp.valueOf("2009-03-13 00:00:00")), "disease", "C67", 1.0,
+        Timestamp.valueOf("2008-03-08 00:00:00"), None),
+      FlatEvent("Patient_02", 1, Timestamp.valueOf("1959-01-01 00:00:00"),
+        Some(Timestamp.valueOf("2009-03-13 00:00:00")), "disease", "C67", 1.0,
+        Timestamp.valueOf("2008-03-15 00:00:00"), None),
+      FlatEvent("Patient_02", 1, Timestamp.valueOf("1959-01-01 00:00:00"),
+        Some(Timestamp.valueOf("2009-03-13 00:00:00")), "disease", "C67", 1.0,
+        Timestamp.valueOf("2007-01-29 00:00:00"), None),
+      FlatEvent("Patient_02", 1, Timestamp.valueOf("1959-01-01 00:00:00"),
+        Some(Timestamp.valueOf("2009-03-13 00:00:00")), "disease", "C67", 1.0,
+        Timestamp.valueOf("2007-01-29 00:00:00"), None)  // duplicate event, it's ok. See the
+      // Scaladoc of McoDiseaseTransformer.estimateStayStartTime for explanation.
     ).toDF
 
     // When

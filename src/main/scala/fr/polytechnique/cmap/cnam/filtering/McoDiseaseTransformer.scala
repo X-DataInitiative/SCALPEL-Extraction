@@ -2,7 +2,11 @@ package fr.polytechnique.cmap.cnam.filtering
 
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.{LongType, TimestampType}
 
+/**
+  * This transformer looks for CIM10 codes containing DiseaseTransformer.DiseaseCode in PMSI expected.MCO.
+  */
 object McoDiseaseTransformer extends DiseaseTransformer {
 
   val mcoInputColumns: List[Column] = List(
@@ -15,36 +19,47 @@ object McoDiseaseTransformer extends DiseaseTransformer {
     col("`MCO_B.SOR_MOI`").as("stayMonthEndDate"),
     col("`MCO_B.SOR_ANN`").as("stayYearEndDate"),
     col("`MCO_B.SEJ_NBJ`").as("stayLength"),
-    col("`MCO_B.ENT_DAT`").as("stayStartDate"),
-    col("`MCO_B.SOR_DAT`").as("stayEndDate")
+    col("`ENT_DAT`").as("stayStartTime").cast("Timestamp"),
+    col("`SOR_DAT`").as("stayEndDate").cast("Timestamp")
   )
 
-  val mcoDiseaseColumns: List[Column] =
-    mcoInputColumns.filter(x => x.toString.contains("disease"))
+  val mcoDiseaseColumns: List[Column] = List(
+    col("diseaseAss"),
+    col("diseasePalUm"),
+    col("diseaseRelUm"),
+    col("diseasePal"),
+    col("diseaseRel")
+  )
 
   implicit class pmsiMcoDataFrame(df: DataFrame) {
 
     def extractMcoDisease: DataFrame = {
-      df.filter(mcoDiseaseColumns
-        .map(diseaseColumn => diseaseColumn.contains(DiseaseCode))
-        .reduce((x,y) => x or y)
+      df.filter(
+        mcoDiseaseColumns.map(_.contains(DiseaseCode)).reduce(_ or _)
       )
     }
 
-    def estimateEventDate: DataFrame = {
+    /**
+      * Estimate the stay starting date according to the different versions of PMSI MCO
+      * Please note that in the case of early MCO (i.e. < 2009), the estimator is
+      * date(01/month/year) - number of days of the stay.
+      * This estimator is quite imprecise, and if one patient has several stays of the same
+      * length in one month, it results in duplicate events.
+      */
+    def estimateStayStartTime: DataFrame = {
       val dayInMs = 24L * 60 * 60
-
-      df.withColumn("timeDelta", col("stayLength") * dayInMs)
-        .withColumn("estimStayStartDate", col("stayEndDate") - col("timeDelta"))
-        .withColumn("estimStayStartDateWoDays",
+      val timeDelta: Column = col("stayLength") * dayInMs
+      val estimate: Column = (col("stayEndDate").cast(LongType) - timeDelta).cast(TimestampType)
+      val roughEstimate: Column = (
           unix_timestamp(
             concat_ws("-", col("stayYearEndDate"), col("stayMonthEndDate"), lit("01 00:00:00"))
-              - col("timeDelta")
-          )
-        )
-        .withColumn("eventDate",
-          coalesce(col("stayStartDate"), col("estimStayStartDate"), col("estimStayStartDateWoDays"))
-        )
+          ).cast(LongType) - timeDelta
+        ).cast(TimestampType)
+
+      df.withColumn(
+        "eventDate",
+        coalesce(col("stayStartTime"), estimate, roughEstimate)
+      )
     }
 
   }
@@ -57,8 +72,7 @@ object McoDiseaseTransformer extends DiseaseTransformer {
 
     pmsiMco.select(mcoInputColumns: _*)
       .extractMcoDisease
-      .estimateEventDate
-      .na.drop(Seq("patientId", "eventDate"))
+      .estimateStayStartTime
       .select(outputColumns: _*)
       .as[Event]
   }

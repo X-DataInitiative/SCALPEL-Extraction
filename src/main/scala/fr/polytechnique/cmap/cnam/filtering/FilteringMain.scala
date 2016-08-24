@@ -16,9 +16,9 @@ object FilteringMain extends Main {
 
     val patients: Dataset[Patient] = PatientsTransformer.transform(sources)
     val drugEvents: Dataset[Event] = DrugEventsTransformer.transform(sources)
-    val cancerEvents: Dataset[Event] = CancerTransformer.transform(sources)
+    val diseaseEvents: Dataset[Event] = DiseaseTransformer.transform(sources)
 
-    val events = drugEvents.union(cancerEvents)
+    val events = drugEvents.union(diseaseEvents)
 
     patients.toDF.write.parquet(config.getString("paths.output.patients"))
     events.writeFlatEvent(patients, config.getString("paths.output.events"))

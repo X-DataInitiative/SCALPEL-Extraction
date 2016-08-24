@@ -4,7 +4,7 @@ import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
 
 /**
-  * This transformer looks for CIM10 code starting with C67 in IR_IMB_R
+  * This transformer looks for CIM10 codes containing DiseaseTransformer.DiseaseCode in IR_IMB_R.
   */
 object ImbDiseaseTransformer extends DiseaseTransformer {
 
