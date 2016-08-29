@@ -1,31 +1,14 @@
 package fr.polytechnique.cmap.cnam.flattening
 
-import java.util.Locale
-
-import org.apache.log4j.{Level, Logger}
-import org.apache.spark.sql.{DataFrame, SQLContext}
-import org.apache.spark.{SparkConf, SparkContext}
-
+import org.apache.spark.sql.DataFrame
+import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig
 import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig._
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
 
-/**
-  * Created by burq on 19/07/16.
-  */
-object Converter {
+object FlatteningMain extends Main {
 
-  Logger.getRootLogger.setLevel(Level.ERROR)
-  Logger.getLogger("org").setLevel(Level.ERROR)
-  Logger.getLogger("akka").setLevel(Level.ERROR)
-
-  val conf = new SparkConf().setAppName("Flattening")
-
-  Locale.setDefault(Locale.US)
-
-  val sc = new SparkContext(conf)
-  val sqlContext = new SQLContext(sc)
-    sqlContext.setConf("spark.sql.autoBroadcastJoinThreshold", "104857600")
+  def appName = "Flattening"
 
   def loadToParquet(): Unit = {
     val tables = FlatteningConfig.tablesConfig
@@ -77,13 +60,10 @@ object Converter {
     }
   }
 
-
   def main(args: Array[String]): Unit = {
-    import sqlContext.implicits._
-
+    initContexts()
+    sqlContext.setConf("spark.sql.autoBroadcastJoinThreshold", "104857600")
     loadToParquet()
-
     joinTables()
-
   }
 }

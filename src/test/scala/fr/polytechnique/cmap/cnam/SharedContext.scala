@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam
 
+import java.util.{Locale, TimeZone}
 import org.apache.spark._
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
@@ -15,6 +16,9 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
   Logger.getLogger("org").setLevel(Level.WARN)
   Logger.getLogger("akka").setLevel(Level.WARN)
   Logger.getLogger("/executors").setLevel(Level.FATAL)
+
+  Locale.setDefault(Locale.US)
+  TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 
   val conf = new SparkConf().setMaster("local").setAppName("test")
 

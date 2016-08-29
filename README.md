@@ -1,7 +1,7 @@
-# flattening
+# Flattening
 [![Build Status](https://travis-ci.com/X-DataInitiative/SNIIRAM-flattening.svg?token=LzAm1iAXuXZzFBCrak5F&branch=master)](https://travis-ci.com/X-DataInitiative/SNIIRAM-flattening)
 
-This repository host a cleaner version of flattening, including testing and statistics computation
+This repository hosts a cleaner version of flattening, including testing and statistics computation
 
 The src/test/resources contains different fake csv including 2 different patients:
 * Patient_01 is a female, who took GLICLAZIDE medicine and didn't get cancer.
@@ -54,4 +54,24 @@ The object should be formatted like this :
     
 It is possible to add a "date_format" field that will describe how the date 
 should be formatted following the java DateTime API.
+
+# Filtering
+
+The filtering package contains the ETL logic used to convert the flattened tables into two new tables: one containing the patients data and another one containing the normalized events as well as the outcomes. More details can be found in the [Software Architecture page](https://datainitiative.atlassian.net/wiki/display/CNAM/Software+architecture), on Confluence.
+
+## FilteringMain
+
+This package also contains a runnable object called `FilteringMain`. It can be run with spark-submit and it expects an "environment" parameter that can be either "test", "cnam" or "cmap", this will define which part of the `filtering.conf` configuration file will be used. Please make sure this file contains the correct paths before submiting the job. 
+
+After a successfull execution, the output tables will be written as parquet files in the paths defined in the `filtering.conf` file.
+
+An example of execution of this class with the "test" environment is shown below:
+
+```
+$SPARK_HOME/bin/spark-submit \
+   --class fr.polytechnique.cmap.cnam.filtering.FilteringMain \
+   --master local[4] \
+   this_package.jar test
+```
+
 

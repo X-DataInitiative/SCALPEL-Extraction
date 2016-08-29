@@ -1,10 +1,9 @@
 package fr.polytechnique.cmap.cnam.utilities
 
 import java.sql.Timestamp
-
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.filtering.utilities.TransformerHelper
-import org.apache.spark.sql.{Column, DataFrame, Row}
+import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 
 
@@ -26,19 +25,20 @@ class TransformerHelperSuite extends SharedContext{
       (Timestamp.valueOf("2010-01-01 00:00:00"), Timestamp.valueOf("2010-01-02 00:00:00"))
     ).toDF("ts1", "ts2")
 
-    val expectedResult: Seq[Timestamp] = Seq(
-      Timestamp.valueOf("2010-01-01 00:00:00"),
-      Timestamp.valueOf("2010-06-17 01:00:00"),
-      Timestamp.valueOf("2004-12-31 12:00:00"),
-      Timestamp.valueOf("2004-12-31 12:00:00"),
-      Timestamp.valueOf("2010-01-01 12:00:00")
-    )
+    val expectedResult: DataFrame = List(
+      Tuple1(Timestamp.valueOf("2010-01-01 00:00:00")),
+      Tuple1(Timestamp.valueOf("2010-06-17 00:00:00")),
+      Tuple1(Timestamp.valueOf("2004-12-31 12:00:00")),
+      Tuple1(Timestamp.valueOf("2004-12-31 12:00:00")),
+      Tuple1(Timestamp.valueOf("2010-01-01 12:00:00"))
+    ).toDF("ts")
 
     // When
     val meanTimestampCol: Column = TransformerHelper.getMeanTimestampColumn(col("ts1"), col("ts2"))
-    val result: DataFrame = givenDf.select(meanTimestampCol)
+    val result: DataFrame = givenDf.select(meanTimestampCol.as("ts"))
 
     // Then
-    assert(result.collect.toSeq.map(_.getAs[Timestamp](0)) == expectedResult)
+    import RichDataFrames._
+    assert(result === expectedResult)
   }
 }
