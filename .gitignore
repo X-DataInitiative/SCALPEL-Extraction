@@ -1,7 +1,12 @@
 # Created by https://www.gitignore.io/api/scala,intellij
 
+# OS X
+*.DS_Store
+
 # Tests
 anyPath/
+output/
+metastore_db/
 
 ### Scala ###
 *.class

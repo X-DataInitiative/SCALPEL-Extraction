@@ -9,7 +9,8 @@ package object implicits {
   /**
     * Implicit class for writing the events to a parquet file
     *
-    * todo: We should decide if this class should stay here or in an object "Writer", importable by doing "import Writer._"
+    * TODO: We should decide if this class should stay here or in an object "Writer", importable by
+    * doing "import Writer._"
     */
   implicit class FlatEventWriter(data: Dataset[Event]) {
 
@@ -27,7 +28,6 @@ package object implicits {
 
   /**
     * Implicit class for extracting data using an sqlContext directly (not as an argument)
-    *
     */
   implicit class SourceExtractor(sqlContext: SQLContext) {
 
@@ -43,7 +43,7 @@ package object implicits {
     def extractAll(pathConfig: Config): Sources = {
       new Sources(
         dcir = Some(extractDcir(pathConfig.getString("dcir"))),
-        // pmsiMco = Some(extractPmsiMco(pathConfig.getString("pmsi_mco"))),
+        pmsiMco = Some(extractPmsiMco(pathConfig.getString("pmsi_mco"))),
         // pmsiHad = Some(extractPmsiHad(pathConfig.getString("pmsi_had"))),
         // pmsiSsr = Some(extractPmsiSsr(pathConfig.getString("pmsi_ssr"))),
         irBen = Some(extractIrBen(pathConfig.getString("ir_ben"))),
