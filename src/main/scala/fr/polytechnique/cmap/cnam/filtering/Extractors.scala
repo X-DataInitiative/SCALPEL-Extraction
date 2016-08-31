@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.filtering
 
 import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.IntegerType
 
 /**
   * Base class for all Extractor classes.
@@ -108,7 +109,7 @@ class DrugDosageExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) 
       .select(
         col("PHA_PRS_IDE"),
         col("MOLECULE_NAME"),
-        col("TOTAL_MG_PER_UNIT")
+        col("TOTAL_MG_PER_UNIT").cast(IntegerType)
       )
   }
 

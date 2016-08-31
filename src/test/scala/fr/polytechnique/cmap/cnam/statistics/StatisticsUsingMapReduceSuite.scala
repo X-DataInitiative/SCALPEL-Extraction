@@ -17,13 +17,13 @@ class StatisticsUsingMapReduceSuite extends Config {
 
     // When
     val resultMostOccurence = StatisticsUsingMapReduce.findMostOccurrenceValues(
-      combinedDF, "BEN_NAI_ANN", 2)
+      combinedDF, "BEN_NAI_ANN")
 
     val resultLeastOccurence = StatisticsUsingMapReduce.findLeastOccurrenceValues(
-      combinedDF, "BEN_NAI_ANN", 2)
+      combinedDF, "BEN_NAI_ANN")
 
     // Then
-    assert(resultMostOccurence == Seq((1970, 3), (1975, 2)))
+    assert(resultMostOccurence == Seq((1970, 3)))
     assert(resultLeastOccurence == Seq((1959, 1), (1960, 1)))
   }
 
@@ -38,12 +38,12 @@ class StatisticsUsingMapReduceSuite extends Config {
 
     // When
     val resultMostOccurrence = StatisticsUsingMapReduce.findMostOccurrenceValues(
-      combinedDFString, "BEN_NAI_ANN", 2)
+      combinedDFString, "BEN_NAI_ANN")
     val resultLeastOccurrence = StatisticsUsingMapReduce.findLeastOccurrenceValues(
-      combinedDFString, "BEN_NAI_ANN", 2)
+      combinedDFString, "BEN_NAI_ANN")
 
     // Then
-    assert(resultMostOccurrence == Seq(("1970", 3), ("1975", 2)))
+    assert(resultMostOccurrence == Seq(("1970", 3)))
     assert(resultLeastOccurrence == Seq(("1959", 1), ("1960", 1)))
 
   }
@@ -60,14 +60,14 @@ class StatisticsUsingMapReduceSuite extends Config {
 
     // When
     val resultMostOccurrence = StatisticsUsingMapReduce.findMostOccurrenceValues(
-      combinedDFDouble, "BEN_NAI_ANN", 2)
+      combinedDFDouble, "BEN_NAI_ANN")
 
     val resultLeastOccurrence = StatisticsUsingMapReduce.findLeastOccurrenceValues(
-      combinedDFDouble, "BEN_NAI_ANN", 2)
+      combinedDFDouble, "BEN_NAI_ANN")
 
     // Then
-    assert(resultMostOccurrence == Seq((1970, 3), (1975, 2)))
-    assert(resultLeastOccurrence == Seq((1960, 1), (1959, 1)))
+    assert(resultMostOccurrence == Seq((1970, 3)))
+    assert(resultLeastOccurrence == Seq((1959, 1), (1960, 1)))
 
   }
 
@@ -83,12 +83,12 @@ class StatisticsUsingMapReduceSuite extends Config {
 
     // When
     val resultMostOccurrence = StatisticsUsingMapReduce.findMostOccurrenceValues(
-      combinedDFLong, "BEN_NAI_ANN", 2)
+      combinedDFLong, "BEN_NAI_ANN")
     val resultLeastOccurrence = StatisticsUsingMapReduce.findLeastOccurrenceValues(
-      combinedDFLong, "BEN_NAI_ANN", 2)
+      combinedDFLong, "BEN_NAI_ANN")
 
     // Then
-    assert(resultMostOccurrence == Seq((1970, 3), (1975, 2)))
+    assert(resultMostOccurrence == Seq((1970, 3)))
     assert(resultLeastOccurrence == Seq((1959, 1), (1960, 1)))
 
   }
@@ -106,12 +106,12 @@ class StatisticsUsingMapReduceSuite extends Config {
 
     // When
     val resultMostOccurrence = StatisticsUsingMapReduce.findMostOccurrenceValues(
-      combinedDfWithNull, "BEN_DTE_INS", 2)
+      combinedDfWithNull, "BEN_DTE_INS")
     val resultLeastOccurrence = StatisticsUsingMapReduce.findLeastOccurrenceValues(
-      combinedDfWithNull, "BEN_DTE_INS", 2)
+      combinedDfWithNull, "BEN_DTE_INS")
 
     // Then
-    assert(resultMostOccurrence.toList == Seq(("1970", 3), ("1975", 2)))
-    assert(resultLeastOccurrence.toList == Seq(("1960", 1), ("1975", 2)))
+    assert(resultMostOccurrence.toList == Seq(("1970", 3)))
+    assert(resultLeastOccurrence.toList == Seq(("1960", 1)))
   }
 }

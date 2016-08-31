@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.statistics
 
-import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
+import org.apache.spark.sql.DataFrame
 
 /**
   * Created by sathiya on 29/07/16.
@@ -18,30 +18,21 @@ class CustomStatisticsSuite extends Config {
 
     // Given
 
-    val input = getSourceDF
+    val input = getSourceDF.select("BEN_CDI_NIR", "BEN_DTE_MAJ", "BEN_SEX_COD",
+                                   "MAX_TRT_DTD", "ORG_CLE_NEW", "NUM_ENQ")
     val expected: DataFrame = {
       Seq(
-        ("0", "0", 2L, "0.0", "0", "(0,2)", "(0,2)", "BEN_CDI_NIR"),
-        (null, null, 0L, "NA", "NA", "", "", "BEN_DTE_INS"),
-        ("01/01/2006", "25/01/2006", 2L, "NA", "NA", "(01/01/2006,1)", "(01/01/2006,1)", "BEN_DTE_MAJ"),
-        ("1959", "1975", 2L, "1967.0", "3934", "(1959,1)", "(1959,1)", "BEN_NAI_ANN"),
-        ("1", "10", 2L, "5.5", "11", "(1,1)", "(1,1)", "BEN_NAI_MOI"),
-        ("4", "114", 2L, "59.0", "118", "(4,1)", "(4,1)", "BEN_RES_COM"),
-        ("02A", "075", 2L, "NA", "NA", "(075,1)", "(075,1)", "BEN_RES_DPT"),
-        ("1", "1", 2L, "1.0", "2", "(1,2)", "(1,2)", "BEN_RNG_GEM"),
-        ("1", "2", 2L, "1.5", "3", "(1,1)", "(1,1)", "BEN_SEX_COD"),
-        ("1", "1", 2L, "1.0", "2", "(1,2)", "(1,2)", "BEN_TOP_CNS"),
-        ("07/03/2008", "07/03/2008", 1L, "NA", "NA", "(07/03/2008,1)", "(07/03/2008,1)", "MAX_TRT_DTD"),
-        ("CODE1234", "CODE1234", 2L, "NA", "NA", "(CODE1234,2)", "(CODE1234,2)", "ORG_CLE_NEW"),
-        ("CODE1234", "CODE1234", 2L, "NA", "NA", "(CODE1234,2)", "(CODE1234,2)", "ORG_AFF_BEN"),
-        ("101", "200801", 2L, "100451.0", "200902", "(101,1)", "(101,1)", "BEN_DCD_AME"),
-        ("25/01/2008", "25/01/2008", 1L, "NA", "NA", "(25/01/2008,1)", "(25/01/2008,1)", "BEN_DCD_DTE"),
-        ("Patient_01", "Patient_02", 2L, "NA", "NA", "(Patient_01,1)", "(Patient_01,1)", "NUM_ENQ")
-      ).toDF("Min", "Max", "Count", "Avg", "Sum", "MaxOccur", "MinOccur", "ColName")
+        ("0", "0", 2L, 1L, "0", "0", "0.0", "0.0", "(0,2)", "(0,2)", "BEN_CDI_NIR"),
+        ("01/01/2006", "25/01/2006", 2L, 2L, "NA", "NA", "NA", "NA", "(01/01/2006,1)(25/01/2006,1)", "(01/01/2006,1)(25/01/2006,1)", "BEN_DTE_MAJ"),
+        ("1", "2", 2L, 2L, "3", "3", "1.5", "1.5", "(1,1)(2,1)", "(1,1)(2,1)", "BEN_SEX_COD"),
+        ("07/03/2008", "07/03/2008", 1L, 1L, "NA", "NA", "NA", "NA", "(07/03/2008,1)", "(07/03/2008,1)", "MAX_TRT_DTD"),
+        ("CODE1234", "CODE1234", 2L, 1L, "NA", "NA", "NA", "NA", "(CODE1234,2)", "(CODE1234,2)", "ORG_CLE_NEW"),
+        ("Patient_01", "Patient_02", 2L, 2L, "NA", "NA", "NA", "NA", "(Patient_01,1)(Patient_02,1)", "(Patient_01,1)(Patient_02,1)", "NUM_ENQ")
+      ).toDF("Min", "Max", "Count", "CountDistinct", "Sum", "SumDistinct", "Avg", "AvgDistinct", "MaxOccur", "MinOccur", "ColName")
     }
 
     // When
-    val result = input.customDescribe()
+    val result = input.customDescribe(forComparison = false)
 
     // Then
     assert(expected === result)
@@ -55,16 +46,17 @@ class CustomStatisticsSuite extends Config {
 
     // Given
     val givenDF = getSourceDF
-    val cols = Array("BEN_DCD_DTE", "NUM_ENQ")
+    val cols = Array("BEN_TOP_CNS", "BEN_DCD_DTE", "NUM_ENQ")
     val expected = {
       Seq(
-      ("25/01/2008", "25/01/2008", 1L, "NA", "NA", "(25/01/2008,1)", "(25/01/2008,1)", "BEN_DCD_DTE"),
-      ("Patient_01", "Patient_02", 2L, "NA", "NA", "(Patient_01,1)", "(Patient_01,1)", "NUM_ENQ")
-      ).toDF("Min", "Max", "Count", "Avg", "Sum", "MaxOccur", "MinOccur", "ColName")
+      ("1", "1", 2L, 1L, "2", "1", "1.0", "1.0", "(1,2)", "(1,2)", "BEN_TOP_CNS"),
+      ("25/01/2008", "25/01/2008", 1L, 1L, "NA", "NA", "NA", "NA", "(25/01/2008,1)", "(25/01/2008,1)", "BEN_DCD_DTE"),
+      ("Patient_01", "Patient_02", 2L, 2L, "NA", "NA", "NA", "NA", "(Patient_01,1)(Patient_02,1)", "(Patient_01,1)(Patient_02,1)", "NUM_ENQ")
+      ).toDF("Min", "Max", "Count", "CountDistinct", "Sum", "SumDistinct", "Avg", "AvgDistinct", "MaxOccur", "MinOccur", "ColName")
     }
 
     // When
-    val resultColumns = givenDF.customDescribe(cols: _*)
+    val resultColumns = givenDF.customDescribe(forComparison = false, cols: _*)
 
     // Then
     assert(resultColumns === expected)

@@ -91,8 +91,8 @@ class PatientsTransformerSuite extends SharedContext {
     // Given
     val givenDf: DataFrame = sqlContext.read.parquet("src/test/resources/expected/DCIR.parquet")
     val expectedResult: DataFrame = Seq(
-      ("Patient_01", 31, 3, 6, Date.valueOf("2006-01-15"), Date.valueOf("2006-01-30"), None),
-      ("Patient_02", 47, 4, 4,
+      ("Patient_01", 31, 3L, 6L, Date.valueOf("2006-01-15"), Date.valueOf("2006-01-30"), None),
+      ("Patient_02", 47, 4L, 4L,
         Date.valueOf("2006-01-05"), Date.valueOf("2006-01-30"), Some(Date.valueOf("2009-03-13")))
     ).toDF("patientID", "age", "genderCount", "genderSum", "minEventDate", "maxEventDate", "deathDate")
 

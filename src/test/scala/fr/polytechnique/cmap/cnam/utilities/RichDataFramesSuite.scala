@@ -38,6 +38,20 @@ class RichDataFramesSuite extends SharedContext {
     assert(!result)
   }
 
+  it should "return false when inconsistent duplicates are found" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+    // Given
+    val df1 = sc.parallelize(Seq(1,2,3,2)).toDF("toto")
+    val df2 = sc.parallelize(Seq(1,3,2,3)).toDF("toto")
+
+    // When
+    val result = df1 === df2
+
+    // Then
+    assert(!result)
+  }
+
   "storeParquet" should "call the write method" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._

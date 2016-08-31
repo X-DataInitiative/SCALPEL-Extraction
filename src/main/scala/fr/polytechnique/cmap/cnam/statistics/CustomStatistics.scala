@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.statistics
 
 import scala.reflect.ClassTag
 
-import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql._
 import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.functions._
@@ -12,40 +11,7 @@ import org.apache.spark.sql.types._
   * Created by sathiya on 26/07/16.
   */
 
-/**
-  * This case class represents needed (statistics) columns for the output dataframe.
-  *
-  * @param Min
-  * @param Max
-  * @param Count
-  * @param Avg
-  * @param Sum
-  * @param MaxOccur
-  * @param MinOccur
-  * @param ColName
-  */
-case class CaseDescribeFunctionColumns(Min: String,
-                                       Max: String,
-                                       Count: Long,
-                                       Avg: String,
-                                       Sum: String,
-                                       MaxOccur: String,
-                                       MinOccur: String,
-                                       ColName: String)
-
 object CustomStatistics {
-
-  /** WE MAY NEED TO PUT THIS FUNCTION INSIDE UTILITIES/ MAIN LATER.
-    * Only one SparkContext can exists for a given application.
-    * This method helps not to recreate a new Spark Context if one already exists.
-    *
-    */
-//  def getSparkContext(): SparkContext = {
-//
-//    val sparkConf = new SparkConf().setAppName("Jira Id CNAM 41")
-//
-//    SparkContext.getOrCreate(sparkConf)
-//  }
 
   implicit class Statistics(val df: DataFrame) {
 
@@ -53,12 +19,25 @@ object CustomStatistics {
     val sc = sqlContext.sparkContext
     import sqlContext.implicits._
 
-    def customDescribe(columnNames: String*): DataFrame = {
+    // In order to preserve old API calls (the one without boolean parameter) to
+    // customDescribe method, i am doing this. It is open to debate.
+    def customDescribe(): DataFrame = customDescribe(true, df.columns)
 
-      val inputColumns: List[String] = {
-        if (columnNames.isEmpty) df.columns.toList
-        else columnNames.toList
-      }
+    def customDescribe(forComparison: Boolean): DataFrame =
+      customDescribe(forComparison, df.columns)
+
+    def customDescribe(otherColumns: String*): DataFrame =
+      customDescribe(true, otherColumns.toArray)
+
+    def customDescribe(forComparison: Boolean,
+                       otherColumns: String*): DataFrame =
+      customDescribe(forComparison, otherColumns.toArray)
+
+    // To compare flatDf columns to columns from individual df's, we need to compare only
+    // statistics on distinct values. Inorder to do this without any code duplication,
+    // i am adding a boolean parameter to this function.
+    private def customDescribe(forComparison: Boolean,
+                               inputColumns: Array[String]): DataFrame = {
 
       def computeAvailableAgg(schema: StructType,
                               colName: String): DataFrame =
@@ -68,57 +47,72 @@ object CustomStatistics {
           df.select(colName)
                   .filter(!col(colName).isin(""))
                   .agg(
-                    min(colName),
-                    max(colName),
-                    count(colName),
-                    avg(colName),
-                    sum(colName)
+                    min(colName) cast("string") as "Min",
+                    max(colName) cast("string") as "Max",
+                    count(colName) cast("long") as "Count",
+                    countDistinct(colName) cast("long") as "CountDistinct",
+                    sum(colName) cast("string") as "Sum",
+                    sumDistinct(colName) cast("string") as "SumDistinct",
+                    avg(colName) cast("string") as "Avg",
+                    (sumDistinct(colName)/countDistinct(colName)) cast("string") as "AvgDistinct"
                   ).withColumn("ColName", lit(colName))
 
         case colName =>
           df.select(colName)
-            .filter(!col(colName).isin(""))
-            .agg(
-              min(colName),
-              max(colName),
-              count(colName)
-            ).withColumn("Avg", lit("NA"))
-            .withColumn("Sum", lit("NA"))
-            .withColumn("ColName", lit(colName))
+                  .filter(!col(colName).isin(""))
+                  .agg(
+                    min(colName) cast("string") as "Min",
+                    max(colName) cast("string") as "Max",
+                    count(colName) cast("long") as "Count",
+                    countDistinct(colName) cast("long") as "CountDistinct"
+                  ).withColumn("Sum", lit("NA"))
+                  .withColumn("SumDistinct", lit("NA"))
+                  .withColumn("Avg", lit("NA"))
+                  .withColumn("AvgDistinct", lit("NA"))
+                  .withColumn("ColName", lit(colName))
       }
 
       val outputDF: DataFrame = inputColumns
         .map(computeAvailableAgg(df.schema, _))
         .reduce(_.unionAll(_))
 
-      val maxOccur: Map[String, String] = inputColumns
-        .map{
+      if(forComparison == true)
+      {
+        outputDF
+          .drop("Count")
+          .drop("Sum")
+          .drop("Avg")
+      }
+      else
+      {
+        val maxOccur: Map[String, String] = inputColumns
+          .map{
+            name =>
+              val mostOccurrence: String = StatisticsUsingMapReduce
+                .findMostOccurrenceValues(df, name)
+                .mkString
+
+              (name, mostOccurrence)
+          }.toMap
+
+        val minOccur: Map[String, String] = inputColumns.map{
           name =>
-            val mostOccurrent: String = StatisticsUsingMapReduce
-              .findMostOccurrenceValues(df, name)
+            val leastOccurrence: String = StatisticsUsingMapReduce
+              .findLeastOccurrenceValues(df, name)
               .mkString
 
-            (name, mostOccurrent)
+            (name, leastOccurrence)
         }.toMap
 
-      val minOccur: Map[String, String] = inputColumns.map{
-        name =>
-          val leastOccurent: String = StatisticsUsingMapReduce
-            .findLeastOccurrenceValues(df, name)
-            .mkString
+        val addMaxOccur = udf({x:String => maxOccur(x)})
+        val addMinOccur = udf({(x:String) => minOccur(x)})
 
-          (name, leastOccurent)
-      }.toMap
-
-      outputDF.map((r: Row) => CaseDescribeFunctionColumns(r.getString(0),
-        r.getString(1),
-        r.getLong(2),
-        r.getString(3),
-        r.getString(4),
-        maxOccur.get(r.getString(5)).get,
-        minOccur.get(r.getString(5)).get,
-        r.getString(5)
-      )).toDF()
+        outputDF
+          .withColumn("MinOccur", addMinOccur($"ColName"))
+          .withColumn("MaxOccur", addMaxOccur($"ColName"))
+          .select("Min", "Max", "Count", "CountDistinct", "Sum", "SumDistinct",
+                  "Avg", "AvgDistinct", "MaxOccur", "MinOccur", "ColName")
+      }
     }
 
     /**
