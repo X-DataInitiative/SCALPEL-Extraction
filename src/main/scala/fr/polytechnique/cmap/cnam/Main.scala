@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam
 
 import java.util.{Locale, TimeZone}
 
+import fr.polytechnique.cmap.cnam.filtering.FilteringMain._
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
@@ -14,6 +15,9 @@ trait Main {
 
   Locale.setDefault(Locale.US)
   TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
+
+  @transient final lazy val logger = Logger.getLogger(getClass)
+  logger.setLevel(Level.INFO)
 
   @transient private var _sc: SparkContext = _
   @transient private var _sql: HiveContext = _

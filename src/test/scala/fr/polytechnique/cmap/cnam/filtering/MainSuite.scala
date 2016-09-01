@@ -13,16 +13,19 @@ class MainSuite extends SharedContext {
   val config = ConfigFactory.parseResources("filtering.conf").getConfig("test")
   val patientsPath = config.getString("paths.output.patients")
   val eventsPath = config.getString("paths.output.events")
+  val exposuresPath = config.getString("paths.output.exposures")
 
   override def beforeAll(): Unit = {
     FileUtils.deleteDirectory(new File(patientsPath))
     FileUtils.deleteDirectory(new File(eventsPath))
+    FileUtils.deleteDirectory(new File(exposuresPath))
     super.beforeAll()
   }
 
   override def afterAll(): Unit = {
     FileUtils.deleteDirectory(new File(patientsPath))
     FileUtils.deleteDirectory(new File(eventsPath))
+    FileUtils.deleteDirectory(new File(exposuresPath))
     super.afterAll()
   }
 
