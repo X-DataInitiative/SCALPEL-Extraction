@@ -100,8 +100,7 @@ class ColumnUtilitiesSuite extends SharedContext{
   }
 
   "minColumn" should "correctly return a column with the minimum value among a set of Numeric columns" in {
-    val sqlCtx = this
-      .sqlContext
+    val sqlCtx = this.sqlContext
     import sqlCtx.implicits._
 
     // Given

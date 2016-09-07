@@ -1,11 +1,10 @@
 package fr.polytechnique.cmap.cnam.filtering
 
 import java.sql.Timestamp
-
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
 
 
 object TrackLossTransformer extends Transformer[Event]{

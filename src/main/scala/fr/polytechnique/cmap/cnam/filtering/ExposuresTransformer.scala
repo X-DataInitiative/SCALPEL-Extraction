@@ -1,23 +1,19 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import java.sql.Timestamp
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.utilities.ColumnUtilities._
+import fr.polytechnique.cmap.cnam.utilities.functions._
 
 object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
 
   // Constant definitions for delays and time windows. Should be verified before compiling.
   // In the future, we may want to export them to an external file.
-  final val followUpDelay = 180
-  final val followUpEndMinInterval = 120
-  final val exposureStartDelay = 90
-  final val exposureStartMinInterval = 180
-  final val startObservation = Timestamp.valueOf("2006-01-01 00:00:00")
-  final val endObservation = Timestamp.valueOf("2009-12-31 23:59:59")
-  final val diseaseCode = "C67"
+  final val ExposureStartDelay = 3
+  final val ExposureStartInterval = 6
+  final val PeriodStart = makeTS(2006, 1, 1)
+  final val DiseaseCode = "C67"
 
   val outputColumns = List(
     col("patientID"),
@@ -33,16 +29,15 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
 
   implicit class ExposuresDataFrame(data: DataFrame) {
 
-    def withFollowUpStart: DataFrame = {
+    def withFollowUpPeriod: DataFrame = {
       val window = Window.partitionBy("patientID")
 
-      val correctedStart = when(lower(col("category")) === "molecule", col("start")) // NULL otherwise
+      val followUpStart: Column = when(col("category") === "followUpPeriod", col("start"))
+      val followUpEnd: Column = when(col("category") === "followUpPeriod", col("end"))
 
       data
-        .withColumn("followUpStart",
-          date_add(min(correctedStart).over(window), followUpDelay).cast(TimestampType)
-        )
-        .where(col("followUpStart") < endObservation)
+        .withColumn("followUpStart", min(followUpStart).over(window))
+        .withColumn("followUpEnd", min(followUpEnd).over(window))
     }
 
     def filterPatients: DataFrame = {
@@ -55,8 +50,8 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
         lit(0)).otherwise(lit(1))
       ).over(window).cast(BooleanType)
 
-      // Drop patients whose first molecule event is after startObservation + 1 year
-      val firstYearObservation = date_add(lit(startObservation), 365).cast(TimestampType)
+      // Drop patients whose first molecule event is after startPeriod + 1 year
+      val firstYearObservation = add_months(lit(PeriodStart), 12).cast(TimestampType)
       val drugFilter = max(
         when(
           col("category") === "molecule" && (col("start") <= firstYearObservation),
@@ -64,44 +59,9 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
         ).otherwise(lit(0))
       ).over(window).cast(BooleanType)
 
-      // Drop patients who only got tracklosses event
-      val tracklossFilter = max(
-        when(col("category") === "trackloss",
-          lit(0)
-        ).otherwise(lit(1))
-      ).over(window).cast(BooleanType)
-
       data.withColumn("diseaseFilter", diseaseFilter)
         .withColumn("drugFilter", drugFilter)
-        .withColumn("tracklossFilter", tracklossFilter)
-        .where(col("diseaseFilter") && col("drugFilter") && col("tracklossFilter"))
-    }
-
-    def withTrackloss: DataFrame = {
-      val window = Window.partitionBy("patientID")
-
-      val firstCorrectTrackloss = min(
-        when(
-        col("category") === "trackloss" &&
-        col("start") > col("followUpStart"),
-        col("start"))
-      ).over(window)
-
-      data.withColumn("trackloss", firstCorrectTrackloss)
-    }
-
-    def withFollowUpEnd: DataFrame = {
-      val window = Window.partitionBy("patientID")
-
-      val firstTargetDisease = min(
-        when(col("category") === "disease" && col("eventId") === diseaseCode, col("start"))
-      ).over(window)
-
-      data
-        .withColumn("firstTargetDisease", firstTargetDisease)
-        .withColumn("followUpEnd",
-          minColumn(col("deathDate"), col("firstTargetDisease"), col("trackloss"), lit(endObservation))
-        )
+        .where(col("diseaseFilter") && col("drugFilter"))
     }
 
     // Ideally, this method must receive only molecules events, otherwise they will treat diseases
@@ -111,8 +71,8 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
       val window = Window.partitionBy("patientID", "eventId")
 
       val exposureStartRule: Column = when(
-        datediff(col("start"), col("previousStartDate")) <= exposureStartMinInterval,
-          date_add(col("start"), exposureStartDelay).cast(TimestampType)
+        months_between(col("previousStartDate"), col("start")) <= ExposureStartInterval,
+          add_months(col("start"), ExposureStartDelay).cast(TimestampType)
       )
 
       data
@@ -130,12 +90,10 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
 
     val events = input.toDF.repartition(col("patientID"))
     events
-      .withFollowUpStart
+      .withFollowUpPeriod
       .filterPatients
-      .withTrackloss
-      .withFollowUpEnd
-      .where(col("start") < col("followUpEnd"))
       .where(col("category") === "molecule")
+      .where(col("start") < col("followUpEnd"))
       .withExposureStart
       .where(col("exposureStart").isNotNull)
       .select(outputColumns: _*)
