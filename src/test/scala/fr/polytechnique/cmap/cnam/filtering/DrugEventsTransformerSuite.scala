@@ -1,12 +1,11 @@
 package fr.polytechnique.cmap.cnam.filtering
 
 import java.sql.Timestamp
-
-import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
+import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 
 
 class DrugEventsTransformerSuite extends SharedContext {
@@ -49,6 +48,8 @@ class DrugEventsTransformerSuite extends SharedContext {
 
     // Then
     import RichDataFrames._
+    result.show
+    expected.show
     assert(result === expected)
   }
 
@@ -75,12 +76,11 @@ class DrugEventsTransformerSuite extends SharedContext {
     )
     // Note: there is a row in the dummy dataset where the field "EXE_SOI_DTD" is null.
     val expected = Seq(
-      Event("Patient_01", "molecule", "GLICLAZIDE", 900.0, null.asInstanceOf[Timestamp], None),
-      Event("Patient_01", "molecule", "GLICLAZIDE", 1800.0, Timestamp.valueOf("2006-01-15 00:00:00"), None),
-      Event("Patient_01", "molecule", "GLICLAZIDE", 900.0, Timestamp.valueOf("2006-01-30 00:00:00"), None),
+      Event("Patient_01", "molecule", "SULFONYLUREE", 900.0, null.asInstanceOf[Timestamp], None),
+      Event("Patient_01", "molecule", "SULFONYLUREE", 1800.0, Timestamp.valueOf("2006-01-15 00:00:00"), None),
+      Event("Patient_01", "molecule", "SULFONYLUREE", 900.0, Timestamp.valueOf("2006-01-30 00:00:00"), None),
       Event("Patient_02", "molecule", "PIOGLITAZONE", 840.0, Timestamp.valueOf("2006-01-15 00:00:00"), None),
-      Event("Patient_02", "molecule", "PIOGLITAZONE", 1680.0, Timestamp.valueOf("2006-01-30 00:00:00"), None),
-      Event("Patient_02", "molecule", "PIOGLITAZONE", 2520.0, Timestamp.valueOf("2006-01-30 00:00:00"), None),
+      Event("Patient_02", "molecule", "PIOGLITAZONE", 4200.0, Timestamp.valueOf("2006-01-30 00:00:00"), None),
       Event("Patient_02", "molecule", "PIOGLITAZONE", 1680.0, Timestamp.valueOf("2006-01-05 00:00:00"), None)
     ).toDF
 
@@ -89,6 +89,10 @@ class DrugEventsTransformerSuite extends SharedContext {
 
     // Then
     import RichDataFrames._
+    result.show
+    result.printSchema
+    expected.show
+    expected.printSchema
     assert(result.toDF === expected)
   }
 }
