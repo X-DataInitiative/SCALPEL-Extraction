@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.{DataFrame, Row, SQLContext}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
+import org.apache.spark.sql.{DataFrame, SQLContext}
 
 /**
   * Base class for all Extractor classes.
@@ -111,6 +111,7 @@ class DrugDosageExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) 
         col("MOLECULE_NAME"),
         col("TOTAL_MG_PER_UNIT").cast(IntegerType)
       )
+      .where(col("MOLECULE_NAME") !== "BENFLUOREX")
   }
 
 }

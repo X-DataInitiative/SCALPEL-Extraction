@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import fr.polytechnique.cmap.cnam.filtering.utilities.TransformerHelper
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.utilities.ColumnUtilities
 
 /**
   * Transformer object for patients data
@@ -15,7 +15,7 @@ object PatientsTransformer extends Transformer[Patient] {
   def estimateBirthDateCol(ts1: Column, ts2: Column, birthYear: Column): Column = {
     unix_timestamp(
       concat(
-        month(TransformerHelper.getMeanTimestampColumn(ts1, ts2)),
+        month(ColumnUtilities.getMeanTimestampColumn(ts1, ts2)),
         lit("-"),
         birthYear
       ), "MM-yyyy"
@@ -107,11 +107,14 @@ object PatientsTransformer extends Transformer[Patient] {
   }
 
   def transform(sources: Sources): Dataset[Patient] = {
-    val dcir: DataFrame = sources.dcir.get.selectFromDCIR.cache()
+    val dcir: DataFrame = sources.dcir.get.selectFromDCIR.persist()
     val birthYears: DataFrame = dcir.findBirthYears
-    dcir
+    val result = dcir
       .groupByIdAndAge
       .join(birthYears, "patientID")
       .estimateFields
+
+    dcir.unpersist()
+    result
   }
 }

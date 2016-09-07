@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import fr.polytechnique.cmap.cnam.SharedContext
 import org.apache.spark.sql.DataFrame
+import fr.polytechnique.cmap.cnam.SharedContext
 
 
 class ExtractorSuite extends SharedContext{

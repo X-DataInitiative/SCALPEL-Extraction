@@ -2,15 +2,15 @@ package fr.polytechnique.cmap.cnam.filtering
 
 import java.sql.Timestamp
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
-import fr.polytechnique.cmap.cnam.utilities.functions._
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.utilities.ColumnUtilities._
 
-object ExposuresTransformer extends DatasetTransformer[FlatEvent, Exposure] {
-  /**
-    * todo: add scaladoc
-    */
+object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
+
+  // Constant definitions for delays and time windows. Should be verified before compiling.
+  // In the future, we may want to export them to an external file.
   final val followUpDelay = 180
   final val followUpEndMinInterval = 120
   final val exposureStartDelay = 90
@@ -24,7 +24,9 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, Exposure] {
     col("gender"),
     col("birthDate"),
     col("deathDate"),
-    col("eventId").as("molecule"),
+    lit("exposure").as("category"),
+    col("eventId"),
+    lit(1.0).as("weight"),
     col("exposureStart").as("start"),
     col("followUpEnd").as("end")
   )
@@ -34,15 +36,12 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, Exposure] {
     def addFollowUpStart: DataFrame = {
       val window = Window.partitionBy("patientID")
 
-      val correctedStart = when(
-        lower(col("category")) === "disease" ||
-        lower(col("eventId")) === "benfluorex",
-          lit(null)
-      ).otherwise(col("start"))
+      val correctedStart = when(lower(col("category")) !== "disease", col("start")) // NULL otherwise
 
       data
-        .withColumn("followUpStart", date_add(min(correctedStart).over(window),
-          followUpDelay).cast(TimestampType))
+        .withColumn("followUpStart",
+          date_add(min(correctedStart).over(window), followUpDelay).cast(TimestampType)
+        )
         .where(col("followUpStart") < endObservation)
     }
 
@@ -80,7 +79,7 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, Exposure] {
       data
         .withColumn("firstTargetDisease", firstTargetDisease)
         .withColumn("followUpEnd",
-          minAmongColumns(col("deathDate"), col("firstTargetDisease"), lit(endObservation))
+          minColumn(col("deathDate"), col("firstTargetDisease"), lit(endObservation))
         )
     }
 
@@ -105,7 +104,7 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, Exposure] {
     }
   }
 
-  def transform(input: Dataset[FlatEvent]): Dataset[Exposure] = {
+  def transform(input: Dataset[FlatEvent]): Dataset[FlatEvent] = {
     import input.sqlContext.implicits._
 
     val events = input.toDF.repartition(col("patientID"))
@@ -118,7 +117,7 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, Exposure] {
       .addExposureStart
       .where(col("exposureStart").isNotNull)
       .select(outputColumns: _*)
-      .dropDuplicates(Seq("patientID", "molecule"))
-      .as[Exposure]
+      .dropDuplicates(Seq("patientID", "eventId"))
+      .as[FlatEvent]
   }
 }
