@@ -50,6 +50,11 @@ class MainSuite extends SharedContext {
     ).toDF
 
     val expectedFlatEvents: DataFrame = Seq(
+      FlatEvent("Patient_01", 2, Timestamp.valueOf("1975-01-01 00:00:00"), None, "trackloss",
+        "eventId", 1.0, Timestamp.valueOf("2006-03-15 00:00:00"), None),
+      FlatEvent("Patient_02", 1, Timestamp.valueOf("1959-01-01 00:00:00"),
+        Some(Timestamp.valueOf("2009-03-13 00:00:00")), "trackloss",
+        "eventId", 1.0, Timestamp.valueOf("2006-03-30 00:00:00"), None),
       FlatEvent("Patient_01", 2, Timestamp.valueOf("1975-01-01 00:00:00"), None, "molecule",
         "SULFONYLUREE", 900.0, null.asInstanceOf[Timestamp], None),
       FlatEvent("Patient_01", 2, Timestamp.valueOf("1975-01-01 00:00:00"), None, "molecule",
