@@ -25,7 +25,7 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
   @transient private var _sc: SparkContext = _
 
   // We use hiveContext instead of sqlContext because it is more complete (e.g. Window functions).
-  // The tradeoff is the overhead of the hive package.
+  // The trade off is the overhead of the hive package.
   @transient private var _sql: TestHiveContext = _
 
   def sc: SparkContext = _sc

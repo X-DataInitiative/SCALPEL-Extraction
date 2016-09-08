@@ -10,7 +10,7 @@ import org.apache.spark.sql.DataFrame
   */
 class TrackLossTransformerSuite extends SharedContext {
 
-  "addInterval" should "add the number of month before the next prescription" in {
+  "withInterval" should "add the number of month before the next prescription" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -29,7 +29,7 @@ class TrackLossTransformerSuite extends SharedContext {
 
     // When
     import TrackLossTransformer._
-    val result = input.addInterval()
+    val result = input.withInterval
 
     // Then
     import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
@@ -54,7 +54,7 @@ class TrackLossTransformerSuite extends SharedContext {
 
     // When
     import TrackLossTransformer._
-    val result = input.filterTrackLosses()
+    val result = input.filterTrackLosses
 
     // Then
     import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
@@ -62,7 +62,7 @@ class TrackLossTransformerSuite extends SharedContext {
 
   }
 
-  "addTrackLossDate" should "add the date of the trackloss" in {
+  "withTrackLossDate" should "add the date of the trackloss" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -79,7 +79,7 @@ class TrackLossTransformerSuite extends SharedContext {
 
     // When
     import TrackLossTransformer._
-    val result = input.addTrackLossDate()
+    val result = input.withTrackLossDate
 
     // Then
     import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._

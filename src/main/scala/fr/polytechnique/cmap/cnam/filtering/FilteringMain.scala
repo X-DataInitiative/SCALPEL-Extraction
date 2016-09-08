@@ -23,6 +23,8 @@ object FilteringMain extends Main {
     val drugEvents: Dataset[Event] = DrugEventsTransformer.transform(sources)
     logger.info("(Lazy) Transforming disease events...")
     val diseaseEvents: Dataset[Event] = DiseaseTransformer.transform(sources)
+    logger.info("(Lazy) Transforming trackloss events...")
+    val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(sources)
 
     val drugFlatEvents = drugEvents.as("left")
       .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
@@ -34,12 +36,19 @@ object FilteringMain extends Main {
       .map((FlatEvent.merge _).tupled)
       .cache()
 
+    val tracklossFlatEvents = tracklossEvents.as("left")
+      .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
+      .map((FlatEvent.merge _).tupled)
+      .cache()
+
     logger.info("Caching drug events...")
     logger.info("Number of drug events: " + drugFlatEvents.count)
     logger.info("Caching disease events...")
     logger.info("Number of disease events: " + diseaseFlatEvents.count)
 
-    val flatEvents = drugFlatEvents.union(diseaseFlatEvents)
+    val flatEvents = drugFlatEvents
+      .union(diseaseFlatEvents)
+      .union(tracklossFlatEvents)
 
     logger.info("(Lazy) Transforming exposures...")
     val exposures = ExposuresTransformer.transform(flatEvents).cache()

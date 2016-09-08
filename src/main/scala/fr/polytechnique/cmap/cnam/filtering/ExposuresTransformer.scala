@@ -33,10 +33,10 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
 
   implicit class ExposuresDataFrame(data: DataFrame) {
 
-    def addFollowUpStart: DataFrame = {
+    def withFollowUpStart: DataFrame = {
       val window = Window.partitionBy("patientID")
 
-      val correctedStart = when(lower(col("category")) !== "disease", col("start")) // NULL otherwise
+      val correctedStart = when(lower(col("category")) === "molecule", col("start")) // NULL otherwise
 
       data
         .withColumn("followUpStart",
@@ -64,12 +64,33 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
         ).otherwise(lit(0))
       ).over(window).cast(BooleanType)
 
+      // Drop patients who only got tracklosses event
+      val tracklossFilter = max(
+        when(col("category") === "trackloss",
+          lit(0)
+        ).otherwise(lit(1))
+      ).over(window).cast(BooleanType)
+
       data.withColumn("diseaseFilter", diseaseFilter)
         .withColumn("drugFilter", drugFilter)
-        .where(col("diseaseFilter") && col("drugFilter"))
+        .withColumn("tracklossFilter", tracklossFilter)
+        .where(col("diseaseFilter") && col("drugFilter") && col("tracklossFilter"))
     }
 
-    def addFollowUpEnd: DataFrame = {
+    def withTrackloss: DataFrame = {
+      val window = Window.partitionBy("patientID")
+
+      val firstCorrectTrackloss = min(
+        when(
+        col("category") === "trackloss" &&
+        col("start") > col("followUpStart"),
+        col("start"))
+      ).over(window)
+
+      data.withColumn("trackloss", firstCorrectTrackloss)
+    }
+
+    def withFollowUpEnd: DataFrame = {
       val window = Window.partitionBy("patientID")
 
       val firstTargetDisease = min(
@@ -79,14 +100,14 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
       data
         .withColumn("firstTargetDisease", firstTargetDisease)
         .withColumn("followUpEnd",
-          minColumn(col("deathDate"), col("firstTargetDisease"), lit(endObservation))
+          minColumn(col("deathDate"), col("firstTargetDisease"), col("trackloss"), lit(endObservation))
         )
     }
 
     // Ideally, this method must receive only molecules events, otherwise they will treat diseases
     //   as molecules and add an exposure start date for them.
     // The exposure start date will be null when the patient was not exposed.
-    def addExposureStart: DataFrame = {
+    def withExposureStart: DataFrame = {
       val window = Window.partitionBy("patientID", "eventId")
 
       val exposureStartRule: Column = when(
@@ -109,12 +130,13 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
 
     val events = input.toDF.repartition(col("patientID"))
     events
-      .addFollowUpStart
+      .withFollowUpStart
       .filterPatients
-      .addFollowUpEnd
+      .withTrackloss
+      .withFollowUpEnd
       .where(col("start") < col("followUpEnd"))
       .where(col("category") === "molecule")
-      .addExposureStart
+      .withExposureStart
       .where(col("exposureStart").isNotNull)
       .select(outputColumns: _*)
       .dropDuplicates(Seq("patientID", "eventId"))

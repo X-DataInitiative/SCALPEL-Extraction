@@ -10,7 +10,9 @@ import org.apache.spark.sql.types.TimestampType
 
 object TrackLossTransformer extends Transformer[Event]{
 
-  val lastDay = Timestamp.valueOf("2010-01-01 00:00:00")
+  val EmptyMonths: Int = 4
+  val TracklossMonthDelay: Int = 2
+  val LastDay = Timestamp.valueOf("2010-01-01 00:00:00")
 
   val inputColumns: List[Column] = List(
     col("NUM_ENQ").as("patientID"),
@@ -20,7 +22,6 @@ object TrackLossTransformer extends Transformer[Event]{
     ).as("drug"),
     col("EXE_SOI_DTD").as("eventDate")
   )
-
   val outputColumns: List[Column] = List(
     col("patientID").as("patientID"),
     lit("trackloss").as("category"),
@@ -29,28 +30,25 @@ object TrackLossTransformer extends Transformer[Event]{
     col("trackloss").as("start"),
     lit(null).cast(TimestampType).as("end")
   )
-
   implicit class TrackLossDataFrame(data: DataFrame) {
 
-    def addInterval(): DataFrame = {
+
+    def withInterval: DataFrame = {
 
       val window = Window.partitionBy(col("patientID")).orderBy(col("eventDate").asc)
 
       data
-        .withColumn("nextDate", lead(col("eventDate"), 1, lastDay).over(window))
+        .withColumn("nextDate", lead(col("eventDate"), 1, LastDay).over(window))
         .filter(col("nextDate").isNotNull)
         .withColumn("interval", months_between(col("nextDate"), col("eventDate")).cast("int"))
         .drop(col("nextDate"))
     }
 
-    def filterTrackLosses(): DataFrame = {
-      data
-        .filter(col("interval") >= 4)
+    def filterTrackLosses: DataFrame = {
+      data.filter(col("interval") >= EmptyMonths)
     }
-
-    def addTrackLossDate(): DataFrame = {
-      data
-        .withColumn("trackloss", add_months(col("eventDate"), 2).cast(TimestampType))
+    def withTrackLossDate: DataFrame = {
+      data.withColumn("trackloss", add_months(col("eventDate"), TracklossMonthDelay).cast(TimestampType))
     }
 
   }
@@ -62,10 +60,10 @@ object TrackLossTransformer extends Transformer[Event]{
     dcir.select(inputColumns:_*)
       .filter(col("drug").isNotNull)
       .select(col("patientID"), col("eventDate"))
-      .distinct()
-      .addInterval()
-      .filterTrackLosses()
-      .addTrackLossDate()
+      .distinct
+      .withInterval
+      .filterTrackLosses
+      .withTrackLossDate
       .select(outputColumns: _*)
       .as[Event]
   }
