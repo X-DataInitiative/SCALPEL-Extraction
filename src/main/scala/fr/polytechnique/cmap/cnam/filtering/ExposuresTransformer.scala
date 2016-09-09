@@ -29,17 +29,6 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
 
   implicit class ExposuresDataFrame(data: DataFrame) {
 
-    def withFollowUpPeriod: DataFrame = {
-      val window = Window.partitionBy("patientID")
-
-      val followUpStart: Column = when(col("category") === "followUpPeriod", col("start"))
-      val followUpEnd: Column = when(col("category") === "followUpPeriod", col("end"))
-
-      data
-        .withColumn("followUpStart", min(followUpStart).over(window))
-        .withColumn("followUpEnd", min(followUpEnd).over(window))
-    }
-
     def filterPatients: DataFrame = {
       val window = Window.partitionBy("patientID")
 
@@ -71,7 +60,7 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
       val window = Window.partitionBy("patientID", "eventId")
 
       val exposureStartRule: Column = when(
-        months_between(col("previousStartDate"), col("start")) <= ExposureStartInterval,
+        months_between(col("start"), col("previousStartDate")) <= ExposureStartInterval,
           add_months(col("start"), ExposureStartDelay).cast(TimestampType)
       )
 
@@ -86,11 +75,12 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
   }
 
   def transform(input: Dataset[FlatEvent]): Dataset[FlatEvent] = {
+    import FollowUpEventsTransformer.FollowUpFunctions
     import input.sqlContext.implicits._
 
     val events = input.toDF.repartition(col("patientID"))
     events
-      .withFollowUpPeriod
+      .withFollowUpPeriodFromEvents
       .filterPatients
       .where(col("category") === "molecule")
       .where(col("start") < col("followUpEnd"))

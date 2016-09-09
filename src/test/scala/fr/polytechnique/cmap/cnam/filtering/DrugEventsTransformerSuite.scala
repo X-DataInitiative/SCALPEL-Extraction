@@ -76,9 +76,9 @@ class DrugEventsTransformerSuite extends SharedContext {
     )
     // Note: there is a row in the dummy dataset where the field "EXE_SOI_DTD" is null.
     val expected = Seq(
-      Event("Patient_01", "molecule", "SULFONYLUREE", 900.0, null.asInstanceOf[Timestamp], None),
-      Event("Patient_01", "molecule", "SULFONYLUREE", 1800.0, Timestamp.valueOf("2006-01-15 00:00:00"), None),
-      Event("Patient_01", "molecule", "SULFONYLUREE", 900.0, Timestamp.valueOf("2006-01-30 00:00:00"), None),
+      Event("Patient_01", "molecule", "SULFONYLUREA", 900.0, null.asInstanceOf[Timestamp], None),
+      Event("Patient_01", "molecule", "SULFONYLUREA", 1800.0, Timestamp.valueOf("2006-01-15 00:00:00"), None),
+      Event("Patient_01", "molecule", "SULFONYLUREA", 900.0, Timestamp.valueOf("2006-01-30 00:00:00"), None),
       Event("Patient_02", "molecule", "PIOGLITAZONE", 840.0, Timestamp.valueOf("2006-01-15 00:00:00"), None),
       Event("Patient_02", "molecule", "PIOGLITAZONE", 4200.0, Timestamp.valueOf("2006-01-30 00:00:00"), None),
       Event("Patient_02", "molecule", "PIOGLITAZONE", 1680.0, Timestamp.valueOf("2006-01-05 00:00:00"), None)
@@ -89,10 +89,10 @@ class DrugEventsTransformerSuite extends SharedContext {
 
     // Then
     import RichDataFrames._
-    result.show
     result.printSchema
-    expected.show
     expected.printSchema
+    result.show
+    expected.show
     assert(result.toDF === expected)
   }
 }

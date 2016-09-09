@@ -6,38 +6,6 @@ import fr.polytechnique.cmap.cnam.utilities.functions.makeTS
 
 class ExposuresTransformerSuite extends SharedContext {
 
-  "withFollowUpPeriod" should "add a column for the follow-up start and one for the end" in {
-    val sqlCtx = sqlContext
-    import sqlCtx.implicits._
-
-    // Given
-    val input = Seq(
-      ("Patient_A", "followUpPeriod", makeTS(2006, 1, 1), Some(makeTS(2009, 1, 1))),
-      ("Patient_B", "followUpPeriod", makeTS(2006, 2, 1), Some(makeTS(2009, 2, 1))),
-      ("Patient_C", "HelloWorld", makeTS(2006, 3, 1), Some(makeTS(2006, 1, 1))),
-      ("Patient_C", "followUpPeriod", makeTS(2006, 4, 1), Some(makeTS(2009, 3, 1))),
-      ("Patient_D", "HelloWorld", makeTS(2006, 5, 1), None)
-    ).toDF("patientID", "category", "start", "end")
-
-    val expected = Seq(
-      ("Patient_A", Some(makeTS(2006, 1, 1)), Some(makeTS(2009, 1, 1))),
-      ("Patient_B", Some(makeTS(2006, 2, 1)), Some(makeTS(2009, 2, 1))),
-      ("Patient_C", Some(makeTS(2006, 4, 1)), Some(makeTS(2009, 3, 1))),
-      ("Patient_C", Some(makeTS(2006, 4, 1)), Some(makeTS(2009, 3, 1))),
-      ("Patient_D", None, None)
-    ).toDF("patientID", "followUpStart", "followUpEnd")
-
-    // When
-    import ExposuresTransformer.ExposuresDataFrame
-    val result = input.withFollowUpPeriod.select("patientID", "followUpStart", "followUpEnd")
-
-    // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
-  }
-
   "filterPatients" should "drop patients that we couldn't remove before calculating follow-up start" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -84,8 +52,8 @@ class ExposuresTransformerSuite extends SharedContext {
     ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 3, 1), makeTS(2008, 6, 29)),
     ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 1), makeTS(2008, 6, 29)),
     ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 8, 1), makeTS(2008, 6, 29)),
-    ("Patient_A", "molecule", "SULFONYLUREE", makeTS(2008, 9, 1), makeTS(2008, 6, 29)),
-    ("Patient_A", "molecule", "SULFONYLUREE", makeTS(2008, 10, 1), makeTS(2008, 6, 29)),
+    ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2008, 9, 1), makeTS(2008, 6, 29)),
+    ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2008, 10, 1), makeTS(2008, 6, 29)),
     ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2009, 1, 1), makeTS(2009, 6, 29)),
     ("Patient_B", "molecule", "BENFLUOREX", makeTS(2007, 1, 1), makeTS(2009, 6, 29))
     ).toDF("PatientID", "category", "eventId", "start", "followUpStart")
@@ -94,8 +62,8 @@ class ExposuresTransformerSuite extends SharedContext {
       ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 6, 29))),
       ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 6, 29))),
       ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 6, 29))),
-      ("Patient_A", "SULFONYLUREE", Some(makeTS(2009, 1, 1))),
-      ("Patient_A", "SULFONYLUREE", Some(makeTS(2009, 1, 1))),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2009, 1, 1))),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2009, 1, 1))),
       ("Patient_B", "PIOGLITAZONE", None),
       ("Patient_B", "BENFLUOREX", None)
     ).toDF("PatientID", "eventId", "exposureStart")
@@ -134,11 +102,11 @@ class ExposuresTransformerSuite extends SharedContext {
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
         "PIOGLITAZONE", 900.0, makeTS(2007, 10, 1), None),
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
-        "SULFONYLUREE", 900.0, makeTS(2008, 4, 1), None),
+        "SULFONYLUREA", 900.0, makeTS(2008, 4, 1), None),
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
-        "SULFONYLUREE", 900.0, makeTS(2008, 5, 1), None),
+        "SULFONYLUREA", 900.0, makeTS(2008, 5, 1), None),
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
-        "SULFONYLUREE", 900.0, makeTS(2008, 7, 1), None),
+        "SULFONYLUREA", 900.0, makeTS(2008, 7, 1), None),
       FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "followUpPeriod",
         "trackloss", 900.0, makeTS(2006, 7, 1), Some(makeTS(2008, 9, 1))),
       FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
@@ -153,7 +121,7 @@ class ExposuresTransformerSuite extends SharedContext {
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
         "PIOGLITAZONE", 1.0, makeTS(2007, 5, 1), Some(makeTS(2009, 7, 11))),
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
-        "SULFONYLUREE", 1.0, makeTS(2008, 8, 1), Some(makeTS(2009, 7, 11))),
+        "SULFONYLUREA", 1.0, makeTS(2008, 8, 1), Some(makeTS(2009, 7, 11))),
       FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "exposure",
         "PIOGLITAZONE", 1.0, makeTS(2006, 8, 1), Some(makeTS(2008, 9, 1)))
     ).toDF

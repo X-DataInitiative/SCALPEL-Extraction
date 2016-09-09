@@ -24,14 +24,14 @@ object DrugEventsTransformerHelper {
            "ACARBOSE"      |
            "EXENATIDE"     |
            "SAXAGLIPTINE"  |
-           "SITAGLIPTINE"   => "AUTRES"
+           "SITAGLIPTINE"   => "OTHER"
       case "GLIMEPIRIDE"  |
            "GLIBORNURIDE" |
            "TOLBUTAMIDE"  |
            "GLICLAZIDE"   |
            "GLIPIZIDE"    |
            "SULFAMIDES"   |
-           "GLIBENCLAMIDE" => "SULFONYLUREE"
+           "GLIBENCLAMIDE" => "SULFONYLUREA"
       case "METFORMINE"                  => "METFORMINE"
       case "PIOGLITAZONE"                => "PIOGLITAZONE"
       case "BENFLUOREX"                  => "BENFLUOREX"

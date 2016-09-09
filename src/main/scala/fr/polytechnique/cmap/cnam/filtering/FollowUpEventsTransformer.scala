@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.filtering
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
-import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.utilities.ColumnUtilities._
 
 object FollowUpEventsTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
@@ -23,18 +23,30 @@ object FollowUpEventsTransformer extends DatasetTransformer[FlatEvent, FlatEvent
     col("followUpEnd").as("end")
   )
 
-  implicit class FollowUpDataFrame(data: DataFrame) {
+  implicit class FollowUpFunctions(data: DataFrame) {
 
-    def withObservationPeriod: DataFrame = {
+    // The following functions are supposed to be used on any dataset that contains follow-up events,
+    //   in order to add  follow-up related columns, without changing the line count.
+    // They are not used inside the FollowUpEventsTransformer object.
+    def withFollowUpPeriodFromEvents: DataFrame = {
       val window = Window.partitionBy("patientID")
 
-      val observationStart = when(lower(col("category")) === "observationperiod", col("start"))
-      val observationEnd = when(lower(col("category")) === "observationperiod", col("end"))
+      val followUpStart: Column = when(col("category") === "followUpPeriod", col("start"))
+      val followUpEnd: Column = when(col("category") === "followUpPeriod", col("end"))
 
       data
-        .withColumn("observationStart", min(observationStart).over(window))
-        .withColumn("observationEnd", min(observationEnd).over(window))
+        .withColumn("followUpStart", min(followUpStart).over(window))
+        .withColumn("followUpEnd", min(followUpEnd).over(window))
     }
+
+    def withEndReasonFromEvents: DataFrame = {
+      val window = Window.partitionBy("patientID")
+      val endReason: Column = when(col("category") === "followUpPeriod", col("eventId"))
+      data.withColumn("endReason", min(endReason).over(window))
+    }
+  }
+
+  implicit class FollowUpDataFrame(data: DataFrame) {
 
     def withFollowUpStart: DataFrame = {
       val window = Window.partitionBy("patientID")
@@ -65,7 +77,12 @@ object FollowUpEventsTransformer extends DatasetTransformer[FlatEvent, FlatEvent
       data
         .withColumn("firstTargetDisease", firstTargetDisease)
         .withColumn("followUpEnd",
-          minColumn(col("deathDate"), col("firstTargetDisease"), col("trackloss"), col("observationEnd"))
+          minColumn(
+            col("deathDate"),
+            col("firstTargetDisease"),
+            col("trackloss"),
+            col("observationEnd")
+          )
         )
     }
 
@@ -85,11 +102,12 @@ object FollowUpEventsTransformer extends DatasetTransformer[FlatEvent, FlatEvent
   }
 
   def transform(input: Dataset[FlatEvent]): Dataset[FlatEvent] = {
+    import ObservationPeriodTransformer.ObservationFunctions
     import input.sqlContext.implicits._
 
     val events = input.toDF.repartition(col("patientID"))
     events
-      .withObservationPeriod
+      .withObservationPeriodFromEvents
       .withFollowUpStart
       .withTrackloss
       .withFollowUpEnd

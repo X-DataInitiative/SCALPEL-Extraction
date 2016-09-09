@@ -22,11 +22,29 @@ object ObservationPeriodTransformer extends DatasetTransformer[FlatEvent, FlatEv
     lit(ObservationEnd).as("end")
   )
 
+  implicit class ObservationFunctions(data: DataFrame) {
+
+    // The following function is supposed to be used on any dataset that contains observationPeriod
+    //   events, in order to add the observation start and end as columns, without changing the line
+    //   count.
+    // It is not used inside the ObservationPeriodTransformer object.
+    def withObservationPeriodFromEvents: DataFrame = {
+      val window = Window.partitionBy("patientID")
+
+      val observationStart = when(lower(col("category")) === "observationperiod", col("start"))
+      val observationEnd = when(lower(col("category")) === "observationperiod", col("end"))
+
+      data
+        .withColumn("observationStart", min(observationStart).over(window))
+        .withColumn("observationEnd", min(observationEnd).over(window))
+    }
+  }
+
   implicit class ObservationDataFrame(data: DataFrame) {
     def withObservationStart: DataFrame = {
       val window = Window.partitionBy("patientID")
       val correctedStart = when(lower(col("category")) === "molecule", col("start")) // NULL otherwise
-      data.withColumn("observationStart",min(correctedStart).over(window).cast(TimestampType))
+      data.withColumn("observationStart", min(correctedStart).over(window).cast(TimestampType))
     }
   }
 
