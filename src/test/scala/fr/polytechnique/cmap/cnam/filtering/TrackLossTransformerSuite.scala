@@ -1,9 +1,8 @@
 package fr.polytechnique.cmap.cnam.filtering
 
 import java.sql.Timestamp
-
-import fr.polytechnique.cmap.cnam.SharedContext
 import org.apache.spark.sql.DataFrame
+import fr.polytechnique.cmap.cnam.SharedContext
 
 /**
   * Created by burq on 07/09/16.

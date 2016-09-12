@@ -23,8 +23,6 @@ object FilteringMain extends Main {
     val drugEvents: Dataset[Event] = DrugEventsTransformer.transform(sources)
     logger.info("(Lazy) Transforming disease events...")
     val diseaseEvents: Dataset[Event] = DiseaseTransformer.transform(sources)
-    logger.info("(Lazy) Transforming trackloss events...")
-    val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(sources)
 
     val drugFlatEvents = drugEvents.as("left")
       .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
@@ -36,29 +34,43 @@ object FilteringMain extends Main {
       .map((FlatEvent.merge _).tupled)
       .cache()
 
-    val tracklossFlatEvents = tracklossEvents.as("left")
-      .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
-      .map((FlatEvent.merge _).tupled)
-      .cache()
-
     logger.info("Caching drug events...")
     logger.info("Number of drug events: " + drugFlatEvents.count)
     logger.info("Caching disease events...")
     logger.info("Number of disease events: " + diseaseFlatEvents.count)
 
-    val flatEvents = drugFlatEvents
-      .union(diseaseFlatEvents)
-      .union(tracklossFlatEvents)
+    logger.info("(Lazy) Transforming Follow-up events...")
+    val observationFlatEvents = ObservationPeriodTransformer.transform(drugFlatEvents)
+
+    val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(sources)
+    val tracklossFlatEvents = tracklossEvents.as("left")
+      .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
+      .map((FlatEvent.merge _).tupled)
+      .cache()
+
+    val followUpFlatEvents = FollowUpEventsTransformer.transform(
+      drugFlatEvents
+        .union(diseaseFlatEvents)
+        .union(observationFlatEvents)
+        .union(tracklossFlatEvents)
+    ).cache()
 
     logger.info("(Lazy) Transforming exposures...")
-    val exposures = ExposuresTransformer.transform(flatEvents).cache()
+    val flatEventsForExposures =
+      drugFlatEvents
+        .union(diseaseFlatEvents)
+        .union(followUpFlatEvents)
+    val exposures = ExposuresTransformer.transform(flatEventsForExposures).cache()
     logger.info("Caching exposures...")
     logger.info("Number of exposures: " + exposures.count)
 
-    // Todo: union exposures with flatEvents, then use the resulting Dataset as input to the model transformers
-    // Example:
-    //   val finalEvents = flatEvents.union(exposures)
-    //   CoxphTransformer.transform(finalEvents).writeCoxphInput
+    logger.info("(Lazy) Transforming Cox features...")
+    val coxFlatEvents = exposures.union(followUpFlatEvents)
+    val coxFeatures = CoxTransformer.transform(coxFlatEvents)
+
+    val flatEvents = flatEventsForExposures
+      .union(observationFlatEvents)
+      .union(tracklossFlatEvents)
 
     logger.info("Writing Patients...")
     patients.toDF.write.parquet(config.getString("paths.output.patients"))
@@ -66,6 +78,10 @@ object FilteringMain extends Main {
     flatEvents.toDF.write.parquet(config.getString("paths.output.events"))
     logger.info("Writing Exposures...")
     exposures.toDF.write.parquet(config.getString("paths.output.exposures"))
+
+    logger.info("Writing Cox features...")
+    import CoxFeaturesWriter._
+    coxFeatures.writeCSV(config.getString("paths.output.coxFeatures"))
   }
 
   def main(args: Array[String]): Unit = {
