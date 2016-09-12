@@ -79,9 +79,9 @@ object FilteringMain extends Main {
     logger.info("Writing Exposures...")
     exposures.toDF.write.parquet(config.getString("paths.output.exposures"))
 
-    // Todo: create cox writer
     logger.info("Writing Cox features...")
-    coxFeatures.toDF.write.parquet(config.getString("paths.output.coxFeatures"))
+    import CoxFeaturesWriter._
+    coxFeatures.writeCSV(config.getString("paths.output.coxFeatures"))
   }
 
   def main(args: Array[String]): Unit = {

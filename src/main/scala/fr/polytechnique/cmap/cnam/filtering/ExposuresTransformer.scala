@@ -4,7 +4,7 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.utilities.functions._
+import fr.polytechnique.cmap.cnam.utilities.Functions._
 
 object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
 
@@ -39,7 +39,7 @@ object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
         lit(0)).otherwise(lit(1))
       ).over(window).cast(BooleanType)
 
-      // Drop patients whose first molecule event is after startPeriod + 1 year
+      // Drop patients whose first molecule event is after PeriodStart + 1 year
       val firstYearObservation = add_months(lit(PeriodStart), 12).cast(TimestampType)
       val drugFilter = max(
         when(

@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.filtering
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
-import fr.polytechnique.cmap.cnam.utilities.functions.makeTS
+import fr.polytechnique.cmap.cnam.utilities.Functions.makeTS
 
 class ObservationPeriodTransformerSuite extends SharedContext {
 

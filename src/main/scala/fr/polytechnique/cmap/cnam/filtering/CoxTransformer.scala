@@ -18,7 +18,16 @@ case class CoxFeature(
   metformine: Int = 0,
   pioglitazone: Int = 0,
   rosiglitazone: Int = 0,
-  other: Int = 0)
+  other: Int = 0,
+  age40_44: Int,
+  age45_49: Int,
+  age50_54: Int,
+  age55_59: Int,
+  age60_64: Int,
+  age65_69: Int,
+  age70_74: Int,
+  age75_79: Int
+)
 
 object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
 
@@ -39,12 +48,12 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
 
     def withAge: DataFrame = {
       data.withColumn("age",
-        (months_between(col("followUpStart"), col("birthDate")) / 12).cast(IntegerType)
+        (months_between(col("followUpStart"), col("birthDate")) - 6.0).cast(IntegerType)
       )
     }
 
     def normalizeDates: DataFrame = {
-      def normalize(c: Column) = round(months_between(c, col("followUpStart"))).cast(IntegerType)
+      def normalize(c: Column) = months_between(c, col("followUpStart")).cast(IntegerType)
 
       data
         .withColumn("start", normalize(col("start")))
@@ -93,10 +102,28 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
           col("coxEnd").as("end"),
           col("hasCancer")
         )
-        .pivot("moleculeName", moleculesList).agg(count("moleculeName").cast(IntegerType).as("count")).persist
+        .pivot("moleculeName", moleculesList).agg(count("moleculeName").cast(IntegerType)).persist
     }
 
-    def fixCancerValues: DataFrame = {
+    def withAgeGroups: DataFrame = {
+      // Note: if any changes are made to the age groups created in this function, the CoxFeature
+      //   case class must be changed as well.
+      val ageStep = 5
+      val firstAge = 40
+      val numGroups = 8
+
+      def groupMax(groupMin: Int) = groupMin + ageStep - 1
+      def colName(groupMin: Int) = s"age${groupMin}_${groupMax(groupMin)}"
+      def isAgeInGroup(groupMin: Int) = when(
+        floor(col("age") / 12).between(groupMin, groupMax(groupMin)), 1
+      ).otherwise(0)
+
+      (0 until numGroups).map(_ * ageStep + firstAge).foldLeft(data) {
+        (df: DataFrame, groupMin: Int) => df.withColumn(colName(groupMin), isAgeInGroup(groupMin))
+      }
+    }
+
+    def adjustCancerValues: DataFrame = {
       val window = Window.partitionBy("patientID").orderBy(col("end").desc)
       data
         .withColumn("rank", row_number().over(window))
@@ -124,7 +151,8 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
       .na.drop("any", Seq("coxStart", "coxEnd"))
       .prepareToPivot(exposures)
       .pivotMolecules
-      .fixCancerValues
+      .withAgeGroups
+      .adjustCancerValues
       .as[CoxFeature]
   }
 }

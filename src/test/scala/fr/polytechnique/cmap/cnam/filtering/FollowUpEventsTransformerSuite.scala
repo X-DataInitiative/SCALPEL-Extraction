@@ -4,7 +4,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
-import fr.polytechnique.cmap.cnam.utilities.functions.makeTS
+import fr.polytechnique.cmap.cnam.utilities.Functions.makeTS
 
 class FollowUpEventsTransformerSuite extends SharedContext {
 

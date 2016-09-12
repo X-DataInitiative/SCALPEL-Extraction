@@ -7,7 +7,7 @@ import org.apache.spark.sql.DataFrame
 import com.typesafe.config.ConfigFactory
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
-import fr.polytechnique.cmap.cnam.utilities.functions.makeTS
+import fr.polytechnique.cmap.cnam.utilities.Functions.makeTS
 
 class MainSuite extends SharedContext {
 
@@ -57,7 +57,7 @@ class MainSuite extends SharedContext {
       FlatEvent("Patient_01", 2, makeTS(1975, 1, 1), None, "followUpPeriod",
         "observationEnd", 1.0, makeTS(2006, 7, 15), Some(makeTS(2009, 12, 31, 23, 59, 59))),
       FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "followUpPeriod",
-        "death", 1.0, makeTS(2006, 7, 5), Some(makeTS(2009, 3, 13))),
+        "disease", 1.0, makeTS(2006, 7, 5), Some(makeTS(2005, 12, 24))),
       FlatEvent("Patient_01", 2, makeTS(1975, 1, 1), None, "observationPeriod",
         "observationPeriod", 1.0, makeTS(2006, 1, 15), Some(makeTS(2009, 12, 31, 23, 59, 59))),
       FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "observationPeriod",

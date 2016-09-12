@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.filtering
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
-import fr.polytechnique.cmap.cnam.utilities.functions._
+import fr.polytechnique.cmap.cnam.utilities.Functions._
 
 class CoxTransformerSuite extends SharedContext {
 
@@ -15,19 +15,23 @@ class CoxTransformerSuite extends SharedContext {
     val input = Seq(
       ("Patient_A", makeTS(1950, 1, 1), makeTS(2006, 7, 15)),
       ("Patient_A", makeTS(1950, 1, 1), makeTS(2006, 7, 15)),
-      ("Patient_B", makeTS(1960, 7, 15), makeTS(2006, 7, 15)),
-      ("Patient_B", makeTS(1960, 7, 15), makeTS(2006, 7, 15)),
-      ("Patient_C", makeTS(1970, 12, 31), makeTS(2006, 7, 15)),
-      ("Patient_C", makeTS(1970, 12, 31), makeTS(2006, 7, 15))
+      ("Patient_B", makeTS(1960, 7, 15), makeTS(2006, 4, 21)),
+      ("Patient_B", makeTS(1960, 7, 15), makeTS(2006, 4, 21)),
+      ("Patient_C", makeTS(1970, 12, 31), makeTS(2006, 1, 1)),
+      ("Patient_C", makeTS(1970, 12, 31), makeTS(2006, 1, 1)),
+      ("Patient_D", makeTS(1970, 12, 31), makeTS(2006, 12, 31)),
+      ("Patient_D", makeTS(1970, 12, 31), makeTS(2006, 12, 31))
     ).toDF("patientID", "birthDate", "followUpStart")
 
     val expected = Seq(
-      ("Patient_A", 56),
-      ("Patient_A", 56),
-      ("Patient_B", 46),
-      ("Patient_B", 46),
-      ("Patient_C", 35),
-      ("Patient_C", 35)
+      ("Patient_A", 672),
+      ("Patient_A", 672),
+      ("Patient_B", 543),
+      ("Patient_B", 543),
+      ("Patient_C", 414),
+      ("Patient_C", 414),
+      ("Patient_D", 426),
+      ("Patient_D", 426)
     ).toDF("patientID", "age")
 
     // When
@@ -293,6 +297,43 @@ class CoxTransformerSuite extends SharedContext {
     assert(result === expected)
   }
 
+  "withAgeGroups" should "add a column for each age group" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input = Seq(
+      ("Patient_A", 1, 678),
+      ("Patient_A", 1, 678),
+      ("Patient_A", 1, 678),
+      ("Patient_A", 1, 678),
+      ("Patient_B", 1, 554),
+      ("Patient_B", 1, 554)
+    ).toDF("patientID", "gender", "age")
+
+    val expected = Seq(
+      ("Patient_A", 1, 678, 0, 0, 0, 1, 0, 0, 0, 0),
+      ("Patient_A", 1, 678, 0, 0, 0, 1, 0, 0, 0, 0),
+      ("Patient_A", 1, 678, 0, 0, 0, 1, 0, 0, 0, 0),
+      ("Patient_A", 1, 678, 0, 0, 0, 1, 0, 0, 0, 0),
+      ("Patient_B", 1, 554, 0, 1, 0, 0, 0, 0, 0, 0),
+      ("Patient_B", 1, 554, 0, 1, 0, 0, 0, 0, 0, 0)
+    ).toDF("patientID", "gender", "age", "age40_44", "age45_49", "age50_54", "age55_59", "age60_64",
+      "age65_69", "age70_74", "age75_79")
+
+    // When
+    import CoxTransformer.CoxDataFrame
+    val result = input.withAgeGroups
+
+    // Then
+    import RichDataFrames._
+    result.printSchema
+    expected.printSchema
+    result.orderBy("patientID").show
+    expected.orderBy("patientID").show
+    assert(result === expected)
+  }
+
   "fixCancerValues" should "leave only the last feature of each patient with 1 for the hasCancer value" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -318,7 +359,7 @@ class CoxTransformerSuite extends SharedContext {
 
     // When
     import CoxTransformer.CoxDataFrame
-    val result = input.fixCancerValues
+    val result = input.adjustCancerValues
 
     // Then
     import RichDataFrames._
@@ -350,9 +391,9 @@ class CoxTransformerSuite extends SharedContext {
     ).toDS
 
     val expected = Seq(
-      CoxFeature("Patient_A", 1, 57, 19, 30, 1, 0, 1, 0, 1, 0, 0),
-      CoxFeature("Patient_A", 1, 57, 4, 19, 0, 0, 0, 0, 1, 0, 0),
-      CoxFeature("Patient_B", 1, 66, 1, 26, 0, 0, 0, 0, 1, 0, 0)
+      CoxFeature("Patient_A", 1, 678, 19, 30, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+      CoxFeature("Patient_A", 1, 678, 4, 19, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
+      CoxFeature("Patient_B", 1, 792, 1, 26, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0)
     ).toDF
 
     // When
