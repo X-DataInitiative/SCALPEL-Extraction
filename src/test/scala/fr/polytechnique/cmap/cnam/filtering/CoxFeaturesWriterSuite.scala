@@ -3,13 +3,11 @@ package fr.polytechnique.cmap.cnam.filtering
 import java.io.File
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql.Dataset
-import org.scalatest.BeforeAndAfter
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 
-class CoxFeaturesWriterSuite extends SharedContext with BeforeAndAfter{
+class CoxFeaturesWriterSuite extends SharedContext {
 
-  override def beforeEach(): Unit ={
+  override def beforeEach(): Unit = {
     val directory = new File("anyPath")
     FileUtils.deleteDirectory(directory)
     super.afterEach()

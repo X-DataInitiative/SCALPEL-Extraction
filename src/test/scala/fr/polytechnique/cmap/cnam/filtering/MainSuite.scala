@@ -16,12 +16,14 @@ class MainSuite extends SharedContext {
   val eventsPath = config.getString("paths.output.events")
   val exposuresPath = config.getString("paths.output.exposures")
   val coxPath = config.getString("paths.output.coxFeatures")
+  val LTSCSSPath = config.getString("paths.output.coxFeatures")
 
   override def beforeAll(): Unit = {
     FileUtils.deleteDirectory(new File(patientsPath))
     FileUtils.deleteDirectory(new File(eventsPath))
     FileUtils.deleteDirectory(new File(exposuresPath))
     FileUtils.deleteDirectory(new File(coxPath))
+    FileUtils.deleteDirectory(new File(LTSCSSPath))
     super.beforeAll()
   }
 
@@ -30,6 +32,7 @@ class MainSuite extends SharedContext {
     FileUtils.deleteDirectory(new File(eventsPath))
     FileUtils.deleteDirectory(new File(exposuresPath))
     FileUtils.deleteDirectory(new File(coxPath))
+    FileUtils.deleteDirectory(new File(LTSCSSPath))
     super.afterAll()
   }
 

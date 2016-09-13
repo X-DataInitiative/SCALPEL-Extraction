@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.filtering
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 import fr.polytechnique.cmap.cnam.utilities.Functions._
+import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 
 class CoxTransformerSuite extends SharedContext {
 

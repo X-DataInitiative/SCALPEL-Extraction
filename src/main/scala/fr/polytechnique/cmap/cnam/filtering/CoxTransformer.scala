@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.filtering
 
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
 
 // Start and End are expressed in month from the patient startObs
 case class CoxFeature(
