@@ -273,11 +273,11 @@ class LTSCCSWriterSuite extends SharedContext {
     // When
     input.writeLTSCCS(outPath)
     val resultedCounts = List(
-      "anyPath/GroundTruth.csv",
-      "anyPath/Persons.txt",
-      "anyPath/ObservationPeriods.txt",
-      "anyPath/Drugexposures.txt",
-      "anyPath/ConditionEras.txt"
+      s"$outPath/GroundTruth.csv",
+      s"$outPath/Persons.txt",
+      s"$outPath/ObservationPeriods.txt",
+      s"$outPath/Drugexposures.txt",
+      s"$outPath/Conditioneras.txt"
     ).map(p => readFile(p).count)
 
     // Then

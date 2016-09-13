@@ -5,6 +5,8 @@ import java.time.ZoneOffset
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Dataset}
 
+// The following case classes are based on the formats defined in the following Confluence page:
+//   https://datainitiative.atlassian.net/wiki/display/CNAM/Coxph+data+format
 case class GroundTruth(
     drug_concept_id: String,
     drug_concept_name: String,
@@ -77,7 +79,9 @@ object LTSCCSWriter {
     }
 
     def filterPatients(patientIDs: Dataset[String]): Dataset[FlatEvent] = {
-      data.joinWith(patientIDs, col("patientID") === col("value")).map(_._1)
+      data.as("e").joinWith(patientIDs.as("p"), col("e.patientID") === col("p.value")).map {
+        case (event: FlatEvent, patientID: String) => event
+      }
     }
 
     def toPersons: Dataset[Person] = {
@@ -122,7 +126,7 @@ object LTSCCSWriter {
       val followUpPeriods: Dataset[FlatEvent] = data.filter(_.category == "followUpPeriod").persist()
       val diseases: Dataset[FlatEvent] = data.filter(_.category == "disease").persist()
 
-      val patientIDs: Dataset[String] = exposures.map(_.patientID).distinct.persist()
+      val patientIDs: Dataset[String] = patients.map(_.patientID).persist()
 
       groundTruth.toDF.coalesce(1)
         .writeCSV(dir + "GroundTruth.csv")

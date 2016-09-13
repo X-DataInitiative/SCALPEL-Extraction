@@ -85,7 +85,7 @@ object FilteringMain extends Main {
 
     logger.info("Writing LTSCCS features...")
     import LTSCCSWriter._
-    flatEvents.writeLTSCCS(config.getString("paths.output.LTSCCSFeatures"))
+    flatEvents.union(exposures).writeLTSCCS(config.getString("paths.output.LTSCCSFeatures"))
   }
 
   def main(args: Array[String]): Unit = {

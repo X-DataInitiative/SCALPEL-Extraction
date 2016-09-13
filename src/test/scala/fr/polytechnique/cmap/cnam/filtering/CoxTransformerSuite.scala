@@ -46,6 +46,42 @@ class CoxTransformerSuite extends SharedContext {
   }
 
 
+  "withAgeGroups" should "add a column for each age group" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input = Seq(
+      ("Patient_A", 1, 678),
+      ("Patient_A", 1, 678),
+      ("Patient_A", 1, 678),
+      ("Patient_A", 1, 678),
+      ("Patient_B", 1, 554),
+      ("Patient_B", 1, 554)
+    ).toDF("patientID", "gender", "age")
+
+    val expected = Seq(
+      ("Patient_A", 1, 678, "55-59"),
+      ("Patient_A", 1, 678, "55-59"),
+      ("Patient_A", 1, 678, "55-59"),
+      ("Patient_A", 1, 678, "55-59"),
+      ("Patient_B", 1, 554, "45-49"),
+      ("Patient_B", 1, 554, "45-49")
+    ).toDF("patientID", "gender", "age", "ageGroup")
+
+    // When
+    import CoxTransformer.CoxDataFrame
+    val result = input.withAgeGroup
+
+    // Then
+    import RichDataFrames._
+    result.printSchema
+    expected.printSchema
+    result.orderBy("patientID").show
+    expected.orderBy("patientID").show
+    assert(result === expected)
+  }
+
   "withHasCancer" should "add a column with 1 for the values who had a disease as reason for follow-up end" in {
 
     val sqlCtx = sqlContext
@@ -263,25 +299,25 @@ class CoxTransformerSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", 1, 56, "METFORMINE", 0, 3, 1),
-      ("Patient_A", 1, 56, "INSULINE", 3, 5, 1),
-      ("Patient_A", 1, 56, "METFORMINE", 3, 5, 1),
-      ("Patient_A", 1, 56, "METFORMINE", 5, 8, 1),
-      ("Patient_A", 1, 56, "PIOGLITAZONE", 8, 9, 1),
-      ("Patient_A", 1, 56, "METFORMINE", 8, 9, 1),
-      ("Patient_B", 1, 46, "INSULINE", 4, 5, 0),
-      ("Patient_B", 1, 46, "OTHER", 5, 6, 0),
-      ("Patient_B", 1, 46, "INSULINE", 5, 6, 0)
-    ).toDF("patientID", "gender", "age", "moleculeName", "coxStart", "coxEnd", "hasCancer")
+      ("Patient_A", 1, 678, "55-59", "METFORMINE", 0, 3, 1),
+      ("Patient_A", 1, 678, "55-59", "INSULINE", 3, 5, 1),
+      ("Patient_A", 1, 678, "55-59", "METFORMINE", 3, 5, 1),
+      ("Patient_A", 1, 678, "55-59", "METFORMINE", 5, 8, 1),
+      ("Patient_A", 1, 678, "55-59", "PIOGLITAZONE", 8, 9, 1),
+      ("Patient_A", 1, 678, "55-59", "METFORMINE", 8, 9, 1),
+      ("Patient_B", 1, 554, "45-49", "INSULINE", 4, 5, 0),
+      ("Patient_B", 1, 554, "45-49", "OTHER", 5, 6, 0),
+      ("Patient_B", 1, 554, "45-49", "INSULINE", 5, 6, 0)
+    ).toDF("patientID", "gender", "age", "ageGroup", "moleculeName", "coxStart", "coxEnd", "hasCancer")
 
     val expected = Seq(
-      ("Patient_A", 1, 56, 0, 3, 1, 0, 0, 1, 0, 0, 0),
-      ("Patient_A", 1, 56, 3, 5, 1, 1, 0, 1, 0, 0, 0),
-      ("Patient_A", 1, 56, 5, 8, 1, 0, 0, 1, 0, 0, 0),
-      ("Patient_A", 1, 56, 8, 9, 1, 0, 0, 1, 1, 0, 0),
-      ("Patient_B", 1, 46, 4, 5, 0, 1, 0, 0, 0, 0, 0),
-      ("Patient_B", 1, 46, 5, 6, 0, 1, 0, 0, 0, 0, 1)
-    ).toDF("patientID", "gender", "age", "start", "end", "hasCancer", "insuline",
+      ("Patient_A", 1, 678, "55-59", 0, 3, 1, 0, 0, 1, 0, 0, 0),
+      ("Patient_A", 1, 678, "55-59", 3, 5, 1, 1, 0, 1, 0, 0, 0),
+      ("Patient_A", 1, 678, "55-59", 5, 8, 1, 0, 0, 1, 0, 0, 0),
+      ("Patient_A", 1, 678, "55-59", 8, 9, 1, 0, 0, 1, 1, 0, 0),
+      ("Patient_B", 1, 554, "45-49", 4, 5, 0, 1, 0, 0, 0, 0, 0),
+      ("Patient_B", 1, 554, "45-49", 5, 6, 0, 1, 0, 0, 0, 0, 1)
+    ).toDF("patientID", "gender", "age", "ageGroup", "start", "end", "hasCancer", "insuline",
       "sulfonylurea", "metformine", "pioglitazone", "rosiglitazone", "other")
 
     // When
@@ -294,43 +330,6 @@ class CoxTransformerSuite extends SharedContext {
     expected.printSchema
     result.orderBy("patientID", "start", "end").show
     expected.orderBy("patientID", "start", "end").show
-    assert(result === expected)
-  }
-
-  "withAgeGroups" should "add a column for each age group" in {
-    val sqlCtx = sqlContext
-    import sqlCtx.implicits._
-
-    // Given
-    val input = Seq(
-      ("Patient_A", 1, 678),
-      ("Patient_A", 1, 678),
-      ("Patient_A", 1, 678),
-      ("Patient_A", 1, 678),
-      ("Patient_B", 1, 554),
-      ("Patient_B", 1, 554)
-    ).toDF("patientID", "gender", "age")
-
-    val expected = Seq(
-      ("Patient_A", 1, 678, 0, 0, 0, 1, 0, 0, 0, 0),
-      ("Patient_A", 1, 678, 0, 0, 0, 1, 0, 0, 0, 0),
-      ("Patient_A", 1, 678, 0, 0, 0, 1, 0, 0, 0, 0),
-      ("Patient_A", 1, 678, 0, 0, 0, 1, 0, 0, 0, 0),
-      ("Patient_B", 1, 554, 0, 1, 0, 0, 0, 0, 0, 0),
-      ("Patient_B", 1, 554, 0, 1, 0, 0, 0, 0, 0, 0)
-    ).toDF("patientID", "gender", "age", "age40_44", "age45_49", "age50_54", "age55_59", "age60_64",
-      "age65_69", "age70_74", "age75_79")
-
-    // When
-    import CoxTransformer.CoxDataFrame
-    val result = input.withAgeGroups
-
-    // Then
-    import RichDataFrames._
-    result.printSchema
-    expected.printSchema
-    result.orderBy("patientID").show
-    expected.orderBy("patientID").show
     assert(result === expected)
   }
 
@@ -391,9 +390,9 @@ class CoxTransformerSuite extends SharedContext {
     ).toDS
 
     val expected = Seq(
-      CoxFeature("Patient_A", 1, 678, 19, 30, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
-      CoxFeature("Patient_A", 1, 678, 4, 19, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
-      CoxFeature("Patient_B", 1, 792, 1, 26, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0)
+      CoxFeature("Patient_A", 1, 678, "55-59", 19, 30, 1, 0, 1, 0, 1, 0),
+      CoxFeature("Patient_A", 1, 678, "55-59", 4, 19, 0, 0, 0, 0, 1, 0),
+      CoxFeature("Patient_B", 1, 792, "65-69", 1, 26, 0, 0, 0, 0, 1, 0)
     ).toDF
 
     // When

@@ -19,9 +19,9 @@ class CoxFeaturesWriterSuite extends SharedContext {
 
     // Given
     val features: Dataset[CoxFeature] = Seq(
-      CoxFeature("Patient_A", 1, 678, 19, 30, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
-      CoxFeature("Patient_A", 1, 678, 4, 19, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
-      CoxFeature("Patient_B", 1, 792, 1, 26, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0)
+      CoxFeature("Patient_A", 1, 678, "55-59", 19, 30, 1, 0, 1, 0, 1, 0),
+      CoxFeature("Patient_A", 1, 678, "55-59", 4, 19, 0, 0, 0, 0, 1, 0),
+      CoxFeature("Patient_B", 1, 792, "65-69", 1, 26, 0, 0, 0, 0, 1, 0)
     ).toDS
     val path = "anyPath/coxFeatures.csv"
     val expectedCount = 3

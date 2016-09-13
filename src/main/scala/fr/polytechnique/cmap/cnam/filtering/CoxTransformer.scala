@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.filtering
 
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.IntegerType
+import org.apache.spark.sql.types.{IntegerType, StringType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 
 // Start and End are expressed in month from the patient startObs
@@ -10,6 +10,7 @@ case class CoxFeature(
   patientID: String,
   gender: Int,
   age: Int,
+  ageGroup: String,
   start: Int,
   end: Int,
   hasCancer: Int = 0,
@@ -18,15 +19,7 @@ case class CoxFeature(
   metformine: Int = 0,
   pioglitazone: Int = 0,
   rosiglitazone: Int = 0,
-  other: Int = 0,
-  age40_44: Int,
-  age45_49: Int,
-  age50_54: Int,
-  age55_59: Int,
-  age60_64: Int,
-  age65_69: Int,
-  age70_74: Int,
-  age75_79: Int
+  other: Int = 0
 )
 
 object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
@@ -50,6 +43,13 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
       data.withColumn("age",
         (months_between(col("followUpStart"), col("birthDate")) - 6.0).cast(IntegerType)
       )
+    }
+
+    def withAgeGroup: DataFrame = {
+      val ageStep = 5
+      val groupMin = floor(col("age") / (12.0 * ageStep)) * ageStep
+      val ageGroup = concat(groupMin, lit("-"), groupMin + ageStep - 1)
+      data.withColumn("ageGroup", ageGroup)
     }
 
     def normalizeDates: DataFrame = {
@@ -98,6 +98,7 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
           col("patientID"),
           col("gender"),
           col("age"),
+          col("ageGroup"),
           col("coxStart").as("start"),
           col("coxEnd").as("end"),
           col("hasCancer")
@@ -105,26 +106,8 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
         .pivot("moleculeName", moleculesList).agg(count("moleculeName").cast(IntegerType)).persist
     }
 
-    def withAgeGroups: DataFrame = {
-      // Note: if any changes are made to the age groups created in this function, the CoxFeature
-      //   case class must be changed as well.
-      val ageStep = 5
-      val firstAge = 40
-      val numGroups = 8
-
-      def groupMax(groupMin: Int) = groupMin + ageStep - 1
-      def colName(groupMin: Int) = s"age${groupMin}_${groupMax(groupMin)}"
-      def isAgeInGroup(groupMin: Int) = when(
-        floor(col("age") / 12).between(groupMin, groupMax(groupMin)), 1
-      ).otherwise(0)
-
-      (0 until numGroups).map(_ * ageStep + firstAge).foldLeft(data) {
-        (df: DataFrame, groupMin: Int) => df.withColumn(colName(groupMin), isAgeInGroup(groupMin))
-      }
-    }
-
     def adjustCancerValues: DataFrame = {
-      val window = Window.partitionBy("patientID").orderBy(col("end").desc)
+      val window = Window.partitionBy("patientID").orderBy(col("end").desc, col("start").desc)
       data
         .withColumn("rank", row_number().over(window))
         .withColumn("hasCancer", when(col("rank") === 1, col("hasCancer")).otherwise(0))
@@ -141,6 +124,7 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
       .withEndReasonFromEvents
       .withHasCancer
       .withAge
+      .withAgeGroup
       .where(col("category") === "exposure")
       .withColumnRenamed("eventId", "moleculeName")
       .normalizeDates
@@ -151,7 +135,6 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
       .na.drop("any", Seq("coxStart", "coxEnd"))
       .prepareToPivot(exposures)
       .pivotMolecules
-      .withAgeGroups
       .adjustCancerValues
       .as[CoxFeature]
   }
