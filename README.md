@@ -4,7 +4,7 @@
 This repository hosts a cleaner version of flattening, including testing and statistics computation
 
 The src/test/resources contains different fake csv including 2 different patients:
-* Patient_01 is a female, who took GLICLAZIDE medicine and didn't get cancer.
+* Patient_01 is a female, who took GLICLAZIDE medicine and did not get cancer.
 * Patient_02 is a male, he took PIOGLITAZONE and got cancer and died on 25/01/2006. But there is one purchase action for him in the PRS file.
 
 
@@ -61,9 +61,9 @@ The filtering package contains the ETL logic used to convert the flattened table
 
 ## FilteringMain
 
-This package also contains a runnable object called `FilteringMain`. It can be run with spark-submit and it expects an "environment" parameter that can be either "test", "cnam" or "cmap", this will define which part of the `filtering.conf` configuration file will be used. Please make sure this file contains the correct paths before submiting the job. 
+This package also contains a runnable object called `FilteringMain`. It can be run with spark-submit and it expects an "environment" parameter that can be either "test", "cnam" or "cmap", this will define which part of the `filtering.conf` configuration file will be used. Please make sure this file contains the correct paths before submitting the job. 
 
-After a successfull execution, the output tables will be written as parquet files in the paths defined in the `filtering.conf` file.
+After a successful execution, the output tables will be written as parquet files in the paths defined in the `filtering.conf` file.
 
 An example of execution of this class with the "test" environment is shown below:
 

@@ -7,7 +7,7 @@ import org.apache.spark.sql.DataFrame
 import com.typesafe.config.ConfigFactory
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
-import fr.polytechnique.cmap.cnam.utilities.Functions.makeTS
+import fr.polytechnique.cmap.cnam.utilities.functions._
 
 class MainSuite extends SharedContext {
 
@@ -51,47 +51,47 @@ class MainSuite extends SharedContext {
       Patient(
         patientID = "Patient_02",
         gender = 1,
-        birthDate = makeTS(1959, 1, 1),
-        deathDate = Some(makeTS(2009, 3, 13))
+        birthDate = makeTS(1959, 10, 1),
+        deathDate = Some(makeTS(2008, 1, 25))
       )
     ).toDF
 
     val expectedFlatEvents: DataFrame = Seq(
       FlatEvent("Patient_01", 2, makeTS(1975, 1, 1), None, "followUpPeriod",
         "observationEnd", 1.0, makeTS(2006, 7, 15), Some(makeTS(2009, 12, 31, 23, 59, 59))),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "followUpPeriod",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "followUpPeriod",
         "disease", 1.0, makeTS(2006, 7, 5), Some(makeTS(2005, 12, 24))),
       FlatEvent("Patient_01", 2, makeTS(1975, 1, 1), None, "observationPeriod",
         "observationPeriod", 1.0, makeTS(2006, 1, 15), Some(makeTS(2009, 12, 31, 23, 59, 59))),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "observationPeriod",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "observationPeriod",
         "observationPeriod", 1.0, makeTS(2006, 1, 5), Some(makeTS(2009, 12, 31, 23, 59, 59))),
       FlatEvent("Patient_01", 2, makeTS(1975, 1, 1), None, "trackloss",
         "eventId", 1.0, makeTS(2006, 3, 15), None),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "trackloss",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "trackloss",
         "eventId", 1.0, makeTS(2006, 3, 30), None),
       FlatEvent("Patient_01", 2, makeTS(1975, 1, 1), None, "molecule",
         "SULFONYLUREA", 900.0, null.asInstanceOf[Timestamp], None),
       FlatEvent("Patient_01", 2, makeTS(1975, 1, 1), None, "molecule",
         "SULFONYLUREA", 1800.0, makeTS(2006, 1, 15), None),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "molecule",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
         "PIOGLITAZONE", 840.0, makeTS(2006, 1, 15), None),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "molecule",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
         "PIOGLITAZONE", 4200.0, makeTS(2006, 1, 30), None),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "molecule",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
         "PIOGLITAZONE", 1680.0, makeTS(2006, 1, 5), None),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "disease",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
         "C67", 1.0, makeTS(2006, 3, 13), None),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "disease",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
         "C67", 1.0, makeTS(2005, 12, 29), None),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "disease",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
         "C67", 1.0, makeTS(2005, 12, 24), None),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "disease",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
         "C67", 1.0, makeTS(2008, 3, 8), None),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "disease",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
         "C67", 1.0, makeTS(2008, 3, 15), None),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "disease",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
         "C67", 1.0, makeTS(2007, 1, 29), None),
-      FlatEvent("Patient_02", 1, makeTS(1959, 1, 1), Some(makeTS(2009, 3, 13)), "disease",
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
         "C67", 1.0, makeTS(2007, 1, 29), None)  // duplicate event, it's ok. See the
       // Scaladoc of McoDiseaseTransformer.estimateStayStartTime for explanation.
     ).toDF
