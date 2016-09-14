@@ -82,6 +82,10 @@ object FilteringMain extends Main {
     logger.info("Writing Cox features...")
     import CoxFeaturesWriter._
     coxFeatures.writeCSV(config.getString("paths.output.coxFeatures"))
+
+    logger.info("Writing LTSCCS features...")
+    import LTSCCSWriter._
+    flatEvents.union(exposures).writeLTSCCS(config.getString("paths.output.LTSCCSFeatures"))
   }
 
   def main(args: Array[String]): Unit = {

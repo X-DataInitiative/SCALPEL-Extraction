@@ -3,13 +3,11 @@ package fr.polytechnique.cmap.cnam.filtering
 import java.io.File
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql.Dataset
-import org.scalatest.BeforeAndAfter
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 
-class CoxFeaturesWriterSuite extends SharedContext with BeforeAndAfter{
+class CoxFeaturesWriterSuite extends SharedContext {
 
-  override def beforeEach(): Unit ={
+  override def beforeEach(): Unit = {
     val directory = new File("anyPath")
     FileUtils.deleteDirectory(directory)
     super.afterEach()
@@ -21,9 +19,9 @@ class CoxFeaturesWriterSuite extends SharedContext with BeforeAndAfter{
 
     // Given
     val features: Dataset[CoxFeature] = Seq(
-      CoxFeature("Patient_A", 1, 678, 19, 30, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
-      CoxFeature("Patient_A", 1, 678, 4, 19, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0),
-      CoxFeature("Patient_B", 1, 792, 1, 26, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0)
+      CoxFeature("Patient_A", 1, 678, "55-59", 19, 30, 1, 0, 1, 0, 1, 0),
+      CoxFeature("Patient_A", 1, 678, "55-59", 4, 19, 0, 0, 0, 0, 1, 0),
+      CoxFeature("Patient_B", 1, 792, "65-69", 1, 26, 0, 0, 0, 0, 1, 0)
     ).toDS
     val path = "anyPath/coxFeatures.csv"
     val expectedCount = 3
