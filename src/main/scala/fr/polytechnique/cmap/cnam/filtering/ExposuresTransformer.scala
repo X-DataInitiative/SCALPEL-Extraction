@@ -4,7 +4,7 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.utilities.Functions._
+import fr.polytechnique.cmap.cnam.utilities.functions._
 
 object ExposuresTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
 

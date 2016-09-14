@@ -2,13 +2,13 @@ package fr.polytechnique.cmap.cnam.utilities
 
 import java.sql.Timestamp
 import org.scalatest.FlatSpecLike
+import fr.polytechnique.cmap.cnam.utilities.functions._
 
 class FunctionsSuite extends FlatSpecLike {
 
   "makeTS" should "build the correct timestamp" in {
 
     // Given
-    import Functions.makeTS
     val expected = List(
       "2010-01-24 14:23:15",
       "1901-09-21 01:12:59",
@@ -29,7 +29,6 @@ class FunctionsSuite extends FlatSpecLike {
   it should "throw an exception when any parameter is out of bounds" in {
 
     // Given
-    import Functions.makeTS
 
     // Then
     intercept[java.lang.IllegalArgumentException] {

@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.filtering
 import java.io.File
 import org.apache.commons.io.FileUtils
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.utilities.Functions._
+import fr.polytechnique.cmap.cnam.utilities.functions._
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 
 class LTSCCSWriterSuite extends SharedContext {

@@ -56,27 +56,13 @@ class McoExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
   * Extractor class for the P_HAD table
   *
   */
-class HadExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
-
-  override def extract(path: String): DataFrame = {
-    val rawDF = super.extract(path)
-    // todo: implement extraction
-    rawDF
-  }
-}
+class HadExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
 
 /**
   * Extractor class for the P_SSR table
   *
   */
-class SsrExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
-
-  override def extract(path: String): DataFrame = {
-    val rawDF = super.extract(path)
-    // todo: implement extraction
-    rawDF
-  }
-}
+class SsrExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
 
 /**
   * Extractor class for the IR_BEN_R table
