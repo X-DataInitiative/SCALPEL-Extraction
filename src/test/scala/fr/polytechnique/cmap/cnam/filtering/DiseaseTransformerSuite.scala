@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.filtering
 import org.apache.spark.sql.DataFrame
 
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
-
+import fr.polytechnique.cmap.cnam.utilities.functions.makeTS
 
 class DiseaseTransformerSuite extends fakeMcoDataFixture {
 
@@ -23,12 +23,12 @@ class DiseaseTransformerSuite extends fakeMcoDataFixture {
     val input = new Sources(irImb=Some(imbData), pmsiMco=Some(mcoData))
 
     val expected = Seq(
-      Event("Patient_02", "disease", "C67", 1, timestamp(2006, 3, 13), None), // IMB event
-      Event("HasCancer1", "disease", "C67", 1, timestamp(2011, 12, 1), None), // expected.MCO events
-      Event("HasCancer2", "disease", "C67", 1, timestamp(2011, 12, 1), None),
-      Event("HasCancer3", "disease", "C67", 1, timestamp(2011, 11, 20), None),
-      Event("HasCancer4", "disease", "C67", 1, timestamp(2011, 12, 1), None),
-      Event("HasCancer5", "disease", "C67", 1, timestamp(2011, 12, 1), None)
+      Event("Patient_02", "disease", "C67", 1, makeTS(2006, 3, 13), None), // IMB event
+      Event("HasCancer1", "disease", "C67", 1, makeTS(2011, 12, 1), None), // expected.MCO events
+      Event("HasCancer2", "disease", "C67", 1, makeTS(2011, 12, 1), None),
+      Event("HasCancer3", "disease", "C67", 1, makeTS(2011, 11, 20), None),
+      Event("HasCancer4", "disease", "C67", 1, makeTS(2011, 12, 1), None),
+      Event("HasCancer5", "disease", "C67", 1, makeTS(2011, 12, 1), None)
     ).toDF
 
     // When

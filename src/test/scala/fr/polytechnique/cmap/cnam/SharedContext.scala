@@ -1,6 +1,9 @@
 package fr.polytechnique.cmap.cnam
 
+import java.io.{File, IOException}
 import java.util.{Locale, TimeZone}
+
+import org.apache.commons.io.FileUtils
 import org.apache.spark._
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
@@ -34,6 +37,14 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
   override def beforeAll() {
     _sc = new SparkContext(conf)
     _sql = new TestHiveContext(_sc)
+
+    try {
+      FileUtils.deleteDirectory(new File("target/test/output"))
+    } catch {
+      case ioe: IOException => {}
+      case e: Exception => {e.printStackTrace(); throw e}
+    }
+
     super.beforeAll()
   }
 
