@@ -18,24 +18,6 @@ class MainSuite extends SharedContext {
   val coxPath = config.getString("paths.output.coxFeatures")
   val LTSCSSPath = config.getString("paths.output.coxFeatures")
 
-  override def beforeAll(): Unit = {
-    FileUtils.deleteDirectory(new File(patientsPath))
-    FileUtils.deleteDirectory(new File(eventsPath))
-    FileUtils.deleteDirectory(new File(exposuresPath))
-    FileUtils.deleteDirectory(new File(coxPath))
-    FileUtils.deleteDirectory(new File(LTSCSSPath))
-    super.beforeAll()
-  }
-
-  override def afterAll(): Unit = {
-    FileUtils.deleteDirectory(new File(patientsPath))
-    FileUtils.deleteDirectory(new File(eventsPath))
-    FileUtils.deleteDirectory(new File(exposuresPath))
-    FileUtils.deleteDirectory(new File(coxPath))
-    FileUtils.deleteDirectory(new File(LTSCSSPath))
-    super.afterAll()
-  }
-
   "runETL" should "correctly run the full filtering pipeline without exceptions" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._

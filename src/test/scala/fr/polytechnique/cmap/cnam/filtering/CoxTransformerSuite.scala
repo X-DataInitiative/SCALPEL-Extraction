@@ -24,14 +24,14 @@ class CoxTransformerSuite extends SharedContext {
     ).toDF("patientID", "birthDate", "followUpStart")
 
     val expected = Seq(
-      ("Patient_A", 672),
-      ("Patient_A", 672),
-      ("Patient_B", 543),
-      ("Patient_B", 543),
-      ("Patient_C", 414),
-      ("Patient_C", 414),
-      ("Patient_D", 426),
-      ("Patient_D", 426)
+      ("Patient_A", 683),
+      ("Patient_A", 683),
+      ("Patient_B", 557),
+      ("Patient_B", 557),
+      ("Patient_C", 432),
+      ("Patient_C", 432),
+      ("Patient_D", 432),
+      ("Patient_D", 432)
     ).toDF("patientID", "age")
 
     // When
@@ -390,9 +390,9 @@ class CoxTransformerSuite extends SharedContext {
     ).toDS
 
     val expected = Seq(
-      CoxFeature("Patient_A", 1, 678, "55-59", 19, 30, 1, 0, 1, 0, 1, 0),
-      CoxFeature("Patient_A", 1, 678, "55-59", 4, 19, 0, 0, 0, 0, 1, 0),
-      CoxFeature("Patient_B", 1, 792, "65-69", 1, 26, 0, 0, 0, 0, 1, 0)
+      CoxFeature("Patient_A", 1, 683, "55-59", 19, 30, 1, 0, 1, 0, 1, 0),
+      CoxFeature("Patient_A", 1, 683, "55-59", 4, 19, 0, 0, 0, 0, 1, 0),
+      CoxFeature("Patient_B", 1, 803, "65-69", 1, 26, 0, 0, 0, 0, 1, 0)
     ).toDF
 
     // When

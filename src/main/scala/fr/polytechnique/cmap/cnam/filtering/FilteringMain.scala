@@ -81,7 +81,8 @@ object FilteringMain extends Main {
 
     logger.info("Writing Cox features...")
     import CoxFeaturesWriter._
-    coxFeatures.writeCSV(config.getString("paths.output.coxFeatures"))
+    coxFeatures.toDF.write.parquet(config.getString("paths.output.coxFeatures"))
+    coxFeatures.writeCSV(config.getString("paths.output.coxFeaturesCsv"))
 
     logger.info("Writing LTSCCS features...")
     import LTSCCSWriter._

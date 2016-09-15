@@ -8,7 +8,7 @@ object CoxFeaturesWriter {
 
     def writeParquet(path: String): Unit = data.toDF.write.parquet(path)
     def writeCSV(path: String): Unit = {
-      data.toDF.orderBy("patientID", "start", "end")
+      data.toDF.orderBy("patientID", "start")
         .coalesce(1)
         .write
         .format("com.databricks.spark.csv")

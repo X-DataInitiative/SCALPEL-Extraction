@@ -1,10 +1,9 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import java.sql.Timestamp
 import org.apache.spark.sql.functions._
-
-import fr.polytechnique.cmap.cnam.utilities.functions._
 import org.apache.spark.sql.{Column, Dataset}
+import fr.polytechnique.cmap.cnam.utilities.functions._
+
 
 trait PatientsTransformer {
 
@@ -18,7 +17,7 @@ trait PatientsTransformer {
   final val MinMonth = 1
   final val MaxMonth = 12
   final val deathCode = 9
-  final val AgeReferenceDate = Timestamp.valueOf("2006-12-31 23:59:59.9")
+  final val AgeReferenceDate = makeTS(2006, 12, 31, 23, 59, 59)
 
 }
 
