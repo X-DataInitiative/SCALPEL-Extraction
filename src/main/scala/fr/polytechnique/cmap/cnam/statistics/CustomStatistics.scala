@@ -52,9 +52,9 @@ object CustomStatistics {
                     count(colName) cast("long") as "Count",
                     countDistinct(colName) cast("long") as "CountDistinct",
                     sum(colName) cast("string") as "Sum",
-                    sumDistinct(colName) cast("string") as "SumDistinct",
-                    avg(colName) cast("string") as "Avg",
-                    (sumDistinct(colName)/countDistinct(colName)) cast("string") as "AvgDistinct"
+//                    sumDistinct(colName) cast("string") as "SumDistinct",
+                    avg(colName) cast("string") as "Avg"
+//                    (sumDistinct(colName)/countDistinct(colName)) cast("string") as "AvgDistinct"
                   ).withColumn("ColName", lit(colName))
 
         case colName =>
@@ -66,9 +66,9 @@ object CustomStatistics {
                     count(colName) cast("long") as "Count",
                     countDistinct(colName) cast("long") as "CountDistinct"
                   ).withColumn("Sum", lit("NA"))
-                  .withColumn("SumDistinct", lit("NA"))
+//                  .withColumn("SumDistinct", lit("NA"))
                   .withColumn("Avg", lit("NA"))
-                  .withColumn("AvgDistinct", lit("NA"))
+//                  .withColumn("AvgDistinct", lit("NA"))
                   .withColumn("ColName", lit(colName))
       }
 
