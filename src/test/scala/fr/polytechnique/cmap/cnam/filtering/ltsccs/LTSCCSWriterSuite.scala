@@ -1,10 +1,11 @@
-package fr.polytechnique.cmap.cnam.filtering
+package fr.polytechnique.cmap.cnam.filtering.ltsccs
 
 import java.io.File
 import org.apache.commons.io.FileUtils
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.utilities.functions._
+import fr.polytechnique.cmap.cnam.filtering.FlatEvent
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
+import fr.polytechnique.cmap.cnam.utilities.functions._
 
 class LTSCCSWriterSuite extends SharedContext {
 
@@ -241,13 +242,13 @@ class LTSCCSWriterSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "followUpPeriod",
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "observationPeriod",
         "disease", 900.0, makeTS(2007, 1, 1), Some(makeTS(2009, 7, 11))),
-      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "followUpPeriod",
+      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "observationPeriod",
         "trackloss", 900.0, makeTS(2006, 7, 1), Some(makeTS(2008, 9, 1))),
-      FlatEvent("Patient_C", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "followUpPeriod",
+      FlatEvent("Patient_C", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "observationPeriod",
         "trackloss", 900.0, makeTS(2006, 7, 1), Some(makeTS(2008, 9, 1))),
-      FlatEvent("Patient_D", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "followUpPeriod",
+      FlatEvent("Patient_D", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "observationPeriod",
         "trackloss", 900.0, makeTS(2006, 7, 1), Some(makeTS(2008, 9, 1))),
       FlatEvent("Patient_A", 1, makeTS(1960, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
         "PIOGLITAZONE", 1.0, makeTS(2007, 5, 1), Some(makeTS(2009, 7, 11))),

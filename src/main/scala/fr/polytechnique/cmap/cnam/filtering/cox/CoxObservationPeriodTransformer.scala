@@ -1,12 +1,13 @@
-package fr.polytechnique.cmap.cnam.filtering
+package fr.polytechnique.cmap.cnam.filtering.cox
 
 import java.sql.Timestamp
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.filtering.{DatasetTransformer, FlatEvent}
 
-object ObservationPeriodTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
+object CoxObservationPeriodTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
 
   final val ObservationEnd = Timestamp.valueOf("2009-12-31 23:59:59")
 

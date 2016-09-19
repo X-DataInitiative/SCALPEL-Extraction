@@ -16,7 +16,7 @@ class MainSuite extends SharedContext {
   val eventsPath = config.getString("paths.output.events")
   val exposuresPath = config.getString("paths.output.exposures")
   val coxPath = config.getString("paths.output.coxFeatures")
-  val LTSCSSPath = config.getString("paths.output.coxFeatures")
+  val LTSCSSPath = config.getString("paths.output.LTSCCSFeatures")
 
   "runETL" should "correctly run the full filtering pipeline without exceptions" in {
     val sqlCtx = sqlContext

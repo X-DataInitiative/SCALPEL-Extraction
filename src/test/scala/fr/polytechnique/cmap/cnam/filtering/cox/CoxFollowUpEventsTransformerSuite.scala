@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.filtering
+package fr.polytechnique.cmap.cnam.filtering.cox
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
@@ -6,7 +6,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
-class FollowUpEventsTransformerSuite extends SharedContext {
+class CoxFollowUpEventsTransformerSuite extends SharedContext {
 
   "withFollowUpStart" should "add a column with the start of the follow-up period" in {
 
@@ -33,7 +33,7 @@ class FollowUpEventsTransformerSuite extends SharedContext {
     ).toDF("patientID", "followUpStart")
 
     // When
-    import FollowUpEventsTransformer.FollowUpDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxFollowUpEventsTransformer.FollowUpDataFrame
     val result = input.withFollowUpStart.select("patientID", "followUpStart")
 
     // Then
@@ -65,7 +65,7 @@ class FollowUpEventsTransformerSuite extends SharedContext {
     ).toDF("patientID", "category", "trackloss")
 
     // When
-    import FollowUpEventsTransformer.FollowUpDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxFollowUpEventsTransformer.FollowUpDataFrame
     val result = input.withTrackloss.select("patientID", "category", "trackloss")
 
     // Then
@@ -100,7 +100,7 @@ class FollowUpEventsTransformerSuite extends SharedContext {
     ).toDF("patientID", "category", "trackloss")
 
     // When
-    import FollowUpEventsTransformer.FollowUpDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxFollowUpEventsTransformer.FollowUpDataFrame
     val result = input.withTrackloss.select("patientID", "category", "trackloss")
 
     // Then
@@ -131,7 +131,7 @@ class FollowUpEventsTransformerSuite extends SharedContext {
     ).toDF("patientID", "category").withColumn("trackloss", lit(null).cast(TimestampType))
 
     // When
-    import FollowUpEventsTransformer.FollowUpDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxFollowUpEventsTransformer.FollowUpDataFrame
     val result = input.withTrackloss.select("patientID", "category", "trackloss")
 
     // Then
@@ -183,7 +183,7 @@ class FollowUpEventsTransformerSuite extends SharedContext {
     ).toDF("patientID", "followUpEnd")
 
     // When
-    import FollowUpEventsTransformer.FollowUpDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxFollowUpEventsTransformer.FollowUpDataFrame
     val result = input.withFollowUpEnd.select("patientID", "followUpEnd")
 
     // Then
@@ -220,7 +220,7 @@ class FollowUpEventsTransformerSuite extends SharedContext {
     ).toDF("followUpEnd", "endReason")
 
     // When
-    import FollowUpEventsTransformer.FollowUpDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxFollowUpEventsTransformer.FollowUpDataFrame
     val result = input.withEndReason.toDF.select("followUpEnd", "endReason")
 
     // Then
@@ -252,7 +252,7 @@ class FollowUpEventsTransformerSuite extends SharedContext {
     ).toDF("patientID", "followUpStart", "followUpEnd")
 
     // When
-    import FollowUpEventsTransformer.FollowUpFunctions
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxFollowUpEventsTransformer.FollowUpFunctions
     val result = input.withFollowUpPeriodFromEvents.select("patientID", "followUpStart", "followUpEnd")
 
     // Then

@@ -1,9 +1,10 @@
-package fr.polytechnique.cmap.cnam.filtering
+package fr.polytechnique.cmap.cnam.filtering.ltsccs
 
 import java.sql.Timestamp
 import java.time.ZoneOffset
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.filtering._
 
 // The following case classes are based on the formats defined in the following Confluence page:
 //   https://datainitiative.atlassian.net/wiki/display/CNAM/Coxph+data+format
@@ -123,7 +124,7 @@ object LTSCCSWriter {
 
       val exposures: Dataset[FlatEvent] = data.filter(_.category == "exposure").persist()
       val patients = exposures.toDF.dropDuplicates(Seq("patientID")).as[FlatEvent].persist()
-      val followUpPeriods: Dataset[FlatEvent] = data.filter(_.category == "followUpPeriod").persist()
+      val observationPeriods: Dataset[FlatEvent] = data.filter(_.category == "observationPeriod").persist()
       val diseases: Dataset[FlatEvent] = data.filter(_.category == "disease").persist()
 
       val patientIDs: Dataset[String] = patients.map(_.patientID).persist()
@@ -132,7 +133,7 @@ object LTSCCSWriter {
         .writeCSV(dir + "GroundTruth.csv")
       patients.toPersons.toDF.coalesce(1)
         .writeCSV(dir + "Persons.txt")
-      followUpPeriods.filterPatients(patientIDs).toObservationPeriods.toDF.coalesce(1)
+      observationPeriods.filterPatients(patientIDs).toObservationPeriods.toDF.coalesce(1)
         .writeCSV(dir + "ObservationPeriods.txt")
       exposures.toDrugExposures.toDF.coalesce(1)
         .writeCSV(dir + "Drugexposures.txt")
@@ -141,7 +142,7 @@ object LTSCCSWriter {
 
       patientIDs.unpersist()
       diseases.unpersist()
-      followUpPeriods.unpersist()
+      observationPeriods.unpersist()
       exposures.unpersist()
     }
   }
