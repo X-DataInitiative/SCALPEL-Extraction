@@ -1,6 +1,9 @@
 package fr.polytechnique.cmap.cnam
 
+import java.io.File
 import java.util.{Locale, TimeZone}
+
+import org.apache.commons.io.FileUtils
 import org.apache.spark._
 import org.apache.log4j.Logger
 import org.apache.log4j.Level
@@ -34,6 +37,7 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
   override def beforeAll() {
     _sc = new SparkContext(conf)
     _sql = new TestHiveContext(_sc)
+    FileUtils.deleteDirectory(new File("target/test/output"))
     super.beforeAll()
   }
 
@@ -43,6 +47,7 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
       _sc = null
       System.clearProperty("spark.driver.port")
     } finally {
+      FileUtils.deleteDirectory(new File("target/test/output"))
       super.afterAll()
     }
   }

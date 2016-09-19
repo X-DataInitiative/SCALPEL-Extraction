@@ -2,8 +2,9 @@ package fr.polytechnique.cmap.cnam.filtering
 
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{IntegerType, StringType}
+import org.apache.spark.sql.types.IntegerType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.utilities.functions._
 
 // Start and End are expressed in month from the patient startObs
 case class CoxFeature(
@@ -33,6 +34,8 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
     "other"
   )
 
+  final val AgeReferenceDate = makeTS(2006, 12, 31, 23, 59, 59)
+
   implicit class CoxDataFrame(data: DataFrame) {
 
     def withHasCancer: DataFrame = {
@@ -41,7 +44,7 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
 
     def withAge: DataFrame = {
       data.withColumn("age",
-        (months_between(col("followUpStart"), col("birthDate")) - 6.0).cast(IntegerType)
+        (months_between(lit(AgeReferenceDate), col("birthDate"))).cast(IntegerType)
       )
     }
 

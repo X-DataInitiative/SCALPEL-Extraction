@@ -43,14 +43,14 @@ class PatientsTransformerSuite extends SharedContext {
 
     // Given
     val dcirDf: DataFrame = Seq(
-      ("Patient_01", 2, 31, 1975, Some(Timestamp.valueOf("2006-01-15 00:00:00")), None),
-      ("Patient_01", 2, 31, 1975, Some(Timestamp.valueOf("2006-01-30 00:00:00")), None),
+      ("Patient_01", 2, 31, 1945, Some(Timestamp.valueOf("2006-01-15 00:00:00")), None),
+      ("Patient_01", 2, 31, 1945, Some(Timestamp.valueOf("2006-01-30 00:00:00")), None),
       ("Patient_02", 1, 47, 1959, Some(Timestamp.valueOf("2006-01-15 00:00:00")), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
       ("Patient_02", 1, 47, 1959, Some(Timestamp.valueOf("2006-01-30 00:00:00")), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
       ("Patient_03", 1, 47, 1959, Some(Timestamp.valueOf("2006-01-30 00:00:00")), None),
-      ("Patient_04", 1, 51, 1969, Some(Timestamp.valueOf("2006-01-05 00:00:00")), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
-      ("Patient_04", 1, 51, 1969, Some(Timestamp.valueOf("2006-02-05 00:00:00")), None),
-      ("Patient_04", 2, 51, 1969, Some(Timestamp.valueOf("2006-03-05 00:00:00")), None)
+      ("Patient_04", 1, 51, 1966, Some(Timestamp.valueOf("2006-01-05 00:00:00")), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      ("Patient_04", 1, 51, 1966, Some(Timestamp.valueOf("2006-02-05 00:00:00")), None),
+      ("Patient_04", 2, 51, 1966, Some(Timestamp.valueOf("2006-03-05 00:00:00")), None)
     ).toDF("NUM_ENQ", "BEN_SEX_COD", "BEN_AMA_COD", "BEN_NAI_ANN", "EXE_SOI_DTD", "BEN_DCD_DTE")
 
     val mcoDf: DataFrame = Seq(
@@ -61,9 +61,9 @@ class PatientsTransformerSuite extends SharedContext {
     ).toDF("NUM_ENQ", "MCO_B.SOR_MOD", "SOR_MOI", "SOR_ANN")
 
     val irBenDf: DataFrame = Seq(
-      ("Patient_01", 1, 1, 1975, None),
-      ("Patient_02", 1, 2, 1976, Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
-      ("Patient_03", 2, 3, 1977, Some(Timestamp.valueOf("1976-03-13 00:00:00"))),
+      ("Patient_01", 1, 1, 1945, None),
+      ("Patient_02", 1, 2, 1956, Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      ("Patient_03", 2, 3, 1937, Some(Timestamp.valueOf("1936-03-13 00:00:00"))),
       ("Patient_04", 2, 4, 1895, Some(Timestamp.valueOf("2020-03-13 00:00:00")))
     ).toDF("NUM_ENQ", "BEN_SEX_COD", "BEN_NAI_MOI", "BEN_NAI_ANN", "BEN_DCD_DTE")
 
@@ -72,10 +72,10 @@ class PatientsTransformerSuite extends SharedContext {
     // When
     val result = PatientsTransformer.transform(sources).toDF
     val expected: DataFrame = Seq(
-      ("Patient_01", 1, Timestamp.valueOf("1975-01-01 00:00:00"), None),
-      ("Patient_02", 1, Timestamp.valueOf("1976-02-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
-      ("Patient_03", 2, Timestamp.valueOf("1977-03-01 00:00:00"), Some(Timestamp.valueOf("1980-04-01 00:00:00"))),
-      ("Patient_04", 2, Timestamp.valueOf("1969-02-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00")))
+      ("Patient_01", 1, Timestamp.valueOf("1945-01-01 00:00:00"), None),
+      ("Patient_02", 1, Timestamp.valueOf("1956-02-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      ("Patient_03", 2, Timestamp.valueOf("1937-03-01 00:00:00"), Some(Timestamp.valueOf("1980-04-01 00:00:00"))),
+      ("Patient_04", 2, Timestamp.valueOf("1966-02-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00")))
     ).toDF("patientID", "gender", "birthDate", "deathDate")
 
     // Then

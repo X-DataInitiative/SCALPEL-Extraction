@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.filtering
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, Dataset}
-
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
 
@@ -18,17 +17,17 @@ trait PatientsTransformer {
   final val MinMonth = 1
   final val MaxMonth = 12
   final val deathCode = 9
+  final val AgeReferenceDate = makeTS(2006, 12, 31, 23, 59, 59)
 
 }
 
+
 object PatientsTransformer extends Transformer[Patient] with PatientsTransformer {
 
-  def isDeathDateValid(deathDate: Column, birthDate: Column): Column = {
+  def isDeathDateValid(deathDate: Column, birthDate: Column): Column =
     deathDate.between(birthDate, MaxDeathDate)
-  }
 
   def transform(sources: Sources): Dataset[Patient] = {
-
     val irBen = IrBenPatientTransformer.transform(sources).toDF.as("irBen")
     val mco = McoPatientTransformer.transform(sources).toDF.as("mco")
     val dcir = DcirPatientTransformer.transform(sources).toDF.as("dcir")
@@ -60,8 +59,11 @@ object PatientsTransformer extends Transformer[Patient] with PatientsTransformer
         col("mco.deathDate"))
     )
 
+    val age = floor(months_between(lit(AgeReferenceDate), birthdate) / 12)
+    val filterPatientsByAge = age >= 40 && age < 80
 
-    patients.select(
+    patients.where(filterPatientsByAge)
+      .select(
       patientID.as("patientID"),
       gender.as("gender"),
       birthdate.as("birthDate"),
@@ -69,4 +71,5 @@ object PatientsTransformer extends Transformer[Patient] with PatientsTransformer
     ).as[Patient]
 
   }
+
 }
