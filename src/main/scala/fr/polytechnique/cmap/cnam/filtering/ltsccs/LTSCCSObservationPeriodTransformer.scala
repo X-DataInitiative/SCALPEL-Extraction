@@ -1,40 +1,25 @@
 package fr.polytechnique.cmap.cnam.filtering.ltsccs
 
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
-import fr.polytechnique.cmap.cnam.filtering.{DatasetTransformer, FlatEvent}
+import org.apache.spark.sql.types.TimestampType
+import fr.polytechnique.cmap.cnam.filtering.ObservationPeriodTransformer
+import fr.polytechnique.cmap.cnam.utilities.ColumnUtilities._
 
-// For the LTSCCS Model, we calculate the observation periods based on the exposures.
-// The observation start of a patient is defined of the first exposure start and the observation end
-//   is defined as the last exposure end.
-object LTSCCSObservationPeriodTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
+// For LTSCCS, we define the observation start as the date of the first A10 medicine purchase and
+//   the end as the minimum between the death date and the end of the study
+object LTSCCSObservationPeriodTransformer extends ObservationPeriodTransformer {
 
-  val groupCols = List(
-    col("patientID"),
-    col("gender"),
-    col("birthDate"),
-    col("deathDate")
-  )
+  override def computeObservationStart(data: DataFrame): DataFrame =  {
+    val window = Window.partitionBy("patientID")
+    val correctedStart = when(
+      lower(col("category")) === "molecule" && (col("start") >= StudyStart), col("start")
+    )
+    data.withColumn("observationStart", min(correctedStart).over(window).cast(TimestampType))
+  }
 
-  val outputCols = groupCols ++ List(
-    lit("observationPeriod").as("category"),
-    lit("observationPeriod").as("eventId"),
-    lit(1.0).as("weight"),
-    col("observationStart").as("start"),
-    col("observationEnd").as("end")
-  )
-
-  override def transform(input: Dataset[FlatEvent]): Dataset[FlatEvent] = {
-    import input.sqlContext.implicits._
-    val exposures = input.toDF.where(col("category") === "exposure")
-
-    exposures
-      .groupBy(groupCols: _*)
-      .agg(
-        min(col("start")).as("observationStart"),
-        max(col("end")).as("observationEnd")
-      )
-      .select(outputCols: _*)
-      .as[FlatEvent]
+  override def computeObservationEnd(data: DataFrame): DataFrame = {
+    data.withColumn("observationEnd", minColumn(col("deathDate"), lit(StudyEnd)))
   }
 }

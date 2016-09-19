@@ -59,6 +59,7 @@ object LTSCCSWriter {
         .format("com.databricks.spark.csv")
         .option("header", "true")
         .option("delimiter", ",")
+        .option("nullValue", "")
         .save(path)
     }
   }
@@ -93,7 +94,7 @@ object LTSCCSWriter {
       data.map(
         obs => ObservationPeriod(
           obs.patientID,
-          "ObservationPeriod",
+          "ObsPeriod",
           None,
           obs.start.minusMonths(6).format,
           obs.end.get.format

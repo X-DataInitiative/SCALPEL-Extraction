@@ -1,61 +1,24 @@
 package fr.polytechnique.cmap.cnam.filtering.cox
 
-import java.sql.Timestamp
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
-import org.apache.spark.sql.{DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.filtering.{DatasetTransformer, FlatEvent}
+import fr.polytechnique.cmap.cnam.filtering.ObservationPeriodTransformer
 
-object CoxObservationPeriodTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
+// For Cox, the observation start is the date of the first A10 medicine purchase and the end is
+//   the end of the study
+object CoxObservationPeriodTransformer extends ObservationPeriodTransformer {
 
-  final val ObservationEnd = Timestamp.valueOf("2009-12-31 23:59:59")
-
-  val outputColumns = List(
-    col("patientID"),
-    col("gender"),
-    col("birthDate"),
-    col("deathDate"),
-    lit("observationPeriod").as("category"),
-    lit("observationPeriod").as("eventId"),
-    lit(1.0).as("weight"),
-    col("observationStart").as("start"),
-    lit(ObservationEnd).as("end")
-  )
-
-  implicit class ObservationFunctions(data: DataFrame) {
-
-    // The following function is supposed to be used on any dataset that contains observationPeriod
-    //   events, in order to add the observation start and end as columns, without changing the line
-    //   count.
-    // It is not used inside the ObservationPeriodTransformer object.
-    def withObservationPeriodFromEvents: DataFrame = {
-      val window = Window.partitionBy("patientID")
-
-      val observationStart = when(lower(col("category")) === "observationperiod", col("start"))
-      val observationEnd = when(lower(col("category")) === "observationperiod", col("end"))
-
-      data
-        .withColumn("observationStart", min(observationStart).over(window))
-        .withColumn("observationEnd", min(observationEnd).over(window))
-    }
+  override def computeObservationStart(data: DataFrame): DataFrame =  {
+    val window = Window.partitionBy("patientID")
+    val correctedStart = when(
+      lower(col("category")) === "molecule" && (col("start") >= StudyStart), col("start")
+    )
+    data.withColumn("observationStart", min(correctedStart).over(window).cast(TimestampType))
   }
 
-  implicit class ObservationDataFrame(data: DataFrame) {
-    def withObservationStart: DataFrame = {
-      val window = Window.partitionBy("patientID")
-      val correctedStart = when(lower(col("category")) === "molecule", col("start")) // NULL otherwise
-      data.withColumn("observationStart", min(correctedStart).over(window).cast(TimestampType))
-    }
-  }
-
-  def transform(events: Dataset[FlatEvent]): Dataset[FlatEvent] = {
-    import events.sqlContext.implicits._
-
-    events.toDF
-      .withObservationStart
-      .select(outputColumns: _*)
-      .dropDuplicates(Seq("patientID"))
-      .as[FlatEvent]
+  override def computeObservationEnd(data: DataFrame): DataFrame = {
+    data.withColumn("observationEnd", lit(StudyEnd))
   }
 }

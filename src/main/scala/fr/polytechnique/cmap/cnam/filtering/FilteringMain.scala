@@ -90,7 +90,7 @@ object FilteringMain extends Main {
 
     logger.info("Preparing for LTSCCS")
     val ltsccsExposures = LTSCCSExposuresTransformer.transform(drugFlatEvents)
-    val ltsccsObservationPeriods = LTSCCSObservationPeriodTransformer.transform(ltsccsExposures)
+    val ltsccsObservationPeriods = LTSCCSObservationPeriodTransformer.transform(drugFlatEvents)
     val coxPatients = exposures.map(_.patientID).distinct.persist()
 
     val ltsccsFlatEvents: Dataset[FlatEvent] =

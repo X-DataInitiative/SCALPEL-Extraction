@@ -7,27 +7,27 @@ import fr.polytechnique.cmap.cnam.utilities.functions._
 
 class LTSCCSObservationPeriodTransformerSuite extends SharedContext {
 
-  "transform" should "return a Dataset[FlatEvent] with the follow-up events of each patient" in {
+  "transform" should "return a Dataset[FlatEvent] with the observation period of each patient" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
     val input = Seq(
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2011, 12, 31)), "exposure",
-        "PIOGLITAZONE", 1.0, makeTS(2008,  2, 1), Some(makeTS(2008,  5, 1))),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2011, 12, 31)), "exposure",
-        "PIOGLITAZONE", 1.0, makeTS(2009,  6, 1), Some(makeTS(2009,  9, 1))),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2011, 12, 31)), "exposure",
-        "PIOGLITAZONE", 1.0, makeTS(2010,  3, 1), Some(makeTS(2010,  4, 1))),
-      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31)), "exposure",
-        "PIOGLITAZONE", 1.0, makeTS(2008,  2, 1), Some(makeTS(2008,  4, 1)))
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2011, 12, 31)), "molecule",
+        "PIOGLITAZONE", 1.0, makeTS(2008,  2, 1), None),
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2011, 12, 31)), "molecule",
+        "PIOGLITAZONE", 1.0, makeTS(2009,  6, 1), None),
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2011, 12, 31)), "molecule",
+        "PIOGLITAZONE", 1.0, makeTS(2010,  3, 1), None),
+      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 12, 31)), "molecule",
+        "PIOGLITAZONE", 1.0, makeTS(2008,  2, 1), None)
     ).toDS
 
     val expected = Seq(
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2011, 12, 31)), "observationPeriod",
-        "observationPeriod", 1.0, makeTS(2008, 2, 1), Some(makeTS(2010, 4, 1))),
-      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31)), "observationPeriod",
-        "observationPeriod", 1.0, makeTS(2008, 2, 1), Some(makeTS(2008, 4, 1)))
+        "observationPeriod", 1.0, makeTS(2008, 2, 1), Some(makeTS(2009, 12, 31, 23, 59, 59))),
+      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 12, 31)), "observationPeriod",
+        "observationPeriod", 1.0, makeTS(2008, 2, 1), Some(makeTS(2008, 12, 31)))
     ).toDS.toDF
 
     // When

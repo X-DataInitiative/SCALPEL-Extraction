@@ -337,8 +337,6 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
     // When
     val result = LTSCCSExposuresTransformer.transform(input)
 
-    println(result.rdd.toDebugString)
-
     // Then
     result.show
     expected.show
