@@ -1,12 +1,13 @@
-package fr.polytechnique.cmap.cnam.filtering
+package fr.polytechnique.cmap.cnam.filtering.cox
 
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.filtering.{DatasetTransformer, FlatEvent}
 import fr.polytechnique.cmap.cnam.utilities.ColumnUtilities._
 
-object FollowUpEventsTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
+object CoxFollowUpEventsTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
 
   final val followUpMonthsDelay = 6
   final val diseaseCode = "C67"
@@ -102,7 +103,7 @@ object FollowUpEventsTransformer extends DatasetTransformer[FlatEvent, FlatEvent
   }
 
   def transform(input: Dataset[FlatEvent]): Dataset[FlatEvent] = {
-    import ObservationPeriodTransformer.ObservationFunctions
+    import CoxObservationPeriodTransformer.ObservationFunctions
     import input.sqlContext.implicits._
 
     val events = input.toDF.repartition(col("patientID"))

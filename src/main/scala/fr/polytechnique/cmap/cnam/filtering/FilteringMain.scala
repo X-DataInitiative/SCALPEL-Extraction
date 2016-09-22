@@ -5,6 +5,8 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
 import com.typesafe.config.{Config, ConfigFactory}
 import fr.polytechnique.cmap.cnam.Main
+import fr.polytechnique.cmap.cnam.filtering.cox._
+import fr.polytechnique.cmap.cnam.filtering.ltsccs._
 
 object FilteringMain extends Main {
 
@@ -39,16 +41,18 @@ object FilteringMain extends Main {
     logger.info("Caching disease events...")
     logger.info("Number of disease events: " + diseaseFlatEvents.count)
 
+    logger.info("Preparing for Cox")
     logger.info("(Lazy) Transforming Follow-up events...")
-    val observationFlatEvents = ObservationPeriodTransformer.transform(drugFlatEvents)
+    val observationFlatEvents = CoxObservationPeriodTransformer.transform(drugFlatEvents)
 
     val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(sources)
-    val tracklossFlatEvents = tracklossEvents.as("left")
+    val tracklossFlatEvents = tracklossEvents
+      .as("left")
       .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
       .map((FlatEvent.merge _).tupled)
       .cache()
 
-    val followUpFlatEvents = FollowUpEventsTransformer.transform(
+    val followUpFlatEvents = CoxFollowUpEventsTransformer.transform(
       drugFlatEvents
         .union(diseaseFlatEvents)
         .union(observationFlatEvents)
@@ -60,7 +64,7 @@ object FilteringMain extends Main {
       drugFlatEvents
         .union(diseaseFlatEvents)
         .union(followUpFlatEvents)
-    val exposures = ExposuresTransformer.transform(flatEventsForExposures).cache()
+    val exposures = CoxExposuresTransformer.transform(flatEventsForExposures).cache()
     logger.info("Caching exposures...")
     logger.info("Number of exposures: " + exposures.count)
 
@@ -84,9 +88,24 @@ object FilteringMain extends Main {
     coxFeatures.toDF.write.parquet(config.getString("paths.output.coxFeatures"))
     coxFeatures.writeCSV(config.getString("paths.output.coxFeaturesCsv"))
 
+    logger.info("Preparing for LTSCCS")
+    val ltsccsExposures = LTSCCSExposuresTransformer.transform(drugFlatEvents)
+    val ltsccsObservationPeriods = LTSCCSObservationPeriodTransformer.transform(drugFlatEvents)
+    val ltsccsDiseases = diseaseFlatEvents.toDF.where(col("start").isNotNull).as[FlatEvent]
+    val coxPatients = exposures.map(_.patientID).distinct.persist()
+
+    val ltsccsFlatEvents: Dataset[FlatEvent] =
+      drugFlatEvents
+        .union(ltsccsDiseases)
+        .union(ltsccsExposures)
+        .union(ltsccsObservationPeriods)
+        .joinWith(coxPatients.as("p"), col("patientID") === col("p.value")).map{
+          case (event: FlatEvent, p: String) => event
+        }
+
     logger.info("Writing LTSCCS features...")
     import LTSCCSWriter._
-    flatEvents.union(exposures).writeLTSCCS(config.getString("paths.output.LTSCCSFeatures"))
+    ltsccsFlatEvents.writeLTSCCS(config.getString("paths.output.LTSCCSFeatures"))
   }
 
   def main(args: Array[String]): Unit = {

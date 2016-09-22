@@ -1,10 +1,11 @@
-package fr.polytechnique.cmap.cnam.filtering
+package fr.polytechnique.cmap.cnam.filtering.cox
 
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.filtering.FlatEvent
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
-class ObservationPeriodTransformerSuite extends SharedContext {
+class CoxObservationPeriodTransformerSuite extends SharedContext {
 
   "withObservationStart" should "add a column with the start of the observation period" in {
     val sqlCtx = sqlContext
@@ -30,7 +31,7 @@ class ObservationPeriodTransformerSuite extends SharedContext {
     ).toDF("patientID", "category", "eventId", "start", "observationStart")
 
     // When
-    import ObservationPeriodTransformer.ObservationDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxObservationPeriodTransformer.ObservationDataFrame
     val result = input.withObservationStart
 
     // Then
@@ -62,7 +63,7 @@ class ObservationPeriodTransformerSuite extends SharedContext {
     ).toDF("patientID", "observationStart", "observationEnd")
 
     // When
-    import ObservationPeriodTransformer.ObservationFunctions
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxObservationPeriodTransformer.ObservationFunctions
     val result = input.withObservationPeriodFromEvents
       .select("patientID", "observationStart", "observationEnd")
 
@@ -73,7 +74,7 @@ class ObservationPeriodTransformerSuite extends SharedContext {
     assert(result === expected)
   }
 
-  "transform" should "return a Dataset[FlatEvent] with the follow-up events of each patient" in {
+  "transform" should "return a Dataset[FlatEvent] with the observation events of each patient" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -102,7 +103,7 @@ class ObservationPeriodTransformerSuite extends SharedContext {
 
     // When
     import RichDataFrames._
-    val result = ObservationPeriodTransformer.transform(input)
+    val result = CoxObservationPeriodTransformer.transform(input)
     result.show
     expected.show
     assert(result.toDF === expected)

@@ -1,6 +1,7 @@
-package fr.polytechnique.cmap.cnam.filtering
+package fr.polytechnique.cmap.cnam.filtering.cox
 
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.filtering.FlatEvent
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
@@ -35,7 +36,7 @@ class CoxTransformerSuite extends SharedContext {
     ).toDF("patientID", "age")
 
     // When
-    import CoxTransformer.CoxDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxTransformer.CoxDataFrame
     val result = input.withAge.select("patientID", "age")
 
     // Then
@@ -70,7 +71,7 @@ class CoxTransformerSuite extends SharedContext {
     ).toDF("patientID", "gender", "age", "ageGroup")
 
     // When
-    import CoxTransformer.CoxDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxTransformer.CoxDataFrame
     val result = input.withAgeGroup
 
     // Then
@@ -111,7 +112,7 @@ class CoxTransformerSuite extends SharedContext {
     ).toDF("patientID", "hasCancer")
 
     // When
-    import CoxTransformer.CoxDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxTransformer.CoxDataFrame
     val result = input.withHasCancer.select("patientID", "hasCancer")
 
     // Then
@@ -146,7 +147,7 @@ class CoxTransformerSuite extends SharedContext {
     ).toDF("patientID", "start", "end")
 
     // When
-    import CoxTransformer.CoxDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxTransformer.CoxDataFrame
     val result = input.normalizeDates.select("patientID", "start", "end")
 
     // Then
@@ -187,7 +188,7 @@ class CoxTransformerSuite extends SharedContext {
     ).toDF("patientID", "coxStart")
 
     // When
-    import CoxTransformer.CoxDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxTransformer.CoxDataFrame
     val result = input.stackDates.select("patientID", "coxStart")
 
     // Then
@@ -234,7 +235,7 @@ class CoxTransformerSuite extends SharedContext {
     ).toDF("patientID", "coxStart", "coxEnd")
 
     // When
-    import CoxTransformer.CoxDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxTransformer.CoxDataFrame
     val result = input.withCoxEnd.select("patientID", "coxStart", "coxEnd")
 
     // Then
@@ -281,7 +282,7 @@ class CoxTransformerSuite extends SharedContext {
     ).toDF("patientID", "gender", "moleculeName", "coxStart", "coxEnd")
 
     // When
-    import CoxTransformer.CoxDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxTransformer.CoxDataFrame
     val result = input.prepareToPivot(exposures)
       .select("patientID", "gender", "moleculeName", "coxStart", "coxEnd")
 
@@ -321,7 +322,7 @@ class CoxTransformerSuite extends SharedContext {
       "sulfonylurea", "metformine", "pioglitazone", "rosiglitazone", "other")
 
     // When
-    import CoxTransformer.CoxDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxTransformer.CoxDataFrame
     val result = input.pivotMolecules
 
     // Then
@@ -357,7 +358,7 @@ class CoxTransformerSuite extends SharedContext {
     ).toDF("patientID", "gender", "start", "end", "hasCancer")
 
     // When
-    import CoxTransformer.CoxDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxTransformer.CoxDataFrame
     val result = input.adjustCancerValues
 
     // Then

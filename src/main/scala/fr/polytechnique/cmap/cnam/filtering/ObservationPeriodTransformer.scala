@@ -1,14 +1,14 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import java.sql.Timestamp
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.utilities.functions._
 
-object ObservationPeriodTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
+trait ObservationPeriodTransformer extends DatasetTransformer[FlatEvent, FlatEvent]{
 
-  final val ObservationEnd = Timestamp.valueOf("2009-12-31 23:59:59")
+  final val StudyStart = makeTS(2006, 1, 1)
+  final val StudyEnd = makeTS(2009, 12, 31, 23, 59, 59)
 
   val outputColumns = List(
     col("patientID"),
@@ -19,8 +19,11 @@ object ObservationPeriodTransformer extends DatasetTransformer[FlatEvent, FlatEv
     lit("observationPeriod").as("eventId"),
     lit(1.0).as("weight"),
     col("observationStart").as("start"),
-    lit(ObservationEnd).as("end")
+    col("observationEnd").as("end")
   )
+
+  def computeObservationStart(data: DataFrame): DataFrame
+  def computeObservationEnd(data: DataFrame): DataFrame
 
   implicit class ObservationFunctions(data: DataFrame) {
 
@@ -41,11 +44,8 @@ object ObservationPeriodTransformer extends DatasetTransformer[FlatEvent, FlatEv
   }
 
   implicit class ObservationDataFrame(data: DataFrame) {
-    def withObservationStart: DataFrame = {
-      val window = Window.partitionBy("patientID")
-      val correctedStart = when(lower(col("category")) === "molecule", col("start")) // NULL otherwise
-      data.withColumn("observationStart", min(correctedStart).over(window).cast(TimestampType))
-    }
+    def withObservationStart: DataFrame = computeObservationStart(data)
+    def withObservationEnd: DataFrame = computeObservationEnd(data)
   }
 
   def transform(events: Dataset[FlatEvent]): Dataset[FlatEvent] = {
@@ -53,6 +53,7 @@ object ObservationPeriodTransformer extends DatasetTransformer[FlatEvent, FlatEv
 
     events.toDF
       .withObservationStart
+      .withObservationEnd
       .select(outputColumns: _*)
       .dropDuplicates(Seq("patientID"))
       .as[FlatEvent]

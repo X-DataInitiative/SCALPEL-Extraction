@@ -1,10 +1,11 @@
-package fr.polytechnique.cmap.cnam.filtering
+package fr.polytechnique.cmap.cnam.filtering.cox
 
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.filtering.FlatEvent
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
-class ExposuresTransformerSuite extends SharedContext {
+class CoxExposuresTransformerSuite extends SharedContext {
 
   "filterPatients" should "drop patients that we couldn't remove before calculating follow-up start" in {
     val sqlCtx = sqlContext
@@ -31,7 +32,7 @@ class ExposuresTransformerSuite extends SharedContext {
     ).toDF("patientID", "category")
 
     // When
-    import ExposuresTransformer.ExposuresDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxExposuresTransformer.ExposuresDataFrame
     val result = input.filterPatients.select("patientID", "category")
 
     // Then
@@ -70,7 +71,7 @@ class ExposuresTransformerSuite extends SharedContext {
 
 
     // When
-    import ExposuresTransformer.ExposuresDataFrame
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxExposuresTransformer.ExposuresDataFrame
     val result = input.withExposureStart.select("PatientID", "eventId", "exposureStart")
 
     // Then
@@ -127,7 +128,7 @@ class ExposuresTransformerSuite extends SharedContext {
     ).toDF
 
     // When
-    val result = ExposuresTransformer.transform(input)
+    val result = CoxExposuresTransformer.transform(input)
 
     // Then
     result.show

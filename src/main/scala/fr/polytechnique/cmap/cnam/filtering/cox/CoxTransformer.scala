@@ -1,9 +1,10 @@
-package fr.polytechnique.cmap.cnam.filtering
+package fr.polytechnique.cmap.cnam.filtering.cox
 
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.filtering.{DatasetTransformer, FlatEvent}
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
 // Start and End are expressed in month from the patient startObs
@@ -119,7 +120,7 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
   }
 
   def transform(events: Dataset[FlatEvent]): Dataset[CoxFeature] = {
-    import FollowUpEventsTransformer.FollowUpFunctions
+    import CoxFollowUpEventsTransformer.FollowUpFunctions
     import events.sqlContext.implicits._
 
     val exposures = events.toDF.repartition(col("patientID"))

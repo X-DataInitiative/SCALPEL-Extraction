@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.filtering
+package fr.polytechnique.cmap.cnam.filtering.cox
 
 import org.apache.spark.sql.Dataset
 

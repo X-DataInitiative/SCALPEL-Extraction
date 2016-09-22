@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.filtering
+package fr.polytechnique.cmap.cnam.filtering.cox
 
 import java.io.File
 import org.apache.commons.io.FileUtils
@@ -27,7 +27,7 @@ class CoxFeaturesWriterSuite extends SharedContext {
     val expectedCount = 3
 
     // When
-    import CoxFeaturesWriter.CoxFeatures
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxFeaturesWriter.CoxFeatures
     features.writeCSV(path)
     val result = sqlContext
       .read
