@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.filtering
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
 object IrBenPatientTransformer extends Transformer[Patient] with PatientsTransformer{
@@ -42,21 +41,9 @@ object IrBenPatientTransformer extends Transformer[Patient] with PatientsTransfo
     }
 
     def getDeathDate: DataFrame = {
-      val cleanData = data.filter(col("BEN_DCD_DTE").isNotNull)
-
-      val distinctPatients = cleanData.select("patientID").distinct
-      val distinctPatientsDeathDate = cleanData
-        .select("patientID", "BEN_DCD_DTE").distinct
-
-      if (distinctPatients.count != distinctPatientsDeathDate.count)
-        throw new Exception("One or more patients have conflicting DEATH DATES in IR_BEN_R")
-
-      val columnsToSelect: List[Column] = List(
-        col("patientID"),
-        col("BEN_DCD_DTE").cast(TimestampType).as("deathDate")
-      )
-
-      distinctPatientsDeathDate.select(columnsToSelect: _*)
+      data.filter(col("BEN_DCD_DTE").isNotNull)
+        .groupBy(col("patientID"))
+        .agg(min(col("BEN_DCD_DTE")).cast(TimestampType).as("deathDate"))
     }
 
     def getBirthDate: DataFrame = {

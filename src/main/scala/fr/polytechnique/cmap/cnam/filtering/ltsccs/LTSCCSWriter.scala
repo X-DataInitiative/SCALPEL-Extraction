@@ -1,10 +1,11 @@
 package fr.polytechnique.cmap.cnam.filtering.ltsccs
 
 import java.sql.Timestamp
-import java.time.ZoneOffset
+import org.apache.log4j.Logger
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.filtering._
+import fr.polytechnique.cmap.cnam.utilities.functions._
 
 // The following case classes are based on the formats defined in the following Confluence page:
 //   https://datainitiative.atlassian.net/wiki/display/CNAM/Coxph+data+format
@@ -45,11 +46,12 @@ case class ConditionEra(
 
 object LTSCCSWriter {
 
+  final val StudyStart = makeTS(2006, 1, 1)
+  final val StudyEnd = makeTS(2009, 12, 31, 23, 59, 59)
+  final val diseaseCodes = List("C67")
+
   private implicit class RichTimestamp(t: Timestamp) {
     def format: String = new java.text.SimpleDateFormat("yyyyMMdd").format(t)
-    def minusMonths(m: Int): Timestamp = {
-      Timestamp.from(t.toLocalDateTime.minusMonths(m).toInstant(ZoneOffset.ofHours(0)))
-    }
   }
 
   private implicit class OutputData(data: DataFrame) {
@@ -68,16 +70,9 @@ object LTSCCSWriter {
 
     import data.sqlContext.implicits._
 
-    def groundTruth: Dataset[GroundTruth] = {
-      Seq(
-        GroundTruth("PIOGLITAZONE", "PIOGLITAZONE", "C67", "C67", 1),
-        GroundTruth("INSULINE", "INSULINE", "C67", "C67", 0),
-        GroundTruth("SULFONYLUREA", "SULFONYLUREA", "C67", "C67", 0),
-        GroundTruth("METFORMINE", "METFORMINE", "C67", "C67", 0),
-        GroundTruth("BENFLUOREX", "BENFLUOREX", "C67", "C67", 0),
-        GroundTruth("ROSIGLITAZONE", "ROSIGLITAZONE", "C67", "C67", 0),
-        GroundTruth("OTHER", "OTHER", "C67", "C67", 0)
-      ).toDS
+    def groundTruth(moleculeNames: List[String], diseaseCodes: List[String]): Dataset[GroundTruth] = {
+      val list = for(m <- moleculeNames; d <- diseaseCodes) yield GroundTruth(m, m, d, d, 1)
+      list.toDS
     }
 
     def filterPatients(patientIDs: Dataset[String]): Dataset[FlatEvent] = {
@@ -96,52 +91,84 @@ object LTSCCSWriter {
           obs.patientID,
           "ObsPeriod",
           None,
-          obs.start.minusMonths(6).format,
+          obs.start.format,
           obs.end.get.format
         )
       ).distinct
     }
 
     def toDrugExposures: Dataset[DrugExposure] = {
-      data.map(
-        e => DrugExposure(e.patientID, "Rx", e.eventId, e.start.format, e.end.get.format)
-      ).distinct
+      data
+        .filter(e => e.start.after(StudyStart) && e.start.before(StudyEnd))
+        .map(
+          e => DrugExposure(e.patientID, "Rx", e.eventId, e.start.format, e.end.get.format)
+        ).distinct
     }
 
     def toConditionEras: Dataset[ConditionEra] = {
-      data.map(
-        disease => ConditionEra(
-          disease.patientID,
-          "Condition",
-          disease.eventId,
-          disease.start.format,
-          disease.start.format
-        )
-      ).distinct
+      val result = data
+        .filter(e => e.start.after(StudyStart) && e.start.before(StudyEnd))
+        .map(
+          disease => ConditionEra(
+            disease.patientID,
+            "Condition",
+            disease.eventId,
+            disease.start.format,
+            disease.start.format
+          )
+        ).distinct
+      result
     }
 
     def writeLTSCCS(path: String): Unit = {
-      val dir = if(path.last == '/') path else path + "/"
+      val rootDir = if (path.last == '/') path.dropRight(1) else path
 
-      val exposures: Dataset[FlatEvent] = data.filter(_.category == "exposure").persist()
-      val patients = exposures.toDF.dropDuplicates(Seq("patientID")).as[FlatEvent].persist()
-      val observationPeriods: Dataset[FlatEvent] = data.filter(_.category == "observationPeriod").persist()
-      val diseases: Dataset[FlatEvent] = data.filter(_.category == "disease").persist()
+      val observationPeriods: Dataset[FlatEvent] = data.filter(_.category == "observationPeriod")
+        .persist()
+      val diseases: Dataset[FlatEvent] = data.filter(_.category == "disease")
+        .persist()
+      val exposures: Dataset[FlatEvent] = data.filter(_.category == "exposure")
+        .persist()
 
-      val patientIDs: Dataset[String] = patients.map(_.patientID).persist()
+      val molecules: List[String] = List("ALL") ++ exposures.map(_.eventId).distinct.collect.toList
 
-      groundTruth.toDF.coalesce(1)
-        .writeCSV(dir + "GroundTruth.csv")
-      patients.toPersons.toDF.coalesce(1)
-        .writeCSV(dir + "Persons.txt")
-      observationPeriods.filterPatients(patientIDs).toObservationPeriods.toDF.coalesce(1)
-        .writeCSV(dir + "ObservationPeriods.txt")
-      exposures.toDrugExposures.toDF.coalesce(1)
-        .writeCSV(dir + "Drugexposures.txt")
-      diseases.filterPatients(patientIDs).toConditionEras.toDF.coalesce(1)
-        .writeCSV(dir + "Conditioneras.txt")
+      for (population <- List("all", "men"); molecule <- molecules) {
 
-      patientIDs.unpersist()
+        val moleculeExposures = {
+          if(molecule == "ALL") exposures
+          else exposures.filter(_.eventId == molecule)
+        }
+        val moleculesList = {
+          if(molecule == "ALL") molecules
+          else List(molecule)
+        }
+
+        val rawPatients = moleculeExposures.toDF.dropDuplicates(Seq("patientID")).as[FlatEvent]
+          .persist()
+
+        val patients = {
+          if (population == "men") rawPatients.filter(_.gender == 1)
+          else rawPatients
+        }
+        val patientIDs = patients.map(_.patientID)
+
+        val dir = s"$rootDir/$population/$molecule"
+        Logger.getLogger(getClass).info(s"Writing $dir...")
+
+        groundTruth(moleculesList, diseaseCodes).toDF.coalesce(1)
+          .writeCSV(s"$dir/GroundTruth.csv")
+        patients.toPersons.toDF.coalesce(1)
+          .writeCSV(s"$dir/Persons.txt")
+        observationPeriods.filterPatients(patientIDs).toObservationPeriods.toDF.coalesce(1)
+          .writeCSV(s"$dir/Observationperiods.txt")
+        moleculeExposures.filterPatients(patientIDs).toDrugExposures.toDF.coalesce(1)
+          .writeCSV(s"$dir/Drugexposures.txt")
+        diseases.filterPatients(patientIDs).toConditionEras.toDF.coalesce(1)
+          .writeCSV(s"$dir/Conditioneras.txt")
+
+        rawPatients.unpersist()
+      }
+
       diseases.unpersist()
       observationPeriods.unpersist()
       exposures.unpersist()

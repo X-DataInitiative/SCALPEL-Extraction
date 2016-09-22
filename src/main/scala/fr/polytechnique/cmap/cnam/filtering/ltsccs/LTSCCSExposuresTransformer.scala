@@ -59,6 +59,7 @@ object LTSCCSExposuresTransformer extends ExposuresTransformer {
 
       // I needed this redefinition of names because I was getting some very weird errors when using
       //   the .as() function and .select("table.*")
+      // Todo: try to understand the problem and solve it
       val adjustedTracklosses = tracklosses.select(
         col("patientID").as("t_patientID"),
         col("moleculeName").as("t_moleculeName"),

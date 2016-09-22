@@ -37,7 +37,6 @@ object FilteringMain extends Main {
       .cache()
 
     logger.info("Caching drug events...")
-    drugFlatEvents.show
     logger.info("Number of drug events: " + drugFlatEvents.count)
     logger.info("Caching disease events...")
     logger.info("Number of disease events: " + diseaseFlatEvents.count)
@@ -47,7 +46,8 @@ object FilteringMain extends Main {
     val observationFlatEvents = CoxObservationPeriodTransformer.transform(drugFlatEvents)
 
     val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(sources)
-    val tracklossFlatEvents = tracklossEvents.as("left")
+    val tracklossFlatEvents = tracklossEvents
+      .as("left")
       .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
       .map((FlatEvent.merge _).tupled)
       .cache()
@@ -91,11 +91,12 @@ object FilteringMain extends Main {
     logger.info("Preparing for LTSCCS")
     val ltsccsExposures = LTSCCSExposuresTransformer.transform(drugFlatEvents)
     val ltsccsObservationPeriods = LTSCCSObservationPeriodTransformer.transform(drugFlatEvents)
+    val ltsccsDiseases = diseaseFlatEvents.toDF.where(col("start").isNotNull).as[FlatEvent]
     val coxPatients = exposures.map(_.patientID).distinct.persist()
 
     val ltsccsFlatEvents: Dataset[FlatEvent] =
       drugFlatEvents
-        .union(diseaseFlatEvents)
+        .union(ltsccsDiseases)
         .union(ltsccsExposures)
         .union(ltsccsObservationPeriods)
         .joinWith(coxPatients.as("p"), col("patientID") === col("p.value")).map{
