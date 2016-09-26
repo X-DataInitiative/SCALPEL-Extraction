@@ -11,8 +11,9 @@ import fr.polytechnique.cmap.cnam.utilities.ColumnUtilities._
 //   the end as the minimum between the death date and the end of the study
 object LTSCCSObservationPeriodTransformer extends ObservationPeriodTransformer {
 
+  val window = Window.partitionBy("patientID")
+
   override def computeObservationStart(data: DataFrame): DataFrame =  {
-    val window = Window.partitionBy("patientID")
     val correctedStart = when(
       lower(col("category")) === "molecule" && (col("start") >= StudyStart), col("start")
     )
@@ -20,6 +21,17 @@ object LTSCCSObservationPeriodTransformer extends ObservationPeriodTransformer {
   }
 
   override def computeObservationEnd(data: DataFrame): DataFrame = {
-    data.withColumn("observationEnd", minColumn(col("deathDate"), lit(StudyEnd)))
+    val firstCorrectTrackloss = min(
+      when(col("category") === "trackloss" && (col("start") > col("observationStart")), col("start"))
+    ).over(window)
+
+    data
+      .withColumn("globalTrackloss", firstCorrectTrackloss)
+      .withColumn("observationEnd", minColumn(
+        col("globalTrackloss"),
+        col("deathDate"),
+        lit(StudyEnd))
+      )
+      .drop("globalTrackloss")
   }
 }
