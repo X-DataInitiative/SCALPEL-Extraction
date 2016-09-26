@@ -268,21 +268,16 @@ class LTSCCSWriterSuite extends SharedContext {
     def readFile(path: String) = {
       sqlCtx.read.format("com.databricks.spark.csv").option("header", "true").load(path)
     }
-    val expectedCounts = List(1, 2, 2, 2, 3, 1, 2, 2, 2, 0)
+    val expectedCounts = List(1, 3, 3, 4, 3)
 
     // When
     input.writeLTSCCS(outPath)
     val resultedCounts = List(
-      s"$outPath/all/PIOGLITAZONE/GroundTruth.csv",
-      s"$outPath/all/PIOGLITAZONE/Persons.txt",
-      s"$outPath/all/PIOGLITAZONE/Observationperiods.txt",
-      s"$outPath/all/PIOGLITAZONE/Drugexposures.txt",
-      s"$outPath/all/PIOGLITAZONE/Conditioneras.txt",
-      s"$outPath/all/SULFONYLUREA/GroundTruth.csv",
-      s"$outPath/all/SULFONYLUREA/Persons.txt",
-      s"$outPath/all/SULFONYLUREA/Observationperiods.txt",
-      s"$outPath/all/SULFONYLUREA/Drugexposures.txt",
-      s"$outPath/all/SULFONYLUREA/Conditioneras.txt"
+      s"$outPath/all/ALL/GroundTruth.csv",
+      s"$outPath/all/ALL/Persons.txt",
+      s"$outPath/all/ALL/Observationperiods.txt",
+      s"$outPath/all/ALL/Drugexposures.txt",
+      s"$outPath/all/ALL/Conditioneras.txt"
     ).map(p => readFile(p).count)
 
     // Then

@@ -6,7 +6,9 @@ import org.apache.spark.sql.types.{BooleanType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.filtering.{ExposuresTransformer, FlatEvent}
 
-object LTSCCSExposuresTransformer extends ExposuresTransformer {
+class LTSCCSExposuresTransformer(
+    exposureStartThreshold: Int,
+    exposureEndThreshold: Int) extends ExposuresTransformer {
 
   val inputColumns = Seq(
     col("patientID"),
@@ -32,10 +34,7 @@ object LTSCCSExposuresTransformer extends ExposuresTransformer {
 
   implicit class LTSCCSExposuresDataFrame(data: DataFrame) {
 
-    final val ExposureStartThreshold = 6
-    final val ExposureEndThreshold = 4
     final val ObservationRunInPeriod = 6
-
     val window = Window.partitionBy("patientID", "moleculeName")
     val orderedWindow = window.orderBy("eventDate")
 
@@ -73,7 +72,7 @@ object LTSCCSExposuresTransformer extends ExposuresTransformer {
         .where(
           col("nextDate").isNull ||   // The last line of the ordered window (lead("eventDate") == null)
           (col("rank") === 1) ||      // The first line of the ordered window
-          (col("delta") > ExposureEndThreshold)  // All the lines that represent a trackloss
+          (col("delta") > exposureEndThreshold)  // All the lines that represent a trackloss
         )
         .select(col("patientID"), col("moleculeName"), col("eventDate"))
         .withColumn("tracklossDate", lead(col("eventDate"), 1).over(orderedWindow))
@@ -111,7 +110,7 @@ object LTSCCSExposuresTransformer extends ExposuresTransformer {
 
       // We take the first pair of purchases that happened within the threshold and set the
       //   the exposureStart date as the date of the second purchase of the pair.
-      val adjustedNextDate: Column = when(col("delta") <= ExposureStartThreshold, col("nextDate"))
+      val adjustedNextDate: Column = when(col("delta") <= exposureStartThreshold, col("nextDate"))
       data.withColumn("exposureStart", min(adjustedNextDate).over(window))
     }
 
@@ -152,3 +151,6 @@ object LTSCCSExposuresTransformer extends ExposuresTransformer {
     transform(input, filterPatients=true)
   }
 }
+
+// Default instantiation can be accessed by the companion object:
+object LTSCCSExposuresTransformer extends LTSCCSExposuresTransformer(6, 4)

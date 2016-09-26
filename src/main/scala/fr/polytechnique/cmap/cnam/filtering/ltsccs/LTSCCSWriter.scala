@@ -48,7 +48,8 @@ object LTSCCSWriter {
 
   final val StudyStart = makeTS(2006, 1, 1)
   final val StudyEnd = makeTS(2009, 12, 31, 23, 59, 59)
-  final val diseaseCodes = List("C67")
+  final val DiseaseCodes = List("C67")
+  final val Molecules = List("ALL")
 
   private implicit class RichTimestamp(t: Timestamp) {
     def format: String = new java.text.SimpleDateFormat("yyyyMMdd").format(t)
@@ -130,16 +131,14 @@ object LTSCCSWriter {
       val exposures: Dataset[FlatEvent] = data.filter(_.category == "exposure")
         .persist()
 
-      val molecules: List[String] = List("ALL") ++ exposures.map(_.eventId).distinct.collect.toList
-
-      for (population <- List("all", "men"); molecule <- molecules) {
+      for (population <- List("all", "men"); molecule <- Molecules) {
 
         val moleculeExposures = {
           if(molecule == "ALL") exposures
           else exposures.filter(_.eventId == molecule)
         }
         val moleculesList = {
-          if(molecule == "ALL") molecules
+          if(molecule == "ALL") Molecules
           else List(molecule)
         }
 
@@ -155,7 +154,7 @@ object LTSCCSWriter {
         val dir = s"$rootDir/$population/$molecule"
         Logger.getLogger(getClass).info(s"Writing $dir...")
 
-        groundTruth(moleculesList, diseaseCodes).toDF.coalesce(1)
+        groundTruth(moleculesList, DiseaseCodes).toDF.coalesce(1)
           .writeCSV(s"$dir/GroundTruth.csv")
         patients.toPersons.toDF.coalesce(1)
           .writeCSV(s"$dir/Persons.txt")
