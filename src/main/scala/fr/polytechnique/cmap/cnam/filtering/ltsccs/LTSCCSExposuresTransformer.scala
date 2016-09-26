@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.filtering.ltsccs
 
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.{BooleanType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.filtering.{ExposuresTransformer, FlatEvent}
 
@@ -33,25 +34,49 @@ object LTSCCSExposuresTransformer extends ExposuresTransformer {
 
     final val ExposureStartThreshold = 6
     final val ExposureEndThreshold = 4
+    final val ObservationRunInPeriod = 6
 
     val window = Window.partitionBy("patientID", "moleculeName")
-    val orderedWin = window.orderBy("eventDate")
+    val orderedWindow = window.orderBy("eventDate")
 
-    def withNextDate: DataFrame = data.withColumn("nextDate", lead(col("eventDate"), 1).over(orderedWin))
-    def withDelta: DataFrame = data.withColumn("delta", months_between(col("nextDate"), col("eventDate")))
+    def withNextDate: DataFrame = {
+      data.withColumn("nextDate", lead(col("eventDate"), 1).over(orderedWindow))
+    }
 
-    def filterPatients: DataFrame = data
+    def withDelta: DataFrame = {
+      data.withColumn("delta", months_between(col("nextDate"), col("eventDate")))
+    }
+
+    def filterPatients: DataFrame = {
+      val patientWindow = Window.partitionBy("patientID")
+
+      // Drop patients whose got a disease within first 6 months of observation
+      // Note: this filter will not make a big difference if we keep joining the LTSCCS exposures
+      //   with the Cox patients in the Main class.
+      val runInEnd = add_months(col("observationStart"), ObservationRunInPeriod).cast(TimestampType)
+      val diseaseFilter = min(
+        when(
+          col("category") === "disease" && (col("start") <= runInEnd),
+          lit(0)
+        ).otherwise(lit(1))
+      ).over(patientWindow).cast(BooleanType)
+
+      data
+        .withColumn("diseaseFilter", diseaseFilter)
+        .where(col("diseaseFilter"))
+        .drop("diseaseFilter")
+    }
 
     def getTracklosses: DataFrame = {
       data
-        .withColumn("rank", row_number().over(orderedWin)) // This is used to find the first line of the window
+        .withColumn("rank", row_number().over(orderedWindow)) // This is used to find the first line of the window
         .where(
           col("nextDate").isNull ||   // The last line of the ordered window (lead("eventDate") == null)
           (col("rank") === 1) ||      // The first line of the ordered window
           (col("delta") > ExposureEndThreshold)  // All the lines that represent a trackloss
         )
         .select(col("patientID"), col("moleculeName"), col("eventDate"))
-        .withColumn("tracklossDate", lead(col("eventDate"), 1).over(orderedWin))
+        .withColumn("tracklossDate", lead(col("eventDate"), 1).over(orderedWindow))
         .where(col("tracklossDate").isNotNull)
     }
 
@@ -92,19 +117,22 @@ object LTSCCSExposuresTransformer extends ExposuresTransformer {
 
   }
 
-  override def transform(input: Dataset[FlatEvent]): Dataset[FlatEvent] = {
+  def transform(input: Dataset[FlatEvent], filterPatients: Boolean): Dataset[FlatEvent] = {
     import input.sqlContext.implicits._
+    import LTSCCSObservationPeriodTransformer.ObservationFunctions
 
-    val events = input.toDF
-      .filterPatients
-      .where(col("category") === "molecule")
-      .select(inputColumns: _*)
-      .repartition(col("patientID"), col("moleculeName"))
-      .persist()
+    val inputDF = input.toDF.repartition(col("patientID"))
+    val events = if(filterPatients)
+      inputDF.withObservationPeriodFromEvents.filterPatients
+    else
+      inputDF
 
     val eventsWithDelta = events
+      .where(col("category") === "molecule")
+      .select(inputColumns: _*)
       .withNextDate
       .withDelta
+      .persist()
 
     val tracklosses = eventsWithDelta.getTracklosses
 
@@ -116,7 +144,11 @@ object LTSCCSExposuresTransformer extends ExposuresTransformer {
       .dropDuplicates(Seq("patientID", "eventId", "start", "end"))
       .as[FlatEvent]
 
-    events.unpersist()
+    eventsWithDelta.unpersist()
     result
+  }
+
+  override def transform(input: Dataset[FlatEvent]): Dataset[FlatEvent] = {
+    transform(input, filterPatients=true)
   }
 }

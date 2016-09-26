@@ -89,9 +89,17 @@ object FilteringMain extends Main {
     coxFeatures.writeCSV(config.getString("paths.output.coxFeaturesCsv"))
 
     logger.info("Preparing for LTSCCS")
-    val ltsccsExposures = LTSCCSExposuresTransformer.transform(drugFlatEvents)
-    val ltsccsObservationPeriods = LTSCCSObservationPeriodTransformer.transform(drugFlatEvents)
+    val ltsccsObservationPeriods = LTSCCSObservationPeriodTransformer.transform(
+      drugFlatEvents
+        .union(tracklossFlatEvents)
+    )
     val ltsccsDiseases = diseaseFlatEvents.toDF.where(col("start").isNotNull).as[FlatEvent]
+    val ltsccsExposures = LTSCCSExposuresTransformer.transform(
+      drugFlatEvents
+        .union(ltsccsDiseases)
+        .union(ltsccsObservationPeriods)
+    )
+
     val coxPatients = exposures.map(_.patientID).distinct.persist()
 
     val ltsccsFlatEvents: Dataset[FlatEvent] =

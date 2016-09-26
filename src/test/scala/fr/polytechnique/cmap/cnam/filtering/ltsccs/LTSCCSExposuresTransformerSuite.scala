@@ -42,7 +42,7 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
 
 
     // When
-    import fr.polytechnique.cmap.cnam.filtering.ltsccs.LTSCCSExposuresTransformer.LTSCCSExposuresDataFrame
+    import LTSCCSExposuresTransformer.LTSCCSExposuresDataFrame
     val result = input.withNextDate
 
     // Then
@@ -86,8 +86,36 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
     ).toDF("PatientID", "moleculeName", "eventDate", "nextDate", "delta")
 
     // When
-    import fr.polytechnique.cmap.cnam.filtering.ltsccs.LTSCCSExposuresTransformer.LTSCCSExposuresDataFrame
+    import LTSCCSExposuresTransformer.LTSCCSExposuresDataFrame
     val result = input.withDelta
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
+    assert(result === expected)
+  }
+
+  "filterPatients" should "remove unwanted patients" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input = Seq(
+      ("Patient_A", "molecule", makeTS(2009, 10, 1), makeTS(2009, 10, 1)),
+      ("Patient_A", "molecule", makeTS(2009, 11, 1), makeTS(2009, 10, 1)),
+      ("Patient_A", "disease",  makeTS(2009, 12, 1), makeTS(2009, 10, 1)),
+      ("Patient_B", "molecule", makeTS(2008,  4, 1), makeTS(2008,  4, 1)),
+      ("Patient_B", "molecule", makeTS(2008,  4, 1), makeTS(2008,  4, 1))
+    ).toDF("patientID", "category", "start", "observationStart")
+    val expected = Seq(
+      ("Patient_B", "molecule", makeTS(2008,  4, 1), makeTS(2008,  4, 1)),
+      ("Patient_B", "molecule", makeTS(2008,  4, 1), makeTS(2008,  4, 1))
+    ).toDF("patientID", "category", "start", "observationStart")
+
+    // When
+    import LTSCCSExposuresTransformer.LTSCCSExposuresDataFrame
+    val result = input.filterPatients
 
     // Then
     import RichDataFrames._
@@ -132,7 +160,7 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
     ).toDF("patientID", "moleculeName", "eventDate", "tracklossDate")
 
     // When
-    import fr.polytechnique.cmap.cnam.filtering.ltsccs.LTSCCSExposuresTransformer.LTSCCSExposuresDataFrame
+    import LTSCCSExposuresTransformer.LTSCCSExposuresDataFrame
     val result = input.withNextDate.withDelta.getTracklosses
 
     // Then
@@ -198,7 +226,7 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
     ).toDF("patientID", "moleculeName", "eventDate", "exposureEnd")
 
     // When
-    import fr.polytechnique.cmap.cnam.filtering.ltsccs.LTSCCSExposuresTransformer.LTSCCSExposuresDataFrame
+    import LTSCCSExposuresTransformer.LTSCCSExposuresDataFrame
     val result = input.withNextDate.withDelta.withExposureEnd(tracklosses)
       .select("patientID", "moleculeName", "eventDate", "exposureEnd")
 
@@ -269,7 +297,7 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
     ).toDF("patientID", "moleculeName", "eventDate", "exposureStart")
 
     // When
-    import fr.polytechnique.cmap.cnam.filtering.ltsccs.LTSCCSExposuresTransformer.LTSCCSExposuresDataFrame
+    import LTSCCSExposuresTransformer.LTSCCSExposuresDataFrame
     val result = input.withNextDate.withDelta.withExposureStart
       .select("patientID", "moleculeName", "eventDate", "exposureStart")
 
@@ -287,6 +315,8 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
 
     // Given
     val input = Seq(
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2011, 12, 31)), "observationPeriod",
+        "observationPeriod", 1.0, makeTS(2008,  1, 1), Some(makeTS(2011, 12, 31))),
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2011, 12, 31)), "molecule",
         "PIOGLITAZONE", 1.0, makeTS(2008,  1, 1), None),
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2011, 12, 31)), "molecule",
@@ -313,6 +343,8 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
         "SULFONYLUREA", 1.0, makeTS(2009, 11, 1), None),
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2011, 12, 31)), "molecule",
         "SULFONYLUREA", 1.0, makeTS(2009, 12, 1), None),
+      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31)), "observationPeriod",
+        "observationPeriod", 1.0, makeTS(2008,  1, 1), Some(makeTS(2011, 12, 31))),
       FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31)), "molecule",
         "PIOGLITAZONE", 1.0, makeTS(2008,  1, 1), None),
       FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31)), "molecule",
@@ -320,7 +352,17 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
       FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31)), "molecule",
         "PIOGLITAZONE", 1.0, makeTS(2008,  3, 1), None),
       FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31)), "molecule",
-        "PIOGLITAZONE", 1.0, makeTS(2008,  4, 1), None)
+        "PIOGLITAZONE", 1.0, makeTS(2008,  4, 1), None),
+      FlatEvent("Patient_C", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31)), "observationPeriod",
+        "observationPeriod", 1.0, makeTS(2008,  1, 1), Some(makeTS(2011, 12, 31))),
+      FlatEvent("Patient_C", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31)), "disease",
+        "C67", 1.0, makeTS(2008,  4, 1), None),
+      FlatEvent("Patient_C", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31)), "molecule",
+        "PIOGLITAZONE", 1.0, makeTS(2008,  1, 1), None),
+      FlatEvent("Patient_C", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31)), "molecule",
+        "PIOGLITAZONE", 1.0, makeTS(2008,  2, 1), None),
+        FlatEvent("Patient_C", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31)), "molecule",
+        "PIOGLITAZONE", 1.0, makeTS(2008,  3, 1), None)
     ).toDS
 
     val expected = Seq(
