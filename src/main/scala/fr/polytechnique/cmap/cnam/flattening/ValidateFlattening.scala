@@ -17,8 +17,8 @@ object ValidateFlattening extends Main {
 
   implicit class ConvertColNameDelimiters(data: DataFrame) {
 
-    val oldDelimiter: String = "\\."
-    val newDelimiter: String = "_"
+    final val OldDelimiter: String = "\\."
+    final val NewDelimiter: String = "__"
 
     def prefixColumnNameWithDelimiter(prefix: String, ignoreColumns: Seq[String]): Seq[Column] = {
       data.columns
@@ -27,7 +27,7 @@ object ValidateFlattening extends Main {
             if (ignoreColumns.contains(columnName))
               col(columnName)
             else
-              col(columnName).as(prefix + newDelimiter + columnName)
+              col(columnName).as(prefix + NewDelimiter + columnName)
           })
     }
 
@@ -35,9 +35,9 @@ object ValidateFlattening extends Main {
       data.columns
         .map(
           columnName => {
-            val splittedColName = columnName.split(oldDelimiter)
+            val splittedColName = columnName.split(OldDelimiter)
             if (splittedColName.size == 2)
-              col("`" + columnName + "`").as(splittedColName(0) + newDelimiter + splittedColName(1))
+              col("`" + columnName + "`").as(splittedColName(0) + NewDelimiter + splittedColName(1))
             else
               col(columnName)
           })
@@ -54,40 +54,70 @@ object ValidateFlattening extends Main {
     def cleanDFColumnNames: DataFrame = {
       data.select(changeColumnNameDelimiter: _*)
     }
+
+    def computeStatForComparison: DataFrame = {
+      Comparator.unifyColNamesAndDescribeDistinct(data)
+    }
+
+    def computeStatForComparison(subDfs: Seq[DataFrame]): DataFrame = {
+      Comparator.unifyColNamesAndDescribeDistinct(data, subDfs: _*)
+    }
   }
 
-  def validateJoinedTables() = {
-    val joinTables = FlatteningConfig.joinTablesConfig
+  implicit class JoinedTableUtilities(joinedTableObject: JoinedTable) {
+
+    def getFlatDfWithCleanColumnNames: DataFrame = {
+      joinedTableObject
+        .joinedTable
+        .cleanDFColumnNames
+    }
+
+    def getSubDfWithPrefixedColumnNames: Seq[DataFrame] = {
+      joinedTableObject
+        .otherTables
+        .map {
+          case (subDfName: String, df: DataFrame) =>
+            df.prefixColumnNames(subDfName, joinedTableObject.joinKeys)
+        }.toSeq
+    }
+  }
+
+  def getJoinedTablePairsFromConfig: Map[String, JoinedTable] = {
+
+    FlatteningConfig.joinTablesConfig
       .map(
         config => {
           config.name -> new JoinedTable(config, sqlContext)
         }
       ).toMap
+  }
 
-    joinTables.foreach {
-      case (dfName, joinedTable) => {
-        val cleanedFlatDf = joinedTable.joinedTable.cleanDFColumnNames
+  def storeFlatAndInputDfsStat(flatDfName: String,
+                               flatDfStat: DataFrame,
+                               inputDfsStat: DataFrame) = {
+    flatDfStat.writeParquet(FlatteningConfig.outputPath + s"/joins/stat/${flatDfName}_flat")
+    inputDfsStat.writeParquet(FlatteningConfig.outputPath + s"/joins/stat/${flatDfName}_input")
+  }
 
-        val cleanedSubDfs: Seq[DataFrame] = joinedTable.otherTables.
-          map(nameDfPair => nameDfPair._2.prefixColumnNames(nameDfPair._1,
-            joinedTable.joinKeys)).toSeq
+  def computeStoreFlatAndInputDfsStat() = {
+    val joinedTablePairs = getJoinedTablePairsFromConfig
 
-        val flatDfResult = Comparator.unifyColNamesAndDescribeDistinct(cleanedFlatDf)
-        val inputDfsResult = Comparator.unifyColNamesAndDescribeDistinct(joinedTable.mainTable,
-          cleanedSubDfs: _*)
+    joinedTablePairs.foreach {
+      case (flatDfName, joinedTableObject) => {
+        val cleanedFlatDf: DataFrame = joinedTableObject.getFlatDfWithCleanColumnNames
+        val cleanedSubDfs: Seq[DataFrame] = joinedTableObject.getSubDfWithPrefixedColumnNames
+        val mainTable: DataFrame = joinedTableObject.mainTable
 
-        flatDfResult.writeParquet(FlatteningConfig.outputPath + s"/joins/stat/${dfName}_flat")
-        inputDfsResult.writeParquet(FlatteningConfig.outputPath + s"/joins/stat/${dfName}_input")
+        val flatDfStat = cleanedFlatDf.computeStatForComparison
+        val inputDfsStat = mainTable.computeStatForComparison(cleanedSubDfs)
 
-        flatDfResult.select("ColName").collect foreach println
-        println()
-        inputDfsResult.select("ColName").collect foreach println
+        storeFlatAndInputDfsStat(flatDfName, flatDfStat, inputDfsStat)
       }
     }
   }
 
   def main(args: Array[String]){
     startContext( )
-    validateJoinedTables()
+    computeStoreFlatAndInputDfsStat()
   }
 }

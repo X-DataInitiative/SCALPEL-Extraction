@@ -24,7 +24,7 @@ class ValidateFlatteningSuite extends SharedContext {
     val expected: DataFrame = Seq(
       ("Column1", 7, 8, 7),
       ("Column2", 3, 4, 5)
-    ).toDF("column1", "column_2", "column_3", "column4")
+    ).toDF("column1", "column__2", "column__3", "column4")
 
     // When
     import ValidateFlattening._
@@ -50,7 +50,7 @@ class ValidateFlatteningSuite extends SharedContext {
     val expected: DataFrame = Seq(
       ("Column1", 9, 8, 7),
       ("Column2", 3, 4, 5)
-    ).toDF("anyText_column1", "anyText_column2", "anyText_column3", "anyText_column4")
+    ).toDF("anyText__column1", "anyText__column2", "anyText__column3", "anyText__column4")
 
     // When
     import ValidateFlattening._
@@ -75,7 +75,7 @@ class ValidateFlatteningSuite extends SharedContext {
     val expected: DataFrame = Seq(
       ("Column1", 9, 8, 7),
       ("Column2", 3, 4, 5)
-    ).toDF("column1", "anyText_column2", "anyText_column3", "column4")
+    ).toDF("column1", "anyText__column2", "anyText__column3", "column4")
 
     // When
     import ValidateFlattening._
