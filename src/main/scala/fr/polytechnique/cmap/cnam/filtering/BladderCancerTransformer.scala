@@ -1,11 +1,9 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.TimestampType
+import org.apache.spark.sql.{DataFrame, Dataset}
 
-
-object BladderCancerTransformer extends Transformer[Event] with DiseaseTransformer{
+object BladderCancerTransformer extends TargetDiseaseTransformer {
 
   final val AssociateDiseases = List("C77", "C78", "C79")
 
@@ -19,15 +17,6 @@ object BladderCancerTransformer extends Transformer[Event] with DiseaseTransform
     col("`MCO_B.SEJ_NBJ`").as("stayLength"),
     col("`ENT_DAT`").as("stayStartTime").cast("Timestamp"),
     col("`SOR_DAT`").as("stayEndDate").cast("Timestamp")
-  )
-
-  override val outputColumns: List[Column] = List(
-    col("patientID"),
-    lit("disease").as("category"),
-    lit("bladderCancer").as("eventId"),
-    lit(1.00).as("weight"),
-    col("eventDate").cast(TimestampType).as("start"),
-    lit(null).cast(TimestampType).as("end")
   )
 
   implicit class ExtraDf(data: DataFrame) {

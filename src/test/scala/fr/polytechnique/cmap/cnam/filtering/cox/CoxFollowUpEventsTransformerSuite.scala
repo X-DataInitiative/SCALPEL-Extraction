@@ -150,7 +150,7 @@ class CoxFollowUpEventsTransformerSuite extends SharedContext {
       // Cancer:
       ("Patient_A", Some(makeTS(2008, 1, 1)), "molecule", "PIOGLITAZONE", makeTS(2007, 12, 1), None),
       ("Patient_A", Some(makeTS(2008, 1, 1)), "molecule", "PIOGLITAZONE", makeTS(2007, 11, 1), None),
-      ("Patient_A", Some(makeTS(2008, 1, 1)), "disease", "C67", makeTS(2007, 12, 1), None),
+      ("Patient_A", Some(makeTS(2008, 1, 1)), "disease", "targetDisease", makeTS(2007, 12, 1), None),
       // Death:
       ("Patient_B", Some(makeTS(2008, 1, 1)), "molecule", "PIOGLITAZONE", makeTS(2007, 12, 1), None),
       ("Patient_B", Some(makeTS(2008, 1, 1)), "molecule", "PIOGLITAZONE", makeTS(2007, 11, 1), None),
@@ -162,7 +162,7 @@ class CoxFollowUpEventsTransformerSuite extends SharedContext {
       // End of Observation:
       ("Patient_D", Some(makeTS(2016, 1, 1)), "molecule", "PIOGLITAZONE", makeTS(2016, 1, 1), None),
       ("Patient_D", Some(makeTS(2016, 1, 1)), "molecule", "PIOGLITAZONE", makeTS(2016, 2, 1), None),
-      ("Patient_D", Some(makeTS(2016, 1, 1)), "disease", "C67", makeTS(2016, 3, 1), None)
+      ("Patient_D", Some(makeTS(2016, 1, 1)), "disease", "targetDisease", makeTS(2016, 3, 1), None)
     )
       .toDF("patientID", "deathDate", "category", "eventId", "start", "trackloss")
       .withColumn("observationEnd", lit(makeTS(2009, 12, 31, 23, 59, 59)))

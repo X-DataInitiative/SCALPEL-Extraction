@@ -10,6 +10,8 @@ import fr.polytechnique.cmap.cnam.filtering.ltsccs._
 
 object FilteringMain extends Main {
 
+  final val CancerDefinition = "broad" // or "narrow"
+
   def appName = "Filtering"
 
   def runETL(sqlContext: HiveContext, config: Config): Unit = {
@@ -24,7 +26,14 @@ object FilteringMain extends Main {
     logger.info("(Lazy) Transforming drug events...")
     val drugEvents: Dataset[Event] = DrugEventsTransformer.transform(sources)
     logger.info("(Lazy) Transforming disease events...")
-    val diseaseEvents: Dataset[Event] = DiseaseTransformer.transform(sources)
+    val broadDiseaseEvents: Dataset[Event] = DiseaseTransformer.transform(sources)
+    val targetDiseaseEvents: Dataset[Event] = (
+      if (CancerDefinition == "broad")
+        broadDiseaseEvents
+      else
+        TargetDiseaseTransformer.transform(sources)
+    ).map(_.copy(eventId = "targetDisease"))
+    val diseaseEvents = broadDiseaseEvents.union(targetDiseaseEvents)
 
     val drugFlatEvents = drugEvents.as("left")
       .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))

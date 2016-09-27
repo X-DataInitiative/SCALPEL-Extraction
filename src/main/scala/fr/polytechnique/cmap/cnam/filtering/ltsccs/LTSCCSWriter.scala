@@ -126,10 +126,11 @@ object LTSCCSWriter {
 
       val observationPeriods: Dataset[FlatEvent] = data.filter(_.category == "observationPeriod")
         .persist()
-      val diseases: Dataset[FlatEvent] = data.filter(_.category == "disease")
+      val diseases: Dataset[FlatEvent] = data.filter(e => e.category == "disease" && e.eventId == "targetDisease")
         .persist()
       val exposures: Dataset[FlatEvent] = data.filter(_.category == "exposure")
         .persist()
+      val allMolecules: List[String] = exposures.map(_.eventId).distinct.collect.toList
 
       for (population <- List("all", "men"); molecule <- Molecules) {
 
@@ -138,7 +139,7 @@ object LTSCCSWriter {
           else exposures.filter(_.eventId == molecule)
         }
         val moleculesList = {
-          if(molecule == "ALL") Molecules
+          if(molecule == "ALL") allMolecules
           else List(molecule)
         }
 

@@ -72,7 +72,7 @@ object CoxFollowUpEventsTransformer extends DatasetTransformer[FlatEvent, FlatEv
       val window = Window.partitionBy("patientID")
 
       val firstTargetDisease = min(
-        when(col("category") === "disease" && col("eventId") === diseaseCode, col("start"))
+        when(col("category") === "disease" && col("eventId") === "targetDisease", col("start"))
       ).over(window)
 
       data
