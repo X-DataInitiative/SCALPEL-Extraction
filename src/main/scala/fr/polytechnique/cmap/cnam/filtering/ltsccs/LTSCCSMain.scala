@@ -37,7 +37,7 @@ object LTSCCSMain extends Main {
       val dir = s"$outRootDir/cross-validation/start_$startThreshold/end_$endThreshold/filter_$filterPatients"
 
       val ltsccsExposures = LTSCCSExposuresTransformer.transform(
-        flatEvents.union(ltsccsObservationPeriods)//, filterPatients // We need to merge branch CNAM-117
+        flatEvents.union(ltsccsObservationPeriods), filterPatients
       )
 
       val ltsccsFinalEvents = flatEvents.union(ltsccsObservationPeriods).union(ltsccsExposures).as("e")
