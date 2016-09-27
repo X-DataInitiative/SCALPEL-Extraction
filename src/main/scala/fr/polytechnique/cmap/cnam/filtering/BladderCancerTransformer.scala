@@ -1,0 +1,64 @@
+package fr.polytechnique.cmap.cnam.filtering
+
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import org.apache.spark.sql.functions._
+import fr.polytechnique.cmap.cnam.filtering
+import org.apache.spark.sql.types.TimestampType
+
+
+object BladderCancerTransformer extends Transformer[Event] with DiseaseTransformer{
+
+  final val AssociateDiseases = List("C77", "C78", "C79")
+
+  val inputColumns = List(
+    col("NUM_ENQ").as("patientID"),
+    col("`MCO_B.DGN_PAL`").as("DP"),
+    col("`MCO_B.DGN_REL`").as("DR"),
+    col("`MCO_D.ASS_DGN`").as("DAS"),
+    col("`MCO_B.SOR_MOI`").as("stayMonthEndDate"),
+    col("`MCO_B.SOR_ANN`").as("stayYearEndDate"),
+    col("`MCO_B.SEJ_NBJ`").as("stayLength"),
+    col("`ENT_DAT`").as("stayStartTime").cast("Timestamp"),
+    col("`SOR_DAT`").as("stayEndDate").cast("Timestamp")
+  )
+
+  override val outputColumns: List[Column] = List(
+    col("patientID"),
+    lit("disease").as("category"),
+    lit("bladderCancer").as("eventId"),
+    lit(1.00).as("weight"),
+    col("eventDate").cast(TimestampType).as("start"),
+    lit(null).cast(TimestampType).as("end")
+  )
+
+  implicit class ExtraDf(data: DataFrame) {
+
+    def extractNarrowCancer: DataFrame = {
+      data.filter(
+        col("DP").startsWith(DiseaseCode) or
+        col("DR").startsWith(DiseaseCode) or
+        (col("DAS").startsWith(DiseaseCode) and col("DP").startsWith(AssociateDiseases(0))) or
+        (col("DAS").startsWith(DiseaseCode) and col("DP").startsWith(AssociateDiseases(1))) or
+        (col("DAS").startsWith(DiseaseCode) and col("DP").startsWith(AssociateDiseases(2))) or
+        (col("DAS").startsWith(DiseaseCode) and col("DR").startsWith(AssociateDiseases(0))) or
+        (col("DAS").startsWith(DiseaseCode) and col("DR").startsWith(AssociateDiseases(1))) or
+        (col("DAS").startsWith(DiseaseCode) and col("DR").startsWith(AssociateDiseases(2)))
+      )
+    }
+  }
+
+  import McoDiseaseTransformer._
+
+  override def transform(sources: Sources): Dataset[Event] = {
+    val mco = sources.pmsiMco.get
+    import mco.sqlContext.implicits._
+
+    mco
+      .select(inputColumns:_*)
+      .distinct()
+      .extractNarrowCancer
+      .estimateStayStartTime
+      .select(outputColumns:_*)
+      .as[Event]
+  }
+}
