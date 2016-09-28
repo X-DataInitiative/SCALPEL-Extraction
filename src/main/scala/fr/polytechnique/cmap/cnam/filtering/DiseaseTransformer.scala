@@ -10,7 +10,7 @@ import org.apache.spark.sql.types.TimestampType
 trait DiseaseTransformer extends Transformer[Event] {
   final val DiseaseCode  = "C67"
 
-  protected final val outputColumns: List[Column] = List(
+  protected val outputColumns: List[Column] = List(
     col("patientID"),
     lit("disease").as("category"),
     lit(DiseaseCode).as("eventId"),
