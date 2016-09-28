@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.filtering
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
-import McoDiseaseTransformer._
 
 
 object BladderCancerTransformer extends Transformer[Event] with DiseaseTransformer{
@@ -44,6 +43,8 @@ object BladderCancerTransformer extends Transformer[Event] with DiseaseTransform
   }
 
   override def transform(sources: Sources): Dataset[Event] = {
+    import McoDiseaseTransformer.pmsiMcoDataFrame
+
     val mco = sources.pmsiMco.get
     import mco.sqlContext.implicits._
 
