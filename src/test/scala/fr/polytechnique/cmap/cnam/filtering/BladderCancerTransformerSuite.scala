@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.utilities.functions._
 
 class BladderCancerTransformerSuite extends SharedContext{
 
-  "extractNarrowCancer" should "be ok when cancer in DP" in {
+  "extractNarrowCancer" should "capture the event when code found in Diagnostic principal" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
     // Given
@@ -26,7 +26,7 @@ class BladderCancerTransformerSuite extends SharedContext{
     assert(result.count()==1)
   }
 
-  "extractNarrowCancer" should "be ok when cancer in DR" in {
+  "extractNarrowCancer" should "capture the event when code found in Diagnostic relié" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
     // Given
@@ -44,7 +44,7 @@ class BladderCancerTransformerSuite extends SharedContext{
     assert(result.count()==1)
   }
 
-  "extractNarrowCancer" should "be ok when cancer in DAS and other in DP" in {
+  "extractNarrowCancer" should "capture the event when code combination found with DP" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
     // Given
@@ -64,7 +64,7 @@ class BladderCancerTransformerSuite extends SharedContext{
     assert(result.count()==3)
   }
 
-  "extractNarrowCancer" should "be ok when cancer in DAS and other in DR" in {
+  "extractNarrowCancer" should "capture the event when code combination found with DR" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
     // Given
