@@ -2,8 +2,8 @@ package fr.polytechnique.cmap.cnam.filtering
 
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
-import fr.polytechnique.cmap.cnam.filtering
 import org.apache.spark.sql.types.TimestampType
+import McoDiseaseTransformer._
 
 
 object BladderCancerTransformer extends Transformer[Event] with DiseaseTransformer{
@@ -37,17 +37,11 @@ object BladderCancerTransformer extends Transformer[Event] with DiseaseTransform
       data.filter(
         col("DP").startsWith(DiseaseCode) or
         col("DR").startsWith(DiseaseCode) or
-        (col("DAS").startsWith(DiseaseCode) and col("DP").startsWith(AssociateDiseases(0))) or
-        (col("DAS").startsWith(DiseaseCode) and col("DP").startsWith(AssociateDiseases(1))) or
-        (col("DAS").startsWith(DiseaseCode) and col("DP").startsWith(AssociateDiseases(2))) or
-        (col("DAS").startsWith(DiseaseCode) and col("DR").startsWith(AssociateDiseases(0))) or
-        (col("DAS").startsWith(DiseaseCode) and col("DR").startsWith(AssociateDiseases(1))) or
-        (col("DAS").startsWith(DiseaseCode) and col("DR").startsWith(AssociateDiseases(2)))
+        (col("DAS").startsWith(DiseaseCode) and col("DP").substr(0,3).isin(AssociateDiseases:_*)) or
+        (col("DAS").startsWith(DiseaseCode) and col("DR").substr(0,3).isin(AssociateDiseases:_*))
       )
     }
   }
-
-  import McoDiseaseTransformer._
 
   override def transform(sources: Sources): Dataset[Event] = {
     val mco = sources.pmsiMco.get
