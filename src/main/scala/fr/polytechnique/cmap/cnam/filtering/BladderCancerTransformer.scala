@@ -29,16 +29,14 @@ object BladderCancerTransformer extends TargetDiseaseTransformer {
     lit(null).cast(TimestampType).as("end")
   )
 
-  implicit class ExtraDf(data: DataFrame) {
+  val bladderCancerCondition =
+    col("DP").startsWith(DiseaseCode) or
+    col("DR").startsWith(DiseaseCode) or
+    (col("DAS").startsWith(DiseaseCode) and col("DP").substr(0,3).isin(AssociateDiseases:_*)) or
+    (col("DAS").startsWith(DiseaseCode) and col("DR").substr(0,3).isin(AssociateDiseases:_*))
 
-    def extractNarrowCancer: DataFrame = {
-      data.filter(
-        col("DP").startsWith(DiseaseCode) or
-        col("DR").startsWith(DiseaseCode) or
-        (col("DAS").startsWith(DiseaseCode) and col("DP").substr(0,3).isin(AssociateDiseases:_*)) or
-        (col("DAS").startsWith(DiseaseCode) and col("DR").substr(0,3).isin(AssociateDiseases:_*))
-      )
-    }
+  implicit class BladderCancerDataFrame(data: DataFrame) {
+    def extractBladderCancer: DataFrame = data.filter(bladderCancerCondition)
   }
 
   override def transform(sources: Sources): Dataset[Event] = {
@@ -49,7 +47,7 @@ object BladderCancerTransformer extends TargetDiseaseTransformer {
 
     mco.select(inputColumns:_*)
       .distinct()
-      .extractNarrowCancer
+      .extractBladderCancer
       .estimateStayStartTime
       .select(outputColumns:_*)
       .as[Event]

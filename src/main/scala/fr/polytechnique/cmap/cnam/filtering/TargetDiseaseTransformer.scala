@@ -18,7 +18,7 @@ trait TargetDiseaseTransformer extends Transformer[Event] {
     lit(null).cast(TimestampType).as("end")
   )
 
-  implicit class ExtraDF(data: DataFrame) {
+  implicit class TargetDiseaseDataFrame(data: DataFrame) {
 
     val window = Window.partitionBy(col("patientID")).orderBy(col("start"))
 
@@ -57,5 +57,7 @@ object TargetDiseaseTransformer extends TargetDiseaseTransformer {
       .filterBladderCancer
       .select(outputColumns:_*)
       .as[Event]
+      .union(McoActTransformer.transform(sources))
+      .distinct
   }
 }

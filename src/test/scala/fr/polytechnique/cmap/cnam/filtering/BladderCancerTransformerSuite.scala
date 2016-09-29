@@ -17,7 +17,7 @@ class BladderCancerTransformerSuite extends SharedContext{
 
     // When
     import BladderCancerTransformer._
-    val result = input.extractNarrowCancer
+    val result = input.extractBladderCancer
 
 
     // Then
@@ -35,7 +35,7 @@ class BladderCancerTransformerSuite extends SharedContext{
 
     // When
     import BladderCancerTransformer._
-    val result = input.extractNarrowCancer
+    val result = input.extractBladderCancer
 
 
     // Then
@@ -55,7 +55,7 @@ class BladderCancerTransformerSuite extends SharedContext{
 
     // When
     import BladderCancerTransformer._
-    val result = input.extractNarrowCancer
+    val result = input.extractBladderCancer
 
 
     // Then
@@ -75,7 +75,7 @@ class BladderCancerTransformerSuite extends SharedContext{
 
     // When
     import BladderCancerTransformer._
-    val result = input.extractNarrowCancer
+    val result = input.extractBladderCancer
 
 
     // Then
@@ -92,7 +92,7 @@ class BladderCancerTransformerSuite extends SharedContext{
 
     // When
     import BladderCancerTransformer._
-    val result = input.extractNarrowCancer
+    val result = input.extractBladderCancer
 
 
     // Then
