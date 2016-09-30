@@ -4,8 +4,6 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
-
-
 class BladderCancerTransformerSuite extends SharedContext{
 
   "extractNarrowCancer" should "capture the event when code found in Diagnostic principal" in {
@@ -14,7 +12,7 @@ class BladderCancerTransformerSuite extends SharedContext{
     // Given
     val input = Seq(
       ("JohnDoe", Some("C67*"), Some("TOTO"), Some("TOTO")),
-      ("I m fine", null, null, Some("TOTO"))
+      ("I m fine", None, None, Some("TOTO"))
     ).toDF("patientID", "DP", "DR", "DAS")
 
     // When
@@ -32,7 +30,7 @@ class BladderCancerTransformerSuite extends SharedContext{
     // Given
     val input = Seq(
       ("JohnDoe", Some("TOTO"), Some("C67*"), Some("TOTO")),
-      ("I m fine", null, null, Some("TOTO"))
+      ("I m fine", None, None, Some("TOTO"))
     ).toDF("patientID", "DP", "DR", "DAS")
 
     // When
@@ -52,7 +50,7 @@ class BladderCancerTransformerSuite extends SharedContext{
       ("C77 & C67", Some("C77*"), Some("TOTO"), Some("C67*")),
       ("C78 & C67", Some("C78*"), Some("TOTO"), Some("C67*")),
       ("C79 & C67", Some("C79*"), Some("TOTO"), Some("C67*")),
-      ("I m fine", null, null, Some("TOTO"))
+      ("I m fine", None, None, Some("TOTO"))
     ).toDF("patientID", "DP", "DR", "DAS")
 
     // When
@@ -72,7 +70,7 @@ class BladderCancerTransformerSuite extends SharedContext{
       ("C67 & C77", Some("TOTO"), Some("C77*"), Some("C67*")),
       ("C67 & C78", Some("TOTO"), Some("C78*"), Some("C67*")),
       ("C67 & C79", Some("TOTO"), Some("C79*"), Some("C67*")),
-      ("I m fine", null, null, Some("TOTO"))
+      ("I m fine", None, None, Some("TOTO"))
     ).toDF("patientID", "DP", "DR", "DAS")
 
     // When
@@ -83,7 +81,6 @@ class BladderCancerTransformerSuite extends SharedContext{
     // Then
     assert(result.count()==3)
   }
-
 
   "extractNarrowCancer" should "not take C67 alone in DAS position" in {
     val sqlCtx = sqlContext
@@ -111,9 +108,9 @@ class BladderCancerTransformerSuite extends SharedContext{
       ("Patient1", Some("C67*"), Some("TUTU"), Some("TATA"), Some(12), Some(2011),
         11, Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12))),
       ("Patient2", Some("TOTO"), Some("C78*"), Some("C67*"), Some(12), Some(2011),
-        11, null, Some(makeTS(2011, 12, 12))),
+        11, None, Some(makeTS(2011, 12, 12))),
       ("Patient3", Some("TOTO"), Some("TUTU"), Some("TATA"), Some(12), Some(2011),
-        11, null, null)
+        11, None, None)
     ).toDF("NUM_ENQ", "MCO_B.DGN_PAL", "MCO_B.DGN_REL", "MCO_D.ASS_DGN", "MCO_B.SOR_MOI", "MCO_B.SOR_ANN",
       "MCO_B.SEJ_NBJ", "ENT_DAT", "SOR_DAT")
     val input = new Sources(pmsiMco=Some(data))
