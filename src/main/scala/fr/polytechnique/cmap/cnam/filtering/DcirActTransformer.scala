@@ -1,9 +1,8 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.{DataFrame, Dataset}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
-
+import org.apache.spark.sql.{DataFrame, Dataset}
 
 object DcirActTransformer extends Transformer[Event] {
 
@@ -29,7 +28,6 @@ object DcirActTransformer extends Transformer[Event] {
         data.filter(col("actCode") === ActCode)
       }
   }
-
 
   override def transform(sources: Sources): Dataset[Event] = {
     val dcir = sources.dcir.get
