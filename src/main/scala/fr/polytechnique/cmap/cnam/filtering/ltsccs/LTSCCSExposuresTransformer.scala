@@ -34,6 +34,7 @@ class LTSCCSExposuresTransformer(
 
   implicit class LTSCCSExposuresDataFrame(data: DataFrame) {
 
+    final val DiseaseCode = "C67"
     final val ObservationRunInPeriod = 6
     val window = Window.partitionBy("patientID", "moleculeName")
     val orderedWindow = window.orderBy("eventDate")
@@ -55,7 +56,7 @@ class LTSCCSExposuresTransformer(
       val runInEnd = add_months(col("observationStart"), ObservationRunInPeriod).cast(TimestampType)
       val diseaseFilter = min(
         when(
-          col("category") === "disease" && (col("start") <= runInEnd),
+          col("category") === "disease" && col("eventId") === DiseaseCode && (col("start") <= runInEnd),
           lit(0)
         ).otherwise(lit(1))
       ).over(patientWindow).cast(BooleanType)

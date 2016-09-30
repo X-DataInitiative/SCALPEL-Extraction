@@ -12,6 +12,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
   // In the future, we may want to export them to an external file.
   final val ExposureStartDelay = 3
   final val ExposureStartThreshold = 6
+  final val DiseaseCode = "C67"
 
   val outputColumns = List(
     col("patientID"),
@@ -30,10 +31,10 @@ object CoxExposuresTransformer extends ExposuresTransformer {
     def filterPatients: DataFrame = {
       val window = Window.partitionBy("patientID")
 
-      // Drop patients whose got a target disease before the start of the follow up
+      // Drop patients whose got a disease before the start of the follow up
       val diseaseFilter = min(
         when(
-          col("category") === "disease" && (col("start") < col("followUpStart")),
+          col("category") === "disease" && col("eventId") === DiseaseCode && (col("start") < col("followUpStart")),
         lit(0)).otherwise(lit(1))
       ).over(window).cast(BooleanType)
 

@@ -13,17 +13,17 @@ class CoxExposuresTransformerSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", "molecule", makeTS(2008, 1, 20), makeTS(2008, 6, 29)),
-      ("Patient_A", "molecule", makeTS(2008, 1, 1), makeTS(2008, 6, 29)),
-      ("Patient_A", "molecule", makeTS(2008, 1, 10), makeTS(2008, 6, 29)),
-      ("Patient_A", "disease", makeTS(2007, 1, 1), makeTS(2008, 6, 29)),
-      ("Patient_B", "molecule", makeTS(2009, 1, 1), makeTS(2009, 6, 30)),
-      ("Patient_B", "molecule", makeTS(2009, 1, 1), makeTS(2009, 6, 30)),
-      ("Patient_B", "disease", makeTS(2009, 1, 1), makeTS(2009, 6, 30)),
-      ("Patient_C", "molecule", makeTS(2006, 2, 1), makeTS(2006, 6, 30)),
-      ("Patient_C", "molecule", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
-      ("Patient_C", "disease", makeTS(2007, 1, 1), makeTS(2006, 6, 30))
-    ).toDF("patientID", "category", "start", "followUpStart")
+      ("Patient_A", "molecule", "", makeTS(2008, 1, 20), makeTS(2008, 6, 29)),
+      ("Patient_A", "molecule", "", makeTS(2008, 1, 1), makeTS(2008, 6, 29)),
+      ("Patient_A", "molecule", "", makeTS(2008, 1, 10), makeTS(2008, 6, 29)),
+      ("Patient_A", "disease", "C67", makeTS(2007, 1, 1), makeTS(2008, 6, 29)),
+      ("Patient_B", "molecule", "", makeTS(2009, 1, 1), makeTS(2009, 6, 30)),
+      ("Patient_B", "molecule", "", makeTS(2009, 1, 1), makeTS(2009, 6, 30)),
+      ("Patient_B", "disease", "", makeTS(2009, 1, 1), makeTS(2009, 6, 30)),
+      ("Patient_C", "molecule", "", makeTS(2006, 2, 1), makeTS(2006, 6, 30)),
+      ("Patient_C", "molecule", "", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
+      ("Patient_C", "disease", "C67", makeTS(2007, 1, 1), makeTS(2006, 6, 30))
+    ).toDF("patientID", "category", "eventId", "start", "followUpStart")
 
     val expected = Seq(
       ("Patient_C", "molecule"),

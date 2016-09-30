@@ -258,17 +258,17 @@ class LTSCCSWriterSuite extends SharedContext {
       FlatEvent("Patient_C", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "exposure",
         "PIOGLITAZONE", 1.0, makeTS(2006, 8, 1), Some(makeTS(2008, 9, 1))),
       FlatEvent("Patient_C", 1, makeTS(1960, 1, 1), Some(makeTS(2008, 9, 1)), "disease",
-        "C67", 1.0, makeTS(2008, 3, 8), None),
+        "targetDisease", 1.0, makeTS(2008, 3, 8), None),
       FlatEvent("Patient_C", 1, makeTS(1960, 1, 1), Some(makeTS(2008, 9, 1)), "disease",
-        "C67", 1.0, makeTS(2008, 3, 15), None),
+        "targetDisease", 1.0, makeTS(2008, 3, 15), None),
       FlatEvent("Patient_C", 1, makeTS(1960, 1, 1), Some(makeTS(2008, 9, 1)), "disease",
-        "C67", 1.0, makeTS(2007, 1, 29), None)
+        "targetDisease", 1.0, makeTS(2007, 1, 29), None)
     ).toDS
 
     def readFile(path: String) = {
       sqlCtx.read.format("com.databricks.spark.csv").option("header", "true").load(path)
     }
-    val expectedCounts = List(1, 3, 3, 4, 3)
+    val expectedCounts = List(2, 3, 3, 4, 3)
 
     // When
     input.writeLTSCCS(outPath)

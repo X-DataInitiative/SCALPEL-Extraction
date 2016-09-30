@@ -102,16 +102,16 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", "molecule", makeTS(2009, 10, 1), makeTS(2009, 10, 1)),
-      ("Patient_A", "molecule", makeTS(2009, 11, 1), makeTS(2009, 10, 1)),
-      ("Patient_A", "disease",  makeTS(2009, 12, 1), makeTS(2009, 10, 1)),
-      ("Patient_B", "molecule", makeTS(2008,  4, 1), makeTS(2008,  4, 1)),
-      ("Patient_B", "molecule", makeTS(2008,  4, 1), makeTS(2008,  4, 1))
-    ).toDF("patientID", "category", "start", "observationStart")
+      ("Patient_A", "molecule", "", makeTS(2009, 10, 1), makeTS(2009, 10, 1)),
+      ("Patient_A", "molecule", "", makeTS(2009, 11, 1), makeTS(2009, 10, 1)),
+      ("Patient_A", "disease",  "C67", makeTS(2009, 12, 1), makeTS(2009, 10, 1)),
+      ("Patient_B", "molecule", "", makeTS(2008,  4, 1), makeTS(2008,  4, 1)),
+      ("Patient_B", "molecule", "", makeTS(2008,  4, 1), makeTS(2008,  4, 1))
+    ).toDF("patientID", "category", "eventId", "start", "observationStart")
     val expected = Seq(
-      ("Patient_B", "molecule", makeTS(2008,  4, 1), makeTS(2008,  4, 1)),
-      ("Patient_B", "molecule", makeTS(2008,  4, 1), makeTS(2008,  4, 1))
-    ).toDF("patientID", "category", "start", "observationStart")
+      ("Patient_B", "molecule", "", makeTS(2008,  4, 1), makeTS(2008,  4, 1)),
+      ("Patient_B", "molecule", "", makeTS(2008,  4, 1), makeTS(2008,  4, 1))
+    ).toDF("patientID", "category", "eventId", "start", "observationStart")
 
     // When
     import LTSCCSExposuresTransformer.LTSCCSExposuresDataFrame
