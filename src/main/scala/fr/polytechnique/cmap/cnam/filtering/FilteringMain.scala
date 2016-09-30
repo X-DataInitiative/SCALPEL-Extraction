@@ -10,25 +10,28 @@ import fr.polytechnique.cmap.cnam.filtering.ltsccs._
 
 object FilteringMain extends Main {
 
-  final val CancerDefinition = "broad" // or "narrow"
-
   def appName = "Filtering"
 
-  def runETL(sqlContext: HiveContext, config: Config): Unit = {
+  def runETL(sqlContext: HiveContext, config: Config, cancerDefinition: String): Unit = {
     import implicits._
     import sqlContext.implicits._
+
+    val outputRoot = config.getString("paths.output.root")
+    val outputDir = s"$outputRoot/$cancerDefinition"
 
     logger.info("(Lazy) Extracting sources...")
     val sources: Sources = sqlContext.extractAll(config.getConfig("paths.input"))
 
     logger.info("(Lazy) Transforming patients...")
     val patients: Dataset[Patient] = PatientsTransformer.transform(sources).cache()
+
     logger.info("(Lazy) Transforming drug events...")
     val drugEvents: Dataset[Event] = DrugEventsTransformer.transform(sources)
+
     logger.info("(Lazy) Transforming disease events...")
     val broadDiseaseEvents: Dataset[Event] = DiseaseTransformer.transform(sources)
     val targetDiseaseEvents: Dataset[Event] = (
-      if (CancerDefinition == "broad")
+      if (cancerDefinition == "broad")
         broadDiseaseEvents
       else
         TargetDiseaseTransformer.transform(sources)
@@ -86,16 +89,16 @@ object FilteringMain extends Main {
       .union(tracklossFlatEvents)
 
     logger.info("Writing Patients...")
-    patients.toDF.write.parquet(config.getString("paths.output.patients"))
+    patients.toDF.write.parquet(s"$outputDir/patients")
     logger.info("Writing FlatEvents...")
-    flatEvents.toDF.write.parquet(config.getString("paths.output.events"))
+    flatEvents.toDF.write.parquet(s"$outputDir/events")
     logger.info("Writing Exposures...")
-    exposures.toDF.write.parquet(config.getString("paths.output.exposures"))
+    exposures.toDF.write.parquet(s"$outputDir/exposures")
 
     logger.info("Writing Cox features...")
     import CoxFeaturesWriter._
-    coxFeatures.toDF.write.parquet(config.getString("paths.output.coxFeatures"))
-    coxFeatures.writeCSV(config.getString("paths.output.coxFeaturesCsv"))
+    coxFeatures.toDF.write.parquet(s"$outputDir/cox")
+    coxFeatures.writeCSV(s"$outputDir/cox.csv")
 
     logger.info("Preparing for LTSCCS")
     val ltsccsObservationPeriods = LTSCCSObservationPeriodTransformer.transform(
@@ -122,14 +125,17 @@ object FilteringMain extends Main {
 
     logger.info("Writing LTSCCS features...")
     import LTSCCSWriter._
-    ltsccsFlatEvents.writeLTSCCS(config.getString("paths.output.LTSCCSFeatures"))
+    ltsccsFlatEvents.writeLTSCCS(s"$outputDir/LTSCCS")
   }
 
   def main(args: Array[String]): Unit = {
     startContext()
-    val environment = if (args.nonEmpty) args(0) else "test"
+    val (environment, cancerDefinition) = if (args.nonEmpty)
+      (args(0), args(1))
+    else
+      ("test", "broad")
     val config: Config = ConfigFactory.parseResources("filtering.conf").getConfig(environment)
-    runETL(sqlContext, config)
+    runETL(sqlContext, config, cancerDefinition)
     stopContext()
   }
 }
