@@ -1,3 +1,6 @@
+sudo: required
+dist: precise
+
 # Building on centOS require pulling a docker image
 env:
   - linux
