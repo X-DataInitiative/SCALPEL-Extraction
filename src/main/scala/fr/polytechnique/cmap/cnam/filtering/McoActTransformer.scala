@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.filtering
 
+import org.apache.log4j.Logger
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
@@ -20,6 +21,18 @@ object McoActTransformer extends Transformer[Event] {
     "MCO_B.GHS_9510_ACT", "MCO_B.GHS_9511_ACT", "MCO_B.GHS_9512_ACT", "MCO_B.GHS_9515_ACT", "MCO_B.GHS_9524_ACT",
     "MCO_B.GHS_9610_ACT", "MCO_B.GHS_9611_ACT", "MCO_B.GHS_9612_ACT", "MCO_B.GHS_9619_ACT", "MCO_B.GHS_9620_ACT", "MCO_B.GHS_9621_ACT"
   )
+
+  // Needed to avoid errors when a GHS column is not found. A warning is thrown if it's the case.
+  def validGHSColumns(mco: DataFrame): Set[Column] =  {
+    val result = GHSColumnNames.filter(mco.columns.contains(_))
+    val diff = GHSColumnNames.diff(result)
+    if (diff.nonEmpty)
+      Logger.getLogger(getClass).warn(
+        s"The columns in ${diff.toString} don't exist in the input MCO table. Ignoring them."
+      )
+
+    result.map(colName => col("`" + colName + "`"))
+  }
 
   final val ActCodes = List("Z510", "Z511")
   final val AssociateDiseases = List("C77", "C78", "C79")
@@ -43,7 +56,7 @@ object McoActTransformer extends Transformer[Event] {
     col("`MCO_B.SEJ_NBJ`").as("stayLength"),
     col("`ENT_DAT`").as("stayStartTime").cast("Timestamp"),
     col("`SOR_DAT`").as("stayEndDate").cast("Timestamp")
-  ) ++ GHSColumns
+  )
 
   val outputColumns = List(
     col("patientID"),
@@ -56,6 +69,8 @@ object McoActTransformer extends Transformer[Event] {
 
   implicit class ActDF(data: DataFrame) {
 
+    val ghsColumns = validGHSColumns(data)
+
     def filterActs: DataFrame = {
       import BladderCancerTransformer.bladderCancerCondition
       data
@@ -63,7 +78,7 @@ object McoActTransformer extends Transformer[Event] {
           bladderCancerCondition and (
             col("DP").substr(0, 4).isin(ActCodes: _*) or
             col("CCAM").substr(0, 7).isin(SpecificActs: _*) or
-            GHSColumns.map(_ > 0).reduce(_ or _)
+            ghsColumns.map(_ > 0).reduce(_ or _)
           )
         )
     }
@@ -76,7 +91,7 @@ object McoActTransformer extends Transformer[Event] {
     import mco.sqlContext.implicits._
 
     mco
-      .select(inputColumns: _*)
+      .select(inputColumns ++ validGHSColumns(mco): _*)
       .filterActs
       .estimateStayStartTime
       .select(outputColumns: _*)
