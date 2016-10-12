@@ -7,16 +7,22 @@ env:
 
 language: scala
 scala:
-- 2.10.6
+  - 2.10.6
 # JDK8 not available with OpenJDK
 jdk:
-- oraclejdk8
+  - oraclejdk8
 
 branches:
   only:
   - master
 git:
   depth: 1
+
+script:
+  - sbt clean coverage test coverageReport
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -t 539de246-c311-47f8-a400-e2204b9d1f5d
 
 # Notifications on slack  
 notifications:
