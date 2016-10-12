@@ -17,14 +17,19 @@ class JoinedTable(config: Config, sqlContext: SQLContext){
   val name: String = config.name
   val joinKeys: List[String] = config.columns
 
-  val mainTable: DataFrame = sqlContext
+  lazy val mainTable: DataFrame = sqlContext
     .read
     .option("mergeSchema", "true")
     .parquet(path + "/" + config.mainTable)
 
+  lazy val joinedTable: DataFrame = sqlContext
+    .read
+    .option("mergeSchema", "true")
+    .parquet(path + "/joins/" + config.name)
+
   var isPartitioned: Boolean = false
 
-  val years: Array[Int] = {
+  lazy val years: Array[Int] = {
     if(mainTable.select($"key").distinct.cache.count==1) {
       isPartitioned = false
       mainTable.select(year($"FLX_TRT_DTD")).distinct.collect().map(_.getInt(0))
@@ -34,7 +39,7 @@ class JoinedTable(config: Config, sqlContext: SQLContext){
     }
   }
 
-  val otherTables: Map[String, DataFrame] = config.tables.map(
+  lazy val otherTables: Map[String, DataFrame] = config.tables.map(
     name =>
       name ->
         sqlContext
@@ -43,15 +48,15 @@ class JoinedTable(config: Config, sqlContext: SQLContext){
         .parquet(path + "/" + name)
   ).toMap
 
-  val otherTablesWithPrefix: Traversable[DataFrame] = otherTables.map((addPrefix _).tupled)
+  lazy val otherTablesWithPrefix: Traversable[DataFrame] = otherTables.map((addPrefix _).tupled)
 
-  val filterColumn: Column = if(isPartitioned){
+  lazy val filterColumn: Column = if(isPartitioned){
     $"key"
   }else{
     year($"FLX_TRT_DTD")
   }
 
-  val joinedDFPerYear: Map[Int,DataFrame] = years.map(joinDataFrames).toMap
+  lazy val joinedDFPerYear: Map[Int,DataFrame] = years.map(joinDataFrames).toMap
 
   def joinDataFrames(year: Int): (Int, DataFrame) = {
     year ->
