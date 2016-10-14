@@ -1,8 +1,10 @@
 package fr.polytechnique.cmap.cnam.utilities
 
+import java.sql.Timestamp
 import org.apache.spark.sql.Column
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{DoubleType, TimestampType}
+import org.apache.spark.sql.types.{DoubleType, IntegerType, TimestampType}
+import fr.polytechnique.cmap.cnam.utilities.functions._
 
 object ColumnUtilities {
 
@@ -29,6 +31,18 @@ object ColumnUtilities {
       ).otherwise(
         when(left <= right, left).otherwise(right)
       )
+    }
+  }
+
+  implicit class BucketizableTimestampColumn(column: Column) {
+    def bucketize(minTimestamp: Timestamp, maxTimestamp: Timestamp, lengthDays: Int): Column = {
+
+      val bucketCount: Int = (daysBetween(maxTimestamp, minTimestamp) / lengthDays).toInt
+      val lastBucket = if (bucketCount > 0) bucketCount - 1 else 0
+
+      val bucketId: Column = floor(datediff(column, lit(minTimestamp)) / lengthDays).cast(IntegerType)
+      when(bucketId <= lastBucket || bucketId.isNull, bucketId)
+        .otherwise(lastBucket)
     }
   }
 }

@@ -4,6 +4,7 @@ import java.sql.Timestamp
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.utilities.functions._
 
 class ColumnUtilitiesSuite extends SharedContext{
 
@@ -159,5 +160,45 @@ class ColumnUtilitiesSuite extends SharedContext{
     // Then
     import RichDataFrames._
     assert(result === expectedResult)
+  }
+
+  "bucketize" should "bucketize (discretize) a timestamp column" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2006, 2, 2)
+    val bucketSize = 2
+
+    val input = Seq(
+      Tuple1(Some(makeTS(2006, 1, 1))),
+      Tuple1(Some(makeTS(2006, 1, 3))),
+      Tuple1(Some(makeTS(2006, 1, 10))),
+      Tuple1(Some(makeTS(2006, 1, 31))),
+      Tuple1(Some(makeTS(2006, 2, 2))),
+      Tuple1(None)
+    ).toDF("input")
+
+    val expected = Seq(
+      (Some(makeTS(2006, 1, 1)), Some(0)),
+      (Some(makeTS(2006, 1, 3)), Some(1)),
+      (Some(makeTS(2006, 1, 10)), Some(4)),
+      (Some(makeTS(2006, 1, 31)), Some(15)),
+      (Some(makeTS(2006, 2, 2)), Some(15)),
+      (None, None)
+    ).toDF("input", "output")
+
+    // When
+    import ColumnUtilities.BucketizableTimestampColumn
+    val result = input.withColumn("output",
+      col("input").bucketize(minTimestamp, maxTimestamp, bucketSize)
+    )
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
+    assert(result === expected)
   }
 }

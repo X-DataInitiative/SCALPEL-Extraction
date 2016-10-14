@@ -11,6 +11,8 @@ object RichDataFrames {
 
   implicit class CSVDataFrame(dataFrame: DataFrame) {
 
+    override def toString: String = dataFrame.toString
+
     def writeParquet(path: String, isOverwrite: Boolean = true ): Unit = {
       val saveMode : SaveMode = if(isOverwrite) SaveMode.Ignore else SaveMode.Overwrite
       dataFrame.write
