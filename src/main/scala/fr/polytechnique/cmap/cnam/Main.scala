@@ -10,6 +10,7 @@ trait Main {
   Logger.getRootLogger.setLevel(Level.ERROR)
   Logger.getLogger("org").setLevel(Level.ERROR)
   Logger.getLogger("akka").setLevel(Level.ERROR)
+  Logger.getLogger("fr.polytechnique").setLevel(Level.WARN)
 
   Locale.setDefault(Locale.US)
   TimeZone.setDefault(TimeZone.getTimeZone("UTC"))

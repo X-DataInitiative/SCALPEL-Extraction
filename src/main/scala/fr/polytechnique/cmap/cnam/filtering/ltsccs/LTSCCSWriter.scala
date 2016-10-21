@@ -48,7 +48,7 @@ object LTSCCSWriter {
 
   final val StudyStart = makeTS(2006, 1, 1)
   final val StudyEnd = makeTS(2009, 12, 31, 23, 59, 59)
-  final val DiseaseCodes = List("C67")
+  final val DiseaseCodes = List("targetDisease")
   final val Molecules = List("ALL")
 
   private implicit class RichTimestamp(t: Timestamp) {

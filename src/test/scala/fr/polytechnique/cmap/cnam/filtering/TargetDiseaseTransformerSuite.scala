@@ -1,6 +1,8 @@
 package fr.polytechnique.cmap.cnam.filtering
 
 import java.sql.Timestamp
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.IntegerType
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 import fr.polytechnique.cmap.cnam.utilities.functions._
@@ -61,7 +63,7 @@ class TargetDiseaseTransformerSuite extends SharedContext {
     assert(result === expected)
   }
 
-  "filterBladderCancer" should "return event BladderCancer with radiotherapy close after" in {
+  "filterDcirTargetDiseases" should "return event BladderCancer with radiotherapy close after" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -82,14 +84,14 @@ class TargetDiseaseTransformerSuite extends SharedContext {
 
     // When
     import TargetDiseaseTransformer._
-    val result = input.filterBladderCancer
+    val result = input.filterDcirTargetDiseases
 
     // Then
     import RichDataFrames._
     assert(result === expected)
   }
 
-  "filterBladderCancer" should "return event BladderCancer with radiotherapy close before" in {
+  it should "return event BladderCancer with radiotherapy close before" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -112,7 +114,7 @@ class TargetDiseaseTransformerSuite extends SharedContext {
 
     // When
     import TargetDiseaseTransformer._
-    val result = input.filterBladderCancer
+    val result = input.filterDcirTargetDiseases
 
     // Then
     import RichDataFrames._
@@ -124,25 +126,40 @@ class TargetDiseaseTransformerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val mco = Seq(
-      ("Patient1", Some("C67*"), Some("TUTU"), Some("TATA"), Some(12), Some(2011),
-        11, Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12))),
-      ("Patient2", Some("TOTO"), Some("C78*"), Some("C67*"), Some(12), Some(2011),
-        11, None, Some(makeTS(2011, 12, 12))),
-      ("Patient3", Some("TOTO"), Some("TUTU"), Some("TATA"), Some(12), Some(2011),
-        11, None, None)
-    ).toDF("NUM_ENQ", "MCO_B.DGN_PAL", "MCO_B.DGN_REL", "MCO_D.ASS_DGN", "MCO_B.SOR_MOI", "MCO_B.SOR_ANN",
-      "MCO_B.SEJ_NBJ", "ENT_DAT", "SOR_DAT")
-
     val dcir = Seq(
-      ("Patient2", Some("7511"), makeTS(2016, 10, 1)),
-      ("Patient1", Some("Z511"), makeTS(2012, 2, 1)),
-      ("Patient3", None, makeTS(2016, 10, 1))
+      ("Patient1", "Z511", makeTS(2011, 6, 1)),
+      ("Patient2", "Z511", makeTS(2012, 1, 1)),
+      ("Patient2", "...", makeTS(2011, 12, 1)),
+      ("Patient3", "Z511", makeTS(2011, 10, 1)),
+      ("Patient3", "Z511", makeTS(2011, 6, 1))
     ).toDF("NUM_ENQ", "ER_CAM_F.CAM_PRS_IDE", "EXE_SOI_DTD")
 
-    val input = new Sources(pmsiMco=Some(mco), dcir=Some(dcir))
+    val initialMco = Seq(
+      ("Patient1", Some("Z511"), "C67", None: Option[String], Some("JDFA014"), Some(12), Some(2011), 11,
+        Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12))),
+      ("Patient2", None, "C67", None: Option[String], Some("JDFA003"), Some(12), Some(2011), 11,
+        None, Some(makeTS(2011, 12, 12))),
+      ("Patient3", Some("..."), "C67", None: Option[String], Some("..."), Some(12), Some(2011), 11,
+        None, Some(makeTS(2011, 12, 12))),
+      ("Patient3", Some("..."), "C67", None: Option[String], Some("..."), Some(12), Some(2011), 11,
+        None, Some(makeTS(2011, 12, 12)))
+    ).toDF("NUM_ENQ", "MCO_B.DGN_PAL", "MCO_B.DGN_REL", "MCO_D.ASS_DGN", "MCO_A.CDC_ACT",
+      "MCO_B.SOR_MOI", "MCO_B.SOR_ANN", "MCO_B.SEJ_NBJ", "ENT_DAT", "SOR_DAT")
+
+    import McoActTransformer.GHSColumnNames
+    val mco = GHSColumnNames.foldLeft(initialMco)(
+      (df, colName) => df.withColumn(colName, lit(null).cast(IntegerType))
+    )
+
+    val input = new Sources(
+      pmsiMco = Some(mco),
+      dcir = Some(dcir)
+    )
+
     val expected = Seq(
-      Event("Patient1", "disease", "targetDisease", 1, makeTS(2011, 12, 1), None)
+      Event("Patient1", "disease", "targetDisease", 1.0, makeTS(2011, 12, 1), None),
+      Event("Patient2", "disease", "targetDisease", 1.0, makeTS(2011, 12, 1), None),
+      Event("Patient3", "disease", "targetDisease", 1.0, makeTS(2011, 12, 1), None)
     ).toDF
 
     // When

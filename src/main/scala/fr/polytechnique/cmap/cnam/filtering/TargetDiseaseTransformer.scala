@@ -18,7 +18,7 @@ trait TargetDiseaseTransformer extends Transformer[Event] {
     lit(null).cast(TimestampType).as("end")
   )
 
-  implicit class ExtraDF(data: DataFrame) {
+  implicit class TargetDiseaseDataFrame(data: DataFrame) {
 
     val window = Window.partitionBy(col("patientID")).orderBy(col("start"))
 
@@ -35,10 +35,13 @@ trait TargetDiseaseTransformer extends Transformer[Event] {
         .withColumn("previousType", lag(col("eventId"),1).over(window))
     }
 
-    def filterBladderCancer: DataFrame = {
-      data.filter(col("eventID") === "bladderCancer")
-        .filter((col("nextDelta") < 3 and col("nextType") === "radiotherapy") or
-        (col("previousDelta") < 3 and col("previousType") === "radiotherapy"))
+    def filterDcirTargetDiseases: DataFrame = {
+      data
+        .filter(col("eventId") === "bladderCancer")
+        .filter(
+          (col("nextDelta") < 3 and col("nextType") === "radiotherapy") or
+          (col("previousDelta") < 3 and col("previousType") === "radiotherapy")
+        )
     }
   }
 }
@@ -46,16 +49,21 @@ trait TargetDiseaseTransformer extends Transformer[Event] {
 object TargetDiseaseTransformer extends TargetDiseaseTransformer {
   override def transform(sources: Sources): Dataset[Event] = {
 
-    val df = BladderCancerTransformer.transform(sources)
+    val mcoCancers: Dataset[Event] = McoActTransformer.transform(sources)
+    import mcoCancers.sqlContext.implicits._
+
+    val bladderCancers: Dataset[Event] = mcoCancers.filter(_.eventId == "bladderCancer")
+    val mcoTargetDiseases: Dataset[Event] = mcoCancers.filter(_.eventId == "targetDisease")
+
+    val dcirTargetDiseases = bladderCancers
       .union(DcirActTransformer.transform(sources))
       .toDF
-
-    import df.sqlContext.implicits._
-
-    df.withDelta
+      .withDelta
       .withNextType
-      .filterBladderCancer
-      .select(outputColumns:_*)
+      .filterDcirTargetDiseases
+      .select(outputColumns: _*)
       .as[Event]
+
+    dcirTargetDiseases.union(mcoTargetDiseases).distinct
   }
 }
