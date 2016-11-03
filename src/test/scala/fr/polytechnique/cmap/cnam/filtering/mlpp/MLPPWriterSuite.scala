@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.filtering.mlpp
 
 import org.apache.spark.sql.Dataset
-import org.scalatest.FlatSpec
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.filtering.FlatEvent
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
@@ -118,22 +117,28 @@ class MLPPWriterSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("PA", "molecule", "PIOGLITAZONE", 0),
-      ("PA", "molecule", "PIOGLITAZONE", 5),
-      ("PA", "disease", "targetDisease", 3),
-      ("PB", "molecule", "PIOGLITAZONE", 2),
-      ("PB", "disease", "targetDisease", 4),
-      ("PC", "molecule", "PIOGLITAZONE", 0)
-    ).toDF("patientID", "category", "eventId", "startBucket")
+      ("PA", "molecule", "PIOGLITAZONE", 0, Some(4)),
+      ("PA", "molecule", "PIOGLITAZONE", 5, Some(4)),
+      ("PA", "disease", "targetDisease", 3, Some(4)),
+      ("PB", "molecule", "PIOGLITAZONE", 2,    None),
+      ("PB", "disease", "targetDisease", 4,    None),
+      ("PC", "molecule", "PIOGLITAZONE", 0, Some(6)),
+      ("PD", "molecule", "PIOGLITAZONE", 2, Some(3)),
+      ("PD", "molecule", "PIOGLITAZONE", 3, Some(3)),
+      ("PD", "disease", "targetDisease", 4, Some(3))
+    ).toDF("patientID", "category", "eventId", "startBucket", "deathBucket")
 
     val expected = Seq(
-      ("PA", "molecule", "PIOGLITAZONE", 0, Some(3)),
-      ("PA", "molecule", "PIOGLITAZONE", 5, Some(3)),
-      ("PA", "disease", "targetDisease", 3, Some(3)),
-      ("PB", "molecule", "PIOGLITAZONE", 2, Some(4)),
-      ("PB", "disease", "targetDisease", 4, Some(4)),
-      ("PC", "molecule", "PIOGLITAZONE", 0, None)
-    ).toDF("patientID", "category", "eventId", "startBucket", "diseaseBucket")
+      ("PA", "molecule", "PIOGLITAZONE", 0, Some(4), Some(3)),
+      ("PA", "molecule", "PIOGLITAZONE", 5, Some(4), Some(3)),
+      ("PA", "disease", "targetDisease", 3, Some(4), Some(3)),
+      ("PB", "molecule", "PIOGLITAZONE", 2,    None, Some(4)),
+      ("PB", "disease", "targetDisease", 4,    None, Some(4)),
+      ("PC", "molecule", "PIOGLITAZONE", 0, Some(6),    None),
+      ("PD", "molecule", "PIOGLITAZONE", 2, Some(3),    None),
+      ("PD", "molecule", "PIOGLITAZONE", 3, Some(3),    None),
+      ("PD", "disease", "targetDisease", 4, Some(3),    None)
+    ).toDF("patientID", "category", "eventId", "startBucket", "deathBucket", "diseaseBucket")
 
     // When
     val writer = MLPPWriter()
@@ -200,23 +205,23 @@ class MLPPWriterSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("PA", 0, 1, 75, "Mol1", 0, 0, 6),
-      ("PA", 0, 1, 75, "Mol1", 0, 0, 6),
-      ("PA", 0, 1, 75, "Mol1", 0, 2, 6),
-      ("PA", 0, 1, 75, "Mol2", 1, 3, 6),
-      ("PB", 1, 2, 40, "Mol1", 0, 0, 8),
-      ("PB", 1, 2, 40, "Mol1", 0, 4, 8),
-      ("PB", 1, 2, 40, "Mol1", 0, 4, 8),
-      ("PB", 1, 2, 40, "Mol2", 1, 6, 8)
-    ).toDF("patientID", "patientIDIndex", "gender", "age", "molecule", "moleculeIndex", "startBucket", "endBucket")
+      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6),
+      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6),
+      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6),
+      ("PA", 0, 1, 75, Some(6), "Mol2", 1, 3, 6),
+      ("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8),
+      ("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8),
+      ("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8),
+      ("PB", 1, 2, 40,    None, "Mol2", 1, 6, 8)
+    ).toDF("patientID", "patientIDIndex", "gender", "age", "diseaseBucket", "molecule", "moleculeIndex", "startBucket", "endBucket")
 
     val expected = Seq(
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 0, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 3, 6, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 0, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 4, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol2", 1, 6, 8, 0, 1.0)
+      LaggedExposure("PA", 0, 1, 75, Some(6),"Mol1", 0, 0, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6),"Mol1", 0, 2, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6),"Mol2", 1, 3, 6, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None,"Mol1", 0, 0, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None,"Mol1", 0, 4, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None,"Mol2", 1, 6, 8, 0, 1.0)
     ).toDF
 
     // When
@@ -293,32 +298,32 @@ class MLPPWriterSuite extends SharedContext {
     // Given
     val params = MLPPWriter.Params(lagCount = 4)
     val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 0, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 4, 6, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 0, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 4, 8, 0, 1.0)
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol2", 1, 4, 6, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8, 0, 1.0)
     ).toDS
 
     val expected = Seq(
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 0, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 1, 6, 1, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 2, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 3, 6, 3, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 3, 6, 1, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 4, 6, 2, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 5, 6, 3, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 4, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 5, 6, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 0, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 1, 8, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 2, 8, 2, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 3, 8, 3, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 4, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 5, 8, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 6, 8, 2, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 7, 8, 3, 1.0)
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 1, 6, 1, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, 2, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 3, 6, 3, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 3, 6, 1, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 4, 6, 2, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 5, 6, 3, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol2", 1, 4, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol2", 1, 5, 6, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 1, 8, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 2, 8, 2, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 3, 8, 3, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 5, 8, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 6, 8, 2, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 7, 8, 3, 1.0)
     ).toDF
 
     // When
@@ -333,6 +338,42 @@ class MLPPWriterSuite extends SharedContext {
     assert(result === expected)
   }
 
+  "makeMetadata" should "create a metadata dataset with some relevant information" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val params = MLPPWriter.Params(
+      minTimestamp = makeTS(2006, 1, 1),
+      maxTimestamp = makeTS(2006, 2, 1),
+      bucketSize = 2,
+      lagCount = 4
+    )
+    val input: Dataset[LaggedExposure] = Seq(
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol3", 2, 1, 6, 1, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol2", 1, 2, 6, 2, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol3", 2, 1, 8, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol4", 3, 6, 8, 2, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol5", 4, 7, 8, 3, 1.0)
+    ).toDS
+    val expected: Dataset[Metadata] = Seq(
+      Metadata(30, 20, 2, 15, 2, 5, 4)
+    ).toDS
+
+    // When
+    val writer = MLPPWriter(params)
+    import writer.DiscreteExposures
+    val result = input.makeMetadata
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
+    assert(result.toDF === expected.toDF)
+  }
+
   "toMLPPFeatures" should "create a new Dataset with the final COO sparse matrix format" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -345,24 +386,24 @@ class MLPPWriterSuite extends SharedContext {
       lagCount = 4
     )
     val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 0, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 1, 6, 1, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 2, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 3, 6, 3, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 3, 6, 1, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 4, 6, 2, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 5, 6, 3, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 4, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 5, 6, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 0, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 1, 8, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 2, 8, 2, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 3, 8, 3, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 4, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 5, 8, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 6, 8, 2, 1.0),
-      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 7, 8, 3, 1.0)
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 1, 6, 1, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, 2, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 3, 6, 3, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 3, 6, 1, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 4, 6, 2, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 5, 6, 3, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol2", 1, 4, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol2", 1, 5, 6, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 1, 8, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 2, 8, 2, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 3, 8, 3, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 5, 8, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 6, 8, 2, 1.0),
+      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 7, 8, 3, 1.0)
     ).toDS
 
     val expected = Seq(
@@ -405,11 +446,11 @@ class MLPPWriterSuite extends SharedContext {
 
     // Given
     val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, "ROS", 2, 0, 1, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, "PIO", 1, 1, 2, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, "ROS", 2, 2, 3, 0, 1),
-      LaggedExposure("PB", 1, 2, 40, "INS", 0, 1, 2, 0, 1),
-      LaggedExposure("PC", 2, 1, 50, "ROS", 2, 0, 1, 0, 1)
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1),
+      LaggedExposure("PB", 1, 2, 40,    None, "INS", 0, 1, 8, 0, 1),
+      LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
     ).toDS()
 
     val expected = Seq(
@@ -422,6 +463,68 @@ class MLPPWriterSuite extends SharedContext {
     val writer = MLPPWriter()
     import writer.DiscreteExposures
     val result = input.makeStaticExposures
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
+    assert(result === expected)
+  }
+
+  "makeOutcomes" should "create a single-column dataframe with the sparse time-dependent outcomes" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val params = MLPPWriter.Params(
+      minTimestamp = makeTS(2006, 1, 1),
+      maxTimestamp = makeTS(2006, 2, 1),
+      bucketSize = 3 // bucketCount = 10
+    )
+    val input: Dataset[LaggedExposure] = Seq(
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1),
+      LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
+    ).toDS()
+
+    val expected = Seq(6, 21).toDS.toDF
+
+    // When
+    val writer = MLPPWriter(params)
+    import writer.DiscreteExposures
+    val result = input.makeOutcomes
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
+    assert(result === expected)
+  }
+
+  "makeStaticOutcomes" should "create a single-column dataframe with the sparse static outcomes" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val params = MLPPWriter.Params(
+      minTimestamp = makeTS(2006, 1, 1),
+      maxTimestamp = makeTS(2006, 2, 1),
+      bucketSize = 3 // bucketCount = 10
+    )
+    val input: Dataset[LaggedExposure] = Seq(
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1),
+      LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
+    ).toDS()
+
+    val expected = Seq(0, 2).toDS.toDF
+
+    // When
+    val writer = MLPPWriter(params)
+    import writer.DiscreteExposures
+    val result = input.makeStaticOutcomes
 
     // Then
     import RichDataFrames._
@@ -466,20 +569,20 @@ class MLPPWriterSuite extends SharedContext {
       MLPPFeature("PA", 0, "Mol1", 0,  3, 0,  3, 0, 1.0),
       MLPPFeature("PA", 0, "Mol2", 1,  2, 0,  2, 4, 1.0),
       MLPPFeature("PA", 0, "Mol2", 1,  3, 1,  3, 5, 1.0),
-      MLPPFeature("PA", 0, "Mol3", 2,  3, 0,  3, 8, 1.0),
-      // Patient B
-      MLPPFeature("PB", 1, "Mol1", 0,  0, 0,  7, 0, 1.0),
-      MLPPFeature("PB", 1, "Mol1", 0,  1, 1,  8, 1, 1.0),
-      MLPPFeature("PB", 1, "Mol1", 0,  2, 2,  9, 2, 1.0),
-      MLPPFeature("PB", 1, "Mol1", 0,  3, 3, 10, 3, 1.0),
-      MLPPFeature("PB", 1, "Mol2", 1,  2, 0,  9, 4, 1.0),
-      MLPPFeature("PB", 1, "Mol2", 1,  3, 1, 10, 5, 1.0),
-      MLPPFeature("PB", 1, "Mol2", 1,  4, 2, 11, 6, 1.0),
-      MLPPFeature("PB", 1, "Mol2", 1,  4, 0, 11, 4, 1.0),
-      // Patient C
-      MLPPFeature("PC", 2, "Mol1", 0,  4, 0, 18, 0, 1.0),
-      MLPPFeature("PC", 2, "Mol1", 0,  5, 1, 19, 1, 1.0),
-      MLPPFeature("PC", 2, "Mol1", 0,  6, 2, 20, 2, 1.0)
+      MLPPFeature("PA", 0, "Mol3", 2,  3, 0,  3, 8, 1.0)//,
+//      // Patient B
+//      MLPPFeature("PB", 1, "Mol1", 0,  0, 0,  7, 0, 1.0),
+//      MLPPFeature("PB", 1, "Mol1", 0,  1, 1,  8, 1, 1.0),
+//      MLPPFeature("PB", 1, "Mol1", 0,  2, 2,  9, 2, 1.0),
+//      MLPPFeature("PB", 1, "Mol1", 0,  3, 3, 10, 3, 1.0),
+//      MLPPFeature("PB", 1, "Mol2", 1,  2, 0,  9, 4, 1.0),
+//      MLPPFeature("PB", 1, "Mol2", 1,  3, 1, 10, 5, 1.0),
+//      MLPPFeature("PB", 1, "Mol2", 1,  4, 2, 11, 6, 1.0),
+//      MLPPFeature("PB", 1, "Mol2", 1,  4, 0, 11, 4, 1.0),
+//      // Patient C
+//      MLPPFeature("PC", 2, "Mol1", 0,  4, 0, 18, 0, 1.0),
+//      MLPPFeature("PC", 2, "Mol1", 0,  5, 1, 19, 1, 1.0),
+//      MLPPFeature("PC", 2, "Mol1", 0,  6, 2, 20, 2, 1.0)
     ).toDF
 
     val expectedZMatrix = Seq(
@@ -490,8 +593,8 @@ class MLPPWriterSuite extends SharedContext {
 
     // When
     val result = MLPPWriter(params).write(input, rootDir).toDF
-    val writtenResult = sqlContext.read.parquet(s"$rootDir/SparseFeatures")
-    val StaticExposures = sqlContext.read.parquet(s"$rootDir/StaticExposures")
+    val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
+    val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
 
     // Then
     import RichDataFrames._

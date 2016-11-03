@@ -2,21 +2,21 @@ package fr.polytechnique.cmap.cnam.filtering.mlpp
 
 case class MLPPFeature(
   patientID: String,
-  patientIndex: Long,
+  patientIndex: Int,
   moleculeName: String,
-  moleculeIndex: Long,
+  moleculeIndex: Int,
   bucketIndex: Int,
   lagIndex: Int,
-  rowIndex: Long,
-  colIndex: Long,
+  rowIndex: Int,
+  colIndex: Int,
   value: Double)
 
 object MLPPFeature {
 
   def fromLaggedExposure(e: LaggedExposure, bucketCount: Int, lagCount: Int): MLPPFeature = {
 
-    val r = e.patientIDIndex * bucketCount + e.startBucket
-    val c = e.moleculeIndex * lagCount + e.lag
+    val r: Int = e.patientIDIndex * bucketCount + e.startBucket
+    val c: Short = (e.moleculeIndex * lagCount + e.lag).toShort
 
     MLPPFeature(
       patientID = e.patientID,

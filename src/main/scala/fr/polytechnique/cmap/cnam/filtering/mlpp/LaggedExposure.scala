@@ -5,6 +5,7 @@ case class LaggedExposure(
     patientIDIndex: Int,
     gender: Int,
     age: Int,
+    diseaseBucket: Option[Int],
     molecule: String,
     moleculeIndex: Int,
     startBucket: Int,
