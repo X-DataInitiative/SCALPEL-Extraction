@@ -1,16 +1,19 @@
 package fr.polytechnique.cmap.cnam.filtering
 
+import scala.collection.JavaConversions._
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
 import com.typesafe.config.{Config, ConfigFactory}
 import fr.polytechnique.cmap.cnam.Main
+import fr.polytechnique.cmap.cnam.utilities.functions._
 /**
   * Created by sathiya on 18/10/16.
   */
 object MLPPMain extends Main {
 
-  override def appName: String = "MLPP"
+  override def appName: String = "MLPPFeaturing"
 
-  def runMLPP(sqlContext: HiveContext, config: Config): Unit = {
+  def MLPPFeaturing(sqlContext: HiveContext, config: Config): Unit = {
     import sqlContext.implicits._
 
     val bucketSize = config.getString("hypothesis.bucketSize")
@@ -21,23 +24,18 @@ object MLPPMain extends Main {
     val inputRootDir = config.getString("paths.input")
 
     val flatEvents = sqlContext.read.parquet(config.getString("paths.input.events"))
+      .where(col("category").isin("disease", "mlpp_exposure"))
+      .withColumn("category",
+        when(col("category") === "mlpp_exposure", lit("exposure"))
+          .otherwise(col("category")))
       .as[FlatEvent]
       .persist()
 
 //    val params = MLPPWriter.Params(
 //      bucketSize = bucketSize,
 //      lagCount = lagCount,
-//      minTimestamp = makeTS(
-//        minTimestampList.get(0),
-//        minTimestampList.get(1),
-//        minTimestampList.get(2)),
-//      maxTimestamp = makeTS(
-//        maxTimestampList.get(0),
-//        maxTimestampList.get(1),
-//        maxTimestampList.get(2),
-//        maxTimestampList.get(3),
-//        maxTimestampList.get(4),
-//        maxTimestampList.get(5)),
+//      minTimestamp = makeTS(minTimestampList.toList),
+//      maxTimestamp = makeTS(maxTimestampList.toList)
 //    )
 //    val writer = MLPPWriter(params)
 //    val result = writer.write(flatEvents, outputRootDir)
@@ -47,7 +45,7 @@ object MLPPMain extends Main {
     startContext()
     val environment = if (args.nonEmpty) args(0) else "test"
     val config: Config = ConfigFactory.parseResources("mlpp.conf").getConfig(environment)
-    runMLPP(sqlContext, config)
+    MLPPFeaturing(sqlContext, config)
     stopContext()
   }
 }
