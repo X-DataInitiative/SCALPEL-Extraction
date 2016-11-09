@@ -28,14 +28,16 @@ object CoxExposuresTransformer extends ExposuresTransformer {
 
   implicit class ExposuresDataFrame(data: DataFrame) {
 
-    def filterPatients: DataFrame = {
+    def filterPatients(includeDelayedPatients: Column): DataFrame = {
       val window = Window.partitionBy("patientID")
 
-      // Drop patients whose got a disease before the start of the follow up
+      // Drop patients who got the disease before the start of the follow up
       val diseaseFilter = min(
         when(
-          col("category") === "disease" && col("eventId") === DiseaseCode && (col("start") < col("followUpStart")),
-        lit(0)).otherwise(lit(1))
+          col("category") === "disease" &&
+            col("eventId") === DiseaseCode &&
+            col("start") < col("followUpStart"), lit(0))
+          .otherwise(lit(1))
       ).over(window).cast(BooleanType)
 
       // Drop patients whose first molecule event is after PeriodStart + 1 year
@@ -48,7 +50,9 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       ).over(window).cast(BooleanType)
 
       data.withColumn("diseaseFilter", diseaseFilter)
-        .withColumn("drugFilter", drugFilter)
+        .withColumn("drugFilter",
+          when(includeDelayedPatients, includeDelayedPatients)
+            .otherwise(drugFilter))
         .where(col("diseaseFilter") && col("drugFilter"))
     }
 
@@ -76,14 +80,14 @@ object CoxExposuresTransformer extends ExposuresTransformer {
     def withExposureEnd: DataFrame = data.withColumn("exposureEnd", col("followUpEnd"))
   }
 
-  def transform(input: Dataset[FlatEvent]): Dataset[FlatEvent] = {
+  def transform(input: Dataset[FlatEvent], includeDelayedPatients: Boolean): Dataset[FlatEvent] = {
     import CoxFollowUpEventsTransformer.FollowUpFunctions
     import input.sqlContext.implicits._
 
     val events = input.toDF.repartition(col("patientID"))
     events
       .withFollowUpPeriodFromEvents
-      .filterPatients
+      .filterPatients(lit(includeDelayedPatients))
       .where(col("category") === "molecule")
       .where(col("start") < col("followUpEnd"))
       .withExposureStart
@@ -92,5 +96,9 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       .select(outputColumns: _*)
       .dropDuplicates(Seq("patientID", "eventId"))
       .as[FlatEvent]
+  }
+
+  override def transform(input: Dataset[FlatEvent]): Dataset[FlatEvent] = {
+    transform(input, includeDelayedPatients = true)
   }
 }

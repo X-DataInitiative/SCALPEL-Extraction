@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.filtering.cox
 
+import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.filtering.FlatEvent
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
@@ -7,33 +8,80 @@ import fr.polytechnique.cmap.cnam.utilities.functions._
 
 class CoxExposuresTransformerSuite extends SharedContext {
 
-  "filterPatients" should "drop patients that we couldn't remove before calculating follow-up start" in {
+  "filterPatients" should "always drop patients who got the disease before the follow up start" +
+    "and patients exposed after first year of study if includesDelayedPatients variable is false" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
     val input = Seq(
-      ("Patient_A", "molecule", "", makeTS(2008, 1, 20), makeTS(2008, 6, 29)),
-      ("Patient_A", "molecule", "", makeTS(2008, 1, 1), makeTS(2008, 6, 29)),
-      ("Patient_A", "molecule", "", makeTS(2008, 1, 10), makeTS(2008, 6, 29)),
-      ("Patient_A", "disease", "C67", makeTS(2007, 1, 1), makeTS(2008, 6, 29)),
-      ("Patient_B", "molecule", "", makeTS(2009, 1, 1), makeTS(2009, 6, 30)),
-      ("Patient_B", "molecule", "", makeTS(2009, 1, 1), makeTS(2009, 6, 30)),
-      ("Patient_B", "disease", "", makeTS(2009, 1, 1), makeTS(2009, 6, 30)),
-      ("Patient_C", "molecule", "", makeTS(2006, 2, 1), makeTS(2006, 6, 30)),
-      ("Patient_C", "molecule", "", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
+      ("Patient_A", "molecule", "m1", makeTS(2006, 1, 20), makeTS(2006, 6, 29)),
+      ("Patient_A", "molecule", "m2", makeTS(2006, 1, 1), makeTS(2006, 6, 29)),
+      ("Patient_A", "molecule", "m3", makeTS(2006, 1, 10), makeTS(2006, 6, 29)),
+      ("Patient_A", "disease", "C67", makeTS(2006, 1, 1), makeTS(2006, 6, 29)),
+      ("Patient_B", "molecule", "m1", makeTS(2009, 1, 1), makeTS(2009, 6, 30)),
+      ("Patient_B", "molecule", "m2", makeTS(2009, 1, 1), makeTS(2009, 6, 30)),
+      ("Patient_B", "disease", "m2", makeTS(2009, 1, 1), makeTS(2009, 6, 30)),
+      ("Patient_C", "molecule", "m1", makeTS(2006, 2, 1), makeTS(2006, 6, 30)),
+      ("Patient_C", "molecule", "m2", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
       ("Patient_C", "disease", "C67", makeTS(2007, 1, 1), makeTS(2006, 6, 30))
     ).toDF("patientID", "category", "eventId", "start", "followUpStart")
 
     val expected = Seq(
-      ("Patient_C", "molecule"),
-      ("Patient_C", "molecule"),
-      ("Patient_C", "disease")
-    ).toDF("patientID", "category")
+      ("Patient_C", "molecule", "m1"),
+      ("Patient_C", "molecule", "m2"),
+      ("Patient_C", "disease", "C67")
+    ).toDF("patientID", "category", "eventId")
 
     // When
     import fr.polytechnique.cmap.cnam.filtering.cox.CoxExposuresTransformer.ExposuresDataFrame
-    val result = input.filterPatients.select("patientID", "category")
+    val result = input.filterPatients(includeDelayedPatients = lit(false))
+      .select("patientID", "category", "eventId")
+
+    // Then
+    import RichDataFrames._
+    println("Result:")
+    result.show
+    println("Expected:")
+    expected.show
+    assert(result === expected)
+  }
+
+  it should "include patients who exposed after first year of study if the includesDelayedPatients " +
+    "variable is set to true" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input = Seq(
+      ("Patient_A", "molecule", "m1", makeTS(2006, 1, 20), makeTS(2006, 6, 29)),
+      ("Patient_A", "molecule", "m2", makeTS(2006, 1, 1), makeTS(2006, 6, 29)),
+      ("Patient_A", "molecule", "m3", makeTS(2006, 1, 10), makeTS(2006, 6, 29)),
+      ("Patient_A", "disease", "C67", makeTS(2005, 1, 1), makeTS(2006, 6, 29)),
+      ("Patient_B", "molecule", "m1", makeTS(2009, 1, 20), makeTS(2009, 6, 29)),
+      ("Patient_B", "molecule", "m2", makeTS(2009, 1, 1), makeTS(2009, 6, 29)),
+      ("Patient_B", "disease", "C67", makeTS(2009, 9, 10), makeTS(2009, 6, 29)),
+      ("Patient_B.1", "molecule", "m1", makeTS(2009, 1, 20), makeTS(2009, 6, 29)),
+      ("Patient_B.1", "molecule", "m2", makeTS(2009, 1, 1), makeTS(2009, 6, 29)),
+      ("Patient_B.1", "disease", "C67", makeTS(2009, 5, 10), makeTS(2009, 6, 29)),
+      ("Patient_C", "molecule", "m1", makeTS(2006, 2, 1), makeTS(2006, 6, 30)),
+      ("Patient_C", "molecule", "m2", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
+      ("Patient_C", "disease", "C67", makeTS(2007, 1, 1), makeTS(2006, 6, 30))
+    ).toDF("patientID", "category", "eventId", "start", "followUpStart")
+
+    val expected = Seq(
+      ("Patient_B", "molecule", "m1"),
+      ("Patient_B", "molecule", "m2"),
+      ("Patient_B", "disease", "C67"),
+      ("Patient_C", "molecule", "m1"),
+      ("Patient_C", "molecule", "m2"),
+      ("Patient_C", "disease", "C67")
+    ).toDF("patientID", "category", "eventId")
+
+    // When
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxExposuresTransformer.ExposuresDataFrame
+    val result = input.filterPatients(includeDelayedPatients = lit(true))
+      .select("patientID", "category", "eventId")
 
     // Then
     import RichDataFrames._
