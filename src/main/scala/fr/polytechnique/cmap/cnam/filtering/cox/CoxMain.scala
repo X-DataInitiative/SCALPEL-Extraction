@@ -16,9 +16,9 @@ object CoxMain extends Main {
   def appName = "CoxFeaturing"
 
   def coxFeaturing(sqlContext: HiveContext,
-             config: Config,
-             cancerDefinition: String,
-             includeDelayedPatients: Boolean): Unit = {
+                   config: Config,
+                   cancerDefinition: String,
+                   filterDelayedPatients: Boolean): Unit = {
     import implicits._
     import sqlContext.implicits._
 
@@ -83,7 +83,7 @@ object CoxMain extends Main {
         .union(diseaseFlatEvents)
         .union(followUpFlatEvents)
     val exposures = CoxExposuresTransformer.transform(flatEventsForExposures,
-      includeDelayedPatients).cache()
+      filterDelayedPatients).cache()
 
     logger.info("Caching exposures...")
     logger.info("Number of exposures: " + exposures.count)
@@ -111,14 +111,14 @@ object CoxMain extends Main {
 
   def main(args: Array[String]): Unit = {
     startContext()
-    val (environment: String, cancerDefinition: String, includeDelayedPatients: Boolean) =
+    val (environment: String, cancerDefinition: String, filterDelayedPatients: Boolean) =
       args match {
         case Array(arg1, args2, args3) => (args(0), args(1), args(3))
-        case Array(arg1, args2) => (args(0), args(1), false)
-        case _ => ("test", "broad", false)
+        case Array(arg1, args2) => (args(0), args(1), true)
+        case _ => ("test", "broad", true)
       }
     val config: Config = ConfigFactory.parseResources("filtering.conf").getConfig(environment)
-    coxFeaturing(sqlContext, config, cancerDefinition, includeDelayedPatients)
+    coxFeaturing(sqlContext, config, cancerDefinition, filterDelayedPatients)
     stopContext()
   }
 }
