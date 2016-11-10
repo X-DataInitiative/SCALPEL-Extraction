@@ -185,7 +185,7 @@ class ColumnUtilitiesSuite extends SharedContext{
       (Some(makeTS(2006, 1, 3)), Some(1)),
       (Some(makeTS(2006, 1, 10)), Some(4)),
       (Some(makeTS(2006, 1, 31)), Some(15)),
-      (Some(makeTS(2006, 2, 2)), Some(15)),
+      (Some(makeTS(2006, 2, 2)), None),
       (None, None)
     ).toDF("input", "output")
 

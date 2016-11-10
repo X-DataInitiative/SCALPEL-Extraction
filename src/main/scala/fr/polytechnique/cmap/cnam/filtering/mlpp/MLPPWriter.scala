@@ -50,12 +50,23 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
       )
     }
 
+    def withTracklossBucket: DataFrame = {
+      val window = Window.partitionBy("patientId")
+
+      val hadTrackloss: Column = (col("category") === "trackloss") &&
+        (col("startBucket") < minColumn(col("deathBucket"), lit(bucketCount)))
+
+      val tracklossBucket: Column = min(when(hadTrackloss, col("startBucket"))).over(window)
+
+      data.withColumn("tracklossBucket", tracklossBucket)
+    }
+
     def withDiseaseBucket: DataFrame = {
       val window = Window.partitionBy("patientId")
 
       val hadDisease: Column = (col("category") === "disease") &&
-        (col("eventId") === "targetDisease") &&
-        (col("startBucket") < minColumn(col("deathBucket"), lit(bucketCount)))
+      (col("eventId") === "targetDisease") &&
+      (col("startBucket") < minColumn(col("tracklossBucket"), col("deathBucket"), lit(bucketCount)))
 
       val diseaseBucket: Column = min(when(hadDisease, col("startBucket"))).over(window)
 
@@ -65,7 +76,7 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
     def withEndBucket: DataFrame = {
 
       val endBucket: Column = minColumn(
-        col("diseaseBucket"), col("deathBucket"), lit(bucketCount)
+        col("tracklossBucket"), col("diseaseBucket"), col("deathBucket"), lit(bucketCount)
       )
       data.withColumn("endBucket", endBucket)
     }
@@ -257,6 +268,7 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
       .withAge(AgeReferenceDate)
       .withStartBucket
       .withDeathBucket
+      .withTracklossBucket
       .withDiseaseBucket
       .withEndBucket
       .where(col("category") === "exposure")

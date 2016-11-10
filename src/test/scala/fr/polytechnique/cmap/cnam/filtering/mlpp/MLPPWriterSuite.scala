@@ -111,7 +111,7 @@ class MLPPWriterSuite extends SharedContext {
     assert(result === expected)
   }
 
-  "withDiseaseBucket" should "add a column with the timeBucket of the first targetDisease of each patient" in {
+  "withTracklossBucket" should "add a column with the timeBucket of the first trackloss of each patient" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -119,26 +119,67 @@ class MLPPWriterSuite extends SharedContext {
     val input = Seq(
       ("PA", "molecule", "PIOGLITAZONE", 0, Some(4)),
       ("PA", "molecule", "PIOGLITAZONE", 5, Some(4)),
-      ("PA", "disease", "targetDisease", 3, Some(4)),
+      ("PA", "trackloss", "trackloss",   3, Some(4)),
       ("PB", "molecule", "PIOGLITAZONE", 2,    None),
-      ("PB", "disease", "targetDisease", 4,    None),
+      ("PB", "trackloss", "trackloss",   4,    None),
       ("PC", "molecule", "PIOGLITAZONE", 0, Some(6)),
       ("PD", "molecule", "PIOGLITAZONE", 2, Some(3)),
       ("PD", "molecule", "PIOGLITAZONE", 3, Some(3)),
-      ("PD", "disease", "targetDisease", 4, Some(3))
+      ("PD", "trackloss", "trackloss",   4, Some(3))
     ).toDF("patientID", "category", "eventId", "startBucket", "deathBucket")
 
     val expected = Seq(
       ("PA", "molecule", "PIOGLITAZONE", 0, Some(4), Some(3)),
       ("PA", "molecule", "PIOGLITAZONE", 5, Some(4), Some(3)),
-      ("PA", "disease", "targetDisease", 3, Some(4), Some(3)),
+      ("PA", "trackloss", "trackloss",   3, Some(4), Some(3)),
       ("PB", "molecule", "PIOGLITAZONE", 2,    None, Some(4)),
-      ("PB", "disease", "targetDisease", 4,    None, Some(4)),
+      ("PB", "trackloss", "trackloss",   4,    None, Some(4)),
+      ("PC", "molecule", "PIOGLITAZONE", 0, Some(6),    None),
+      ("PD", "molecule", "PIOGLITAZONE", 2, Some(3),    None),
+      ("PD", "molecule", "PIOGLITAZONE", 3, Some(3),    None),
+      ("PD", "trackloss", "trackloss",   4, Some(3),    None)
+    ).toDF("patientID", "category", "eventId", "startBucket", "deathBucket", "tracklossBucket")
+
+    // When
+    val writer = MLPPWriter()
+    import writer.MLPPDataFrame
+    val result = input.withTracklossBucket
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
+    assert(result === expected)
+  }
+
+  "withDiseaseBucket" should "add a column with the timeBucket of the first targetDisease of each patient" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input = Seq(
+      ("PA", "molecule", "PIOGLITAZONE", 0, Some(4),    None),
+      ("PA", "molecule", "PIOGLITAZONE", 5, Some(4),    None),
+      ("PA", "disease", "targetDisease", 3, Some(4),    None),
+      ("PB", "molecule", "PIOGLITAZONE", 2,    None, Some(5)),
+      ("PB", "disease", "targetDisease", 4,    None, Some(5)),
       ("PC", "molecule", "PIOGLITAZONE", 0, Some(6),    None),
       ("PD", "molecule", "PIOGLITAZONE", 2, Some(3),    None),
       ("PD", "molecule", "PIOGLITAZONE", 3, Some(3),    None),
       ("PD", "disease", "targetDisease", 4, Some(3),    None)
-    ).toDF("patientID", "category", "eventId", "startBucket", "deathBucket", "diseaseBucket")
+    ).toDF("patientID", "category", "eventId", "startBucket", "deathBucket", "tracklossBucket")
+
+    val expected = Seq(
+      ("PA", "molecule", "PIOGLITAZONE", 0, Some(4),    None, Some(3)),
+      ("PA", "molecule", "PIOGLITAZONE", 5, Some(4),    None, Some(3)),
+      ("PA", "disease", "targetDisease", 3, Some(4),    None, Some(3)),
+      ("PB", "molecule", "PIOGLITAZONE", 2,    None, Some(5), Some(4)),
+      ("PB", "disease", "targetDisease", 4,    None, Some(5), Some(4)),
+      ("PC", "molecule", "PIOGLITAZONE", 0, Some(6),    None,    None),
+      ("PD", "molecule", "PIOGLITAZONE", 2, Some(3),    None,    None),
+      ("PD", "molecule", "PIOGLITAZONE", 3, Some(3),    None,    None),
+      ("PD", "disease", "targetDisease", 4, Some(3),    None,    None)
+    ).toDF("patientID", "category", "eventId", "startBucket", "deathBucket", "tracklossBucket", "diseaseBucket")
 
     // When
     val writer = MLPPWriter()
@@ -164,16 +205,18 @@ class MLPPWriterSuite extends SharedContext {
     )
 
     val input = Seq(
-      ("PA", Some(2), Some(3)),
-      ("PA", Some(2), Some(3)),
-      ("PB", Some(4), Some(3)),
-      ("PB", Some(4), Some(3)),
-      ("PC", None, Some(4)),
-      ("PC", None, Some(4)),
-      ("PD", Some(4), None),
-      ("PD", Some(4), None),
-      ("PE", None, None)
-    ).toDF("patientID", "deathBucket", "diseaseBucket")
+      ("PA", Some(2),    None, Some(3)),
+      ("PA", Some(2),    None, Some(3)),
+      ("PB", Some(4), Some(5), Some(3)),
+      ("PB", Some(4), Some(5), Some(3)),
+      ("PC",    None, Some(5), Some(4)),
+      ("PC",    None, Some(5), Some(4)),
+      ("PD", Some(5),    None, None),
+      ("PD", Some(5),    None, None),
+      ("PE", Some(7), Some(6), None),
+      ("PE", Some(7), Some(6), None),
+      ("PF",    None,    None, None)
+    ).toDF("patientID", "deathBucket", "tracklossBucket", "diseaseBucket")
 
     val expected = Seq(
       ("PA", Some(2)),
@@ -182,9 +225,11 @@ class MLPPWriterSuite extends SharedContext {
       ("PB", Some(3)),
       ("PC", Some(4)),
       ("PC", Some(4)),
-      ("PD", Some(4)),
-      ("PD", Some(4)),
-      ("PE", Some(16))
+      ("PD", Some(5)),
+      ("PD", Some(5)),
+      ("PE", Some(6)),
+      ("PE", Some(6)),
+      ("PF", Some(16))
     ).toDF("patientID", "endBucket")
 
     // When

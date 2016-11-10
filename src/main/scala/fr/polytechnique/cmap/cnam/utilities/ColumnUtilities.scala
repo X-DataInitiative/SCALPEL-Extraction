@@ -41,8 +41,8 @@ object ColumnUtilities {
       val lastBucket = if (bucketCount > 0) bucketCount - 1 else 0
 
       val bucketId: Column = floor(datediff(column, lit(minTimestamp)) / lengthDays).cast(IntegerType)
-      when(bucketId <= lastBucket || bucketId.isNull, bucketId)
-        .otherwise(lastBucket)
+      when(bucketId.isNull || bucketId.between(0, lastBucket), bucketId)
+        //.otherwise(lastBucket)
     }
   }
 }
