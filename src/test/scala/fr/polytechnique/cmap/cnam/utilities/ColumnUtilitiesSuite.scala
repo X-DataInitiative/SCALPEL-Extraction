@@ -168,24 +168,30 @@ class ColumnUtilitiesSuite extends SharedContext{
 
     // Given
     val minTimestamp = makeTS(2006, 1, 1)
-    val maxTimestamp = makeTS(2006, 2, 2)
-    val bucketSize = 2
+    val maxTimestamp = makeTS(2007, 12, 31)
+    val bucketSize = 30
 
     val input = Seq(
+      Tuple1(Some(makeTS(2005, 12, 31))),
       Tuple1(Some(makeTS(2006, 1, 1))),
-      Tuple1(Some(makeTS(2006, 1, 3))),
-      Tuple1(Some(makeTS(2006, 1, 10))),
-      Tuple1(Some(makeTS(2006, 1, 31))),
-      Tuple1(Some(makeTS(2006, 2, 2))),
+      Tuple1(Some(makeTS(2006, 6, 10))),
+      Tuple1(Some(makeTS(2006, 12, 10))),
+      Tuple1(Some(makeTS(2007, 4, 10))),
+      Tuple1(Some(makeTS(2007, 8, 10))),
+      Tuple1(Some(makeTS(2007, 12, 31))),
+      Tuple1(Some(makeTS(2008, 1, 1))),
       Tuple1(None)
     ).toDF("input")
 
     val expected = Seq(
+      (Some(makeTS(2005, 12, 31)), None),
       (Some(makeTS(2006, 1, 1)), Some(0)),
-      (Some(makeTS(2006, 1, 3)), Some(1)),
-      (Some(makeTS(2006, 1, 10)), Some(4)),
-      (Some(makeTS(2006, 1, 31)), Some(15)),
-      (Some(makeTS(2006, 2, 2)), None),
+      (Some(makeTS(2006, 6, 10)), Some(5)),
+      (Some(makeTS(2006, 12, 10)), Some(11)),
+      (Some(makeTS(2007, 4, 10)), Some(15)),
+      (Some(makeTS(2007, 8, 10)), Some(19)),
+      (Some(makeTS(2007, 12, 31)), Some(23)),
+      (Some(makeTS(2008, 1, 1)), None),
       (None, None)
     ).toDF("input", "output")
 

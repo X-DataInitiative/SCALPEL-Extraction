@@ -111,14 +111,13 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
     }
 
     def makeDiscreteExposures: Dataset[LaggedExposure] = {
+
+      val discreteColumns: Seq[Column] = Seq("patientID", "patientIDIndex", "gender", "age",
+        "diseaseBucket", "molecule", "moleculeIndex", "startBucket", "endBucket").map(col)
+
       data
-        .groupBy(
-          "patientID", "patientIDIndex", "gender", "age", "diseaseBucket", "molecule",
-          "moleculeIndex", "startBucket", "endBucket"
-        ).agg(
-          lit(0).as("lag"),
-          lit(1.0).as("weight") // In the future, we might change it to sum("weight").as("weight")
-        )
+        // In the future, we might change it to sum("weight").as("weight")
+        .groupBy(discreteColumns: _*).agg(lit(0).as("lag"), lit(1.0).as("weight"))
         .as[LaggedExposure]
     }
 

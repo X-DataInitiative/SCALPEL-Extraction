@@ -614,20 +614,7 @@ class MLPPWriterSuite extends SharedContext {
       MLPPFeature("PA", 0, "Mol1", 0,  3, 0,  3, 0, 1.0),
       MLPPFeature("PA", 0, "Mol2", 1,  2, 0,  2, 4, 1.0),
       MLPPFeature("PA", 0, "Mol2", 1,  3, 1,  3, 5, 1.0),
-      MLPPFeature("PA", 0, "Mol3", 2,  3, 0,  3, 8, 1.0)//,
-//      // Patient B
-//      MLPPFeature("PB", 1, "Mol1", 0,  0, 0,  7, 0, 1.0),
-//      MLPPFeature("PB", 1, "Mol1", 0,  1, 1,  8, 1, 1.0),
-//      MLPPFeature("PB", 1, "Mol1", 0,  2, 2,  9, 2, 1.0),
-//      MLPPFeature("PB", 1, "Mol1", 0,  3, 3, 10, 3, 1.0),
-//      MLPPFeature("PB", 1, "Mol2", 1,  2, 0,  9, 4, 1.0),
-//      MLPPFeature("PB", 1, "Mol2", 1,  3, 1, 10, 5, 1.0),
-//      MLPPFeature("PB", 1, "Mol2", 1,  4, 2, 11, 6, 1.0),
-//      MLPPFeature("PB", 1, "Mol2", 1,  4, 0, 11, 4, 1.0),
-//      // Patient C
-//      MLPPFeature("PC", 2, "Mol1", 0,  4, 0, 18, 0, 1.0),
-//      MLPPFeature("PC", 2, "Mol1", 0,  5, 1, 19, 1, 1.0),
-//      MLPPFeature("PC", 2, "Mol1", 0,  6, 2, 20, 2, 1.0)
+      MLPPFeature("PA", 0, "Mol3", 2,  3, 0,  3, 8, 1.0)
     ).toDF
 
     val expectedZMatrix = Seq(
