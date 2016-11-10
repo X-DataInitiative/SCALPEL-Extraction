@@ -35,7 +35,7 @@ class CoxExposuresTransformerSuite extends SharedContext {
 
     // When
     import fr.polytechnique.cmap.cnam.filtering.cox.CoxExposuresTransformer.ExposuresDataFrame
-    val result = input.filterPatients(includeDelayedPatients = lit(false))
+    val result = input.filterPatients(filterDelayedPatients = true)
       .select("patientID", "category", "eventId")
 
     // Then
@@ -80,7 +80,7 @@ class CoxExposuresTransformerSuite extends SharedContext {
 
     // When
     import fr.polytechnique.cmap.cnam.filtering.cox.CoxExposuresTransformer.ExposuresDataFrame
-    val result = input.filterPatients(includeDelayedPatients = lit(true))
+    val result = input.filterPatients(filterDelayedPatients = false)
       .select("patientID", "category", "eventId")
 
     // Then

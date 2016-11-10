@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.filtering.cox
 
-import org.apache.spark.sql.expressions.Window
+import org.apache.spark.sql.expressions.{Window, WindowSpec}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
@@ -28,7 +28,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
 
   implicit class ExposuresDataFrame(data: DataFrame) {
 
-    def filterPatients(includeDelayedPatients: Column): DataFrame = {
+    def filterPatients(filterDelayedPatients: Boolean): DataFrame = {
       val window = Window.partitionBy("patientID")
 
       // Drop patients who got the disease before the start of the follow up
@@ -41,19 +41,24 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       ).over(window).cast(BooleanType)
 
       // Drop patients whose first molecule event is after PeriodStart + 1 year
-      val firstYearObservation = add_months(lit(periodStart), 12).cast(TimestampType)
-      val drugFilter = max(
+      lazy val firstYearObservation = add_months(lit(periodStart), 12).cast(TimestampType)
+      lazy val drugFilter = max(
         when(
           col("category") === "molecule" && (col("start") <= firstYearObservation),
           lit(1)
         ).otherwise(lit(0))
       ).over(window).cast(BooleanType)
 
-      data.withColumn("diseaseFilter", diseaseFilter)
-        .withColumn("drugFilter",
-          when(includeDelayedPatients, includeDelayedPatients)
-            .otherwise(drugFilter))
-        .where(col("diseaseFilter") && col("drugFilter"))
+      val diseaseFilteredPatients = data
+        .withColumn("diseaseFilter", diseaseFilter)
+        .where(col("diseaseFilter"))
+
+      if (filterDelayedPatients)
+        diseaseFilteredPatients
+          .withColumn("drugFilter", drugFilter)
+          .where(col("drugFilter"))
+      else
+        diseaseFilteredPatients
     }
 
     // Ideally, this method must receive only molecules events, otherwise they will treat diseases
@@ -80,14 +85,14 @@ object CoxExposuresTransformer extends ExposuresTransformer {
     def withExposureEnd: DataFrame = data.withColumn("exposureEnd", col("followUpEnd"))
   }
 
-  def transform(input: Dataset[FlatEvent], includeDelayedPatients: Boolean): Dataset[FlatEvent] = {
+  def transform(input: Dataset[FlatEvent], filterDelayedPatients: Boolean): Dataset[FlatEvent] = {
     import CoxFollowUpEventsTransformer.FollowUpFunctions
     import input.sqlContext.implicits._
 
     val events = input.toDF.repartition(col("patientID"))
     events
       .withFollowUpPeriodFromEvents
-      .filterPatients(lit(includeDelayedPatients))
+      .filterPatients(filterDelayedPatients)
       .where(col("category") === "molecule")
       .where(col("start") < col("followUpEnd"))
       .withExposureStart
@@ -99,6 +104,6 @@ object CoxExposuresTransformer extends ExposuresTransformer {
   }
 
   override def transform(input: Dataset[FlatEvent]): Dataset[FlatEvent] = {
-    transform(input, includeDelayedPatients = true)
+    transform(input, filterDelayedPatients = true)
   }
 }
