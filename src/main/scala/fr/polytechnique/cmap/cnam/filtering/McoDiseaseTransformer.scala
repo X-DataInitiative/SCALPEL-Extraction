@@ -48,7 +48,7 @@ object McoDiseaseTransformer extends DiseaseTransformer {
       */
     def estimateStayStartTime: DataFrame = {
       val dayInMs = 24L * 60 * 60
-      val timeDelta: Column = col("stayLength") * dayInMs
+      val timeDelta: Column = coalesce(col("stayLength"), lit(0)) * dayInMs
       val estimate: Column = (col("stayEndDate").cast(LongType) - timeDelta).cast(TimestampType)
       val roughEstimate: Column = (
           unix_timestamp(
