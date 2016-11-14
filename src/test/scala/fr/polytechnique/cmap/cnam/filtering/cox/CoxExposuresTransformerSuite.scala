@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.filtering.cox
 
-import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.filtering.FlatEvent
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
@@ -163,7 +162,15 @@ class CoxExposuresTransformerSuite extends SharedContext {
       FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
         "PIOGLITAZONE", 900.0, makeTS(2006, 5, 1), None),
       FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
-        "PIOGLITAZONE", 900.0, makeTS(2006, 8, 1), None)
+        "PIOGLITAZONE", 900.0, makeTS(2006, 8, 1), None),
+      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "followUpPeriod",
+        "trackloss", 900.0, makeTS(2007, 11, 1), Some(makeTS(2008, 9, 1))),
+      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2007, 5, 1), None),
+      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2007, 6, 1), None),
+      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2007, 8, 1), None)
     ).toDS
 
     val expected = Seq(
@@ -177,6 +184,70 @@ class CoxExposuresTransformerSuite extends SharedContext {
 
     // When
     val result = CoxExposuresTransformer.transform(input)
+
+    // Then
+    result.show
+    expected.show
+    import RichDataFrames._
+    assert(result.toDF === expected)
+  }
+
+  it should "return a valid Dataset for a known input when filterDelayedPatients is false" in {
+
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input = Seq(
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "followUpPeriod",
+        "death", 900.0, makeTS(2007, 1, 1), Some(makeTS(2009, 7, 11))),
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2007, 1, 1), None),
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2007, 2, 1), None),
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2007, 5, 1), None),
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2007, 8, 1), None),
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2007, 10, 1), None),
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
+        "SULFONYLUREA", 900.0, makeTS(2008, 4, 1), None),
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
+        "SULFONYLUREA", 900.0, makeTS(2008, 5, 1), None),
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
+        "SULFONYLUREA", 900.0, makeTS(2008, 7, 1), None),
+      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "followUpPeriod",
+        "trackloss", 900.0, makeTS(2006, 7, 1), Some(makeTS(2008, 9, 1))),
+      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2006, 1, 1), None),
+      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2006, 5, 1), None),
+      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2006, 8, 1), None),
+      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "followUpPeriod",
+        "trackloss", 900.0, makeTS(2007, 11, 1), Some(makeTS(2008, 9, 1))),
+      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2007, 5, 1), None),
+      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2007, 6, 1), None),
+      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
+        "PIOGLITAZONE", 900.0, makeTS(2007, 8, 1), None)
+    ).toDS
+
+    val expected = Seq(
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
+        "PIOGLITAZONE", 1.0, makeTS(2007, 5, 1), Some(makeTS(2009, 7, 11))),
+      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
+        "SULFONYLUREA", 1.0, makeTS(2008, 8, 1), Some(makeTS(2009, 7, 11))),
+      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "exposure",
+        "PIOGLITAZONE", 1.0, makeTS(2006, 8, 1), Some(makeTS(2008, 9, 1))),
+      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "exposure",
+        "PIOGLITAZONE", 1.0, makeTS(2007, 11, 1), Some(makeTS(2008, 9, 1)))
+    ).toDF
+
+    // When
+    val result = CoxExposuresTransformer.transform(input, false)
 
     // Then
     result.show
