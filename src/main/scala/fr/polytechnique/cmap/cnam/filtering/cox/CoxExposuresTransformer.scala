@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.filtering.cox
 
-import org.apache.spark.sql.expressions.{Window, WindowSpec}
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
@@ -41,8 +41,8 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       ).over(window).cast(BooleanType)
 
       // Drop patients whose first molecule event is after PeriodStart + 1 year
-      lazy val firstYearObservation = add_months(lit(periodStart), 12).cast(TimestampType)
-      lazy val drugFilter = max(
+      val firstYearObservation = add_months(lit(periodStart), 12).cast(TimestampType)
+      val drugFilter = max(
         when(
           col("category") === "molecule" && (col("start") <= firstYearObservation),
           lit(1)
