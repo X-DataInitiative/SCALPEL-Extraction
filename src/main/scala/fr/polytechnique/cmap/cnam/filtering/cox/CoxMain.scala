@@ -23,7 +23,7 @@ object CoxMain extends Main {
     import sqlContext.implicits._
 
     val outputRoot = config.getString("paths.output.root")
-    val outputDir = s"$outputRoot/$cancerDefinition"
+    val outputDir = s"$outputRoot/$cancerDefinition/$filterDelayedPatients"
 
     logger.info("(Lazy) Extracting sources...")
     val sources: Sources = sqlContext.extractAll(config.getConfig("paths.input"))
@@ -113,7 +113,7 @@ object CoxMain extends Main {
     startContext()
     val (environment: String, cancerDefinition: String, filterDelayedPatients: Boolean) =
       args match {
-        case Array(arg1, args2, args3) => (args(0), args(1), args(3))
+        case Array(arg1, args2, args3) => (args(0), args(1), args(2).toBoolean)
         case Array(arg1, args2) => (args(0), args(1), true)
         case _ => ("test", "broad", true)
       }
