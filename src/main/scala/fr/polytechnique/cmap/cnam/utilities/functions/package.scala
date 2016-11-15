@@ -30,6 +30,10 @@ package object functions {
     Timestamp.valueOf(f"$year%04d-$month%02d-$day%02d $hour%02d:$minute%02d:$second%02d")
   }
 
+  def daysBetween(end: Timestamp, start: Timestamp): Double = {
+    (end.getTime - start.getTime) / (24.0 * 3600.0 * 1000.0)
+  }
+
   implicit class IntFunctions(num: Int) {
     def between(lower: Int, upper: Int): Boolean = num >= lower && num <= upper
   }
