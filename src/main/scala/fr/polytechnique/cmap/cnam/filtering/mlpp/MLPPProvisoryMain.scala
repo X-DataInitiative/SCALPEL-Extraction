@@ -11,7 +11,7 @@ object MLPPProvisoryMain extends Main {
 
   override def appName: String = "MLPPMain"
 
-  def runMLPPFeaturing(sqlContext: SQLContext, config: Config) = {
+  def runMLPPFeaturing(sqlContext: SQLContext, config: Config, params: MLPPWriter.Params) = {
     import sqlContext.implicits._
 
     Seq("broad", "narrow").foreach { i =>
@@ -24,15 +24,16 @@ object MLPPProvisoryMain extends Main {
 
       val flatEvents = flatEventsDF.as[FlatEvent].persist
 
-      MLPPWriter().write(flatEvents, s"/shared/mlpp_features/$i/")
+      MLPPWriter(params).write(flatEvents, s"/shared/mlpp_features/$i/")
     }
   }
 
   override def main(args: Array[String]): Unit = {
     startContext()
-    val environment = if (args.nonEmpty) args(0) else "test"
+    val environment = args(0)
+    val params = MLPPWriter.Params(lagCount = args(1).toInt, bucketSize = args(2).toInt)
     val config: Config = ConfigFactory.parseResources("filtering.conf").getConfig(environment)
-    runMLPPFeaturing(sqlContext, config)
+    runMLPPFeaturing(sqlContext, config, params)
     stopContext()
   }
 }
