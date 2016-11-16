@@ -7,7 +7,7 @@ import fr.polytechnique.cmap.cnam.utilities.DrugEventsTransformerHelper
 
 object DrugEventsTransformer extends Transformer[Event] {
 
-  val drugCategories = List("A10") // Only anti-diabetics
+  val drugCategories: List[String] = FilteringConfig.drugCategories
 
   val dcirInputColumns: List[Column] = List(
     col("NUM_ENQ").cast(StringType).as("patientID"),

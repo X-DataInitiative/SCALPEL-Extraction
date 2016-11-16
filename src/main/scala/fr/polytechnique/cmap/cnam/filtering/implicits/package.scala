@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.{ DataFrame, Dataset, SQLContext}
-import com.typesafe.config.Config
+import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
+import fr.polytechnique.cmap.cnam.filtering.FilteringConfig.InputPaths
 
 
 package object implicits {
@@ -40,16 +40,16 @@ package object implicits {
     def extractIrPha(path: String): DataFrame = new IrPhaExtractor(this.sqlContext).extract(path)
     def extractDosages(path: String): DataFrame = new DrugDosageExtractor(this.sqlContext).extract(path)
 
-    def extractAll(pathConfig: Config): Sources = {
+    def extractAll(paths: InputPaths): Sources = {
       new Sources(
-        dcir = Some(extractDcir(pathConfig.getString("dcir"))),
-        pmsiMco = Some(extractPmsiMco(pathConfig.getString("pmsi_mco"))),
-        // pmsiHad = Some(extractPmsiHad(pathConfig.getString("pmsi_had"))),
-        // pmsiSsr = Some(extractPmsiSsr(pathConfig.getString("pmsi_ssr"))),
-        irBen = Some(extractIrBen(pathConfig.getString("ir_ben"))),
-        irImb = Some(extractIrImb(pathConfig.getString("ir_imb"))),
-        irPha = Some(extractIrPha(pathConfig.getString("ir_pha"))),
-        dosages = Some(extractDosages(pathConfig.getString("dosages")))
+        dcir = Some(extractDcir(paths.dcir)),
+        pmsiMco = Some(extractPmsiMco(paths.pmsiMco)),
+        // pmsiHad = Some(extractPmsiHad(paths.pmsiHad)),
+        // pmsiSsr = Some(extractPmsiSsr(paths.pmsiSsr)),
+        irBen = Some(extractIrBen(paths.irBen)),
+        irImb = Some(extractIrImb(paths.irImb)),
+        irPha = Some(extractIrPha(paths.irPha)),
+        dosages = Some(extractDosages(paths.dosages))
       )
     }
   }

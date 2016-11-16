@@ -1,14 +1,14 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.{Column, Dataset}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
+import org.apache.spark.sql.{Column, Dataset}
 
 /**
   * This trait contains the skeleton of the output events and the target disease code
   */
 trait DiseaseTransformer extends Transformer[Event] {
-  final val DiseaseCode  = "C67"
+  final val DiseaseCode: String = FilteringConfig.diseaseCode
 
   protected val outputColumns: List[Column] = List(
     col("patientID"),

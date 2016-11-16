@@ -1,15 +1,12 @@
 package fr.polytechnique.cmap.cnam.filtering
 
 import java.sql.Timestamp
-
 import org.apache.log4j.Logger
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
-case class McoPatient( patientID: String,
-                       deathDate: Timestamp)
+case class McoPatient(patientID: String, deathDate: Timestamp)
 
 object McoPatientTransformer extends Transformer[McoPatient] with PatientsTransformer {
 
@@ -28,7 +25,7 @@ object McoPatientTransformer extends Transformer[McoPatient] with PatientsTransf
 
     def getDeathDates: DataFrame = {
       // TODO: We may need to check the consistency of {SOR_MOI, SOR_ANN} against SOR_DAT in MCO_C.
-      val deathDates: DataFrame = data.filter(col("SOR_MOD") === deathCode)
+      val deathDates: DataFrame = data.filter(col("SOR_MOD") === DeathCode)
         .withColumn("deathDate", computeDateUsingMonthYear(col("SOR_MOI"), col("SOR_ANN")))
 
       val result = deathDates
@@ -53,7 +50,6 @@ object McoPatientTransformer extends Transformer[McoPatient] with PatientsTransf
       result
     }
   }
-
 
   override def transform(sources: Sources): Dataset[McoPatient] = {
 

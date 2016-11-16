@@ -22,7 +22,6 @@ object IrBenPatientTransformer extends Transformer[Patient] with PatientsTransfo
     col("deathDate")
   )
 
-
   implicit class TransformerData(data: DataFrame) {
 
     def getGender: DataFrame = {
@@ -64,12 +63,9 @@ object IrBenPatientTransformer extends Transformer[Patient] with PatientsTransfo
 
       result
     }
-
   }
 
-
   override def transform(sources: Sources): Dataset[Patient] = {
-
 
     val irBen: DataFrame = sources.irBen.get.select(inputColumns: _*).persist()
     import irBen.sqlContext.implicits._

@@ -7,9 +7,9 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 trait Main {
 
-  Logger.getRootLogger.setLevel(Level.ERROR)
-  Logger.getLogger("org").setLevel(Level.ERROR)
-  Logger.getLogger("akka").setLevel(Level.ERROR)
+  Logger.getRootLogger.setLevel(Level.WARN)
+  Logger.getLogger("org").setLevel(Level.WARN)
+  Logger.getLogger("akka").setLevel(Level.WARN)
   Logger.getLogger("fr.polytechnique").setLevel(Level.WARN)
 
   Locale.setDefault(Locale.US)
@@ -30,5 +30,14 @@ trait Main {
   def stopContext(): Unit = _sc.stop()
 
   def appName: String
-  def main(args: Array[String]): Unit
+  def run(sqlContext: HiveContext, args: Array[String]): Unit
+
+  final def main(args: Array[String]): Unit = {
+    startContext()
+    val sqlCtx = sqlContext
+    try {
+      run(sqlCtx, args)
+    }
+    finally stopContext()
+  }
 }

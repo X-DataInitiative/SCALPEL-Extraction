@@ -7,7 +7,7 @@ import org.apache.spark.sql.{Column, DataFrame, Dataset}
 
 object McoActTransformer extends Transformer[Event] {
 
-  final val DiseaseCode = "C67"
+  final val DiseaseCode = FilteringConfig.diseaseCode
   final val ActCodes = List("Z510", "Z511") // Chemotherapy / Radiotherapy
   final val AssociateDiseases = List("C77", "C78", "C79")
 

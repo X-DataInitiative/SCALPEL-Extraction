@@ -79,7 +79,7 @@ class MainSuite extends SharedContext {
     ).toDF
 
     // When
-    FilteringMain.runETL(sqlContext, config, cancerDefinition)
+    FilteringMain.run(sqlContext)
 
     // Then
     val patients = sqlCtx.read.parquet(patientsPath)
@@ -148,7 +148,7 @@ class MainSuite extends SharedContext {
     ).toDF
 
     // When
-    FilteringMain.runETL(sqlContext, config, cancerDefinition)
+    FilteringMain.run(sqlContext)
 
     // Then
     val patients = sqlCtx.read.parquet(patientsPath)
