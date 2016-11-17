@@ -9,13 +9,44 @@ import fr.polytechnique.cmap.cnam.utilities.functions._
 
 object FilteringConfig {
 
-  final private val Conf: Config = {
-    // This is a little hacky. In the future, we need to find a better way.
+/* Alternative option using vars instead of SQLContext:
+
+  private var _conf: Config = _
+  private var _path: String = ""
+  private var _env: String = "test"
+  final private val defaultConfig = ConfigFactory.parseResources("filtering-default.conf")
+
+  def path = _path
+  def env = _env
+
+  def setPath(path: String): Unit = { _path = path }
+  def setEnv(env: String): Unit = { _env = env }
+  def init(path: String, env: String ): Unit = {
+    _path = path
+    _env = env
+    init()
+  }
+  def init(): Unit = {
+    _conf = {
+      val defaultConfig = ConfigFactory.parseResources("filtering-default.conf")
+      val config = ConfigFactory.parseFile(new java.io.File(path)).withFallback(defaultConfig).resolve()
+      config.getConfig(env)
+    }
+  }
+
+  def conf = _conf
+*/
+
+  private lazy val conf: Config = {
+    // This is a little hacky. In the future, it may be nice to find a better way.
     val sqlContext = SQLContext.getOrCreate(SparkContext.getOrCreate())
-    val configPath: String = sqlContext.getConf("config_path")
-    val environment: String = sqlContext.getConf("environment")
-    val config = ConfigFactory.parseFile(new java.io.File(configPath))
-    config.getConfig(environment)
+    val configPath: String = sqlContext.getConf("conf", "")
+    val environment: String = sqlContext.getConf("env", "test")
+
+    val defaultConfig = ConfigFactory.parseResources("filtering-default.conf").resolve().getConfig(environment)
+    val newConfig = ConfigFactory.parseFile(new java.io.File(configPath))
+
+    newConfig.withFallback(defaultConfig).resolve()
   }
 
   case class InputPaths(
@@ -44,36 +75,36 @@ object FilteringConfig {
 
   case class Dates(ageReference: Timestamp)
 
-  val drugCategories: List[String] = Conf.getStringList("shared.drug_categories").asScala.toList
-  val cancerDefinition: String  = Conf.getString("shared.cancerDefinition")
-  val diseaseCode: String = Conf.getString("shared.diseaseCode")
-  val mcoDeathCode: Int = Conf.getInt("shared.mco_death_code")
-  val inputPaths = InputPaths(
-    dcir = Conf.getString("paths.input.dcir"),
-    pmsiMco = Conf.getString("paths.input.pmsi_mco"),
-    pmsiHad = Conf.getString("paths.input.pmsi_had"),
-    pmsiSsr = Conf.getString("paths.input.pmsi_ssr"),
-    irBen = Conf.getString("paths.input.ir_ben"),
-    irImb = Conf.getString("paths.input.ir_imb"),
-    irPha = Conf.getString("paths.input.ir_pha"),
-    dosages = Conf.getString("paths.input.dosages")
+  lazy val drugCategories: List[String] = conf.getStringList("drug_categories").asScala.toList
+  lazy val cancerDefinition: String  = conf.getString("cancer_definition")
+  lazy val diseaseCode: String = conf.getString("disease_code")
+  lazy val mcoDeathCode: Int = conf.getInt("mco_death_code")
+  lazy val inputPaths = InputPaths(
+    dcir = conf.getString("paths.input.dcir"),
+    pmsiMco = conf.getString("paths.input.pmsi_mco"),
+    pmsiHad = conf.getString("paths.input.pmsi_had"),
+    pmsiSsr = conf.getString("paths.input.pmsi_ssr"),
+    irBen = conf.getString("paths.input.ir_ben"),
+    irImb = conf.getString("paths.input.ir_imb"),
+    irPha = conf.getString("paths.input.ir_pha"),
+    dosages = conf.getString("paths.input.dosages")
   )
-  val outputPaths = OutputPaths(
-    root = Conf.getString("paths.output.root"),
-    patients = Conf.getString("paths.output.patients"),
-    flatEvents = Conf.getString("paths.output.flat_events")
+  lazy val outputPaths = OutputPaths(
+    root = conf.getString("paths.output.root"),
+    patients = conf.getString("paths.output.patients"),
+    flatEvents = conf.getString("paths.output.flat_events")
   )
-  val limits = Limits(
-    minYear = Conf.getInt("shared.limits.min_year"),
-    maxYear = Conf.getInt("shared.limits.max_year"),
-    minMonth = Conf.getInt("shared.limits.min_month"),
-    maxMonth = Conf.getInt("shared.limits.max_month"),
-    minGender = Conf.getInt("shared.limits.min_gender"),
-    maxGender = Conf.getInt("shared.limits.max_gender"),
-    minAge = Conf.getInt("shared.limits.min_age"),
-    maxAge = Conf.getInt("shared.limits.max_age")
+  lazy val limits = Limits(
+    minYear = conf.getInt("limits.min_year"),
+    maxYear = conf.getInt("limits.max_year"),
+    minMonth = conf.getInt("limits.min_month"),
+    maxMonth = conf.getInt("limits.max_month"),
+    minGender = conf.getInt("limits.min_gender"),
+    maxGender = conf.getInt("limits.max_gender"),
+    minAge = conf.getInt("limits.min_age"),
+    maxAge = conf.getInt("limits.max_age")
   )
-  val dates = Dates(
-    ageReference = makeTS(Conf.getIntList("dates.age_reference").asScala.toList)
+  lazy val dates = Dates(
+    ageReference = makeTS(conf.getIntList("dates.age_reference").asScala.toList)
   )
 }

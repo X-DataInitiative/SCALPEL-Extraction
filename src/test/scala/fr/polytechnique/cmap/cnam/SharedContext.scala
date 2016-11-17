@@ -34,23 +34,30 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
   def sc: SparkContext = _sc
   def sqlContext: TestHiveContext = _sql
 
+  def startContexts(): Unit = {
+    _sc = new SparkContext(conf)
+    _sql = new TestHiveContext(_sc)
+  }
+
+  def stopContexts(): Unit = {
+    _sc.stop()
+    _sc = null
+  }
+
   override def beforeEach(): Unit = {
     FileUtils.deleteDirectory(new File("target/test/output"))
     super.beforeEach()
   }
 
   override def beforeAll() {
-    _sc = new SparkContext(conf)
-    _sql = new TestHiveContext(_sc)
+    startContexts()
     FileUtils.deleteDirectory(new File("target/test/output"))
     super.beforeAll()
   }
 
   override def afterAll() {
     try{
-      _sc.stop()
-      _sc = null
-      System.clearProperty("spark.driver.port")
+      stopContexts()
     } finally {
       FileUtils.deleteDirectory(new File("target/test/output"))
       super.afterAll()

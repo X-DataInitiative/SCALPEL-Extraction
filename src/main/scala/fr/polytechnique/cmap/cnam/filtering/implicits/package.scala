@@ -1,6 +1,7 @@
 package fr.polytechnique.cmap.cnam.filtering
 
 import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
+import com.typesafe.config.Config
 import fr.polytechnique.cmap.cnam.filtering.FilteringConfig.InputPaths
 
 
@@ -50,6 +51,23 @@ package object implicits {
         irImb = Some(extractIrImb(paths.irImb)),
         irPha = Some(extractIrPha(paths.irPha)),
         dosages = Some(extractDosages(paths.dosages))
+      )
+    }
+
+    /**
+      * For backwards compatibility only
+      * @deprecated
+      */
+    def extractAll(pathConfig: Config): Sources = {
+      new Sources(
+        dcir = Some(extractDcir(pathConfig.getString("dcir"))),
+        pmsiMco = Some(extractPmsiMco(pathConfig.getString("pmsi_mco"))),
+        // pmsiHad = Some(extractPmsiHad(pathConfig.getString("pmsi_had"))),
+        // pmsiSsr = Some(extractPmsiSsr(pathConfig.getString("pmsi_ssr"))),
+        irBen = Some(extractIrBen(pathConfig.getString("ir_ben"))),
+        irImb = Some(extractIrImb(pathConfig.getString("ir_imb"))),
+        irPha = Some(extractIrPha(pathConfig.getString("ir_pha"))),
+        dosages = Some(extractDosages(pathConfig.getString("dosages")))
       )
     }
   }

@@ -10,17 +10,31 @@ object FilteringMain extends Main {
 
   def appName = "Filtering"
 
-  def run(sqlContext: HiveContext, args: Array[String]): Unit = {
+  /**
+    * Arguments expected:
+    *   "conf" -> "path/to/file.conf" (default: "$resources/filtering-default.conf")
+    *   "env" -> "cnam" | "cmap" | "test" (deafult: "test")
+    */
+  override def run(sqlContext: HiveContext, argsMap: Map[String, String] = Map()): Unit = {
 
     import implicits.SourceExtractor
     import sqlContext.implicits._
 
-    sqlContext.setConf("config_path", args(0))
-    sqlContext.setConf("environment", args(1))
+    // "get" returns an Option, then we can use foreach to gently ignore when the key was not found.
+    argsMap.get("conf").foreach(sqlContext.setConf("conf", _))
+    argsMap.get("env").foreach(sqlContext.setConf("env", _))
+
+  /* Alternative option using vars instead of SQLContext:
+    argsMap.get("conf").foreach(FilteringConfig.setPath)
+    argsMap.get("env").foreach(FilteringConfig.setEnv)
+    FilteringConfig.init()
+  */
 
     val inputPaths = FilteringConfig.inputPaths
     val outputPaths = FilteringConfig.outputPaths
     val cancerDefinition = FilteringConfig.cancerDefinition
+
+    logger.info(s"Running for the $cancerDefinition cancer definition")
 
     logger.info("(Lazy) Extracting sources...")
     val sources: Sources = sqlContext.extractAll(inputPaths)

@@ -60,7 +60,7 @@ object FlatteningMain extends Main {
     }
   }
 
-  def main(args: Array[String]): Unit = {
+  override def main(args: Array[String]): Unit = {
     startContext()
     sqlContext.setConf("spark.sql.autoBroadcastJoinThreshold", "104857600")
     loadToParquet()

@@ -116,7 +116,7 @@ object ValidateFlattening extends Main {
     }
   }
 
-  def main(args: Array[String]){
+  override def main(args: Array[String]){
     startContext( )
     computeStoreFlatAndInputDfsStat()
   }

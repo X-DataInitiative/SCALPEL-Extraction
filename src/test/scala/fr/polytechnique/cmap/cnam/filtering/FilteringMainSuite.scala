@@ -1,29 +1,27 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
-import com.typesafe.config.ConfigFactory
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
-class MainSuite extends SharedContext {
+class FilteringMainSuite extends SharedContext {
 
-  val config = ConfigFactory.parseResources("filtering.conf").getConfig("test")
-  val rootPath = config.getString("paths.output.root")
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    val c = FilteringConfig.getClass.getDeclaredConstructor()
+    c.setAccessible(true)
+    c.newInstance()
+  }
 
-  "runETL" should "correctly run the full filtering pipeline for broad cancer definition without exceptions" in {
+  "run" should "correctly run the full filtering pipeline for broad cancer definition without exceptions" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
-    val cancerDefinition = "broad"
-    val patientsPath = s"$rootPath/$cancerDefinition/patients"
-    val eventsPath = s"$rootPath/$cancerDefinition/events"
-    val exposuresPath = s"$rootPath/$cancerDefinition/exposures"
-    val coxPath = s"$rootPath/$cancerDefinition/cox"
-    val LTSCSSPath = s"$rootPath/$cancerDefinition/LTSCCS"
-
     // Given
+    val configPath = "src/test/resources/config/filtering-broad.conf"
+    lazy val patientsPath = FilteringConfig.outputPaths.patients
+    lazy val flatEventsPath = FilteringConfig.outputPaths.flatEvents
     val expectedPatients: DataFrame = Seq(
       Patient(
         patientID = "Patient_02",
@@ -34,8 +32,6 @@ class MainSuite extends SharedContext {
     ).toDF
 
     val expectedFlatEvents: DataFrame = Seq(
-      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "trackloss",
-        "eventId", 1.0, makeTS(2006, 3, 30), None),
       FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
         "PIOGLITAZONE", 840.0, makeTS(2006, 1, 15), None),
       FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
@@ -69,44 +65,40 @@ class MainSuite extends SharedContext {
       FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
         "C67", 1.0, makeTS(2007, 1, 29), None),
       FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
-        "C67", 1.0, makeTS(2007, 1, 29), None),  // duplicate event, it's ok. See the
+        "C67", 1.0, makeTS(2007, 1, 29), None)  // duplicate event, it's ok. See the
       // Scaladoc of McoDiseaseTransformer.estimateStayStartTime for explanation.
-      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "followUpPeriod",
-        "disease", 1.0, makeTS(2006, 7, 5), Some(makeTS(2005, 12, 24))),
-      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)),
-        "observationPeriod",  "observationPeriod", 1.0, makeTS(2006, 1, 5),
-        Some(Timestamp.valueOf("2009-12-31 23:59:59")))
     ).toDF
 
     // When
-    FilteringMain.run(sqlContext)
+    FilteringMain.run(sqlContext, Map("conf" -> configPath))
 
     // Then
     val patients = sqlCtx.read.parquet(patientsPath)
-    val events = sqlCtx.read.parquet(eventsPath)
-    sqlCtx.read.parquet(exposuresPath)
-    sqlCtx.read.parquet(coxPath)
+    val flatEvents = sqlCtx.read.parquet(flatEventsPath)
     patients.show
     expectedPatients.show
-    events.orderBy("patientID", "category", "start").show
+    flatEvents.orderBy("patientID", "category", "start").show
     expectedFlatEvents.orderBy("patientID", "category", "start").show
+
     import RichDataFrames._
     assert(patients === expectedPatients)
-    assert(events === expectedFlatEvents)
+    assert(flatEvents === expectedFlatEvents)
   }
 
+
+  // We have a problem in this test because FilteringConfig was already instantiated by the previous
+  //   one with another configuration file.
+  // This will happen again whenever we want to test different values in the configuration, which I
+  //   think will be frequent. The only solution I can think of is using "vars" in FilteringConfig
+  //   and using a setter method for updating the config (i.e. Java-like strategy).
   it should "correctly run the full filtering pipeline for narrow cancer definition without exceptions" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
-    val cancerDefinition = "narrow"
-    val patientsPath = s"$rootPath/$cancerDefinition/patients"
-    val eventsPath = s"$rootPath/$cancerDefinition/events"
-    val exposuresPath = s"$rootPath/$cancerDefinition/exposures"
-    val coxPath = s"$rootPath/$cancerDefinition/cox"
-    val LTSCSSPath = s"$rootPath/$cancerDefinition/LTSCCS"
-
     // Given
+    val configPath = "src/test/resources/config/filtering-narrow.conf"
+    lazy val patientsPath = FilteringConfig.outputPaths.patients
+    lazy val flatEventsPath = FilteringConfig.outputPaths.flatEvents
     val expectedPatients: DataFrame = Seq(
       Patient(
         patientID = "Patient_02",
@@ -117,8 +109,6 @@ class MainSuite extends SharedContext {
     ).toDF
 
     val expectedFlatEvents: DataFrame = Seq(
-      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "trackloss",
-        "eventId", 1.0, makeTS(2006, 3, 30), None),
       FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
         "PIOGLITAZONE", 840.0, makeTS(2006, 1, 15), None),
       FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
@@ -138,29 +128,23 @@ class MainSuite extends SharedContext {
       FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
         "C67", 1.0, makeTS(2007, 1, 29), None),
       FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
-        "C67", 1.0, makeTS(2007, 1, 29), None),  // duplicate event, it's ok. See the
+        "C67", 1.0, makeTS(2007, 1, 29), None)  // duplicate event, it's ok. See the
       // Scaladoc of McoDiseaseTransformer.estimateStayStartTime for explanation.
-      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "followUpPeriod",
-        "death", 1.0, makeTS(2006, 7, 5), Some(makeTS(2008, 1, 25))),
-      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)),
-        "observationPeriod",  "observationPeriod", 1.0, makeTS(2006, 1, 5),
-        Some(Timestamp.valueOf("2009-12-31 23:59:59")))
     ).toDF
 
     // When
-    FilteringMain.run(sqlContext)
+    FilteringMain.run(sqlContext, Map("conf" -> configPath))
 
     // Then
     val patients = sqlCtx.read.parquet(patientsPath)
-    val events = sqlCtx.read.parquet(eventsPath)
-    sqlCtx.read.parquet(exposuresPath)
-    sqlCtx.read.parquet(coxPath)
+    val flatEvents = sqlCtx.read.parquet(flatEventsPath)
     patients.show
     expectedPatients.show
-    events.orderBy("patientID", "category", "start").show
+    flatEvents.orderBy("patientID", "category", "start").show
     expectedFlatEvents.orderBy("patientID", "category", "start").show
+
     import RichDataFrames._
-    assert(patients === expectedPatients)
-    assert(events === expectedFlatEvents)
+        assert(patients === expectedPatients)
+        assert(flatEvents === expectedFlatEvents)
   }
 }

@@ -7,10 +7,11 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 trait Main {
 
-  Logger.getRootLogger.setLevel(Level.WARN)
-  Logger.getLogger("org").setLevel(Level.WARN)
-  Logger.getLogger("akka").setLevel(Level.WARN)
-  Logger.getLogger("fr.polytechnique").setLevel(Level.WARN)
+  Logger.getRootLogger.setLevel(Level.ERROR)
+  Logger.getLogger("org").setLevel(Level.ERROR)
+  Logger.getLogger("akka").setLevel(Level.ERROR)
+  Logger.getLogger("org.apache.spark").setLevel(Level.WARN)
+  Logger.getLogger("fr.polytechnique").setLevel(Level.INFO)
 
   Locale.setDefault(Locale.US)
   TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
@@ -29,15 +30,19 @@ trait Main {
   }
   def stopContext(): Unit = _sc.stop()
 
-  def appName: String
-  def run(sqlContext: HiveContext, args: Array[String]): Unit
-
-  final def main(args: Array[String]): Unit = {
+  // Expected args are in format "arg1=value1 arg2=value2 ..."
+  def main(args: Array[String]): Unit = {
     startContext()
     val sqlCtx = sqlContext
+    val argsMap = args.map(
+      arg => arg.split("=")(0) -> arg.split("=")(1)
+    ).toMap
     try {
-      run(sqlCtx, args)
+      run(sqlCtx, argsMap)
     }
     finally stopContext()
   }
+
+  def appName: String
+  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Unit = {}
 }

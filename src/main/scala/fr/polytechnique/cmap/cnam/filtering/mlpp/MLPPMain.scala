@@ -42,7 +42,7 @@ object MLPPMain extends Main {
     mlppWriter.write(flatEvents, outputRootDir)
   }
 
-  def main(args: Array[String]): Unit = {
+  override def main(args: Array[String]): Unit = {
     startContext()
     val environment = if (args.nonEmpty) args(0) else "test"
     val config: Config = ConfigFactory.parseResources("mlpp.conf").getConfig(environment)
