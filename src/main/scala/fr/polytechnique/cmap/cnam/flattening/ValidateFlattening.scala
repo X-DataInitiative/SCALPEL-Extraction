@@ -3,8 +3,9 @@ package fr.polytechnique.cmap.cnam.flattening
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.statistics.Comparator
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
-import org.apache.spark.sql.{Column, DataFrame}
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.hive.HiveContext
 import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig
 import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig._
 
@@ -116,8 +117,8 @@ object ValidateFlattening extends Main {
     }
   }
 
-  override def main(args: Array[String]){
-    startContext( )
+  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
     computeStoreFlatAndInputDfsStat()
+    None
   }
 }

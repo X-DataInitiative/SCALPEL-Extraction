@@ -2,8 +2,10 @@ package fr.polytechnique.cmap.cnam
 
 import java.util.{Locale, TimeZone}
 import org.apache.log4j.{Level, Logger}
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
+import fr.polytechnique.cmap.cnam.flattening.FlatteningMain._
 
 trait Main {
 
@@ -27,6 +29,7 @@ trait Main {
   def startContext(): Unit = {
     _sc = new SparkContext(new SparkConf().setAppName(this.appName))
     _sql = new HiveContext(_sc)
+    _sql.setConf("spark.sql.autoBroadcastJoinThreshold", "104857600")
   }
   def stopContext(): Unit = _sc.stop()
 
@@ -44,5 +47,5 @@ trait Main {
   }
 
   def appName: String
-  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Unit = {}
+  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]]
 }

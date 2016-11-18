@@ -1,6 +1,7 @@
 package fr.polytechnique.cmap.cnam.flattening
 
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.hive.HiveContext
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig
 import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig._
@@ -60,10 +61,9 @@ object FlatteningMain extends Main {
     }
   }
 
-  override def main(args: Array[String]): Unit = {
-    startContext()
-    sqlContext.setConf("spark.sql.autoBroadcastJoinThreshold", "104857600")
+  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
     loadToParquet()
     joinTables()
+    None
   }
 }

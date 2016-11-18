@@ -20,7 +20,7 @@ trait PatientsTransformer {
 object PatientsTransformer extends Transformer[Patient] with PatientsTransformer {
 
   def isDeathDateValid(deathDate: Column, birthDate: Column): Column =
-    deathDate.between(birthDate, lit(makeTS(MaxYear, 1, 1)))
+    deathDate.between(birthDate, makeTS(MaxYear, 1, 1))
 
   def transform(sources: Sources): Dataset[Patient] = {
     val irBen = IrBenPatientTransformer.transform(sources).toDF.as("irBen")

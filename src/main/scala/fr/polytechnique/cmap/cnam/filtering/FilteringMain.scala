@@ -15,7 +15,7 @@ object FilteringMain extends Main {
     *   "conf" -> "path/to/file.conf" (default: "$resources/filtering-default.conf")
     *   "env" -> "cnam" | "cmap" | "test" (deafult: "test")
     */
-  override def run(sqlContext: HiveContext, argsMap: Map[String, String] = Map()): Unit = {
+  def run(sqlContext: HiveContext, argsMap: Map[String, String] = Map()): Option[Dataset[FlatEvent]] = {
 
     import implicits.SourceExtractor
     import sqlContext.implicits._
@@ -70,5 +70,7 @@ object FilteringMain extends Main {
     patients.toDF.write.parquet(outputPaths.patients)
     logger.info("Writing FlatEvents...")
     flatEvents.toDF.write.parquet(outputPaths.flatEvents)
+
+    Some(flatEvents)
   }
 }

@@ -121,4 +121,7 @@ object CoxMain extends Main {
     coxFeaturing(sqlContext, config, cancerDefinition, filterDelayedPatients)
     stopContext()
   }
+
+  // todo: refactor this function
+  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = None
 }

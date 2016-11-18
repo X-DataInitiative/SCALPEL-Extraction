@@ -1,6 +1,7 @@
 package fr.polytechnique.cmap.cnam.filtering.mlpp
 
 import scala.collection.JavaConversions._
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
 import com.typesafe.config.{Config, ConfigFactory}
@@ -49,4 +50,7 @@ object MLPPMain extends Main {
     MLPPFeaturing(sqlContext, config)
     stopContext()
   }
+
+  // todo: refactor this function
+  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = None
 }
