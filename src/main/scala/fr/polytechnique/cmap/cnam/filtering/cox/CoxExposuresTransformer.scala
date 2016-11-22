@@ -41,7 +41,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       ).over(window).cast(BooleanType)
 
       // Drop patients whose first molecule event is after PeriodStart + 1 year
-      val firstYearObservation = add_months(lit(periodStart), 12).cast(TimestampType)
+      val firstYearObservation = add_months(lit(StudyStart), 12).cast(TimestampType)
       val drugFilter = max(
         when(
           col("category") === "molecule" && (col("start") <= firstYearObservation),
