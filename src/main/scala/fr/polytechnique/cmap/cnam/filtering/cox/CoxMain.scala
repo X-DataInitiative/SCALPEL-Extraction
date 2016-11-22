@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.filtering.cox
 
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{DataFrame, Dataset}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
 import com.typesafe.config.{Config, ConfigFactory}
@@ -10,7 +10,6 @@ import fr.polytechnique.cmap.cnam.filtering._
 /**
   * Created by sathiya on 09/11/16.
   */
-//TODO: Avoid redoing the extraction and transformation, instead reuse "hdfs://shared/filtered_data"
 object CoxMain extends Main {
 
   def appName = "CoxFeaturing"
@@ -19,42 +18,23 @@ object CoxMain extends Main {
                    config: Config,
                    cancerDefinition: String,
                    filterDelayedPatients: Boolean): Unit = {
-    import implicits._
     import sqlContext.implicits._
 
+    val flatEventPath = config.getString("paths.input.flatEvent")
+    val flatDcirPath = config.getString("paths.input.flatDcir")
     val outputRoot = config.getString("paths.output.root")
     val outputDir = s"$outputRoot/$cancerDefinition/$filterDelayedPatients"
 
-    logger.info("(Lazy) Extracting sources...")
-    val sources: Sources = sqlContext.extractAll(config.getConfig("paths.input"))
+    logger.info(s"Reading flat events from $flatEventPath...")
 
-    logger.info("(Lazy) Transforming patients...")
-    val patients: Dataset[Patient] = PatientsTransformer.transform(sources).cache()
+    val dcirFlat: DataFrame = sqlContext.read.parquet(flatDcirPath)
+    val flatEvents: DataFrame = sqlContext.read.parquet(flatEventPath)
 
-    logger.info("(Lazy) Transforming drug events...")
-    val drugEvents: Dataset[Event] = DrugEventsTransformer.transform(sources)
+    val drugFlatEvents = flatEvents.filter(col("category") === "molecule").as[FlatEvent]
+    val diseaseFlatEvents = flatEvents.filter(col("category") === "disease").as[FlatEvent]
+    val patientColumns = Array($"patientID", $"gender", $"birthDate", $"deathDate")
+    val patients = flatEvents.select(patientColumns: _*).distinct.as[Patient]
 
-    logger.info("(Lazy) Transforming disease events...")
-    val broadDiseaseEvents: Dataset[Event] = DiseaseTransformer.transform(sources)
-    val targetDiseaseEvents: Dataset[Event] = (
-      if (cancerDefinition == "broad")
-        broadDiseaseEvents
-      else
-        TargetDiseaseTransformer.transform(sources)
-      ).map(_.copy(eventId = "targetDisease"))
-    val diseaseEvents = broadDiseaseEvents.union(targetDiseaseEvents)
-
-    val drugFlatEvents = drugEvents.as("left")
-      .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
-      .map((FlatEvent.merge _).tupled)
-      .cache()
-
-    val diseaseFlatEvents = diseaseEvents.as("left")
-      .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
-      .map((FlatEvent.merge _).tupled)
-      .cache()
-
-    logger.info("Caching drug events...")
     logger.info("Number of drug events: " + drugFlatEvents.count)
     logger.info("Caching disease events...")
     logger.info("Number of disease events: " + diseaseFlatEvents.count)
@@ -63,7 +43,7 @@ object CoxMain extends Main {
     logger.info("(Lazy) Transforming Follow-up events...")
     val observationFlatEvents = CoxObservationPeriodTransformer.transform(drugFlatEvents)
 
-    val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(sources)
+    val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(new Sources(dcir = Some(dcirFlat)))
     val tracklossFlatEvents = tracklossEvents
       .as("left")
       .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
@@ -92,14 +72,12 @@ object CoxMain extends Main {
     val coxFlatEvents = exposures.union(followUpFlatEvents)
     val coxFeatures = CoxTransformer.transform(coxFlatEvents)
 
-    val flatEvents = flatEventsForExposures
+    val flatEventsSummary = flatEventsForExposures
       .union(observationFlatEvents)
       .union(tracklossFlatEvents)
 
-    logger.info("Writing Patients...")
-    patients.toDF.write.parquet(s"$outputDir/patients")
-    logger.info("Writing FlatEvents...")
-    flatEvents.toDF.write.parquet(s"$outputDir/events")
+    logger.info("Writing summary of all cox events...")
+    flatEventsSummary.toDF.write.parquet(s"$outputDir/eventsSummary")
     logger.info("Writing Exposures...")
     exposures.toDF.write.parquet(s"$outputDir/exposures")
 
