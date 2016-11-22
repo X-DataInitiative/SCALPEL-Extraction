@@ -109,7 +109,7 @@ object CoxMain extends Main {
     coxFeatures.writeCSV(s"$outputDir/cox.csv")
   }
 
-  def main(args: Array[String]): Unit = {
+  override def main(args: Array[String]): Unit = {
     startContext()
     val (environment: String, cancerDefinition: String, filterDelayedPatients: Boolean) =
       args match {
@@ -117,8 +117,11 @@ object CoxMain extends Main {
         case Array(arg1, args2) => (args(0), args(1), true)
         case _ => ("test", "broad", true)
       }
-    val config: Config = ConfigFactory.parseResources("filtering.conf").getConfig(environment)
+    val config: Config = ConfigFactory.parseResources("filtering-default.conf").getConfig(environment)
     coxFeaturing(sqlContext, config, cancerDefinition, filterDelayedPatients)
     stopContext()
   }
+
+  // todo: refactor this function
+  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = None
 }

@@ -2,8 +2,7 @@ package fr.polytechnique.cmap.cnam.utilities
 
 import java.sql.Timestamp
 import scala.reflect.runtime.universe.TypeTag
-
-import org.apache.spark.sql.Column
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructType, TimestampType}
@@ -42,6 +41,9 @@ package object functions {
   def daysBetween(end: Timestamp, start: Timestamp): Double = {
     (end.getTime - start.getTime) / (24.0 * 3600.0 * 1000.0)
   }
+
+  def unionAll[A](datasets: Dataset[A]*): Dataset[A] = datasets.reduce(_.union(_))
+  def unionAll(dataframes: DataFrame*): DataFrame = dataframes.reduce(_.unionAll(_))
 
   implicit class IntFunctions(num: Int) {
     def between(lower: Int, upper: Int): Boolean = num >= lower && num <= upper

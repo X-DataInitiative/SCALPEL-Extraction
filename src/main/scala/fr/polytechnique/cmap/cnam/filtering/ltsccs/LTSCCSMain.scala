@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.filtering.ltsccs
 
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
 import com.typesafe.config.{Config, ConfigFactory}
@@ -53,11 +54,14 @@ object LTSCCSMain extends Main {
 
   }
 
-  def main(args: Array[String]): Unit = {
+  override def main(args: Array[String]): Unit = {
     startContext()
     val environment = if (args.nonEmpty) args(0) else "test"
-    val config: Config = ConfigFactory.parseResources("filtering.conf").getConfig(environment)
+    val config: Config = ConfigFactory.parseResources("filtering-default.conf").getConfig(environment)
     runLTSCCS(sqlContext, config)
     stopContext()
   }
+
+  // todo: refactor this function
+  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = None
 }

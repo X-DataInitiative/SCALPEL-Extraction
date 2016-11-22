@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
 
 /**
   * This transformer looks for CIM10 codes containing DiseaseTransformer.DiseaseCode in IR_IMB_R.

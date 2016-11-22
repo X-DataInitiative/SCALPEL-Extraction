@@ -4,11 +4,9 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DateType, IntegerType, StringType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-
 import fr.polytechnique.cmap.cnam.utilities.ColumnUtilities._
 
 object DcirPatientTransformer extends Transformer[Patient] with PatientsTransformer {
-
 
   def estimateBirthDateCol(ts1: Column, ts2: Column, birthYear: Column): Column = {
     unix_timestamp(
@@ -33,7 +31,6 @@ object DcirPatientTransformer extends Transformer[Patient] with PatientsTransfor
   )
 
   implicit class PatientTransformer(data: DataFrame) {
-
 
     // The birth year for each patient is found by grouping by patientId and birthYear and then
     //   by taking the most frequent birth year for each patient.
@@ -105,5 +102,4 @@ object DcirPatientTransformer extends Transformer[Patient] with PatientsTransfor
     dcir.unpersist()
     result
   }
-
 }

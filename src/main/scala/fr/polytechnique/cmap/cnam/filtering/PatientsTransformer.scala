@@ -4,28 +4,23 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, Dataset}
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
-
 trait PatientsTransformer {
-
-  final val MinAge = 18
-  final val MaxAge = 1000
-  final val MinGender = 1
-  final val MaxGender = 2
-  final val MinYear = 1900
-  final val MaxYear = 2020
-  final val MaxDeathDate = makeTS(2020, 1, 1)
-  final val MinMonth = 1
-  final val MaxMonth = 12
-  final val deathCode = 9
-  final val AgeReferenceDate = makeTS(2006, 12, 31, 23, 59, 59)
-
+  final val MinAge: Int = FilteringConfig.limits.minAge
+  final val MaxAge: Int = FilteringConfig.limits.maxAge
+  final val MinGender: Int = FilteringConfig.limits.minGender
+  final val MaxGender: Int = FilteringConfig.limits.maxGender
+  final val MinYear: Int = FilteringConfig.limits.minYear
+  final val MaxYear: Int = FilteringConfig.limits.maxYear
+  final val MinMonth: Int = FilteringConfig.limits.minMonth
+  final val MaxMonth: Int = FilteringConfig.limits.maxMonth
+  final val DeathCode: Int = FilteringConfig.mcoDeathCode
+  final val AgeReferenceDate: java.sql.Timestamp = FilteringConfig.dates.ageReference
 }
-
 
 object PatientsTransformer extends Transformer[Patient] with PatientsTransformer {
 
   def isDeathDateValid(deathDate: Column, birthDate: Column): Column =
-    deathDate.between(birthDate, MaxDeathDate)
+    deathDate.between(birthDate, makeTS(MaxYear, 1, 1))
 
   def transform(sources: Sources): Dataset[Patient] = {
     val irBen = IrBenPatientTransformer.transform(sources).toDF.as("irBen")
@@ -69,7 +64,5 @@ object PatientsTransformer extends Transformer[Patient] with PatientsTransformer
       birthdate.as("birthDate"),
       deathDate.as("deathDate")
     ).as[Patient]
-
   }
-
 }

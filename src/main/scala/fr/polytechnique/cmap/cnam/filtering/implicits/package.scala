@@ -1,7 +1,8 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.{ DataFrame, Dataset, SQLContext}
+import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
 import com.typesafe.config.Config
+import fr.polytechnique.cmap.cnam.filtering.FilteringConfig.InputPaths
 
 
 package object implicits {
@@ -40,6 +41,23 @@ package object implicits {
     def extractIrPha(path: String): DataFrame = new IrPhaExtractor(this.sqlContext).extract(path)
     def extractDosages(path: String): DataFrame = new DrugDosageExtractor(this.sqlContext).extract(path)
 
+    def extractAll(paths: InputPaths): Sources = {
+      new Sources(
+        dcir = Some(extractDcir(paths.dcir)),
+        pmsiMco = Some(extractPmsiMco(paths.pmsiMco)),
+        // pmsiHad = Some(extractPmsiHad(paths.pmsiHad)),
+        // pmsiSsr = Some(extractPmsiSsr(paths.pmsiSsr)),
+        irBen = Some(extractIrBen(paths.irBen)),
+        irImb = Some(extractIrImb(paths.irImb)),
+        irPha = Some(extractIrPha(paths.irPha)),
+        dosages = Some(extractDosages(paths.dosages))
+      )
+    }
+
+    /**
+      * For backwards compatibility only
+      * @deprecated
+      */
     def extractAll(pathConfig: Config): Sources = {
       new Sources(
         dcir = Some(extractDcir(pathConfig.getString("dcir"))),
