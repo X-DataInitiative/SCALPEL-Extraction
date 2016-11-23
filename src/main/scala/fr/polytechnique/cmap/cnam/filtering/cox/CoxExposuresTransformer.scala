@@ -4,15 +4,15 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.filtering.{ExposuresTransformer, FlatEvent}
+import fr.polytechnique.cmap.cnam.filtering.{ExposuresTransformer, FilteringConfig, FlatEvent}
 
 object CoxExposuresTransformer extends ExposuresTransformer {
 
   // Constant definitions for delays and time windows. Should be verified before compiling.
   // In the future, we may want to export them to an external file.
-  final val ExposureStartDelay = 3
-  final val ExposureStartThreshold = 6
-  final val DiseaseCode = "C67"
+  final val ExposureStartDelay: Int = CoxConfig.exposureDefinition.startDelay
+  final val ExposureStartThreshold: Int = CoxConfig.exposureDefinition.purchasesWindow
+  final val DiseaseCode: String = FilteringConfig.diseaseCode
 
   val outputColumns = List(
     col("patientID"),
@@ -41,7 +41,10 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       ).over(window).cast(BooleanType)
 
       // Drop patients whose first molecule event is after PeriodStart + 1 year
-      val firstYearObservation = add_months(lit(StudyStart), 12).cast(TimestampType)
+      val firstYearObservation = add_months(
+        lit(StudyStart),
+        CoxConfig.delayedEntriesThreshold
+      ).cast(TimestampType)
       val drugFilter = max(
         when(
           col("category") === "molecule" && (col("start") <= firstYearObservation),

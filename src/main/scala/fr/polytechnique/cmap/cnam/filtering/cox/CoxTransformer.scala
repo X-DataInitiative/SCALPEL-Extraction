@@ -1,11 +1,11 @@
 package fr.polytechnique.cmap.cnam.filtering.cox
 
+import java.sql.Timestamp
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.filtering.{DatasetTransformer, FlatEvent}
-import fr.polytechnique.cmap.cnam.utilities.functions._
+import fr.polytechnique.cmap.cnam.filtering.{DatasetTransformer, FilteringConfig, FlatEvent}
 
 // Start and End are expressed in month from the patient startObs
 case class CoxFeature(
@@ -35,7 +35,7 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
     "other"
   )
 
-  final val AgeReferenceDate = makeTS(2006, 12, 31, 23, 59, 59)
+  final val AgeReferenceDate: Timestamp = FilteringConfig.dates.ageReference
 
   implicit class CoxDataFrame(data: DataFrame) {
 

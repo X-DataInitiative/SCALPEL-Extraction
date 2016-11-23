@@ -1,9 +1,8 @@
 package fr.polytechnique.cmap.cnam.filtering.cox
 
-import org.apache.spark.sql.{DataFrame, Dataset}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
-import com.typesafe.config.{Config, ConfigFactory}
+import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.filtering._
 
@@ -14,26 +13,40 @@ object CoxMain extends Main {
 
   def appName = "CoxFeaturing"
 
-  def coxFeaturing(sqlContext: HiveContext,
-                   config: Config,
-                   cancerDefinition: String,
-                   filterDelayedPatients: Boolean): Unit = {
-    import sqlContext.implicits._
+  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
 
-    val flatEventPath = config.getString("paths.input.flatEvent")
-    val flatDcirPath = config.getString("paths.input.flatDcir")
-    val outputRoot = config.getString("paths.output.root")
+    val flatEvents: Dataset[FlatEvent] = FilteringMain.run(sqlContext, argsMap).get
+    coxFeaturing(flatEvents, argsMap)
+  }
+
+  def coxFeaturing(flatEvents: Dataset[FlatEvent], argsMap: Map[String, String]): Option[Dataset[_]] = {
+    import flatEvents.sqlContext.implicits._
+
+    val sqlContext = flatEvents.sqlContext
+
+    argsMap.get("conf").foreach(sqlContext.setConf("conf", _))
+    argsMap.get("env").foreach(sqlContext.setConf("env", _))
+
+    val cancerDefinition: String = FilteringConfig.cancerDefinition
+    val filterDelayedPatients: Boolean = CoxConfig.filterDelayedPatients
+    val outputRoot = FilteringConfig.outputPaths.coxFeatures
     val outputDir = s"$outputRoot/$cancerDefinition/$filterDelayedPatients"
 
-    logger.info(s"Reading flat events from $flatEventPath...")
+    logger.info("Running FilteringMain...")
 
-    val dcirFlat: DataFrame = sqlContext.read.parquet(flatDcirPath)
-    val flatEvents: DataFrame = sqlContext.read.parquet(flatEventPath)
+    val dcirFlat: DataFrame = sqlContext.read.parquet(FilteringConfig.inputPaths.dcir)
 
-    val drugFlatEvents = flatEvents.filter(col("category") === "molecule").as[FlatEvent]
-    val diseaseFlatEvents = flatEvents.filter(col("category") === "disease").as[FlatEvent]
-    val patientColumns = Array($"patientID", $"gender", $"birthDate", $"deathDate")
-    val patients = flatEvents.select(patientColumns: _*).distinct.as[Patient]
+    val drugFlatEvents = flatEvents.filter(_.category == "molecule")
+    val diseaseFlatEvents = flatEvents.filter(_.category == "disease")
+
+    val patients: Dataset[Patient] = flatEvents
+      .map(
+        x => Patient(
+          x.patientID,
+          x.gender,
+          x.birthDate,
+          x.deathDate)
+      ).distinct
 
     logger.info("Number of drug events: " + drugFlatEvents.count)
     logger.info("Caching disease events...")
@@ -85,21 +98,7 @@ object CoxMain extends Main {
     import CoxFeaturesWriter._
     coxFeatures.toDF.write.parquet(s"$outputDir/cox")
     coxFeatures.writeCSV(s"$outputDir/cox.csv")
-  }
 
-  override def main(args: Array[String]): Unit = {
-    startContext()
-    val (environment: String, cancerDefinition: String, filterDelayedPatients: Boolean) =
-      args match {
-        case Array(arg1, args2, args3) => (args(0), args(1), args(2).toBoolean)
-        case Array(arg1, args2) => (args(0), args(1), true)
-        case _ => ("test", "broad", true)
-      }
-    val config: Config = ConfigFactory.parseResources("config/filtering-default.conf").getConfig(environment)
-    coxFeaturing(sqlContext, config, cancerDefinition, filterDelayedPatients)
-    stopContext()
+    Some(coxFeatures)
   }
-
-  // todo: refactor this function
-  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = None
 }
