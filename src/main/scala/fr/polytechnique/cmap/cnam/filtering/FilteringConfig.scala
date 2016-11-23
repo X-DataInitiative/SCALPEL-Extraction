@@ -43,7 +43,7 @@ object FilteringConfig {
     val configPath: String = sqlContext.getConf("conf", "")
     val environment: String = sqlContext.getConf("env", "test")
 
-    val defaultConfig = ConfigFactory.parseResources("filtering-default.conf").resolve().getConfig(environment)
+    val defaultConfig = ConfigFactory.parseResources("config/filtering-default.conf").resolve().getConfig(environment)
     val newConfig = ConfigFactory.parseFile(new java.io.File(configPath))
 
     newConfig.withFallback(defaultConfig).resolve()

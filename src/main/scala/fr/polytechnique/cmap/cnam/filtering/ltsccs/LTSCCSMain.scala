@@ -57,7 +57,7 @@ object LTSCCSMain extends Main {
   override def main(args: Array[String]): Unit = {
     startContext()
     val environment = if (args.nonEmpty) args(0) else "test"
-    val config: Config = ConfigFactory.parseResources("filtering-default.conf").getConfig(environment)
+    val config: Config = ConfigFactory.parseResources("config/filtering-default.conf").getConfig(environment)
     runLTSCCS(sqlContext, config)
     stopContext()
   }
