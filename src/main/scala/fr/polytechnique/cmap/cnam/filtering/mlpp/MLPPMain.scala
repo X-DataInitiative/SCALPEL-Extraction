@@ -1,56 +1,36 @@
 package fr.polytechnique.cmap.cnam.filtering.mlpp
 
-import scala.collection.JavaConversions._
 import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
-import com.typesafe.config.{Config, ConfigFactory}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.filtering.FlatEvent
-import fr.polytechnique.cmap.cnam.utilities.functions._
-/**
-  * Created by sathiya on 18/10/16.
-  */
+import fr.polytechnique.cmap.cnam.filtering.{FilteringConfig, FilteringMain, FlatEvent}
+
 object MLPPMain extends Main {
 
   override def appName: String = "MLPPFeaturing"
 
-  def MLPPFeaturing(sqlContext: HiveContext, config: Config): Unit = {
-    import sqlContext.implicits._
+  def run(sqlContext: HiveContext, argsMap: Map[String, String] = Map()): Option[Dataset[MLPPFeature]] = {
 
-    val bucketSize = config.getInt("hypothesis.bucketSize")
-    val lagCount = config.getInt("hypothesis.lagCount")
-    val minTimestampList = config.getIntList("hypothesis.minTimeStamp")
-    val maxTimestampList = config.getIntList("hypothesis.maxTimeStamp")
-    val outputRootDir = config.getString("paths.output.root")
-    val inputFlatEvents = config.getString("paths.input.flatEvents")
+    // "get" returns an Option, then we can use foreach to gently ignore when the key was not found.
+    argsMap.get("conf").foreach(sqlContext.setConf("conf", _))
+    argsMap.get("env").foreach(sqlContext.setConf("env", _))
 
-    val flatEvents = sqlContext.read.parquet(config.getString(inputFlatEvents))
-      .where(col("category").isin("disease", "mlpp_exposure"))
-      .withColumn("category",
-        when(col("category") === "mlpp_exposure", lit("exposure"))
-          .otherwise(col("category")))
-      .as[FlatEvent]
-      .persist()
+    val outputPath: String = FilteringConfig.outputPaths.mlppFeatures
+    val flatEvents: Dataset[FlatEvent] = FilteringMain.run(sqlContext).get
+      .filter(e => e.category == "molecule" || e.category == "disease").cache()
+
+    val diseaseEvents: Dataset[FlatEvent] = flatEvents.filter(_.category == "disease")
+    val exposures: Dataset[FlatEvent] = MLPPExposuresTransformer.transform(flatEvents)
 
     val mlppParams = MLPPWriter.Params(
-      bucketSize = bucketSize,
-      lagCount = lagCount,
-      minTimestamp = makeTS(minTimestampList.toList),
-      maxTimestamp = makeTS(maxTimestampList.toList)
+      bucketSize = MLPPConfig.bucketSize,
+      lagCount = MLPPConfig.lagCount,
+      minTimestamp = MLPPConfig.minTimestamp,
+      maxTimestamp = MLPPConfig.maxTimestamp
     )
     val mlppWriter = MLPPWriter(mlppParams)
-    mlppWriter.write(flatEvents, outputRootDir)
-  }
+    val result = MLPPWriter(mlppParams).write(diseaseEvents.union(exposures), outputPath)
 
-  override def main(args: Array[String]): Unit = {
-    startContext()
-    val environment = if (args.nonEmpty) args(0) else "test"
-    val config: Config = ConfigFactory.parseResources("mlpp.conf").getConfig(environment)
-    MLPPFeaturing(sqlContext, config)
-    stopContext()
+    Some(result)
   }
-
-  // todo: refactor this function
-  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = None
 }

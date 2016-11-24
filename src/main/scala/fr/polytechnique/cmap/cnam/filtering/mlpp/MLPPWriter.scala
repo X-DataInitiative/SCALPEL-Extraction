@@ -5,13 +5,13 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.filtering.FlatEvent
+import fr.polytechnique.cmap.cnam.filtering.{FilteringConfig, FlatEvent}
 import fr.polytechnique.cmap.cnam.utilities.ColumnUtilities._
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
 object MLPPWriter {
 
-  final val AgeReferenceDate = makeTS(2006, 12, 31, 23, 59, 59)
+  final val AgeReferenceDate = FilteringConfig.dates.ageReference
 
   case class Params(
     bucketSize: Int = 30,
