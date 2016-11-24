@@ -117,7 +117,7 @@ object CoxMain extends Main {
         case Array(arg1, args2) => (args(0), args(1), true)
         case _ => ("test", "broad", true)
       }
-    val config: Config = ConfigFactory.parseResources("filtering-default.conf").getConfig(environment)
+    val config: Config = ConfigFactory.parseResources("config/filtering-default.conf").getConfig(environment)
     coxFeaturing(sqlContext, config, cancerDefinition, filterDelayedPatients)
     stopContext()
   }
