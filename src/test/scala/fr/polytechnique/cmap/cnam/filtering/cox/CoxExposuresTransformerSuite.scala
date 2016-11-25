@@ -91,27 +91,34 @@ class CoxExposuresTransformerSuite extends SharedContext {
     assert(result === expected)
   }
 
-  "withExposureStart" should "add a column with the start of the exposure" in {
+  "withExposureStart" should "add exposureStart column correctly if the minPurchases value " +
+    "is passed as 2" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxConfig.CoxExposureDefinition
+    val coxExposureDefintion = CoxExposureDefinition(
+      minPurchases = 2,
+      purchasesWindow = 6,
+      startDelay = 3
+    )
     val input = Seq(
-    ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 3, 1), makeTS(2008, 6, 29)),
-    ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 1), makeTS(2008, 6, 29)),
-    ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 8, 1), makeTS(2008, 6, 29)),
-    ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2008, 9, 1), makeTS(2008, 6, 29)),
-    ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2008, 10, 1), makeTS(2008, 6, 29)),
-    ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2009, 1, 1), makeTS(2009, 6, 29)),
-    ("Patient_B", "molecule", "BENFLUOREX", makeTS(2007, 1, 1), makeTS(2009, 6, 29))
+      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 8, 1), makeTS(2008, 6, 29)),
+      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 1), makeTS(2008, 6, 29)),
+      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 9, 1), makeTS(2008, 6, 29)),
+      ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2009, 3, 1), makeTS(2008, 6, 29)),
+      ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2009, 4, 1), makeTS(2008, 6, 29)),
+      ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2009, 1, 1), makeTS(2009, 6, 29)),
+      ("Patient_B", "molecule", "BENFLUOREX", makeTS(2007, 1, 1), makeTS(2009, 6, 29))
     ).toDF("PatientID", "category", "eventId", "start", "followUpStart")
 
     val expected = Seq(
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 6, 29))),
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 6, 29))),
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 6, 29))),
-      ("Patient_A", "SULFONYLUREA", Some(makeTS(2009, 1, 1))),
-      ("Patient_A", "SULFONYLUREA", Some(makeTS(2009, 1, 1))),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 12, 1))),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 12, 1))),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 12, 1))),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2009, 7, 1))),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2009, 7, 1))),
       ("Patient_B", "PIOGLITAZONE", None),
       ("Patient_B", "BENFLUOREX", None)
     ).toDF("PatientID", "eventId", "exposureStart")
@@ -119,7 +126,7 @@ class CoxExposuresTransformerSuite extends SharedContext {
 
     // When
     import fr.polytechnique.cmap.cnam.filtering.cox.CoxExposuresTransformer.ExposuresDataFrame
-    val result = input.withExposureStart.select("PatientID", "eventId", "exposureStart")
+    val result = input.withExposureStart(coxExposureDefintion).select("PatientID", "eventId", "exposureStart")
 
     // Then
     import RichDataFrames._
@@ -128,6 +135,52 @@ class CoxExposuresTransformerSuite extends SharedContext {
     println("Expected:")
     expected.show
     assert(result === expected)
+  }
+
+  it should "compute the exposureStart date correctly if the minPurchases value is passed as 1" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxConfig.CoxExposureDefinition
+    val coxExposureDefintion = CoxExposureDefinition(
+      minPurchases = 1,
+      purchasesWindow = 6,
+      startDelay = 3
+    )
+    val input = Seq(
+      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 3, 1), makeTS(2008, 6, 29)),
+      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 1), makeTS(2008, 6, 29)),
+      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 8, 1), makeTS(2008, 6, 29)),
+      ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2009, 3, 1), makeTS(2008, 6, 29)),
+      ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2009, 4, 1), makeTS(2008, 6, 29)),
+      ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2009, 1, 1), makeTS(2009, 6, 29)),
+      ("Patient_B", "molecule", "BENFLUOREX", makeTS(2009, 6, 1), makeTS(2009, 6, 29))
+    ).toDF("PatientID", "category", "eventId", "start", "followUpStart")
+
+    val expected = Seq(
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 6, 29))),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 6, 29))),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 6, 29))),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2009, 6, 1))),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2009, 6, 1))),
+      ("Patient_B", "PIOGLITAZONE", Some(makeTS(2009, 6, 29))),
+      ("Patient_B", "BENFLUOREX", Some(makeTS(2009, 9, 1)))
+    ).toDF("PatientID", "eventId", "exposureStart")
+
+    // When
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxExposuresTransformer.ExposuresDataFrame
+    val result = input.withExposureStart(coxExposureDefintion)
+      .select("PatientID", "eventId", "exposureStart")
+
+    // Then
+    import RichDataFrames._
+    println("Result:")
+    result.show
+    println("Expected:")
+    expected.show
+    assert(result === expected)
+
   }
 
   "transform" should "return a valid Dataset for a known input" in {
@@ -247,7 +300,7 @@ class CoxExposuresTransformerSuite extends SharedContext {
     ).toDF
 
     // When
-    val result = CoxExposuresTransformer.transform(input, false)
+    val result = CoxExposuresTransformer.transform(input, filterDelayedPatients = false)
 
     // Then
     result.show

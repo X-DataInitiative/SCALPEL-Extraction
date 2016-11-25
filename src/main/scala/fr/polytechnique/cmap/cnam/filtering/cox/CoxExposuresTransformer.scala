@@ -4,14 +4,15 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.filtering.cox.CoxConfig.CoxExposureDefinition
 import fr.polytechnique.cmap.cnam.filtering.{ExposuresTransformer, FilteringConfig, FlatEvent}
 
 object CoxExposuresTransformer extends ExposuresTransformer {
 
   // Constant definitions for delays and time windows. Should be verified before compiling.
   // In the future, we may want to export them to an external file.
-  final val ExposureStartDelay: Int = CoxConfig.exposureDefinition.startDelay
-  final val ExposureStartThreshold: Int = CoxConfig.exposureDefinition.purchasesWindow
+  final val ExposureDefinition: CoxExposureDefinition = CoxConfig.exposureDefinition
+  final val DelayedEntriesThreshold: Int = CoxConfig.delayedEntriesThreshold
   final val DiseaseCode: String = FilteringConfig.diseaseCode
 
   val outputColumns = List(
@@ -43,7 +44,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       // Drop patients whose first molecule event is after PeriodStart + 1 year
       val firstYearObservation = add_months(
         lit(StudyStart),
-        CoxConfig.delayedEntriesThreshold
+        DelayedEntriesThreshold
       ).cast(TimestampType)
       val drugFilter = max(
         when(
@@ -67,17 +68,21 @@ object CoxExposuresTransformer extends ExposuresTransformer {
     // Ideally, this method must receive only molecules events, otherwise they will treat diseases
     //   as molecules and add an exposure start date for them.
     // The exposure start date will be null when the patient was not exposed.
-    def withExposureStart: DataFrame = {
+    def withExposureStart(exposureDefinition: CoxExposureDefinition): DataFrame = {
       val window = Window.partitionBy("patientID", "eventId")
 
       val exposureStartRule: Column = when(
-        months_between(col("start"), col("previousStartDate")) <= ExposureStartThreshold,
-          add_months(col("start"), ExposureStartDelay).cast(TimestampType)
+        months_between(col("start"), col("previousStartDate")) <= exposureDefinition.purchasesWindow,
+          add_months(col("start"), exposureDefinition.startDelay).cast(TimestampType)
       )
 
-      // todo: think about adding the range in the window for the lag function
+      val potentialExposureStart: Column = if(exposureDefinition.minPurchases == 1)
+        col("start")
+      else
+        lag(col("start"), exposureDefinition.minPurchases - 1).over(window.orderBy("start"))
+
       data
-        .withColumn("previousStartDate", lag(col("start"), 1).over(window.orderBy("start")))
+        .withColumn("previousStartDate", potentialExposureStart)
         .withColumn("exposureStart", exposureStartRule)
         .withColumn("exposureStart", when(col("exposureStart") < col("followUpStart"),
           col("followUpStart")).otherwise(col("exposureStart"))
@@ -98,7 +103,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       .filterPatients(filterDelayedPatients)
       .where(col("category") === "molecule")
       .where(col("start") < col("followUpEnd"))
-      .withExposureStart
+      .withExposureStart(ExposureDefinition)
       .withExposureEnd
       .where(col("exposureEnd") > col("exposureStart"))
       .select(outputColumns: _*)

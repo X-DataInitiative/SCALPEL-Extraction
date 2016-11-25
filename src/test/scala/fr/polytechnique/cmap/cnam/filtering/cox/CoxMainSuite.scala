@@ -36,6 +36,8 @@ class CoxMainSuite extends SharedContext {
     assert(result === expectedResult)
   }
 
+  //TODO: We should update the dummy files and test only the above test case in the future.
+  // We are testing it for the moment because the dummy data don't have any meaningful exposure.
   "coxFeaturing" should "correctly run the CoxFeaturing for the given FlatEvents" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
