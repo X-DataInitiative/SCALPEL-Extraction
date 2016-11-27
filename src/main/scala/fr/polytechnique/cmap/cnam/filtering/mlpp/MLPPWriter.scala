@@ -66,17 +66,18 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
 
       val hadDisease: Column = (col("category") === "disease") &&
       (col("eventId") === "targetDisease") &&
-      (col("startBucket") < minColumn(col("tracklossBucket"), col("deathBucket"), lit(bucketCount)))
+      (col("startBucket") < minColumn(col("deathBucket"), lit(bucketCount)))
 
       val diseaseBucket: Column = min(when(hadDisease, col("startBucket"))).over(window)
 
       data.withColumn("diseaseBucket", diseaseBucket)
     }
 
+    // We are no longer using trackloss and disease information for calculating the end bucket.
     def withEndBucket: DataFrame = {
 
       val endBucket: Column = minColumn(
-        col("tracklossBucket"), col("diseaseBucket"), col("deathBucket"), lit(bucketCount)
+        col("deathBucket"), lit(bucketCount)
       )
       data.withColumn("endBucket", endBucket)
     }
@@ -267,7 +268,6 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
       .withAge(AgeReferenceDate)
       .withStartBucket
       .withDeathBucket
-      .withTracklossBucket
       .withDiseaseBucket
       .withEndBucket
       .where(col("category") === "exposure")
