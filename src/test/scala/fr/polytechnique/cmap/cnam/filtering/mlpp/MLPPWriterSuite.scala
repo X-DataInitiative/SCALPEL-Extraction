@@ -221,14 +221,14 @@ class MLPPWriterSuite extends SharedContext {
     val expected = Seq(
       ("PA", Some(2)),
       ("PA", Some(2)),
-      ("PB", Some(3)),
-      ("PB", Some(3)),
-      ("PC", Some(4)),
-      ("PC", Some(4)),
+      ("PB", Some(4)),
+      ("PB", Some(4)),
+      ("PC", Some(16)),
+      ("PC", Some(16)),
       ("PD", Some(5)),
       ("PD", Some(5)),
-      ("PE", Some(6)),
-      ("PE", Some(6)),
+      ("PE", Some(7)),
+      ("PE", Some(7)),
       ("PF", Some(16))
     ).toDF("patientID", "endBucket")
 
@@ -605,16 +605,26 @@ class MLPPWriterSuite extends SharedContext {
 
     val expectedFeatures = Seq(
       // Patient A
-      MLPPFeature("PA", 0, "Mol1", 0,  0, 0,  0, 0, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0,  1, 1,  1, 1, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0,  2, 2,  2, 2, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0,  3, 3,  3, 3, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0,  2, 0,  2, 0, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0,  3, 1,  3, 1, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0,  3, 0,  3, 0, 1.0),
-      MLPPFeature("PA", 0, "Mol2", 1,  2, 0,  2, 4, 1.0),
-      MLPPFeature("PA", 0, "Mol2", 1,  3, 1,  3, 5, 1.0),
-      MLPPFeature("PA", 0, "Mol3", 2,  3, 0,  3, 8, 1.0)
+      MLPPFeature("PA", 0, "Mol1", 0, 0, 0, 0,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 1, 1, 1,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 2, 2, 2,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 3, 3, 3,  3, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 2, 0, 2,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 3, 1, 3,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 4, 2, 4,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 5, 3, 5,  3, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 3, 0, 3,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 4, 1, 4,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 5, 2, 5,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 6, 3, 6,  3, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 2, 0, 2,  4, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 3, 1, 3,  5, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 4, 2, 4,  6, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 5, 3, 5,  7, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 3, 0, 3,  8, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 4, 1, 4,  9, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 5, 2, 5, 10, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 6, 3, 6, 11, 1.0)
     ).toDF
 
     val expectedZMatrix = Seq(

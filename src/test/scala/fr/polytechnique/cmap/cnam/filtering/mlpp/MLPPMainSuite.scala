@@ -26,11 +26,26 @@ class MLPPMainSuite extends SharedContext {
     lazy val featuresPath = FilteringConfig.outputPaths.mlppFeatures
 
     val expectedFeatures: DataFrame = Seq(
-      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 0, 0, 0, 0, 1.0),
-      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 1, 0, 1, 0, 1.0),
-      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 1, 1, 1, 1, 1.0),
-      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 2, 1, 2, 1, 1.0),
-      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 2, 2, 2, 2, 1.0)
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  0, 0,  0, 0, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  1, 0,  1, 0, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  1, 1,  1, 1, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  2, 1,  2, 1, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  2, 2,  2, 2, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  3, 2,  3, 2, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  3, 3,  3, 3, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  4, 3,  4, 3, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  4, 4,  4, 4, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  5, 4,  5, 4, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  5, 5,  5, 5, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  6, 5,  6, 5, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  6, 6,  6, 6, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  7, 6,  7, 6, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  7, 7,  7, 7, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  8, 7,  8, 7, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  8, 8,  8, 8, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  9, 8,  9, 8, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0,  9, 9,  9, 9, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 10, 9, 10, 9, 1.0)
     ).toDF
 
     // When
@@ -56,7 +71,14 @@ class MLPPMainSuite extends SharedContext {
     val expectedFeatures: DataFrame = Seq(
       MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 0, 0, 0, 0, 1.0),
       MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 1, 1, 1, 1, 1.0),
-      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 2, 2, 2, 2, 1.0)
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 2, 2, 2, 2, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 3, 3, 3, 3, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 4, 4, 4, 4, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 5, 5, 5, 5, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 6, 6, 6, 6, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 7, 7, 7, 7, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 8, 8, 8, 8, 1.0),
+      MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 9, 9, 9, 9, 1.0)
     ).toDF
 
     // When
