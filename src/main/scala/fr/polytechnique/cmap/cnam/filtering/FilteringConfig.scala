@@ -5,7 +5,6 @@ import scala.collection.JavaConverters._
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 import com.typesafe.config.{Config, ConfigFactory}
-import fr.polytechnique.cmap.cnam.filtering.mlpp.MLPPFeature
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
 object FilteringConfig {

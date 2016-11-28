@@ -15,6 +15,7 @@ object CoxMain extends Main {
 
   def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
 
+    logger.info("Running FilteringMain...")
     val flatEvents: Dataset[FlatEvent] = FilteringMain.run(sqlContext, argsMap).get
     coxFeaturing(flatEvents, argsMap)
   }
@@ -23,6 +24,7 @@ object CoxMain extends Main {
     import flatEvents.sqlContext.implicits._
 
     val sqlContext = flatEvents.sqlContext
+    val sc = flatEvents.sqlContext.sparkContext
 
     argsMap.get("conf").foreach(sqlContext.setConf("conf", _))
     argsMap.get("env").foreach(sqlContext.setConf("env", _))
@@ -30,9 +32,7 @@ object CoxMain extends Main {
     val cancerDefinition: String = FilteringConfig.cancerDefinition
     val filterDelayedPatients: Boolean = CoxConfig.filterDelayedPatients
     val outputRoot = FilteringConfig.outputPaths.coxFeatures
-    val outputDir = s"$outputRoot/$cancerDefinition/$filterDelayedPatients"
-
-    logger.info("Running FilteringMain...")
+    val outputDir = s"$outputRoot/$cancerDefinition"
 
     val dcirFlat: DataFrame = sqlContext.read.parquet(FilteringConfig.inputPaths.dcir)
 
@@ -52,7 +52,9 @@ object CoxMain extends Main {
     logger.info("Caching disease events...")
     logger.info("Number of disease events: " + diseaseFlatEvents.count)
 
-    logger.info("Preparing for Cox")
+    logger.info("Preparing for Cox with the following parameters:")
+    logger.info(CoxConfig.summarize.foreach(println))
+
     logger.info("(Lazy) Transforming Follow-up events...")
     val observationFlatEvents = CoxObservationPeriodTransformer.transform(drugFlatEvents)
 
@@ -89,8 +91,9 @@ object CoxMain extends Main {
       .union(observationFlatEvents)
       .union(tracklossFlatEvents)
 
-    logger.info("Writing summary of all cox events...")
+    logger.info("Writing summary of all cox events and config...")
     flatEventsSummary.toDF.write.parquet(s"$outputDir/eventsSummary")
+    sc.parallelize(CoxConfig.summarize.toSeq).coalesce(1).saveAsTextFile(s"$outputDir/config.txt")
     logger.info("Writing Exposures...")
     exposures.toDF.write.parquet(s"$outputDir/exposures")
 

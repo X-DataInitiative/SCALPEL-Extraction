@@ -46,6 +46,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
         lit(StudyStart),
         DelayedEntriesThreshold
       ).cast(TimestampType)
+
       val drugFilter = max(
         when(
           col("category") === "molecule" && (col("start") <= firstYearObservation),

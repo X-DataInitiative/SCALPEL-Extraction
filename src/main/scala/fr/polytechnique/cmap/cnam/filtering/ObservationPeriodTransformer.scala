@@ -1,14 +1,14 @@
 package fr.polytechnique.cmap.cnam.filtering
 
+import java.sql.Timestamp
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.utilities.functions._
 
 trait ObservationPeriodTransformer extends DatasetTransformer[FlatEvent, FlatEvent]{
 
-  final val StudyStart = makeTS(2006, 1, 1)
-  final val StudyEnd = makeTS(2009, 12, 31, 23, 59, 59)
+  final val StudyStart: Timestamp = FilteringConfig.dates.studyStart
+  final val StudyEnd: Timestamp = FilteringConfig.dates.studyEnd
 
   val outputColumns = List(
     col("patientID"),

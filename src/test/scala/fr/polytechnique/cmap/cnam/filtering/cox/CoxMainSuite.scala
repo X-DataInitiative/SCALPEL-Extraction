@@ -32,7 +32,6 @@ class CoxMainSuite extends SharedContext {
 
     // Then
     import RichDataFrames._
-    result.printSchema()
     assert(result === expectedResult)
   }
 
