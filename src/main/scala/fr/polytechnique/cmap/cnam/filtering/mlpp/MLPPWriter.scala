@@ -17,7 +17,8 @@ object MLPPWriter {
     bucketSize: Int = 30,
     lagCount: Int = 10,
     minTimestamp: Timestamp = makeTS(2006, 1, 1),
-    maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59)
+    maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
+    includeDeathBucket: Boolean = false
   )
 
   def apply(params: Params = Params()) = new MLPPWriter(params)
@@ -76,9 +77,9 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
     // We are no longer using trackloss and disease information for calculating the end bucket.
     def withEndBucket: DataFrame = {
 
-      val endBucket: Column = minColumn(
-        col("deathBucket"), lit(bucketCount)
-      )
+      val deathBucketRule = if (params.includeDeathBucket) col("deathBucket") + 1 else col("deathBucket")
+
+      val endBucket: Column = minColumn(deathBucketRule, lit(bucketCount))
       data.withColumn("endBucket", endBucket)
     }
 
