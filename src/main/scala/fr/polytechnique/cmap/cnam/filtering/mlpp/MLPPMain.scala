@@ -28,6 +28,7 @@ object MLPPMain extends Main {
     val patients: Dataset[Patient] = flatEvents.map(
       e => Patient(e.patientID, e.gender, e.birthDate, e.deathDate)
     ).distinct
+    // todo: test if filter_lost_patients is true
     val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(
       Sources(dcir=Some(dcirFlat))
     )
@@ -41,15 +42,21 @@ object MLPPMain extends Main {
 
     val exposures: Dataset[FlatEvent] = MLPPExposuresTransformer.transform(allEvents)
 
-    val mlppParams = MLPPWriter.Params(
-      bucketSize = MLPPConfig.bucketSize,
-      lagCount = MLPPConfig.lagCount,
-      minTimestamp = MLPPConfig.minTimestamp,
-      maxTimestamp = MLPPConfig.maxTimestamp
-    )
-    val mlppWriter = MLPPWriter(mlppParams)
-    val result = MLPPWriter(mlppParams).write(diseaseEvents.union(exposures), outputPath)
-
-    Some(result)
+    val results: List[Dataset[MLPPFeature]] = for {
+      bucketSize <- MLPPConfig.bucketSizes
+      lagCount <- MLPPConfig.lagCounts
+    } yield {
+      val mlppParams = MLPPWriter.Params(
+        bucketSize = bucketSize,
+        lagCount = lagCount,
+        minTimestamp = MLPPConfig.minTimestamp,
+        maxTimestamp = MLPPConfig.maxTimestamp,
+        includeDeathBucket = MLPPConfig.includeDeathBucket
+      )
+      val mlppWriter = MLPPWriter(mlppParams)
+      val path = s"$outputPath/${bucketSize}B-${lagCount}L"
+      MLPPWriter(mlppParams).write(diseaseEvents.union(exposures), path)
+    }
+    Some(results.head)
   }
 }
