@@ -9,23 +9,22 @@ class CoxConfigSuite extends SharedContext {
 
   "summarize" should "correctly return all the default Cox Parameters from the config file" in {
     // Given
-    val expectedResult = Map(
-      "filterDelayedPatients" -> true,
-      "delayedEntriesThreshold" -> 12,
-      "followUpMonthsDelay" -> 6,
-      "exposureDefinition.minPurchases" -> 2,
-      "exposureDefinition.startDelay" -> 3,
-      "exposureDefinition.purchasesWindow" -> 6
-    )
+    val expectedResult =
+      "filterDelayedPatients -> true \n" +
+      "delayedEntriesThreshold -> 12 \n" +
+      "followUpMonthsDelay -> 6 \n" +
+      "exposureDefinition.minPurchases -> 2 \n" +
+      "exposureDefinition.startDelay -> 3 \n"+
+      "exposureDefinition.purchasesWindow -> 6"
 
     // When
-    val result = CoxConfig.summarize
+    val result = CoxConfig.toString
 
     // Then
     println("Result:")
-    result.foreach(println)
+    println(result)
     println("Expected:")
-    expectedResult.foreach(println)
+    println(expectedResult)
     assert(result == expectedResult)
   }
 }

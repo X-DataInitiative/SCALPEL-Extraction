@@ -16,9 +16,9 @@ object CoxConfig {
 
   private lazy val modelParams: Config = FilteringConfig.modelConfig("cox_parameters")
 
-  lazy val followUpMonthsDelay: Int = modelParams.getInt("follow-up-delay")
   lazy val filterDelayedPatients: Boolean = modelParams.getBoolean("filter_delayed_patients")
   lazy val delayedEntriesThreshold: Int = modelParams.getInt("delayed_entries_threshold")
+  lazy val followUpMonthsDelay: Int = modelParams.getInt("follow_up_delay")
 
   lazy val exposureDefinition = CoxExposureDefinition(
     minPurchases = modelParams.getInt("exposures.min_purchases"),
@@ -26,14 +26,12 @@ object CoxConfig {
     purchasesWindow = modelParams.getInt("exposures.purchases_window")
   )
 
-  def summarize: Map[String, AnyVal] = {
-    Map(
-      "filterDelayedPatients" -> filterDelayedPatients,
-      "delayedEntriesThreshold" -> delayedEntriesThreshold,
-      "followUpMonthsDelay" -> followUpMonthsDelay,
-      "exposureDefinition.minPurchases" -> exposureDefinition.minPurchases,
-      "exposureDefinition.startDelay" -> exposureDefinition.startDelay,
-      "exposureDefinition.purchasesWindow" -> exposureDefinition.purchasesWindow
-    )
+  override def toString: String = {
+    s"filterDelayedPatients -> $filterDelayedPatients \n" +
+    s"delayedEntriesThreshold -> $delayedEntriesThreshold \n" +
+    s"followUpMonthsDelay -> $followUpMonthsDelay \n" +
+    s"exposureDefinition.minPurchases -> ${exposureDefinition.minPurchases} \n" +
+    s"exposureDefinition.startDelay -> ${exposureDefinition.startDelay} \n" +
+    s"exposureDefinition.purchasesWindow -> ${exposureDefinition.purchasesWindow}"
   }
 }

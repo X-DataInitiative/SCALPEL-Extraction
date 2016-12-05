@@ -24,7 +24,6 @@ object CoxMain extends Main {
     import flatEvents.sqlContext.implicits._
 
     val sqlContext = flatEvents.sqlContext
-    val sc = flatEvents.sqlContext.sparkContext
 
     argsMap.get("conf").foreach(sqlContext.setConf("conf", _))
     argsMap.get("env").foreach(sqlContext.setConf("env", _))
@@ -53,7 +52,7 @@ object CoxMain extends Main {
     logger.info("Number of disease events: " + diseaseFlatEvents.count)
 
     logger.info("Preparing for Cox with the following parameters:")
-    logger.info(CoxConfig.summarize.foreach(println))
+    logger.info(CoxConfig.toString)
 
     logger.info("(Lazy) Transforming Follow-up events...")
     val observationFlatEvents = CoxObservationPeriodTransformer.transform(drugFlatEvents)
@@ -93,7 +92,6 @@ object CoxMain extends Main {
 
     logger.info("Writing summary of all cox events and config...")
     flatEventsSummary.toDF.write.parquet(s"$outputDir/eventsSummary")
-    sc.parallelize(CoxConfig.summarize.toSeq).coalesce(1).saveAsTextFile(s"$outputDir/config.txt")
     logger.info("Writing Exposures...")
     exposures.toDF.write.parquet(s"$outputDir/exposures")
 
