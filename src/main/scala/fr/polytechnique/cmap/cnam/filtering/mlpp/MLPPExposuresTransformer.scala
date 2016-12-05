@@ -15,8 +15,9 @@ object MLPPExposuresTransformer extends ExposuresTransformer {
   private def filterLostPatients = MLPPConfig.exposureDefinition.filterLostPatients
   private def filterDelayedEntries  = MLPPConfig.exposureDefinition.filterDelayedEntries
   private def delayedEntryThreshold = MLPPConfig.exposureDefinition.delayedEntryThreshold
-  private def filterDiagnosedPatients = MLPPConfig.exposureDefinition.filterDiagnosedPatients
+  private def filterEarlyDiagnosedPatients = MLPPConfig.exposureDefinition.filterEarlyDiagnosedPatients
   private def diagnosedPatientsThreshold = MLPPConfig.exposureDefinition.diagnosedPatientsThreshold
+  private def filterNeverSickPatients = MLPPConfig.exposureDefinition.filterNeverSickPatients
 
   val outputColumns = List(
     col("patientID"),
@@ -33,9 +34,9 @@ object MLPPExposuresTransformer extends ExposuresTransformer {
   implicit class ExposuresDataFrame(data: DataFrame) {
 
     /**
-      * Drops patients whose got a target disease before periodStart + delay (default = 0)
+      * Drops patients who got a target disease before periodStart + delay (default = 0)
       */
-    def filterDiagnosedPatients(doFilter: Boolean): DataFrame = {
+    def filterEarlyDiagnosedPatients(doFilter: Boolean): DataFrame = {
 
       if (doFilter) {
         val window = Window.partitionBy("patientID")
@@ -104,6 +105,29 @@ object MLPPExposuresTransformer extends ExposuresTransformer {
       }
     }
 
+    /**
+      * Drops patients who never had a target disease event
+      */
+    def filterNeverSickPatients(doFilter: Boolean): DataFrame = {
+
+      if (doFilter) {
+        val window = Window.partitionBy("patientID")
+
+        val filterColumn: Column = max(
+          when(
+            (col("category") === "disease") &&
+            (col("eventId") === "targetDisease") &&
+            (col("start") <= MLPPConfig.maxTimestamp), lit(1)
+          ).otherwise(lit(0))
+        ).over(window).cast(BooleanType)
+
+        data.withColumn("filter", filterColumn).where(col("filter")).drop("filter")
+      }
+      else {
+        data
+      }
+    }
+
     def withExposureStart(minPurchases: Int = 1, intervalSize: Int = 6,
         startDelay: Int = 0, firstOnly: Boolean = false): DataFrame = {
 
@@ -142,8 +166,9 @@ object MLPPExposuresTransformer extends ExposuresTransformer {
 
     input.toDF
       .filterDelayedEntries(filterDelayedEntries)
-      .filterDiagnosedPatients(filterDiagnosedPatients)
+      .filterEarlyDiagnosedPatients(filterEarlyDiagnosedPatients)
       .filterLostPatients(filterLostPatients)
+      .filterNeverSickPatients(filterNeverSickPatients)
       .where(col("category") === "molecule")
       .withExposureStart(
         minPurchases = minPurchases,
