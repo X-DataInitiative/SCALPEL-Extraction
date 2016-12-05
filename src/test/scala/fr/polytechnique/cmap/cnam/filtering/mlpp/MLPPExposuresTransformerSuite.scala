@@ -77,7 +77,7 @@ class MLPPExposuresTransformerSuite extends SharedContext {
 
     // When
     import MLPPExposuresTransformer.ExposuresDataFrame
-    val result = input.filterDiagnosedPatients(true).select("patientID", "category")
+    val result = input.filterEarlyDiagnosedPatients(true).select("patientID", "category")
 
     // Then
     import RichDataFrames._
@@ -100,7 +100,7 @@ class MLPPExposuresTransformerSuite extends SharedContext {
 
     // When
     import MLPPExposuresTransformer.ExposuresDataFrame
-    val result = input.filterDiagnosedPatients(false)
+    val result = input.filterEarlyDiagnosedPatients(false)
 
     // Then
     import RichDataFrames._
@@ -132,6 +132,37 @@ class MLPPExposuresTransformerSuite extends SharedContext {
 
     // Then
     import RichDataFrames._
+    assert(result === expected)
+  }
+
+  "filterNeverSickPatients" should "remove patients who never have a target disease" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input = Seq(
+      ("Patient_A", "molecule", "", makeTS(2006, 1, 1)),
+      ("Patient_A", "molecule", "", makeTS(2006, 3, 1)),
+      ("Patient_A", "disease", "targetDisease", makeTS(2006, 6, 1)),
+      ("Patient_B", "molecule", "", makeTS(2006, 5, 1)),
+      ("Patient_B", "molecule", "", makeTS(2007, 1, 1)),
+      ("Patient_C", "molecule", "", makeTS(2006, 11, 1))
+    ).toDF("patientID", "category", "eventId", "start")
+
+    val expected = Seq(
+      ("Patient_A", "molecule", "", makeTS(2006, 1, 1)),
+      ("Patient_A", "molecule", "", makeTS(2006, 3, 1)),
+      ("Patient_A", "disease", "targetDisease", makeTS(2006, 6, 1))
+    ).toDF("patientID", "category", "eventId", "start")
+
+    // When
+    import MLPPExposuresTransformer.ExposuresDataFrame
+    val result = input.filterNeverSickPatients(true)
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
     assert(result === expected)
   }
 

@@ -13,8 +13,9 @@ object MLPPConfig {
     startDelay: Int,
     purchasesWindow: Int,
     onlyFirst: Boolean,
+    filterNeverSickPatients: Boolean,
     filterLostPatients: Boolean,
-    filterDiagnosedPatients: Boolean,
+    filterEarlyDiagnosedPatients: Boolean,
     diagnosedPatientsThreshold: Int,
     filterDelayedEntries: Boolean,
     delayedEntryThreshold: Int
@@ -33,8 +34,9 @@ object MLPPConfig {
     startDelay = conf.getInt("exposures.start_delay"),
     purchasesWindow = conf.getInt("exposures.purchases_window"),
     onlyFirst = conf.getBoolean("exposures.only_first"),
+    filterNeverSickPatients = conf.getBoolean("exposures.filter_never_sick_patients"),
     filterLostPatients = conf.getBoolean("exposures.filter_lost_patients"),
-    filterDiagnosedPatients = conf.getBoolean("exposures.filter_diagnosed_patients"),
+    filterEarlyDiagnosedPatients = conf.getBoolean("exposures.filter_diagnosed_patients"),
     diagnosedPatientsThreshold = conf.getInt("exposures.diagnosed_patients_threshold"),
     filterDelayedEntries = conf.getBoolean("exposures.filter_delayed_entries"),
     delayedEntryThreshold = conf.getInt("exposures.delayed_entry_threshold")
