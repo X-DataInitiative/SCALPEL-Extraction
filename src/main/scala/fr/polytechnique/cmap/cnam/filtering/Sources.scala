@@ -16,3 +16,17 @@ class Sources(
     val irImb: Option[DataFrame] = None,
     val irPha: Option[DataFrame] = None,
     val dosages: Option[DataFrame] = None)
+
+object Sources {
+  def apply(
+      dcir: Option[DataFrame] = None,
+      pmsiMco: Option[DataFrame] = None,
+      pmsiHad: Option[DataFrame] = None,
+      pmsiSsr: Option[DataFrame] = None,
+      irBen: Option[DataFrame] = None,
+      irImb: Option[DataFrame] = None,
+      irPha: Option[DataFrame] = None,
+      dosages: Option[DataFrame] = None) = {
+    new Sources(dcir, pmsiMco, pmsiHad, pmsiSsr, irBen, irImb, irPha, dosages)
+  }
+}

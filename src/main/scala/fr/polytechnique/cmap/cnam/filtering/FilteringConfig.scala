@@ -43,7 +43,7 @@ object FilteringConfig {
     val configPath: String = sqlContext.getConf("conf", "")
     val environment: String = sqlContext.getConf("env", "test")
 
-    val defaultConfig = ConfigFactory.parseResources("filtering-default.conf").resolve().getConfig(environment)
+    val defaultConfig = ConfigFactory.parseResources("config/filtering-default.conf").resolve().getConfig(environment)
     val newConfig = ConfigFactory.parseFile(new java.io.File(configPath))
 
     newConfig.withFallback(defaultConfig).resolve()
@@ -60,7 +60,14 @@ object FilteringConfig {
     dosages: String
   )
 
-  case class OutputPaths(root: String, patients: String, flatEvents: String)
+  case class OutputPaths(
+    root: String,
+    patients: String,
+    flatEvents: String,
+    coxFeatures: String,
+    ltsccsFeatures: String,
+    mlppFeatures: String
+  )
 
   case class Limits(
     minYear: Int,
@@ -73,7 +80,16 @@ object FilteringConfig {
     maxAge: Int
   )
 
-  case class Dates(ageReference: Timestamp)
+  case class Dates(
+    ageReference: Timestamp,
+    studyStart: Timestamp,
+    studyEnd: Timestamp
+  )
+
+  case class TracklossDefinition(
+    threshold: Int,
+    delay: Int
+  )
 
   lazy val drugCategories: List[String] = conf.getStringList("drug_categories").asScala.toList
   lazy val cancerDefinition: String  = conf.getString("cancer_definition")
@@ -92,7 +108,10 @@ object FilteringConfig {
   lazy val outputPaths = OutputPaths(
     root = conf.getString("paths.output.root"),
     patients = conf.getString("paths.output.patients"),
-    flatEvents = conf.getString("paths.output.flat_events")
+    flatEvents = conf.getString("paths.output.flat_events"),
+    coxFeatures = conf.getString("paths.output.cox_features"),
+    ltsccsFeatures = conf.getString("paths.output.ltsccs_features"),
+    mlppFeatures = conf.getString("paths.output.mlpp_features")
   )
   lazy val limits = Limits(
     minYear = conf.getInt("limits.min_year"),
@@ -105,6 +124,14 @@ object FilteringConfig {
     maxAge = conf.getInt("limits.max_age")
   )
   lazy val dates = Dates(
-    ageReference = makeTS(conf.getIntList("dates.age_reference").asScala.toList)
+    ageReference = makeTS(conf.getIntList("dates.age_reference").asScala.toList),
+    studyStart = makeTS(conf.getIntList("dates.study_start").asScala.toList),
+    studyEnd = makeTS(conf.getIntList("dates.study_end").asScala.toList)
   )
+  lazy val tracklossDefinition = TracklossDefinition(
+    threshold = conf.getInt("trackloss.threshold"),
+    delay = conf.getInt("trackloss.delay")
+  )
+
+  def modelConfig(modelName: String): Config = conf.getConfig(modelName)
 }

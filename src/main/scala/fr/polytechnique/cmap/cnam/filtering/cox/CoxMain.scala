@@ -1,69 +1,63 @@
 package fr.polytechnique.cmap.cnam.filtering.cox
 
-import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
-import com.typesafe.config.{Config, ConfigFactory}
+import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.filtering._
 
 /**
   * Created by sathiya on 09/11/16.
   */
-//TODO: Avoid redoing the extraction and transformation, instead reuse "hdfs://shared/filtered_data"
 object CoxMain extends Main {
 
   def appName = "CoxFeaturing"
 
-  def coxFeaturing(sqlContext: HiveContext,
-                   config: Config,
-                   cancerDefinition: String,
-                   filterDelayedPatients: Boolean): Unit = {
-    import implicits._
-    import sqlContext.implicits._
+  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
 
-    val outputRoot = config.getString("paths.output.root")
-    val outputDir = s"$outputRoot/$cancerDefinition/$filterDelayedPatients"
+    logger.info("Running FilteringMain...")
+    val flatEvents: Dataset[FlatEvent] = FilteringMain.run(sqlContext, argsMap).get
+    coxFeaturing(flatEvents, argsMap)
+  }
 
-    logger.info("(Lazy) Extracting sources...")
-    val sources: Sources = sqlContext.extractAll(config.getConfig("paths.input"))
+  def coxFeaturing(flatEvents: Dataset[FlatEvent], argsMap: Map[String, String]): Option[Dataset[_]] = {
+    import flatEvents.sqlContext.implicits._
 
-    logger.info("(Lazy) Transforming patients...")
-    val patients: Dataset[Patient] = PatientsTransformer.transform(sources).cache()
+    val sqlContext = flatEvents.sqlContext
 
-    logger.info("(Lazy) Transforming drug events...")
-    val drugEvents: Dataset[Event] = DrugEventsTransformer.transform(sources)
+    argsMap.get("conf").foreach(sqlContext.setConf("conf", _))
+    argsMap.get("env").foreach(sqlContext.setConf("env", _))
 
-    logger.info("(Lazy) Transforming disease events...")
-    val broadDiseaseEvents: Dataset[Event] = DiseaseTransformer.transform(sources)
-    val targetDiseaseEvents: Dataset[Event] = (
-      if (cancerDefinition == "broad")
-        broadDiseaseEvents
-      else
-        TargetDiseaseTransformer.transform(sources)
-      ).map(_.copy(eventId = "targetDisease"))
-    val diseaseEvents = broadDiseaseEvents.union(targetDiseaseEvents)
+    val cancerDefinition: String = FilteringConfig.cancerDefinition
+    val filterDelayedPatients: Boolean = CoxConfig.filterDelayedPatients
+    val outputRoot = FilteringConfig.outputPaths.coxFeatures
+    val outputDir = s"$outputRoot/$cancerDefinition"
 
-    val drugFlatEvents = drugEvents.as("left")
-      .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
-      .map((FlatEvent.merge _).tupled)
-      .cache()
+    val dcirFlat: DataFrame = sqlContext.read.parquet(FilteringConfig.inputPaths.dcir)
 
-    val diseaseFlatEvents = diseaseEvents.as("left")
-      .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
-      .map((FlatEvent.merge _).tupled)
-      .cache()
+    val drugFlatEvents = flatEvents.filter(_.category == "molecule")
+    val diseaseFlatEvents = flatEvents.filter(_.category == "disease")
 
-    logger.info("Caching drug events...")
+    val patients: Dataset[Patient] = flatEvents
+      .map(
+        x => Patient(
+          x.patientID,
+          x.gender,
+          x.birthDate,
+          x.deathDate)
+      ).distinct
+
     logger.info("Number of drug events: " + drugFlatEvents.count)
     logger.info("Caching disease events...")
     logger.info("Number of disease events: " + diseaseFlatEvents.count)
 
-    logger.info("Preparing for Cox")
+    logger.info("Preparing for Cox with the following parameters:")
+    logger.info(CoxConfig.toString)
+
     logger.info("(Lazy) Transforming Follow-up events...")
     val observationFlatEvents = CoxObservationPeriodTransformer.transform(drugFlatEvents)
 
-    val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(sources)
+    val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(Sources(dcir=Some(dcirFlat)))
     val tracklossFlatEvents = tracklossEvents
       .as("left")
       .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
@@ -92,14 +86,12 @@ object CoxMain extends Main {
     val coxFlatEvents = exposures.union(followUpFlatEvents)
     val coxFeatures = CoxTransformer.transform(coxFlatEvents)
 
-    val flatEvents = flatEventsForExposures
+    val flatEventsSummary = flatEventsForExposures
       .union(observationFlatEvents)
       .union(tracklossFlatEvents)
 
-    logger.info("Writing Patients...")
-    patients.toDF.write.parquet(s"$outputDir/patients")
-    logger.info("Writing FlatEvents...")
-    flatEvents.toDF.write.parquet(s"$outputDir/events")
+    logger.info("Writing summary of all cox events and config...")
+    flatEventsSummary.toDF.write.parquet(s"$outputDir/eventsSummary")
     logger.info("Writing Exposures...")
     exposures.toDF.write.parquet(s"$outputDir/exposures")
 
@@ -107,21 +99,7 @@ object CoxMain extends Main {
     import CoxFeaturesWriter._
     coxFeatures.toDF.write.parquet(s"$outputDir/cox")
     coxFeatures.writeCSV(s"$outputDir/cox.csv")
-  }
 
-  override def main(args: Array[String]): Unit = {
-    startContext()
-    val (environment: String, cancerDefinition: String, filterDelayedPatients: Boolean) =
-      args match {
-        case Array(arg1, args2, args3) => (args(0), args(1), args(2).toBoolean)
-        case Array(arg1, args2) => (args(0), args(1), true)
-        case _ => ("test", "broad", true)
-      }
-    val config: Config = ConfigFactory.parseResources("filtering-default.conf").getConfig(environment)
-    coxFeaturing(sqlContext, config, cancerDefinition, filterDelayedPatients)
-    stopContext()
+    Some(coxFeatures)
   }
-
-  // todo: refactor this function
-  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = None
 }

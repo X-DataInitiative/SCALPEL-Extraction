@@ -9,9 +9,9 @@ import org.apache.spark.sql.{Column, DataFrame, Dataset}
 
 object TrackLossTransformer extends Transformer[Event]{
 
-  val EmptyMonths: Int = 4
-  val TracklossMonthDelay: Int = 2
-  val LastDay = Timestamp.valueOf("2010-01-01 00:00:00")
+  val EmptyMonths: Int = FilteringConfig.tracklossDefinition.threshold
+  val TracklossMonthDelay: Int = FilteringConfig.tracklossDefinition.delay
+  val LastDay: Timestamp = FilteringConfig.dates.studyEnd
 
   val inputColumns: List[Column] = List(
     col("NUM_ENQ").as("patientID"),
