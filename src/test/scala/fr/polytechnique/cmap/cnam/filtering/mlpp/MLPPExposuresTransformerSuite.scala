@@ -56,7 +56,7 @@ class MLPPExposuresTransformerSuite extends SharedContext {
     assert(result === expected)
   }
 
-  "filterDiagnosedPatients" should "keep only patients who did not have a target disease before the study start" in {
+  "filterDiagnosedPatients" should "keep only patients who did not have a target disease before the study start (+ threshold)" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -65,7 +65,7 @@ class MLPPExposuresTransformerSuite extends SharedContext {
       ("Patient_A", "molecule", "", makeTS(2008, 1, 10)),
       ("Patient_A", "disease", "targetDisease", makeTS(2005, 1, 1)),
       ("Patient_B", "molecule", "", makeTS(2009, 1, 1)),
-      ("Patient_B", "disease", "targetDisease", makeTS(2006, 1, 1)),
+      ("Patient_B", "disease", "targetDisease", makeTS(2006, 8, 1)),
       ("Patient_C", "molecule", "", makeTS(2006, 1, 1))
     ).toDF("patientID", "category", "eventId", "start")
 

@@ -34,7 +34,8 @@ object MLPPExposuresTransformer extends ExposuresTransformer {
   implicit class ExposuresDataFrame(data: DataFrame) {
 
     /**
-      * Drops patients who got a target disease before periodStart + delay (default = 0)
+      * Drops patients who got a target disease before before a threshold (measured by a number of
+      *   months after study start, parameterizable with `diagnosedPatientsThreshold`)
       */
     def filterEarlyDiagnosedPatients(doFilter: Boolean): DataFrame = {
 
