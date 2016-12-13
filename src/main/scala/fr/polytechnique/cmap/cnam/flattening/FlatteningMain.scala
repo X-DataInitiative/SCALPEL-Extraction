@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.flattening
 
-import org.apache.spark.sql.{DataFrame, Dataset}
-import org.apache.spark.sql.hive.HiveContext
+import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig
 import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig._
@@ -61,7 +60,7 @@ object FlatteningMain extends Main {
     }
   }
 
-  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
+  def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
     loadToParquet()
     joinTables()
     None

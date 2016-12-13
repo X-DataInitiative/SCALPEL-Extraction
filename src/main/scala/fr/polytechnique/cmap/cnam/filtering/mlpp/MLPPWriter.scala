@@ -32,7 +32,7 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
 
   implicit class MLPPDataFrame(data: DataFrame) {
 
-    import data.sqlContext.implicits._
+    import data.sparkSession.implicits._
 
     def withAge(referenceDate: Timestamp = AgeReferenceDate): DataFrame = {
       val age: Column = year(lit(referenceDate)) - year(col("birthDate"))
@@ -85,14 +85,15 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
 
     def withIndices(columnNames: Seq[String]): DataFrame = {
 
-      columnNames.foldLeft(data){
-        (data, columnName) => {
+      val dataCopy = data
+      columnNames.foldLeft(dataCopy){
+        (currentData, columnName) => {
 
           // WARNING: The following code is dangerous, but there is no perfect solution.
           //   It was tested with up to 30 million distinct values with 15 characters and 300
           //   million total rows. If we have more than that, we may need to fall back to a join
           //   option, which would take very much longer.
-          val labels = data
+          val labels = currentData
             .select(col(columnName).cast(StringType))
             .distinct
             .map(_.getString(0))
@@ -103,11 +104,11 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
           // It's transient to avoid serializing the full Map. Only the labels Seq will be
           // serialized and each executor will compute their own Map. This is slower but allows more
           // labels to be indexed.
-          @transient lazy val indexMap = labels.zipWithIndex.toMap
+          @transient lazy val indexerFuc = labels.zipWithIndex.toMap.apply _
 
-          val indexer = udf(indexMap.apply _)
+          val indexer = udf(indexerFuc)
 
-          data.withColumn(columnName + "Index", indexer(col(columnName)))
+          currentData.withColumn(columnName + "Index", indexer(col(columnName)))
         }
       }
     }
@@ -125,7 +126,7 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
 
     def writeCSV(path: String): Unit = {
       data.coalesce(1).write
-        .format("com.databricks.spark.csv")
+        .format("csv")
         .option("delimiter", ",")
         .option("header", "true")
         .save(path)
@@ -210,7 +211,7 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
       val pivoted = exposuresDF
         .withColumn("toPivot", moleculeColumn)
         .groupBy(referenceColumns: _*)
-        .pivot("toPivot").agg(coalesce(sum("weight"), lit(0D)))
+        .pivot("toPivot").agg(sum("weight")).na.fill(0D)
 
       // We need to sort the molecule names so we have the column indexes in the right order
       val moleculeColumns: Array[Column] = pivoted.columns

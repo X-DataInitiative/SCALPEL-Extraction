@@ -96,7 +96,7 @@ class DrugDosageExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) 
 
   override def extract(path: String): DataFrame = {
     sqlContext.read
-      .format("com.databricks.spark.csv")
+      .format("csv")
       .option("header", "true")
       .load(path)
       .select(

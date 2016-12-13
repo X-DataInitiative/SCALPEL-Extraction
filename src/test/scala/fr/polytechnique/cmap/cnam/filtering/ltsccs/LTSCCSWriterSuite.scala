@@ -266,7 +266,7 @@ class LTSCCSWriterSuite extends SharedContext {
     ).toDS
 
     def readFile(path: String) = {
-      sqlCtx.read.format("com.databricks.spark.csv").option("header", "true").load(path)
+      sqlCtx.read.format("csv").option("header", "true").load(path)
     }
     val expectedCounts = List(2, 3, 3, 4, 3)
 

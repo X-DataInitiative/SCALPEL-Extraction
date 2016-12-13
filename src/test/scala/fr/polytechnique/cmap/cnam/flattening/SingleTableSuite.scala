@@ -38,6 +38,8 @@ class SingleTableSuite extends SharedContext {
     val result = new SingleTable(config, sqlContext).df
 
     // Then
+    result.printSchema
+    expected.printSchema
     assert(result === expected)
   }
 
@@ -51,6 +53,8 @@ class SingleTableSuite extends SharedContext {
     val result = new SingleTable(config, sqlContext).df
 
     // Then
+    result.show()
+    expected.show()
     assert(result === expected)
   }
 

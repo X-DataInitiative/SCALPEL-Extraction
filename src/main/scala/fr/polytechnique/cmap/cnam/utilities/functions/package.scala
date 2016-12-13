@@ -2,10 +2,10 @@ package fr.polytechnique.cmap.cnam.utilities
 
 import java.sql.Timestamp
 import scala.reflect.runtime.universe.TypeTag
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StructType, TimestampType}
+import org.apache.spark.sql.{Column, Dataset}
 
 
 package object functions {
@@ -43,7 +43,7 @@ package object functions {
   }
 
   def unionAll[A](datasets: Dataset[A]*): Dataset[A] = datasets.reduce(_.union(_))
-  def unionAll(dataframes: DataFrame*): DataFrame = dataframes.reduce(_.unionAll(_))
+//  def unionAll(dataframes: DataFrame*): DataFrame = dataframes.reduce(_.unionAll(_))
 
   implicit class IntFunctions(num: Int) {
     def between(lower: Int, upper: Int): Boolean = num >= lower && num <= upper

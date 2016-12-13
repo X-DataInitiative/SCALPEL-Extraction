@@ -39,7 +39,7 @@ class DcirExtractorSuite extends SharedContext {
     val path: String = "src/test/resources/expected/invalid_path.parquet"
 
     // Then
-    intercept[java.lang.AssertionError] {
+    intercept[org.apache.spark.sql.AnalysisException] {
       new DcirExtractor(sqlContext).extract(path).count
     }
   }

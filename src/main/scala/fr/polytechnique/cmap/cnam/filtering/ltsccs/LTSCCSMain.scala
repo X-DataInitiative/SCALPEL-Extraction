@@ -1,8 +1,7 @@
 package fr.polytechnique.cmap.cnam.filtering.ltsccs
 
-import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.hive.HiveContext
+import org.apache.spark.sql.{Dataset, SQLContext}
 import com.typesafe.config.{Config, ConfigFactory}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.filtering.FlatEvent
@@ -15,7 +14,7 @@ object LTSCCSMain extends Main {
 
   override def appName = "LTSCCS"
 
-  def runLTSCCS(sqlContext: HiveContext, config: Config): Unit = {
+  def runLTSCCS(sqlContext: SQLContext, config: Config): Unit = {
     import sqlContext.implicits._
 
     val coxPatients = sqlContext.read.parquet(config.getString("paths.output.exposures"))
@@ -63,5 +62,5 @@ object LTSCCSMain extends Main {
   }
 
   // todo: refactor this function
-  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = None
+  def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = None
 }

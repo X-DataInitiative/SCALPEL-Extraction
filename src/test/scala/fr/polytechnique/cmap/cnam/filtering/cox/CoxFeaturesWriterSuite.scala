@@ -31,7 +31,7 @@ class CoxFeaturesWriterSuite extends SharedContext {
     features.writeCSV(path)
     val result = sqlContext
       .read
-      .format("com.databricks.spark.csv")
+      .format("csv")
       .option("delimiter", ",")
       .option("header", "true")
       .option("inferSchema", "true")

@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.flattening
 
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, SQLContext}
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.Config
 import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig._
 
 
@@ -49,7 +49,7 @@ object SingleTable {
                  dateFormat: String = "dd/MM/yyyy"
                ): DataFrame = {
       sqlContext.read
-        .format("com.databricks.spark.csv")
+        .format("csv")
         .option("header", "true")
         .option("delimiter", ";")
         .option("dateFormat", dateFormat)

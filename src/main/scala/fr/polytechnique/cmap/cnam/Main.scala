@@ -2,9 +2,8 @@ package fr.polytechnique.cmap.cnam
 
 import java.util.{Locale, TimeZone}
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.hive.HiveContext
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.SparkContext
+import org.apache.spark.sql.{Dataset, SQLContext, SparkSession}
 
 trait Main {
 
@@ -17,20 +16,28 @@ trait Main {
   Locale.setDefault(Locale.US)
   TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 
-  @transient final lazy val logger = Logger.getLogger(getClass)
+  @transient final lazy val logger: Logger = Logger.getLogger(getClass)
   logger.setLevel(Level.INFO)
 
-  @transient private var _sc: SparkContext = _
-  @transient private var _sql: HiveContext = _
+  @transient private var _spark: SparkSession = _
 
-  def sc: SparkContext = _sc
-  def sqlContext: HiveContext = _sql
+  def sc: SparkContext = _spark.sparkContext
+  def sqlContext: SQLContext = _spark.sqlContext
   def startContext(): Unit = {
-    _sc = new SparkContext(new SparkConf().setAppName(this.appName))
-    _sql = new HiveContext(_sc)
-    _sql.setConf("spark.sql.autoBroadcastJoinThreshold", "104857600")
+    if (_spark == null) {
+      _spark = SparkSession
+        .builder()
+        .appName(this.appName)
+        .config("spark.sql.autoBroadcastJoinThreshold", "104857600")
+        .getOrCreate()
+    }
   }
-  def stopContext(): Unit = _sc.stop()
+  def stopContext(): Unit = {
+    if (_spark != null) {
+      _spark.stop()
+      _spark = null
+    }
+  }
 
   // Expected args are in format "arg1=value1 arg2=value2 ..."
   def main(args: Array[String]): Unit = {
@@ -46,5 +53,5 @@ trait Main {
   }
 
   def appName: String
-  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]]
+  def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]]
 }
