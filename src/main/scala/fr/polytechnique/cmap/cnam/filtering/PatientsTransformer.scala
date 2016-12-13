@@ -59,10 +59,10 @@ object PatientsTransformer extends Transformer[Patient] with PatientsTransformer
 
     patients.where(filterPatientsByAge)
       .select(
-      patientID.as("patientID"),
-      gender.as("gender"),
-      birthdate.as("birthDate"),
-      deathDate.as("deathDate")
-    ).as[Patient]
+        patientID.as("patientID"),
+        gender.as("gender"),
+        birthdate.as("birthDate"),
+        deathDate.as("deathDate")
+      ).as[Patient]
   }
 }

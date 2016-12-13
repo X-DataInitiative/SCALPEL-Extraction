@@ -193,7 +193,7 @@ class MLPPWriterSuite extends SharedContext {
     assert(result === expected)
   }
 
-  "withEndBucket" should "add a column with the minimum among deathBucket, diseaseBucket and the max number of buckets" in {
+  "withEndBucket" should "add a column with the minimum among deathBucket and the max number of buckets" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -221,15 +221,62 @@ class MLPPWriterSuite extends SharedContext {
     val expected = Seq(
       ("PA", Some(2)),
       ("PA", Some(2)),
-      ("PB", Some(3)),
-      ("PB", Some(3)),
-      ("PC", Some(4)),
-      ("PC", Some(4)),
+      ("PB", Some(4)),
+      ("PB", Some(4)),
+      ("PC", Some(16)),
+      ("PC", Some(16)),
       ("PD", Some(5)),
       ("PD", Some(5)),
-      ("PE", Some(6)),
-      ("PE", Some(6)),
+      ("PE", Some(7)),
+      ("PE", Some(7)),
       ("PF", Some(16))
+    ).toDF("patientID", "endBucket")
+
+    // When
+    val writer = MLPPWriter(params)
+    import writer.MLPPDataFrame
+    val result = input.withEndBucket.select("patientID", "endBucket")
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
+    assert(result === expected)
+  }
+
+  it should "add a column with the minimum among deathBucket + 1, and the max number of buckets if " +
+      "includeDeathBucket is true" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val params = MLPPWriter.Params(
+      minTimestamp = makeTS(2006, 1, 1),
+      maxTimestamp = makeTS(2006, 2, 2),
+      bucketSize = 2,
+      includeDeathBucket = true
+    )
+
+    val input = Seq(
+      ("PA", Some(16)),
+      ("PA", Some(16)),
+      ("PB", Some( 0)),
+      ("PB", Some( 0)),
+      ("PC", Some( 5)),
+      ("PC", Some( 5)),
+      ("PD",    None),
+      ("PD",    None)
+    ).toDF("patientID", "deathBucket")
+
+    val expected = Seq(
+      ("PA", Some(16)),
+      ("PA", Some(16)),
+      ("PB", Some( 1)),
+      ("PB", Some( 1)),
+      ("PC", Some( 6)),
+      ("PC", Some( 6)),
+      ("PD", Some(16)),
+      ("PD", Some(16))
     ).toDF("patientID", "endBucket")
 
     // When
@@ -592,9 +639,9 @@ class MLPPWriterSuite extends SharedContext {
     )
     val input: Dataset[FlatEvent] = Seq(
       FlatEvent("PC", 2, makeTS(1970, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 5, 15), None),
-      FlatEvent("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 6, 15)), "exposure", "Mol1", 1.0, makeTS(2006, 1, 15), None),
-      FlatEvent("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 6, 15)), "exposure", "Mol2", 1.0, makeTS(2006, 3, 15), None),
-      FlatEvent("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 6, 15)), "exposure", "Mol2", 1.0, makeTS(2006, 5, 15), None),
+      FlatEvent("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15)), "exposure", "Mol1", 1.0, makeTS(2006, 1, 15), None),
+      FlatEvent("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15)), "exposure", "Mol1", 1.0, makeTS(2006, 3, 15), None),
+      FlatEvent("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15)), "disease", "targetDisease", 1.0, makeTS(2006, 3, 15), None),
       FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 1, 15), None),
       FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 3, 15), None),
       FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 4, 15), None),
@@ -605,21 +652,36 @@ class MLPPWriterSuite extends SharedContext {
 
     val expectedFeatures = Seq(
       // Patient A
-      MLPPFeature("PA", 0, "Mol1", 0,  0, 0,  0, 0, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0,  1, 1,  1, 1, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0,  2, 2,  2, 2, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0,  3, 3,  3, 3, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0,  2, 0,  2, 0, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0,  3, 1,  3, 1, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0,  3, 0,  3, 0, 1.0),
-      MLPPFeature("PA", 0, "Mol2", 1,  2, 0,  2, 4, 1.0),
-      MLPPFeature("PA", 0, "Mol2", 1,  3, 1,  3, 5, 1.0),
-      MLPPFeature("PA", 0, "Mol3", 2,  3, 0,  3, 8, 1.0)
+      MLPPFeature("PA", 0, "Mol1", 0, 0, 0, 0,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 1, 1, 1,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 2, 2, 2,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 3, 3, 3,  3, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 2, 0, 2,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 3, 1, 3,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 4, 2, 4,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 5, 3, 5,  3, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 3, 0, 3,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 4, 1, 4,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 5, 2, 5,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 6, 3, 6,  3, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 2, 0, 2,  4, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 3, 1, 3,  5, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 4, 2, 4,  6, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 5, 3, 5,  7, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 3, 0, 3,  8, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 4, 1, 4,  9, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 5, 2, 5, 10, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 6, 3, 6, 11, 1.0),
+      // Patient B
+      MLPPFeature("PB", 1, "Mol1", 0, 0, 0,  7,  0, 1.0),
+      MLPPFeature("PB", 1, "Mol1", 0, 1, 1,  8,  1, 1.0),
+      MLPPFeature("PB", 1, "Mol1", 0, 2, 2,  9,  2, 1.0),
+      MLPPFeature("PB", 1, "Mol1", 0, 2, 0,  9,  0, 1.0)
     ).toDF
 
     val expectedZMatrix = Seq(
       (3D, 1D, 1D, 46, 1, "PA", 0),
-      (1D, 2D, 0D, 56, 1, "PB", 1),
+      (2D, 0D, 0D, 56, 1, "PB", 1),
       (1D, 0D, 0D, 36, 2, "PC", 2)
     ).toDF("MOL0000_Mol1", "MOL0001_Mol2", "MOL0002_Mol3", "age", "gender", "patientID", "patientIDIndex")
 
@@ -630,8 +692,88 @@ class MLPPWriterSuite extends SharedContext {
 
     // Then
     import RichDataFrames._
-    result.show
-    expectedFeatures.show
+    result.show(100)
+    expectedFeatures.show(100)
+    StaticExposures.show
+    expectedZMatrix.show
+    assert(result === expectedFeatures)
+    assert(writtenResult === expectedFeatures)
+    assert(StaticExposures === expectedZMatrix)
+  }
+
+
+  it should "create the final matrices and write them as parquet files (removing death bucket)" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val rootDir = "target/test/output"
+    val params = MLPPWriter.Params(
+      minTimestamp = makeTS(2006, 1, 1),
+      maxTimestamp = makeTS(2006, 8, 1), // 7 total buckets
+      bucketSize = 30,
+      lagCount = 4,
+      includeDeathBucket = true
+    )
+    val input: Dataset[FlatEvent] = Seq(
+      FlatEvent("PC", 2, makeTS(1970, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 5, 15), None),
+      FlatEvent("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15)), "exposure", "Mol1", 1.0, makeTS(2006, 1, 15), None),
+      FlatEvent("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15)), "exposure", "Mol1", 1.0, makeTS(2006, 3, 15), None),
+      FlatEvent("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15)), "disease", "targetDisease", 1.0, makeTS(2006, 3, 15), None),
+      FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 1, 15), None),
+      FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 3, 15), None),
+      FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 4, 15), None),
+      FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol2", 1.0, makeTS(2006, 3, 15), None),
+      FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol3", 1.0, makeTS(2006, 4, 15), None),
+      FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "disease", "targetDisease", 1.0, makeTS(2006, 5, 15), None)
+    ).toDS
+
+    val expectedFeatures = Seq(
+      // Patient A
+      MLPPFeature("PA", 0, "Mol1", 0, 0, 0, 0,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 1, 1, 1,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 2, 2, 2,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 3, 3, 3,  3, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 2, 0, 2,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 3, 1, 3,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 4, 2, 4,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 5, 3, 5,  3, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 3, 0, 3,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 4, 1, 4,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 5, 2, 5,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 6, 3, 6,  3, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 2, 0, 2,  4, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 3, 1, 3,  5, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 4, 2, 4,  6, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 5, 3, 5,  7, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 3, 0, 3,  8, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 4, 1, 4,  9, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 5, 2, 5, 10, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 6, 3, 6, 11, 1.0),
+      // Patient A,
+      MLPPFeature("PB", 1, "Mol1", 0, 0, 0,  7,  0, 1.0),
+      MLPPFeature("PB", 1, "Mol1", 0, 1, 1,  8,  1, 1.0),
+      MLPPFeature("PB", 1, "Mol1", 0, 2, 2,  9,  2, 1.0),
+      MLPPFeature("PB", 1, "Mol1", 0, 3, 3, 10,  3, 1.0),
+      MLPPFeature("PB", 1, "Mol1", 0, 2, 0,  9,  0, 1.0),
+      MLPPFeature("PB", 1, "Mol1", 0, 3, 1, 10,  1, 1.0)
+    ).toDF
+
+    val expectedZMatrix = Seq(
+      (3D, 1D, 1D, 46, 1, "PA", 0),
+      (2D, 0D, 0D, 56, 1, "PB", 1),
+      (1D, 0D, 0D, 36, 2, "PC", 2)
+    ).toDF("MOL0000_Mol1", "MOL0001_Mol2", "MOL0002_Mol3", "age", "gender", "patientID", "patientIDIndex")
+
+    // When
+    val result = MLPPWriter(params).write(input, rootDir).toDF
+    val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
+    val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
+
+    // Then
+    import RichDataFrames._
+    result.show(100)
+    expectedFeatures.show(100)
     StaticExposures.show
     expectedZMatrix.show
     assert(result === expectedFeatures)

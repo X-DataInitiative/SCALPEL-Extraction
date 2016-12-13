@@ -5,19 +5,20 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.filtering.FlatEvent
+import fr.polytechnique.cmap.cnam.filtering.{FilteringConfig, FlatEvent}
 import fr.polytechnique.cmap.cnam.utilities.ColumnUtilities._
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
 object MLPPWriter {
 
-  final val AgeReferenceDate = makeTS(2006, 12, 31, 23, 59, 59)
+  final val AgeReferenceDate = FilteringConfig.dates.ageReference
 
   case class Params(
     bucketSize: Int = 30,
     lagCount: Int = 10,
     minTimestamp: Timestamp = makeTS(2006, 1, 1),
-    maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59)
+    maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
+    includeDeathBucket: Boolean = false
   )
 
   def apply(params: Params = Params()) = new MLPPWriter(params)
@@ -66,18 +67,19 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
 
       val hadDisease: Column = (col("category") === "disease") &&
       (col("eventId") === "targetDisease") &&
-      (col("startBucket") < minColumn(col("tracklossBucket"), col("deathBucket"), lit(bucketCount)))
+      (col("startBucket") < minColumn(col("deathBucket"), lit(bucketCount)))
 
       val diseaseBucket: Column = min(when(hadDisease, col("startBucket"))).over(window)
 
       data.withColumn("diseaseBucket", diseaseBucket)
     }
 
+    // We are no longer using trackloss and disease information for calculating the end bucket.
     def withEndBucket: DataFrame = {
 
-      val endBucket: Column = minColumn(
-        col("tracklossBucket"), col("diseaseBucket"), col("deathBucket"), lit(bucketCount)
-      )
+      val deathBucketRule = if (params.includeDeathBucket) col("deathBucket") + 1 else col("deathBucket")
+
+      val endBucket: Column = minColumn(deathBucketRule, lit(bucketCount))
       data.withColumn("endBucket", endBucket)
     }
 
@@ -267,7 +269,6 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
       .withAge(AgeReferenceDate)
       .withStartBucket
       .withDeathBucket
-      .withTracklossBucket
       .withDiseaseBucket
       .withEndBucket
       .where(col("category") === "exposure")

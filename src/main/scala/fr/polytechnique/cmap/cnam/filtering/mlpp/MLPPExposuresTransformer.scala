@@ -8,12 +8,16 @@ import fr.polytechnique.cmap.cnam.filtering.{ExposuresTransformer, FlatEvent}
 
 object MLPPExposuresTransformer extends ExposuresTransformer {
 
-  final val ExposureMinPurchases = 1
-  final val ExposureStartDelay = 0
-  final val ExposureStartThreshold = 6
-  final val OnlyFirstExposure = false
-  final val FilterDelayedEntries = true
-  final val FilterDiagnosedPatients = true
+  private def minPurchases = MLPPConfig.exposureDefinition.minPurchases
+  private def startDelay = MLPPConfig.exposureDefinition.startDelay
+  private def purchasesWindow = MLPPConfig.exposureDefinition.purchasesWindow
+  private def onlyFirstExposure =  MLPPConfig.exposureDefinition.onlyFirst
+  private def filterLostPatients = MLPPConfig.exposureDefinition.filterLostPatients
+  private def filterDelayedEntries  = MLPPConfig.exposureDefinition.filterDelayedEntries
+  private def delayedEntryThreshold = MLPPConfig.exposureDefinition.delayedEntryThreshold
+  private def filterEarlyDiagnosedPatients = MLPPConfig.exposureDefinition.filterEarlyDiagnosedPatients
+  private def diagnosedPatientsThreshold = MLPPConfig.exposureDefinition.diagnosedPatientsThreshold
+  private def filterNeverSickPatients = MLPPConfig.exposureDefinition.filterNeverSickPatients
 
   val outputColumns = List(
     col("patientID"),
@@ -30,34 +34,44 @@ object MLPPExposuresTransformer extends ExposuresTransformer {
   implicit class ExposuresDataFrame(data: DataFrame) {
 
     /**
-      * Drops patients whose got a target disease before periodStart
+      * Drops patients who got a target disease before before a threshold (measured by a number of
+      *   months after study start, parameterizable with `diagnosedPatientsThreshold`)
       */
-    def filterDiagnosedPatients(doFilter: Boolean): DataFrame = doFilter match {
-      case false => data
-      case true => {
+    def filterEarlyDiagnosedPatients(doFilter: Boolean): DataFrame = {
+
+      if (doFilter) {
         val window = Window.partitionBy("patientID")
+
+        val dateThreshold: Column = add_months(
+          lit(StudyStart), diagnosedPatientsThreshold
+        ).cast(TimestampType)
 
         val filterColumn: Column = min(
           when(
-            col("category") === "disease" &&
-              col("eventId") === "targetDisease" &&
-              (col("start") < StudyStart), lit(0)
+            (col("category") === "disease") &&
+            (col("eventId") === "targetDisease") &&
+            (col("start") < dateThreshold), lit(0)
           ).otherwise(lit(1))
         ).over(window).cast(BooleanType)
 
         data.withColumn("filter", filterColumn).where(col("filter")).drop("filter")
       }
+      else {
+        data
+      }
     }
 
     /**
-      * Drops patients whose first molecule event is after StudyStart + 1 year
+      * Drops patients whose first molecule event is after StudyStart + delay (default: 1 year)
       */
-    def filterDelayedEntries(doFilter: Boolean): DataFrame = doFilter match {
-      case false => data
-      case true => {
+    def filterDelayedEntries(doFilter: Boolean): DataFrame = {
+      if (doFilter) {
         val window = Window.partitionBy("patientID")
 
-        val firstYearObservation: Column = add_months(lit(StudyStart), 12).cast(TimestampType)
+        val firstYearObservation: Column = add_months(
+          lit(StudyStart), delayedEntryThreshold
+        ).cast(TimestampType)
+
         val filterColumn: Column = max(
           when(
             col("category") === "molecule" && (col("start") <= firstYearObservation),
@@ -66,6 +80,52 @@ object MLPPExposuresTransformer extends ExposuresTransformer {
         ).over(window).cast(BooleanType)
 
         data.withColumn("filter", filterColumn).where(col("filter")).drop("filter")
+      }
+      else {
+        data
+      }
+    }
+
+    /**
+      * Drops patients with trackloss events
+      */
+    def filterLostPatients(doFilter: Boolean): DataFrame = {
+      if (doFilter) {
+        val window = Window.partitionBy("patientID")
+        val filterColumn: Column = min(
+          when(
+            col("category") === "trackloss" && (col("start") >= StudyStart),
+            lit(0)
+          ).otherwise(lit(1))
+        ).over(window).cast(BooleanType)
+
+        data.withColumn("filter", filterColumn).where(col("filter")).drop("filter")
+      }
+      else {
+        data
+      }
+    }
+
+    /**
+      * Drops patients who never had a target disease event
+      */
+    def filterNeverSickPatients(doFilter: Boolean): DataFrame = {
+
+      if (doFilter) {
+        val window = Window.partitionBy("patientID")
+
+        val filterColumn: Column = max(
+          when(
+            (col("category") === "disease") &&
+            (col("eventId") === "targetDisease") &&
+            (col("start") <= MLPPConfig.maxTimestamp), lit(1)
+          ).otherwise(lit(0))
+        ).over(window).cast(BooleanType)
+
+        data.withColumn("filter", filterColumn).where(col("filter")).drop("filter")
+      }
+      else {
+        data
       }
     }
 
@@ -102,17 +162,20 @@ object MLPPExposuresTransformer extends ExposuresTransformer {
   }
 
   def transform(input: Dataset[FlatEvent]): Dataset[FlatEvent] = {
+
     import input.sqlContext.implicits._
 
     input.toDF
-      .filterDelayedEntries(FilterDelayedEntries)
-      .filterDiagnosedPatients(FilterDiagnosedPatients)
+      .filterDelayedEntries(filterDelayedEntries)
+      .filterEarlyDiagnosedPatients(filterEarlyDiagnosedPatients)
+      .filterLostPatients(filterLostPatients)
+      .filterNeverSickPatients(filterNeverSickPatients)
       .where(col("category") === "molecule")
       .withExposureStart(
-        minPurchases = ExposureMinPurchases,
-        intervalSize = ExposureStartThreshold,
-        startDelay = ExposureStartDelay,
-        firstOnly = OnlyFirstExposure
+        minPurchases = minPurchases,
+        intervalSize = purchasesWindow,
+        startDelay = startDelay,
+        firstOnly = onlyFirstExposure
       )
       .withExposureEnd
       .where(col("exposureStart").isNotNull)
