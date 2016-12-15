@@ -19,7 +19,8 @@ object ImbDiseaseTransformer extends DiseaseTransformer {
 
     def extractImbDisease: DataFrame = {
       df.filter(col("imbEncoding") === "CIM10")
-        .filter(col("disease") contains DiseaseCode)
+        .filter(col("disease").contains(DiseaseCode))
+        .filter(col("eventDate").isNotNull)
     }
 
   }
