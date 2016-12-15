@@ -1,13 +1,12 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import java.sql.Timestamp
-
 import org.apache.spark.sql.DataFrame
-
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.filtering.ImbDiseaseTransformer._
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
+import java.sql.Timestamp
 
+import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 
 class ImbDiseaseTransformerSuite extends SharedContext {
 
@@ -48,5 +47,25 @@ class ImbDiseaseTransformerSuite extends SharedContext {
     // Then
     assert(result.toDF === expected)
 
+  }
+  "transform" should "filter events with None start" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input:DataFrame = Seq(
+      ("Patient_01", "CIM10", "C67",1, None,Some(Timestamp.valueOf("2011-12-1 00:00:00"))),
+      ("Patient_02", "CIM10", "C67",1, None,None),
+      ("id3", "CIM10", "C67",1,  Some(Timestamp.valueOf("2011-12-1 00:00:00")),Some(Timestamp.valueOf("2011-12-1 00:00:00")))
+    ).toDF("patientID", "imbEncoding","disease", "BEN_NAI_MOI", "eventDate", "BEN_DCD_DTE")
+
+    val expected:DataFrame = Seq(
+      ("id3", "CIM10", "C67",1,  Some(Timestamp.valueOf("2011-12-1 00:00:00")),Some(Timestamp.valueOf("2011-12-1 00:00:00")))
+    ).toDF("patientID", "imbEncoding","disease", "BEN_NAI_MOI", "eventDate", "BEN_DCD_DTE")
+    // When
+    val output = ImbDiseaseTransformer.imbDataFrame(input).extractImbDisease
+
+    // Then
+    assert(output === expected)
   }
 }

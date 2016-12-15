@@ -75,7 +75,14 @@ class IrBenExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
   *
   */
 class IrImbExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
+{
+  override def extract(irImbPath: String): DataFrame = {
+    super.extract(irImbPath)
+      //.where(col("IMB_ALD_DTD") isNotNull)
+      .where(col("IMB_ALD_DTD") !== (""))
+  }
 
+}
 /**
   * Extractor class for the IR_PHA_R table
   *
