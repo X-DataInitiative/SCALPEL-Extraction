@@ -140,6 +140,7 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
       .prepareToPivot(exposures)
       .pivotMolecules
       .adjustCancerValues
+      .where(col("start") >= 0) //Avoids negative start (exposures before followUpStart) in cumulative exposure
       .as[CoxFeature]
   }
 }

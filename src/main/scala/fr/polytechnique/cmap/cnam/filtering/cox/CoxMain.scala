@@ -29,7 +29,6 @@ object CoxMain extends Main {
     argsMap.get("env").foreach(sqlContext.setConf("env", _))
 
     val cancerDefinition: String = FilteringConfig.cancerDefinition
-    val filterDelayedPatients: Boolean = CoxConfig.filterDelayedPatients
     val outputRoot = FilteringConfig.outputPaths.coxFeatures
     val outputDir = s"$outputRoot/$cancerDefinition"
 
@@ -76,8 +75,7 @@ object CoxMain extends Main {
       drugFlatEvents
         .union(diseaseFlatEvents)
         .union(followUpFlatEvents)
-    val exposures = CoxExposuresTransformer.transform(flatEventsForExposures,
-      filterDelayedPatients).cache()
+    val exposures = CoxExposuresTransformer.transform(flatEventsForExposures).cache()
 
     logger.info("Caching exposures...")
     logger.info("Number of exposures: " + exposures.count)

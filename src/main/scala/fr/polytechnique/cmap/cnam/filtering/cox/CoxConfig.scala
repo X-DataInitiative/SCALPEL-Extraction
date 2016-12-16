@@ -11,7 +11,9 @@ object CoxConfig {
   case class CoxExposureDefinition(
     minPurchases: Int,
     purchasesWindow: Int,
-    startDelay: Int
+    startDelay: Int,
+    cumulativeExposureType: String = "None",
+    cumulativeExposureWindow: Int = 1
   )
 
   private lazy val modelParams: Config = FilteringConfig.modelConfig("cox_parameters")
@@ -23,7 +25,9 @@ object CoxConfig {
   lazy val exposureDefinition = CoxExposureDefinition(
     minPurchases = modelParams.getInt("exposures.min_purchases"),
     startDelay = modelParams.getInt("exposures.start_delay"),
-    purchasesWindow = modelParams.getInt("exposures.purchases_window")
+    purchasesWindow = modelParams.getInt("exposures.purchases_window"),
+    cumulativeExposureType = modelParams.getString("exposures.cumulative_exposure_type"),
+    cumulativeExposureWindow = modelParams.getInt("exposures.cumulative_exposure_window")
   )
 
   override def toString: String = {
@@ -32,6 +36,8 @@ object CoxConfig {
     s"followUpMonthsDelay -> $followUpMonthsDelay \n" +
     s"exposureDefinition.minPurchases -> ${exposureDefinition.minPurchases} \n" +
     s"exposureDefinition.startDelay -> ${exposureDefinition.startDelay} \n" +
-    s"exposureDefinition.purchasesWindow -> ${exposureDefinition.purchasesWindow}"
+    s"exposureDefinition.purchasesWindow -> ${exposureDefinition.purchasesWindow} \n" +
+    s"exposureDefinition.cumulativeExposureType -> ${exposureDefinition.cumulativeExposureType} \n" +
+    s"exposureDefinition.cumulativeExposureWindow -> ${exposureDefinition.cumulativeExposureWindow}"
   }
 }

@@ -13,9 +13,12 @@ class CoxMainSuite extends SharedContext {
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    val c = FilteringConfig.getClass.getDeclaredConstructor()
-    c.setAccessible(true)
-    c.newInstance()
+    val filteringConfig = FilteringConfig.getClass.getDeclaredConstructor()
+    val coxConfig = CoxConfig.getClass.getDeclaredConstructor()
+    filteringConfig.setAccessible(true)
+    filteringConfig.newInstance()
+    coxConfig.setAccessible(true)
+    coxConfig.newInstance()
   }
 
   "run" should "correctly run the full pipeline from Filtering till CoxFeaturing" in {
@@ -85,6 +88,71 @@ class CoxMainSuite extends SharedContext {
     // When
     val coxFeatures = CoxMain.coxFeaturing(flatEvents, Map("conf" -> configPath))
     val result = coxFeatures.get.toDF.orderBy("patientID")
+
+    // Then
+    result.show
+    expectedResult.show
+    import RichDataFrames._
+    assert(result === expectedResult)
+  }
+
+  it should "also return a valid Dataset when cumulativeExposureType is purchase-based" in {
+
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val configPath = "src/test/resources/config/cox-cumulative-purchase.conf"
+    val flatEvents: Dataset[FlatEvent] = Seq(
+      FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "molecule", "PIOGLITAZONE", 1.0, makeTS(2006, 1, 10), null),
+      FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "molecule", "PIOGLITAZONE", 1.0, makeTS(2006, 8, 10), null),
+      FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "molecule", "PIOGLITAZONE", 1.0, makeTS(2006, 10, 10), null),
+      FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "molecule", "PIOGLITAZONE", 1.0, makeTS(2006, 12, 10), null),
+      FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "molecule", "ROSIGLITAZONE", 1.0, makeTS(2006, 2, 10), null),
+      FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "molecule", "ROSIGLITAZONE", 1.0, makeTS(2006, 9, 10), null),
+      FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "molecule", "ROSIGLITAZONE", 1.0, makeTS(2006, 10, 10), null),
+      FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "molecule", "ROSIGLITAZONE", 1.0, makeTS(2007, 1, 10), null),
+      FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "disease", "C67", 1.0, makeTS(2007, 3, 10), null),
+      FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "disease", "targetDisease", 1.0, makeTS(2007, 3, 10), null),
+      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(2010, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 1, 20), null),
+      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 8, 1), null),
+      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 10, 1), null),
+      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "disease", "C67", 1.0, makeTS(2009, 12, 10), null),
+      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "disease", "targetDisease", 1.0, makeTS(2009, 12, 10), null),
+      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(2010, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 1, 20), null),
+      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 8, 1), null),
+      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 10, 1), null),
+      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "disease", "C67", 1.0, makeTS(2009, 5, 10), null),
+      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "disease", "targetDisease", 1.0, makeTS(2009, 5, 10), null),
+      FlatEvent("Patient_C", 1, makeTS(1979, 12, 3), null, "molecule", "METFORMINE", 1.0, makeTS(2006, 2, 1), null),
+      FlatEvent("Patient_C", 1, makeTS(1979, 12, 3), null, "molecule", "METFORMINE", 1.0, makeTS(2006, 8, 1), null),
+      FlatEvent("Patient_C", 1, makeTS(1979, 12, 3), null, "molecule", "INSULINE", 1.0, makeTS(2006, 8, 30), null),
+      FlatEvent("Patient_C", 1, makeTS(1979, 12, 3), null, "molecule", "METFORMINE", 1.0, makeTS(2006, 11, 1), null),
+      FlatEvent("Patient_C", 1, makeTS(1979, 12, 3), null, "disease", "C67", 1.0, makeTS(2007, 1, 1), null),
+      FlatEvent("Patient_C", 1, makeTS(1979, 12, 3), null, "disease", "targetDisease", 1.0, makeTS(2007, 1, 1), null),
+      FlatEvent("Patient_C.1", 1, makeTS(1979, 12, 3), null, "molecule", "METFORMINE", 1.0, makeTS(2006, 2, 1), null),
+      FlatEvent("Patient_C.1", 1, makeTS(1979, 12, 3), null, "molecule", "METFORMINE", 1.0, makeTS(2006, 8, 1), null),
+      FlatEvent("Patient_C.1", 1, makeTS(1979, 12, 3), null, "molecule", "INSULINE", 1.0, makeTS(2006, 8, 30), null),
+      FlatEvent("Patient_C.1", 1, makeTS(1979, 12, 3), null, "molecule", "METFORMINE", 1.0, makeTS(2006, 11, 1), null),
+      FlatEvent("Patient_C.1", 1, makeTS(1979, 12, 3), null, "disease", "C67", 1.0, makeTS(2007, 1, 1), null)
+    ).toDF("patientID", "gender", "birthDate", "deathDate", "category", "eventId", "weight", "start", "end")
+      .as[FlatEvent]
+
+    val expectedResult = Seq(
+      CoxFeature("Patient_A", 1, 566, "45-49", 0, 1, 0, 0, 0, 0, 2, 1, 0),
+      CoxFeature("Patient_A", 1, 566, "45-49", 1, 2, 0, 0, 0, 0, 2, 2, 0),
+      CoxFeature("Patient_A", 1, 566, "45-49", 2, 4, 0, 0, 0, 0, 3, 3, 0),
+      CoxFeature("Patient_A", 1, 566, "45-49", 4, 5, 0, 0, 0, 0, 4, 3, 0),
+      CoxFeature("Patient_A", 1, 566, "45-49", 5, 8, 1, 0, 0, 0, 4, 4, 0),
+      CoxFeature("Patient_C", 1, 324, "25-29", 0, 3, 0, 1, 0, 2, 0, 0, 0),
+      CoxFeature("Patient_C", 1, 324, "25-29", 3, 5, 1, 1, 0, 3, 0, 0, 0),
+      CoxFeature("Patient_C.1", 1, 324, "25-29", 0, 3, 0, 1, 0, 2, 0, 0, 0),
+      CoxFeature("Patient_C.1", 1, 324, "25-29", 3, 40, 0, 1, 0, 3, 0, 0, 0)
+    ).toDF
+
+    // When
+    val coxFeatures = CoxMain.coxFeaturing(flatEvents, Map("conf" -> configPath))
+    val result = coxFeatures.get.toDF.orderBy("patientID", "start")
 
     // Then
     result.show
