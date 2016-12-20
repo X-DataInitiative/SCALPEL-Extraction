@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.filtering.cox
 
 import com.typesafe.config.Config
 import fr.polytechnique.cmap.cnam.filtering.FilteringConfig
-
+import scala.collection.JavaConverters._
 /**
   * Created by sathiya on 23/11/16.
   */
@@ -59,6 +59,7 @@ object CoxConfig {
     s"exposureDefinition.startDelay -> ${exposureDefinition.startDelay} \n" +
     s"exposureDefinition.purchasesWindow -> ${exposureDefinition.purchasesWindow} \n" +
     s"exposureDefinition.cumulativeExposureType -> ${exposureDefinition.cumulativeExposureType} \n" +
-    s"exposureDefinition.cumulativeExposureWindow -> ${exposureDefinition.cumulativeExposureWindow}"
+    s"exposureDefinition.cumulativeExposureWindow -> ${exposureDefinition.cumulativeExposureWindow}\n" +
+    s"exposureDefinition.dosageLevelLength -> ${exposureDefinition.dosageLevelIntervals}"
   }
 }

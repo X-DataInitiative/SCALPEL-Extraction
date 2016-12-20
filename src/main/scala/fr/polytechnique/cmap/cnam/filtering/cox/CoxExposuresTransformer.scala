@@ -74,7 +74,9 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       exposureDefinition.cumulativeExposureType match {
         case ExposureType.PurchaseBasedCumulative =>
           withCumulativeExposureStart(exposureDefinition.cumulativeExposureWindow)
-        case ExposureType.Simple => withPeriodicExposureStart(exposureDefinition)
+        case "dosage-based" =>
+          withCumulativeDosageExposure(exposureDefinition)
+        case _ => withPeriodicExposureStart(exposureDefinition)
       }
     }
 
@@ -126,6 +128,31 @@ object CoxExposuresTransformer extends ExposuresTransformer {
         .withColumn("exposureStart", normalizedExposureDate(col("normalizedMonth")))
         .withColumn("weight", row_number().over(window.orderBy("start")))
         .withColumn("weight", max("weight").over(windowCumulativeExposure).cast(DoubleType))
+    }
+
+    def withCumulativeDosageExposure(exposureDefinition: CoxExposureDefinition):DataFrame = {
+      val window = Window.partitionBy("patientID", "eventId")
+
+      val exposureStartRule: Column = when(
+        months_between(col("start"), col("previousStartDate")) <= exposureDefinition.purchasesWindow,
+        add_months(col("start"), exposureDefinition.startDelay).cast(TimestampType)
+      )
+
+      val potentialExposureStart: Column = if(exposureDefinition.minPurchases == 1)
+        col("start")
+      else
+        lead(col("start"), exposureDefinition.minPurchases - 1).over(window.orderBy("start"))
+
+
+      val getLevel = udf{(Quantity:Double) => exposureDefinition.dosageLevelIntervals.filter(x => x<= Quantity).size}
+
+
+      data
+        .withColumn("previousStartDate", potentialExposureStart)
+        .withColumn("exposureStart", col("previousStartDate"))
+        .withColumn("exposureStart", min("exposureStart").over(window))
+        .withColumn("weight", (sum("weight").over(window.orderBy("start"))))
+        .withColumn("weight", getLevel(col("weight")))
     }
 
     def withExposureEnd: DataFrame = data.withColumn("exposureEnd", col("followUpEnd"))
