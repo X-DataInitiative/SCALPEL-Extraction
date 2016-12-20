@@ -32,7 +32,9 @@ object CoxConfig {
     purchasesWindow: Int,
     startDelay: Int,
     cumulativeExposureType: ExposureType = ExposureType.Simple,
-    cumulativeExposureWindow: Int = 1
+    cumulativeExposureWindow: Int = 1,
+    cumulativeStartThreshold: Int = 6,
+    cumulativeEndThreshold: Int = 4
   )
 
   private lazy val modelParams: Config = FilteringConfig.modelConfig("cox_parameters")
@@ -46,9 +48,11 @@ object CoxConfig {
     startDelay = modelParams.getInt("exposures.start_delay"),
     purchasesWindow = modelParams.getInt("exposures.purchases_window"),
     cumulativeExposureType = ExposureType.fromString(
-      modelParams.getString("exposures.cumulative_exposure_type")
+      modelParams.getString("exposures.exposure_type")
     ),
-    cumulativeExposureWindow = modelParams.getInt("exposures.cumulative_exposure_window")
+    cumulativeExposureWindow = modelParams.getInt("exposures.cumulative.window"),
+    cumulativeStartThreshold = modelParams.getInt("exposures.cumulative.start_threshold"),
+    cumulativeEndThreshold = modelParams.getInt("exposures.cumulative.end_threshold")
   )
 
   override def toString: String = {
@@ -59,6 +63,8 @@ object CoxConfig {
     s"exposureDefinition.startDelay -> ${exposureDefinition.startDelay} \n" +
     s"exposureDefinition.purchasesWindow -> ${exposureDefinition.purchasesWindow} \n" +
     s"exposureDefinition.cumulativeExposureType -> ${exposureDefinition.cumulativeExposureType} \n" +
-    s"exposureDefinition.cumulativeExposureWindow -> ${exposureDefinition.cumulativeExposureWindow}"
+    s"exposureDefinition.cumulativeExposureWindow -> ${exposureDefinition.cumulativeExposureWindow} \n" +
+    s"exposureDefinition.cumulativeStartThreshold -> ${exposureDefinition.cumulativeStartThreshold} \n" +
+    s"exposureDefinition.cumulativeEndThreshold -> ${exposureDefinition.cumulativeEndThreshold}"
   }
 }

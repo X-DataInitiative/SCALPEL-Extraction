@@ -72,9 +72,10 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       import CoxConfig.ExposureType
 
       exposureDefinition.cumulativeExposureType match {
-        case ExposureType.PurchaseBasedCumulative =>
-          withCumulativeExposureStart(exposureDefinition.cumulativeExposureWindow)
         case ExposureType.Simple => withPeriodicExposureStart(exposureDefinition)
+        case ExposureType.PurchaseBasedCumulative =>
+          withPurchaseBasedCumulativeExposure(exposureDefinition.cumulativeExposureWindow)
+        case ExposureType.TimeBasedCumulative => withTimeBasedCumulativeExposure(6, 4)
       }
     }
 
@@ -104,7 +105,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
         .withColumn("weight", lit(1.0))
     }
 
-    def withCumulativeExposureStart(cumulativePeriod: Integer): DataFrame = {
+    def withPurchaseBasedCumulativeExposure(cumulativePeriod: Integer): DataFrame = {
       val window = Window.partitionBy("patientID", "eventId")
       val windowCumulativeExposure = window.partitionBy("patientID", "eventId", "exposureStart")
 
@@ -126,6 +127,32 @@ object CoxExposuresTransformer extends ExposuresTransformer {
         .withColumn("exposureStart", normalizedExposureDate(col("normalizedMonth")))
         .withColumn("weight", row_number().over(window.orderBy("start")))
         .withColumn("weight", max("weight").over(windowCumulativeExposure).cast(DoubleType))
+    }
+
+    def withTimeBasedCumulativeExposure(exposureStartThreshold: Int,
+                                          exposureEndThreshold: Int): DataFrame = {
+      val window = Window.partitionBy("patientID", "eventId").orderBy("start")
+      import data.sqlContext.implicits._
+
+      val patientsFollowUpEnd = data.select(
+        col("patientID").as("data_patientID"),
+        col("followUpEnd")
+      ).distinct
+
+      // In time-based we share same featuring logic as LTSCCS.
+      //TODO: Move LTSCCSExposuresTransformer outside of the LTSCCS package and make it common for both models
+      import fr.polytechnique.cmap.cnam.filtering.ltsccs.LTSCCSExposuresTransformer
+      val exposures = new LTSCCSExposuresTransformer(exposureStartThreshold, exposureEndThreshold)
+        .transform(data.as[FlatEvent])
+        .toDF
+
+      val exposuresWithFollowUpEnd = exposures.join(
+        patientsFollowUpEnd, col("patientID") === col("data_patientID"), "left_outer")
+
+      exposuresWithFollowUpEnd
+        .withColumn("weight", months_between(col("end"), col("start")))
+        .withColumn("weight", sum(col("weight")).over(window))
+        .withColumn("exposureStart", col("start"))
     }
 
     def withExposureEnd: DataFrame = data.withColumn("exposureEnd", col("followUpEnd"))
