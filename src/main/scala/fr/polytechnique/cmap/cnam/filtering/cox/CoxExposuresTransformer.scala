@@ -112,7 +112,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       val normalizedExposureDate = udf({(normalizedMonth:Integer) => {
         val cal: Calendar = Calendar.getInstance()
         cal.setTime(StudyStart)
-        cal.add(Calendar.MONTH, normalizedMonth)
+        cal.add(Calendar.MONTH, normalizedMonth * cumulativePeriod)
         makeTS(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, 1)
       }})
 

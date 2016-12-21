@@ -83,7 +83,8 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
         col("patientID").as("exp_patientID"),
         col("moleculeName").as("exp_moleculeName"),
         col("start").as("exp_start"),
-        col("end").as("exp_end")
+        col("end").as("exp_end"),
+        col("weight").as("exp_weight")
       )
 
       data
@@ -93,6 +94,7 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
           (col("exp_end") >= col("coxEnd")))
         )
         .withColumn("moleculeName", col("exp_moleculeName"))
+        .withColumn("weight", col("exp_weight"))
     }
 
     def pivotMolecules: DataFrame = {
@@ -107,7 +109,8 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
           col("coxEnd").as("end"),
           col("hasCancer")
         )
-        .pivot("moleculeName", moleculesList).agg(count("moleculeName").cast(IntegerType)).persist
+        .pivot("moleculeName", moleculesList)
+        .agg(coalesce(max("weight"), lit(0)).cast(IntegerType)).persist
     }
 
     def adjustCancerValues: DataFrame = {
