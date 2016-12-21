@@ -146,7 +146,9 @@ object CoxExposuresTransformer extends ExposuresTransformer {
         .withColumn("exposureStart", col("nextStartDate"))
         .withColumn("exposureStart", min("exposureStart").over(window))
         .withColumn("weight", (sum("weight").over(window.orderBy("start"))))
+        .filter(col("exposureStart") <= col("start"))
         .withColumn("weight", getLevel(col("weight")))
+
     }
 
     def withExposureEnd: DataFrame = data.withColumn("exposureEnd", col("followUpEnd"))

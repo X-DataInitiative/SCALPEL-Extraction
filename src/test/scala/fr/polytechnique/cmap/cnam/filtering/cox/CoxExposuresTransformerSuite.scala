@@ -355,14 +355,25 @@ class CoxExposuresTransformerSuite extends SharedContext {
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 3, 1), makeTS(2008, 6, 29),50),
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 1), makeTS(2008, 6, 29),30),
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 8, 1), makeTS(2008, 6, 29),100),
-      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 10, 1), makeTS(2008, 6, 29),200)
+      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 10, 1), makeTS(2008, 6, 29),200),
+      ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2008, 7, 5), makeTS(2008, 1, 2),100),
+      ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2008, 2, 1), makeTS(2008, 1, 2),40),
+      ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2008, 8, 1), makeTS(2008, 1, 2),150),
+      ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2008, 10, 1), makeTS(2008, 6, 29),200),
+      ("Patient_B", "molecule", "SULFONYLUREA", makeTS(2008, 7, 6), makeTS(2008, 1, 2),40),
+      ("Patient_B", "molecule", "SULFONYLUREA", makeTS(2008, 2, 1), makeTS(2008, 1, 2),140),
+      ("Patient_B", "molecule", "SULFONYLUREA", makeTS(2008, 11, 1), makeTS(2008, 1, 2),150)
     ).toDF("PatientID", "category", "eventId", "start", "followUpStart","weight")
 
     val expected = Seq(
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 3, 1)), Some(1)),
+
       ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 3, 1)), Some(1)),
       ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 3, 1)), Some(2)),
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 3, 1)), Some(4))
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 3, 1)), Some(4)),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2008, 7, 5)), Some(2)),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2008, 7, 5)), Some(3)),
+      ("Patient_B", "SULFONYLUREA", Some(makeTS(2008, 7, 6)), Some(2)),
+      ("Patient_B", "SULFONYLUREA", Some(makeTS(2008, 7, 6)), Some(4))
     ).toDF("PatientID", "eventId", "exposureStart", "weight")
 
     // When
