@@ -390,6 +390,63 @@ class CoxExposuresTransformerSuite extends SharedContext {
     assert(result === expected)
   }
   "withExposureStart" should "compute exposureStart and weight correctly if the " +
+    "cumulativeExposureType is Dosage-based and without the constraint of two purchases" in {
+
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxConfig.CoxExposureDefinition
+    val coxExposureDefintion = CoxExposureDefinition(
+      minPurchases = 1,
+      purchasesWindow = 6,
+      startDelay = 3,
+      cumulativeExposureType = "dosage-based",
+      dosageLevelIntervals = List(0,140,200,300)
+    )
+
+    val input = Seq(
+      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 3, 1), makeTS(2008, 6, 29),50),
+      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 1), makeTS(2008, 6, 29),30),
+      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 8, 1), makeTS(2008, 6, 29),100),
+      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 10, 1), makeTS(2008, 6, 29),200),
+      ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2008, 7, 5), makeTS(2008, 1, 2),100),
+      ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2008, 2, 1), makeTS(2008, 1, 2),40),
+      ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2008, 8, 1), makeTS(2008, 1, 2),150),
+      ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2008, 10, 1), makeTS(2008, 6, 29),200),
+      ("Patient_B", "molecule", "SULFONYLUREA", makeTS(2008, 7, 6), makeTS(2008, 1, 2),40),
+      ("Patient_B", "molecule", "SULFONYLUREA", makeTS(2008, 2, 1), makeTS(2008, 1, 2),140),
+      ("Patient_B", "molecule", "SULFONYLUREA", makeTS(2008, 11, 1), makeTS(2008, 1, 2),150)
+    ).toDF("PatientID", "category", "eventId", "start", "followUpStart","weight")
+
+    val expected = Seq(
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 1, 1)), Some(1)),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 1, 1)), Some(1)),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 1, 1)), Some(2)),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 1, 1)), Some(4)),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2008, 2, 1)), Some(1)),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2008, 2, 1)), Some(2)),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2008, 2, 1)), Some(3)),
+      ("Patient_B", "PIOGLITAZONE", Some(makeTS(2008, 10, 1)), Some(3)),
+      ("Patient_B", "SULFONYLUREA", Some(makeTS(2008, 2, 1)), Some(2)),
+      ("Patient_B", "SULFONYLUREA", Some(makeTS(2008, 2, 1)), Some(2)),
+      ("Patient_B", "SULFONYLUREA", Some(makeTS(2008, 2, 1)), Some(4))
+    ).toDF("PatientID", "eventId", "exposureStart", "weight")
+
+    // When
+    import fr.polytechnique.cmap.cnam.filtering.cox.CoxExposuresTransformer.ExposuresDataFrame
+    val result = input.withExposureStart(coxExposureDefintion)
+      .select("PatientID", "eventId", "exposureStart", "weight")
+
+    // Then
+    import RichDataFrames._
+    println("Result:")
+    result.show
+    println("Expected:")
+    expected.show
+    assert(result === expected)
+  }
+  "withExposureStart" should "compute exposureStart and weight correctly if the " +
     "cumulativeExposureType is Dosage-based and the dosagelevelintervals is 0" in {
 
     val sqlCtx = sqlContext
