@@ -20,6 +20,7 @@ class CoxConfigSuite extends SharedContext {
 
   "toString" should "correctly return all the default Cox Parameters from the config file" in {
     // Given
+    val ls:List[Double]  = List(0,100,200,300,400,500)
     val expectedResult =
       "filterDelayedPatients -> true \n" +
       "delayedEntriesThreshold -> 12 \n" +
@@ -29,6 +30,7 @@ class CoxConfigSuite extends SharedContext {
       "exposureDefinition.purchasesWindow -> 6 \n" +
       "exposureDefinition.cumulativeExposureType -> Simple \n"+
       "exposureDefinition.cumulativeExposureWindow -> 1"
+      s"exposureDefinition.dosageLevelIntervals -> ${ls}"
 
     // When
     val result = CoxConfig.toString

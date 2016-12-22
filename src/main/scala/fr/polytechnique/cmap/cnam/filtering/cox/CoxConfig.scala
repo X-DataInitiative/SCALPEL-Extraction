@@ -33,6 +33,7 @@ object CoxConfig {
     startDelay: Int,
     cumulativeExposureType: ExposureType = ExposureType.Simple,
     cumulativeExposureWindow: Int = 1
+    dosageLevelIntervals:List[Double] = List(0)
   )
 
   private lazy val modelParams: Config = FilteringConfig.modelConfig("cox_parameters")
@@ -59,7 +60,7 @@ object CoxConfig {
     s"exposureDefinition.startDelay -> ${exposureDefinition.startDelay} \n" +
     s"exposureDefinition.purchasesWindow -> ${exposureDefinition.purchasesWindow} \n" +
     s"exposureDefinition.cumulativeExposureType -> ${exposureDefinition.cumulativeExposureType} \n" +
-    s"exposureDefinition.cumulativeExposureWindow -> ${exposureDefinition.cumulativeExposureWindow}\n" +
-    s"exposureDefinition.dosageLevelLength -> ${exposureDefinition.dosageLevelIntervals}"
+    s"exposureDefinition.cumulativeExposureWindow -> ${exposureDefinition.cumulativeExposureWindow} \n" +
+    s"exposureDefinition.dosageLevelIntervals -> ${exposureDefinition.dosageLevelIntervals}"
   }
 }
