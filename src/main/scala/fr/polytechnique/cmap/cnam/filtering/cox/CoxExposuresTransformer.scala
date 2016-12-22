@@ -133,7 +133,6 @@ object CoxExposuresTransformer extends ExposuresTransformer {
     def withCumulativeDosageExposure(exposureDefinition: CoxExposureDefinition):DataFrame = {
       val window = Window.partitionBy("patientID", "eventId")
 
-
       val potentialExposureStart: Column = if(exposureDefinition.minPurchases == 1)
         col("start")
       else
@@ -148,6 +147,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
         .withColumn("weight", (sum("weight").over(window.orderBy("start"))))
         .filter(col("exposureStart") <= col("start"))
         .withColumn("weight", getLevel(col("weight")))
+          .dropDuplicates(Seq("patientID","eventId","start"))
 
     }
 
