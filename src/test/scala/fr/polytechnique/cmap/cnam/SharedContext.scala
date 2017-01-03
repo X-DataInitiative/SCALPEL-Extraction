@@ -48,8 +48,8 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
           _spark.stop()
           _spark = null
         }
-        FileUtils.deleteDirectory(new File("target/test/output"))
       } finally {
+        FileUtils.deleteDirectory(new File("target/test/output"))
         super.afterAll()
       }
     }
