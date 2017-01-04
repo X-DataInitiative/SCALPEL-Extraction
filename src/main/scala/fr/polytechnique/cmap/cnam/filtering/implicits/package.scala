@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.filtering
 import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
 import com.typesafe.config.Config
 import fr.polytechnique.cmap.cnam.filtering.FilteringConfig.InputPaths
-
+import org.apache.spark.sql.functions._
 
 package object implicits {
 
@@ -32,7 +32,8 @@ package object implicits {
     */
   implicit class SourceExtractor(sqlContext: SQLContext) {
 
-    def extractDcir(path: String): DataFrame = new DcirExtractor(this.sqlContext).extract(path)
+    def extractDcir(path: String, upperBoundIrphaQuantity:Int = 1000): DataFrame = new DcirExtractor(this.sqlContext)
+      .extract(path).persist().where(col("`ER_PHA_F.PHA_ACT_QSN`") <= upperBoundIrphaQuantity && col("`ER_PHA_F.PHA_ACT_QSN`")>0)
     def extractPmsiMco(path: String): DataFrame = new McoExtractor(this.sqlContext).extract(path)
     def extractPmsiHad(path: String): DataFrame = new HadExtractor(this.sqlContext).extract(path)
     def extractPmsiSsr(path: String): DataFrame = new SsrExtractor(this.sqlContext).extract(path)
@@ -41,9 +42,9 @@ package object implicits {
     def extractIrPha(path: String): DataFrame = new IrPhaExtractor(this.sqlContext).extract(path)
     def extractDosages(path: String): DataFrame = new DrugDosageExtractor(this.sqlContext).extract(path)
 
-    def extractAll(paths: InputPaths): Sources = {
+    def extractAll(paths: InputPaths, upperBoundIrphaQuantity:Int = 1000): Sources = {
       new Sources(
-        dcir = Some(extractDcir(paths.dcir)),
+        dcir = Some(extractDcir(paths.dcir, upperBoundIrphaQuantity)),
         pmsiMco = Some(extractPmsiMco(paths.pmsiMco)),
         // pmsiHad = Some(extractPmsiHad(paths.pmsiHad)),
         // pmsiSsr = Some(extractPmsiSsr(paths.pmsiSsr)),
@@ -60,7 +61,7 @@ package object implicits {
       */
     def extractAll(pathConfig: Config): Sources = {
       new Sources(
-        dcir = Some(extractDcir(pathConfig.getString("dcir"))),
+        dcir = Some(extractDcir(pathConfig.getString("dcir"), pathConfig.getInt("limits.max_quantity_irpha"))),
         pmsiMco = Some(extractPmsiMco(pathConfig.getString("pmsi_mco"))),
         // pmsiHad = Some(extractPmsiHad(pathConfig.getString("pmsi_had"))),
         // pmsiSsr = Some(extractPmsiSsr(pathConfig.getString("pmsi_ssr"))),

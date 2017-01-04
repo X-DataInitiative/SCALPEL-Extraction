@@ -43,4 +43,19 @@ class DcirExtractorSuite extends SharedContext {
       new DcirExtractor(sqlContext).extract(path).count
     }
   }
+
+  "DCIRExtractor.extract" should "filter lines with quantities > upperBound" in {
+    // Given
+    val value = 0L
+    val column = col("`ER_PHA_F.PHA_ACT_QSN`")
+    val path: String = "src/test/resources/test-input/DCIR.parquet"
+
+    // When
+    val result = implicits.SourceExtractor(sqlContext).extractDcir(path,1)
+
+    // Then
+    assert(result.count == 2)
+  }
+
+
 }

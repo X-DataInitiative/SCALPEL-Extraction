@@ -77,7 +77,8 @@ object FilteringConfig {
     minGender: Int,
     maxGender: Int,
     minAge: Int,
-    maxAge: Int
+    maxAge: Int,
+    maxQuantityIrpha:Int
   )
 
   case class Dates(
@@ -121,7 +122,8 @@ object FilteringConfig {
     minGender = conf.getInt("limits.min_gender"),
     maxGender = conf.getInt("limits.max_gender"),
     minAge = conf.getInt("limits.min_age"),
-    maxAge = conf.getInt("limits.max_age")
+    maxAge = conf.getInt("limits.max_age"),
+    maxQuantityIrpha = conf.getInt("limits.max_quantity_irpha")
   )
   lazy val dates = Dates(
     ageReference = makeTS(conf.getIntList("dates.age_reference").asScala.toList),
