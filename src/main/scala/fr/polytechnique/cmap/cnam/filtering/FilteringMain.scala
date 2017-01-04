@@ -33,11 +33,11 @@ object FilteringMain extends Main {
     val inputPaths = FilteringConfig.inputPaths
     val outputPaths = FilteringConfig.outputPaths
     val cancerDefinition = FilteringConfig.cancerDefinition
-
+    val upperBoundQuantityIrpha = FilteringConfig.limits.maxQuantityIrpha
     logger.info(s"Running for the $cancerDefinition cancer definition")
 
     logger.info("(Lazy) Extracting sources...")
-    val sources: Sources = sqlContext.extractAll(inputPaths)
+    val sources: Sources = sqlContext.extractAll(inputPaths, upperBoundQuantityIrpha)
 
     logger.info("(Lazy) Creating patients dataset...")
     val patients: Dataset[Patient] = PatientsTransformer.transform(sources).cache()
