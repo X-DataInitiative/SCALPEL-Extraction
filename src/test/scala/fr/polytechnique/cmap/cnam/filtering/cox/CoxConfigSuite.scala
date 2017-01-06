@@ -27,7 +27,7 @@ class CoxConfigSuite extends SharedContext {
       "exposureDefinition.minPurchases -> 2 \n" +
       "exposureDefinition.startDelay -> 3 \n" +
       "exposureDefinition.purchasesWindow -> 6 \n" +
-      "exposureDefinition.cumulativeExposureType -> None \n"+
+      "exposureDefinition.cumulativeExposureType -> Simple \n"+
       "exposureDefinition.cumulativeExposureWindow -> 1"
 
     // When

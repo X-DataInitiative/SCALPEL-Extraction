@@ -69,10 +69,12 @@ object CoxExposuresTransformer extends ExposuresTransformer {
 
     def withExposureStart(exposureDefinition: CoxExposureDefinition): DataFrame = {
 
+      import CoxConfig.ExposureType
+
       exposureDefinition.cumulativeExposureType match {
-        case "purchase-based" =>
+        case ExposureType.PurchaseBasedCumulative =>
           withCumulativeExposureStart(exposureDefinition.cumulativeExposureWindow)
-        case _ => withPeriodicExposureStart(exposureDefinition)
+        case ExposureType.Simple => withPeriodicExposureStart(exposureDefinition)
       }
     }
 
@@ -106,30 +108,33 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       val window = Window.partitionBy("patientID", "eventId")
       val windowCumulativeExposure = window.partitionBy("patientID", "eventId", "exposureStart")
 
-      def normalizedExposureMonth(start: Column) = floor(
-        months_between(start, lit(StudyStart)) / cumulativePeriod).cast(IntegerType)
+      def normalizedExposureMonth(start: Column) = {
+        floor(months_between(start, lit(StudyStart)) / cumulativePeriod).cast(IntegerType)
+      }
 
-      val normalizedExposureDate = udf({(normalizedMonth:Integer) => {
-        val cal: Calendar = Calendar.getInstance()
-        cal.setTime(StudyStart)
-        cal.add(Calendar.MONTH, normalizedMonth * cumulativePeriod)
-        makeTS(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, 1)
-      }})
+      val normalizedExposureDate = udf(
+        (normalizedMonth: Integer) => {
+          val cal: Calendar = Calendar.getInstance()
+          cal.setTime(StudyStart)
+          cal.add(Calendar.MONTH, normalizedMonth * cumulativePeriod)
+          makeTS(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, 1)
+        }
+      )
 
       data
         .withColumn("normalizedMonth", normalizedExposureMonth(col("start")))
         .withColumn("exposureStart", normalizedExposureDate(col("normalizedMonth")))
         .withColumn("weight", row_number().over(window.orderBy("start")))
-        .withColumn("weight", max("weight").over(windowCumulativeExposure)
-          .cast(DoubleType))
+        .withColumn("weight", max("weight").over(windowCumulativeExposure).cast(DoubleType))
     }
 
     def withExposureEnd: DataFrame = data.withColumn("exposureEnd", col("followUpEnd"))
   }
 
   def transform(input: Dataset[FlatEvent],
-                filterDelayedPatients: Boolean,
-                exposureDefinition: CoxExposureDefinition): Dataset[FlatEvent] = {
+      filterDelayedPatients: Boolean,
+      exposureDefinition: CoxExposureDefinition): Dataset[FlatEvent] = {
+
     import CoxFollowUpEventsTransformer.FollowUpFunctions
     import input.sqlContext.implicits._
 

@@ -194,7 +194,7 @@ class CoxExposuresTransformerSuite extends SharedContext {
       minPurchases = 2,
       purchasesWindow = 6,
       startDelay = 3,
-      cumulativeExposureType = "purchase-based"
+      cumulativeExposureType = CoxConfig.ExposureType.PurchaseBasedCumulative
     )
 
     val input = Seq(
@@ -250,7 +250,7 @@ class CoxExposuresTransformerSuite extends SharedContext {
       minPurchases = 2,
       purchasesWindow = 6,
       startDelay = 3,
-      cumulativeExposureType = "purchase-based",
+      cumulativeExposureType = CoxConfig.ExposureType.PurchaseBasedCumulative,
       cumulativeExposureWindow = 3
     )
 
@@ -473,7 +473,7 @@ class CoxExposuresTransformerSuite extends SharedContext {
       minPurchases = 2,
       purchasesWindow = 6,
       startDelay = 3,
-      cumulativeExposureType = "purchase-based"
+      cumulativeExposureType = CoxConfig.ExposureType.PurchaseBasedCumulative
     )
     val input = Seq(
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "followUpPeriod",
@@ -555,7 +555,7 @@ class CoxExposuresTransformerSuite extends SharedContext {
       minPurchases = 2,
       purchasesWindow = 6,
       startDelay = 3,
-      cumulativeExposureType = "purchase-based",
+      cumulativeExposureType = CoxConfig.ExposureType.PurchaseBasedCumulative,
       cumulativeExposureWindow = 3
     )
     val input = Seq(

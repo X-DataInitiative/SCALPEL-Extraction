@@ -8,11 +8,30 @@ import fr.polytechnique.cmap.cnam.filtering.FilteringConfig
   */
 object CoxConfig {
 
+  sealed trait ExposureType
+
+  object ExposureType  {
+    case object Simple extends ExposureType
+    case object TimeBasedCumulative extends ExposureType
+    case object PurchaseBasedCumulative extends ExposureType
+    case object DosageBasedCumulative extends ExposureType
+
+    def fromString(value: String): ExposureType = value match {
+      case "Simple" | "simple" => ExposureType.Simple
+      case "TimeBasedCumulative" |
+           "time-based-cumulative" => ExposureType.TimeBasedCumulative
+      case "PurchaseBasedCumulative" |
+           "purchase-based-cumulative" => ExposureType.PurchaseBasedCumulative
+      case "DosageBasedCumulative" |
+           "dosage-based-cumulative" => ExposureType.DosageBasedCumulative
+    }
+  }
+
   case class CoxExposureDefinition(
     minPurchases: Int,
     purchasesWindow: Int,
     startDelay: Int,
-    cumulativeExposureType: String = "None",
+    cumulativeExposureType: ExposureType = ExposureType.Simple,
     cumulativeExposureWindow: Int = 1
   )
 
@@ -26,7 +45,9 @@ object CoxConfig {
     minPurchases = modelParams.getInt("exposures.min_purchases"),
     startDelay = modelParams.getInt("exposures.start_delay"),
     purchasesWindow = modelParams.getInt("exposures.purchases_window"),
-    cumulativeExposureType = modelParams.getString("exposures.cumulative_exposure_type"),
+    cumulativeExposureType = ExposureType.fromString(
+      modelParams.getString("exposures.cumulative_exposure_type")
+    ),
     cumulativeExposureWindow = modelParams.getInt("exposures.cumulative_exposure_window")
   )
 
