@@ -1,17 +1,18 @@
 package fr.polytechnique.cmap.cnam.filtering.cox
 
+import java.util.Calendar
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{BooleanType, TimestampType}
+import org.apache.spark.sql.types.{BooleanType, DoubleType, IntegerType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.filtering.cox.CoxConfig.CoxExposureDefinition
 import fr.polytechnique.cmap.cnam.filtering.{ExposuresTransformer, FilteringConfig, FlatEvent}
+import fr.polytechnique.cmap.cnam.utilities.functions._
 
 object CoxExposuresTransformer extends ExposuresTransformer {
 
   // Constant definitions for delays and time windows. Should be verified before compiling.
   // In the future, we may want to export them to an external file.
-  final val ExposureDefinition: CoxExposureDefinition = CoxConfig.exposureDefinition
   final val DelayedEntriesThreshold: Int = CoxConfig.delayedEntriesThreshold
   final val DiseaseCode: String = FilteringConfig.diseaseCode
 
@@ -22,7 +23,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
     col("deathDate"),
     lit("exposure").as("category"),
     col("eventId"),
-    lit(1.0).as("weight"),
+    col("weight"),
     col("exposureStart").as("start"),
     col("exposureEnd").as("end")
   )
@@ -66,10 +67,21 @@ object CoxExposuresTransformer extends ExposuresTransformer {
         diseaseFilteredPatients
     }
 
+    def withExposureStart(exposureDefinition: CoxExposureDefinition): DataFrame = {
+
+      import CoxConfig.ExposureType
+
+      exposureDefinition.cumulativeExposureType match {
+        case ExposureType.PurchaseBasedCumulative =>
+          withCumulativeExposureStart(exposureDefinition.cumulativeExposureWindow)
+        case ExposureType.Simple => withPeriodicExposureStart(exposureDefinition)
+      }
+    }
+
     // Ideally, this method must receive only molecules events, otherwise they will treat diseases
     //   as molecules and add an exposure start date for them.
     // The exposure start date will be null when the patient was not exposed.
-    def withExposureStart(exposureDefinition: CoxExposureDefinition): DataFrame = {
+    def withPeriodicExposureStart(exposureDefinition: CoxExposureDefinition): DataFrame = {
       val window = Window.partitionBy("patientID", "eventId")
 
       val exposureStartRule: Column = when(
@@ -89,12 +101,40 @@ object CoxExposuresTransformer extends ExposuresTransformer {
           col("followUpStart")).otherwise(col("exposureStart"))
         )
         .withColumn("exposureStart", min("exposureStart").over(window))
+        .withColumn("weight", lit(1.0))
+    }
+
+    def withCumulativeExposureStart(cumulativePeriod: Integer): DataFrame = {
+      val window = Window.partitionBy("patientID", "eventId")
+      val windowCumulativeExposure = window.partitionBy("patientID", "eventId", "exposureStart")
+
+      def normalizedExposureMonth(start: Column) = {
+        floor(months_between(start, lit(StudyStart)) / cumulativePeriod).cast(IntegerType)
+      }
+
+      val normalizedExposureDate = udf(
+        (normalizedMonth: Integer) => {
+          val cal: Calendar = Calendar.getInstance()
+          cal.setTime(StudyStart)
+          cal.add(Calendar.MONTH, normalizedMonth * cumulativePeriod)
+          makeTS(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, 1)
+        }
+      )
+
+      data
+        .withColumn("normalizedMonth", normalizedExposureMonth(col("start")))
+        .withColumn("exposureStart", normalizedExposureDate(col("normalizedMonth")))
+        .withColumn("weight", row_number().over(window.orderBy("start")))
+        .withColumn("weight", max("weight").over(windowCumulativeExposure).cast(DoubleType))
     }
 
     def withExposureEnd: DataFrame = data.withColumn("exposureEnd", col("followUpEnd"))
   }
 
-  def transform(input: Dataset[FlatEvent], filterDelayedPatients: Boolean): Dataset[FlatEvent] = {
+  def transform(input: Dataset[FlatEvent],
+      filterDelayedPatients: Boolean,
+      exposureDefinition: CoxExposureDefinition): Dataset[FlatEvent] = {
+
     import CoxFollowUpEventsTransformer.FollowUpFunctions
     import input.sqlContext.implicits._
 
@@ -104,15 +144,15 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       .filterPatients(filterDelayedPatients)
       .where(col("category") === "molecule")
       .where(col("start") < col("followUpEnd"))
-      .withExposureStart(ExposureDefinition)
+      .withExposureStart(exposureDefinition)
       .withExposureEnd
       .where(col("exposureEnd") > col("exposureStart"))
+      .dropDuplicates(Seq("patientID", "eventId", "exposureStart", "exposureEnd"))
       .select(outputColumns: _*)
-      .dropDuplicates(Seq("patientID", "eventId"))
       .as[FlatEvent]
   }
 
   override def transform(input: Dataset[FlatEvent]): Dataset[FlatEvent] = {
-    transform(input, filterDelayedPatients = true)
+    transform(input, CoxConfig.filterDelayedPatients, CoxConfig.exposureDefinition)
   }
 }

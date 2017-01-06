@@ -261,30 +261,30 @@ class CoxTransformerSuite extends SharedContext {
     ).toDF("patientID", "gender", "coxStart", "coxEnd")
 
     val exposures = Seq(
-      ("Patient_A", "METFORMINE", 0, 9),
-      ("Patient_A", "INSULINE", 3, 5),
-      ("Patient_A", "PIOGLITAZONE", 8, 9),
-      ("Patient_B", "INSULINE", 4, 6),
-      ("Patient_B", "OTHER", 5, 6),
-      ("Patient_B", "PIOGLITAZONE", 6, 6)
-    ).toDF("patientID", "moleculeName", "start", "end")
+      ("Patient_A", "METFORMINE", 0, 9, 9.0),
+      ("Patient_A", "INSULINE", 3, 5, 2.0),
+      ("Patient_A", "PIOGLITAZONE", 8, 9, 1.0),
+      ("Patient_B", "INSULINE", 4, 6, 2.0),
+      ("Patient_B", "OTHER", 5, 6, 1.0),
+      ("Patient_B", "PIOGLITAZONE", 6, 6, 0.0)
+    ).toDF("patientID", "moleculeName", "start", "end", "weight")
 
     val expected = Seq(
-      ("Patient_A", 1, "METFORMINE", 0, 3),
-      ("Patient_A", 1, "INSULINE", 3, 5),
-      ("Patient_A", 1, "METFORMINE", 3, 5),
-      ("Patient_A", 1, "METFORMINE", 5, 8),
-      ("Patient_A", 1, "PIOGLITAZONE", 8, 9),
-      ("Patient_A", 1, "METFORMINE", 8, 9),
-      ("Patient_B", 1, "INSULINE", 4, 5),
-      ("Patient_B", 1, "OTHER", 5, 6),
-      ("Patient_B", 1, "INSULINE", 5, 6)
-    ).toDF("patientID", "gender", "moleculeName", "coxStart", "coxEnd")
+      ("Patient_A", 1, "METFORMINE", 0, 3, 9.0),
+      ("Patient_A", 1, "INSULINE", 3, 5, 2.0),
+      ("Patient_A", 1, "METFORMINE", 3, 5, 9.0),
+      ("Patient_A", 1, "METFORMINE", 5, 8, 9.0),
+      ("Patient_A", 1, "PIOGLITAZONE", 8, 9, 1.0),
+      ("Patient_A", 1, "METFORMINE", 8, 9, 9.0),
+      ("Patient_B", 1, "INSULINE", 4, 5, 2.0),
+      ("Patient_B", 1, "OTHER", 5, 6, 1.0),
+      ("Patient_B", 1, "INSULINE", 5, 6, 2.0)
+    ).toDF("patientID", "gender", "moleculeName", "coxStart", "coxEnd", "weight")
 
     // When
     import fr.polytechnique.cmap.cnam.filtering.cox.CoxTransformer.CoxDataFrame
     val result = input.prepareToPivot(exposures)
-      .select("patientID", "gender", "moleculeName", "coxStart", "coxEnd")
+      .select("patientID", "gender", "moleculeName", "coxStart", "coxEnd", "weight")
 
     // Then
     import RichDataFrames._
@@ -300,24 +300,25 @@ class CoxTransformerSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", 1, 678, "55-59", "METFORMINE", 0, 3, 1),
-      ("Patient_A", 1, 678, "55-59", "INSULINE", 3, 5, 1),
-      ("Patient_A", 1, 678, "55-59", "METFORMINE", 3, 5, 1),
-      ("Patient_A", 1, 678, "55-59", "METFORMINE", 5, 8, 1),
-      ("Patient_A", 1, 678, "55-59", "PIOGLITAZONE", 8, 9, 1),
-      ("Patient_A", 1, 678, "55-59", "METFORMINE", 8, 9, 1),
-      ("Patient_B", 1, 554, "45-49", "INSULINE", 4, 5, 0),
-      ("Patient_B", 1, 554, "45-49", "OTHER", 5, 6, 0),
-      ("Patient_B", 1, 554, "45-49", "INSULINE", 5, 6, 0)
-    ).toDF("patientID", "gender", "age", "ageGroup", "moleculeName", "coxStart", "coxEnd", "hasCancer")
+      ("Patient_A", 1, 678, "55-59", "METFORMINE", 0, 3, 1, 1.0),
+      ("Patient_A", 1, 678, "55-59", "INSULINE", 3, 5, 1, 1.0),
+      ("Patient_A", 1, 678, "55-59", "METFORMINE", 3, 5, 1, 2.0),
+      ("Patient_A", 1, 678, "55-59", "METFORMINE", 5, 8, 1, 3.0),
+      ("Patient_A", 1, 678, "55-59", "PIOGLITAZONE", 8, 9, 1, 1.0),
+      ("Patient_A", 1, 678, "55-59", "METFORMINE", 8, 9, 1, 4.0),
+      ("Patient_B", 1, 554, "45-49", "INSULINE", 4, 5, 0, 1.0),
+      ("Patient_B", 1, 554, "45-49", "OTHER", 5, 6, 0, 1.0),
+      ("Patient_B", 1, 554, "45-49", "INSULINE", 5, 6, 0, 2.0)
+    ).toDF("patientID", "gender", "age", "ageGroup", "moleculeName",
+      "coxStart", "coxEnd", "hasCancer", "weight")
 
     val expected = Seq(
       ("Patient_A", 1, 678, "55-59", 0, 3, 1, 0, 0, 1, 0, 0, 0),
-      ("Patient_A", 1, 678, "55-59", 3, 5, 1, 1, 0, 1, 0, 0, 0),
-      ("Patient_A", 1, 678, "55-59", 5, 8, 1, 0, 0, 1, 0, 0, 0),
-      ("Patient_A", 1, 678, "55-59", 8, 9, 1, 0, 0, 1, 1, 0, 0),
+      ("Patient_A", 1, 678, "55-59", 3, 5, 1, 1, 0, 2, 0, 0, 0),
+      ("Patient_A", 1, 678, "55-59", 5, 8, 1, 0, 0, 3, 0, 0, 0),
+      ("Patient_A", 1, 678, "55-59", 8, 9, 1, 0, 0, 4, 1, 0, 0),
       ("Patient_B", 1, 554, "45-49", 4, 5, 0, 1, 0, 0, 0, 0, 0),
-      ("Patient_B", 1, 554, "45-49", 5, 6, 0, 1, 0, 0, 0, 0, 1)
+      ("Patient_B", 1, 554, "45-49", 5, 6, 0, 2, 0, 0, 0, 0, 1)
     ).toDF("patientID", "gender", "age", "ageGroup", "start", "end", "hasCancer", "insuline",
       "sulfonylurea", "metformine", "pioglitazone", "rosiglitazone", "other")
 
