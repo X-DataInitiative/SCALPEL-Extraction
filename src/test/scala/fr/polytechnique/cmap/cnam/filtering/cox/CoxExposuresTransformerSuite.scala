@@ -347,7 +347,7 @@ class CoxExposuresTransformerSuite extends SharedContext {
       minPurchases = 2,
       purchasesWindow = 6,
       startDelay = 3,
-      cumulativeExposureType = "dosage-based",
+      cumulativeExposureType = CoxConfig.ExposureType.DosageBasedCumulative,
       dosageLevelIntervals = List(0,140,200,300)
     )
 
@@ -401,7 +401,7 @@ class CoxExposuresTransformerSuite extends SharedContext {
       minPurchases = 1,
       purchasesWindow = 6,
       startDelay = 3,
-      cumulativeExposureType = "dosage-based",
+      cumulativeExposureType = CoxConfig.ExposureType.DosageBasedCumulative,
       dosageLevelIntervals = List(0,140,200,300)
     )
 
@@ -458,7 +458,7 @@ class CoxExposuresTransformerSuite extends SharedContext {
       minPurchases = 2,
       purchasesWindow = 6,
       startDelay = 3,
-      cumulativeExposureType = "dosage-based",
+      cumulativeExposureType = CoxConfig.ExposureType.DosageBasedCumulative,
       dosageLevelIntervals = List(0)
     )
 
@@ -513,7 +513,7 @@ class CoxExposuresTransformerSuite extends SharedContext {
       minPurchases = 2,
       purchasesWindow = 6,
       startDelay = 3,
-      cumulativeExposureType = "dosage-based",
+      cumulativeExposureType = CoxConfig.ExposureType.DosageBasedCumulative,
       dosageLevelIntervals = List(0,140,200,300)
     )
 

@@ -32,7 +32,7 @@ object CoxConfig {
     purchasesWindow: Int,
     startDelay: Int,
     cumulativeExposureType: ExposureType = ExposureType.Simple,
-    cumulativeExposureWindow: Int = 1
+    cumulativeExposureWindow: Int = 1,
     dosageLevelIntervals:List[Double] = List(0)
   )
 

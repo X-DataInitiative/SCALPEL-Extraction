@@ -74,7 +74,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       exposureDefinition.cumulativeExposureType match {
         case ExposureType.PurchaseBasedCumulative =>
           withCumulativeExposureStart(exposureDefinition.cumulativeExposureWindow)
-        case "dosage-based" =>
+        case ExposureType.DosageBasedCumulative =>
           withCumulativeDosageExposure(exposureDefinition)
         case _ => withPeriodicExposureStart(exposureDefinition)
       }
