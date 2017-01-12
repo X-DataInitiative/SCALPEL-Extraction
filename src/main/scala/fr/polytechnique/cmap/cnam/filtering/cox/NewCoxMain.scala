@@ -7,10 +7,7 @@ import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.filtering._
 import fr.polytechnique.cmap.cnam.filtering.exposures.ExposuresTransformer
 
-/**
-  * Created by sathiya on 09/11/16.
-  */
-object CoxMain extends Main {
+object NewCoxMain extends Main {
 
   def appName = "CoxFeaturing"
 
@@ -76,8 +73,6 @@ object CoxMain extends Main {
       drugFlatEvents
         .union(diseaseFlatEvents)
         .union(followUpFlatEvents)
-//    val exposures = CoxExposuresTransformer.transform(flatEventsForExposures).cache()
-
     val exposuresConfig = FilteringConfig.exposuresConfig
     val exposures = ExposuresTransformer(exposuresConfig).transform(flatEventsForExposures).cache()
 

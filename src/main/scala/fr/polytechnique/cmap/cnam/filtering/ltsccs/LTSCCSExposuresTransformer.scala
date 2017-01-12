@@ -106,7 +106,7 @@ class LTSCCSExposuresTransformer(
         .withColumnRenamed("tracklossDate", "exposureEnd")
     }
 
-      def withExposureStart: DataFrame = {
+    def withExposureStart: DataFrame = {
       val window = Window.partitionBy("patientID", "moleculeName", "exposureEnd")
 
       // We take the first pair of purchases that happened within the threshold and set the

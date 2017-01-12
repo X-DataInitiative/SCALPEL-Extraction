@@ -57,14 +57,14 @@ class CoxMainSuite extends SharedContext {
       FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "molecule", "ROSIGLITAZONE", 1.0, makeTS(2007, 1, 10), null),
       FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "disease", "C67", 1.0, makeTS(2007, 3, 10), null),
       FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "disease", "targetDisease", 1.0, makeTS(2007, 3, 10), null),
-      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(2010, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 1, 20), null),
-      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 8, 1), null),
-      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 10, 1), null),
+      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(2010, 12, 31)), "molecule", "INSULINE", 1.0, makeTS(2009, 1, 20), null),
+      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "INSULINE", 1.0, makeTS(2009, 8, 1), null),
+      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "INSULINE", 1.0, makeTS(2009, 10, 1), null),
       FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "disease", "C67", 1.0, makeTS(2009, 12, 10), null),
       FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "disease", "targetDisease", 1.0, makeTS(2009, 12, 10), null),
-      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(2010, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 1, 20), null),
-      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 8, 1), null),
-      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 10, 1), null),
+      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(2010, 12, 31)), "molecule", "INSULINE", 1.0, makeTS(2009, 1, 20), null),
+      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "INSULINE", 1.0, makeTS(2009, 8, 1), null),
+      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "INSULINE", 1.0, makeTS(2009, 10, 1), null),
       FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "disease", "C67", 1.0, makeTS(2009, 5, 10), null),
       FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "disease", "targetDisease", 1.0, makeTS(2009, 5, 10), null),
       FlatEvent("Patient_C", 1, makeTS(1979, 12, 3), null, "molecule", "METFORMINE", 1.0, makeTS(2006, 2, 1), null),
@@ -114,14 +114,14 @@ class CoxMainSuite extends SharedContext {
       FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "molecule", "ROSIGLITAZONE", 1.0, makeTS(2007, 1, 10), null),
       FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "disease", "C67", 1.0, makeTS(2007, 3, 10), null),
       FlatEvent("Patient_A", 1, makeTS(1959, 10, 1), null, "disease", "targetDisease", 1.0, makeTS(2007, 3, 10), null),
-      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(2010, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 1, 20), null),
-      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 8, 1), null),
-      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 10, 1), null),
+      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(2010, 12, 31)), "molecule", "INSULINE", 1.0, makeTS(2009, 1, 20), null),
+      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "INSULINE", 1.0, makeTS(2009, 8, 1), null),
+      FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "INSULINE", 1.0, makeTS(2009, 10, 1), null),
       FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "disease", "C67", 1.0, makeTS(2009, 12, 10), null),
       FlatEvent("Patient_B", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "disease", "targetDisease", 1.0, makeTS(2009, 12, 10), null),
-      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(2010, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 1, 20), null),
-      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 8, 1), null),
-      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "insuline", 1.0, makeTS(2009, 10, 1), null),
+      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(2010, 12, 31)), "molecule", "INSULINE", 1.0, makeTS(2009, 1, 20), null),
+      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "INSULINE", 1.0, makeTS(2009, 8, 1), null),
+      FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "molecule", "INSULINE", 1.0, makeTS(2009, 10, 1), null),
       FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "disease", "C67", 1.0, makeTS(2009, 5, 10), null),
       FlatEvent("Patient_B.1", 2, makeTS(1969, 11, 2), Some(makeTS(1969, 12, 31)), "disease", "targetDisease", 1.0, makeTS(2009, 5, 10), null),
       FlatEvent("Patient_C", 1, makeTS(1979, 12, 3), null, "molecule", "METFORMINE", 1.0, makeTS(2006, 2, 1), null),
@@ -252,6 +252,7 @@ class CoxMainSuite extends SharedContext {
     val result = coxFeatures.get.toDF.orderBy("patientID", "start")
 
     // Then
+    flatEvents.toDF.select("patientID", "eventId", "start", "end").orderBy("patientID", "eventId", "start", "end").show
     result.show
     expectedResult.show
     import RichDataFrames._

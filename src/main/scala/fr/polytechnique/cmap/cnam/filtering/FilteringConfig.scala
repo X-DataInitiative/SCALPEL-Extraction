@@ -5,6 +5,7 @@ import scala.collection.JavaConverters._
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 import com.typesafe.config.{Config, ConfigFactory}
+import fr.polytechnique.cmap.cnam.filtering.exposures.{ExposurePeriodStrategy, ExposuresConfig, WeightAggStrategy}
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
 object FilteringConfig {
@@ -136,4 +137,21 @@ object FilteringConfig {
   )
 
   def modelConfig(modelName: String): Config = conf.getConfig(modelName)
+  lazy val exposuresConfig: ExposuresConfig = ExposuresConfig(
+    studyStart = dates.studyStart,
+    diseaseCode = diseaseCode,
+    periodStrategy = ExposurePeriodStrategy.fromString(
+      conf.getString("exposures.period_strategy")
+    ),
+    minPurchases = conf.getInt("exposures.min_purchases"),
+    purchasesWindow = conf.getInt("exposures.purchases_window"),
+    startDelay = conf.getInt("exposures.start_delay"),
+    weightAggStrategy = WeightAggStrategy.fromString(
+      conf.getString("exposures.weight_strategy")
+    ),
+    filterDelayedPatients = conf.getBoolean("filters.delayed_entries"),
+    cumulativeExposureWindow = conf.getInt("exposures.cumulative.window"),
+    cumulativeStartThreshold = conf.getInt("exposures.cumulative.start_threshold"),
+    cumulativeEndThreshold = conf.getInt("exposures.cumulative.end_threshold")
+  )
 }
