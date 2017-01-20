@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.filtering
 
 import java.sql.Timestamp
 import scala.collection.JavaConverters._
+import scala.util.Try
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 import com.typesafe.config.{Config, ConfigFactory}
@@ -92,7 +93,7 @@ object FilteringConfig {
     threshold: Int,
     delay: Int
   )
-
+  lazy val reuseFlatEventsPath: Option[String] = Try(conf.getString("reuse_flat_events_path")).toOption
   lazy val drugCategories: List[String] = conf.getStringList("drug_categories").asScala.toList
   lazy val cancerDefinition: String  = conf.getString("cancer_definition")
   lazy val diseaseCode: String = conf.getString("disease_code")
@@ -152,6 +153,7 @@ object FilteringConfig {
     filterDelayedPatients = conf.getBoolean("filters.delayed_entries"),
     cumulativeExposureWindow = conf.getInt("exposures.cumulative.window"),
     cumulativeStartThreshold = conf.getInt("exposures.cumulative.start_threshold"),
-    cumulativeEndThreshold = conf.getInt("exposures.cumulative.end_threshold")
+    cumulativeEndThreshold = conf.getInt("exposures.cumulative.end_threshold"),
+    dosageLevelIntervals = conf.getIntList("exposures.cumulative.dosage_level_intervals").asScala.toList.map(x => x.toInt)
   )
 }

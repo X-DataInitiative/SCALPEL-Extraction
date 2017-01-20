@@ -15,7 +15,8 @@ case class ExposuresConfig(
     filterDelayedPatients: Boolean,
     cumulativeExposureWindow: Int,
     cumulativeStartThreshold: Int,
-    cumulativeEndThreshold: Int)
+    cumulativeEndThreshold: Int,
+    dosageLevelIntervals: List[Int])
 
 object ExposuresConfig {
   // todo: Remove filters from ExposuresConfig pipeline

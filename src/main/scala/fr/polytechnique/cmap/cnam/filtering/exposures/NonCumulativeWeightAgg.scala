@@ -12,7 +12,8 @@ class NonCumulativeWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data)
       studyStart: Option[Timestamp],
       cumWindow: Option[Int],
       cumStartThreshold: Option[Int],
-      cumEndThreshold: Option[Int]): DataFrame = this.aggregateWeightImpl
+      cumEndThreshold: Option[Int],
+      dosageLevelIntervals: Option[List[Int]]): DataFrame = this.aggregateWeightImpl
 
-  def aggregateWeight: DataFrame = aggregateWeight(None, None, None, None)
+  def aggregateWeight: DataFrame = aggregateWeight(None, None, None, None, None)
 }

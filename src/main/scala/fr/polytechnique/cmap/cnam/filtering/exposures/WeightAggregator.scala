@@ -23,5 +23,6 @@ abstract class WeightAggregatorImpl(data: DataFrame) {
       studyStart: Option[Timestamp],
       cumWindow: Option[Int],
       cumStartThreshold: Option[Int],
-      cumEndThreshold: Option[Int]): DataFrame
+      cumEndThreshold: Option[Int],
+      dosageLevelIntervals: Option[List[Int]]): DataFrame
 }

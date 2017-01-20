@@ -1,17 +1,36 @@
 package fr.polytechnique.cmap.cnam.filtering.exposures
 
 import java.sql.Timestamp
-import org.apache.spark.sql.DataFrame
+
+import fr.polytechnique.cmap.cnam.filtering.cox.CoxConfig.CoxExposureDefinition
+import org.apache.spark.sql.{Column, DataFrame}
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 
 class DosageBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
 
-  def aggregateWeight(
-      studyStart: Option[Timestamp],
-      cumWindow: Option[Int],
-      cumStartThreshold: Option[Int],
-      cumEndThreshold: Option[Int]): DataFrame = {
+  val minPurchases = 5
 
-    data.withColumn("weight", lit("dosage-based cumulative weight"))
+  private def aggregateWeightImpl(dosageLevelIntervals: List[Int]): DataFrame = {
+
+    val window = Window.partitionBy("patientID", "eventId")
+    val finalWindow = Window.partitionBy("patientID", "eventId", "weight")
+
+    val getLevel = udf{(Quantity:Double) => dosageLevelIntervals.filter(x => x <= Quantity).size}
+
+    data
+      .withColumn("exposureStart", col("start")) // temporary (todo: "first-only" feature in unlimitedPeriodAdder)
+      .withColumn("weight", (sum("weight").over(window.orderBy("exposureStart"))))
+      .withColumn("weight", getLevel(col("weight")))
+      .withColumn("exposureStart", min("exposureStart").over(finalWindow))
+  }
+  def aggregateWeight(
+      studyStart: Option[Timestamp] = None,
+      cumWindow: Option[Int] = None,
+      cumStartThreshold: Option[Int] = None,
+      cumEndThreshold: Option[Int] = None,
+      dosageLevelIntervals: Option[List[Int]]): DataFrame = {
+
+    aggregateWeightImpl(dosageLevelIntervals.get)
   }
 }

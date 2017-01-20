@@ -7,6 +7,7 @@ import org.apache.spark.sql.types.TimestampType
 
 private class UnlimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriodAdderImpl(data) {
 
+  // todo: add first-only parameter, similar to mlpp
   def withStartEnd(minPurchases: Int = 2, startDelay: Int = 3, purchasesWindow: Int = 6): DataFrame = {
 
     val window = Window.partitionBy("patientID", "eventId")

@@ -21,7 +21,7 @@ class PurchaseBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data)
     }
 
     val normalizeStart = udf(
-      (normalizedMonth: Integer) => {
+      (normalizedMonth: Int) => {
         val cal: Calendar = Calendar.getInstance()
         cal.setTime(studyStart)
         cal.add(Calendar.MONTH, normalizedMonth * cumWindow)
@@ -41,7 +41,8 @@ class PurchaseBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data)
       studyStart: Option[Timestamp],
       cumWindow: Option[Int],
       cumStartThreshold: Option[Int] = None,
-      cumEndThreshold: Option[Int] = None): DataFrame = {
+      cumEndThreshold: Option[Int] = None,
+      dosageLevelIntervals: Option[List[Int]]= None): DataFrame = {
 
     this.aggregateWeightImpl(studyStart.get, cumWindow.get)
   }

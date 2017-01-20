@@ -105,7 +105,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
         .withColumn("weight", lit(1.0))
     }
 
-    def withPurchaseBasedCumulativeExposure(cumulativePeriod: Integer): DataFrame = {
+    def withPurchaseBasedCumulativeExposure(cumulativePeriod: Int): DataFrame = {
       val window = Window.partitionBy("patientID", "eventId")
       val windowCumulativeExposure = window.partitionBy("patientID", "eventId", "exposureStart")
 
@@ -114,7 +114,7 @@ object CoxExposuresTransformer extends ExposuresTransformer {
       }
 
       val normalizedExposureDate = udf(
-        (normalizedMonth: Integer) => {
+        (normalizedMonth: Int) => {
           val cal: Calendar = Calendar.getInstance()
           cal.setTime(StudyStart)
           cal.add(Calendar.MONTH, normalizedMonth * cumulativePeriod)
