@@ -16,7 +16,9 @@ class DosageBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
     val window = Window.partitionBy("patientID", "eventId")
     val finalWindow = Window.partitionBy("patientID", "eventId", "weight")
 
-    val getLevel = udf{(Quantity:Double) => dosageLevelIntervals.filter(x => x <= Quantity).size}
+    val getLevel = udf {
+      (weight: Double) => dosageLevelIntervals.count(_ <= weight).toDouble
+    }
 
     data
       .withColumn("exposureStart", col("start")) // temporary (todo: "first-only" feature in unlimitedPeriodAdder)
@@ -29,7 +31,8 @@ class DosageBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
       cumWindow: Option[Int] = None,
       cumStartThreshold: Option[Int] = None,
       cumEndThreshold: Option[Int] = None,
-      dosageLevelIntervals: Option[List[Int]]): DataFrame = {
+      dosageLevelIntervals: Option[List[Int]],
+      purchaseIntervals: Option[List[Int]]): DataFrame = {
 
     aggregateWeightImpl(dosageLevelIntervals.get)
   }

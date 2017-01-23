@@ -12,7 +12,8 @@ class TimeBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
       cumWindow: Option[Int],
       cumStartThreshold: Option[Int],
       cumEndThreshold: Option[Int],
-      dosageLevelIntervals: Option[List[Int]]): DataFrame = {
+      dosageLevelIntervals: Option[List[Int]],
+      purchaseIntervals: Option[List[Int]]): DataFrame = {
 
     val window = Window.partitionBy("patientID", "eventId").orderBy("exposureStart", "exposureEnd")
     data
@@ -22,5 +23,5 @@ class TimeBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
       .withColumn("exposureEnd", col("followUpEnd"))
   }
 
-  def aggregateWeight: DataFrame = aggregateWeight(None, None, None, None, None)
+  def aggregateWeight: DataFrame = aggregateWeight(None, None, None, None, None, None)
 }

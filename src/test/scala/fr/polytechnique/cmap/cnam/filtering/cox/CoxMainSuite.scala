@@ -139,15 +139,12 @@ class CoxMainSuite extends SharedContext {
       .as[FlatEvent]
 
     val expectedResult = Seq(
-      CoxFeature("Patient_A", 1, 566, "45-49", 0, 1, 0, 0, 0, 0, 2, 1, 0),
-      CoxFeature("Patient_A", 1, 566, "45-49", 1, 2, 0, 0, 0, 0, 2, 2, 0),
-      CoxFeature("Patient_A", 1, 566, "45-49", 2, 4, 0, 0, 0, 0, 3, 3, 0),
-      CoxFeature("Patient_A", 1, 566, "45-49", 4, 5, 0, 0, 0, 0, 4, 3, 0),
-      CoxFeature("Patient_A", 1, 566, "45-49", 5, 8, 1, 0, 0, 0, 4, 4, 0),
-      CoxFeature("Patient_C", 1, 324, "25-29", 0, 3, 0, 1, 0, 2, 0, 0, 0),
-      CoxFeature("Patient_C", 1, 324, "25-29", 3, 5, 1, 1, 0, 3, 0, 0, 0),
-      CoxFeature("Patient_C.1", 1, 324, "25-29", 0, 3, 0, 1, 0, 2, 0, 0, 0),
-      CoxFeature("Patient_C.1", 1, 324, "25-29", 3, 40, 0, 1, 0, 3, 0, 0, 0)
+      CoxFeature("Patient_A", 1, 566, "45-49", 0, 3, 0, 0, 0, 0, 1, 1, 0),
+      CoxFeature("Patient_A", 1, 566, "45-49", 3, 8, 1, 0, 0, 0, 2, 2, 0),
+      CoxFeature("Patient_C", 1, 324, "25-29", 0, 3, 0, 1, 0, 1, 0, 0, 0),
+      CoxFeature("Patient_C", 1, 324, "25-29", 3, 5, 1, 1, 0, 2, 0, 0, 0),
+      CoxFeature("Patient_C.1", 1, 324, "25-29", 0, 3, 0, 1, 0, 1, 0, 0, 0),
+      CoxFeature("Patient_C.1", 1, 324, "25-29", 3, 40, 0, 1, 0, 2, 0, 0, 0)
     ).toDF
 
     // When

@@ -19,10 +19,13 @@ trait WeightAggregator {
 
 abstract class WeightAggregatorImpl(data: DataFrame) {
 
+  // todo: refactor the parametrization (maybe passing a single config object).
+  // The current approach is not maintainable nor scalable
   def aggregateWeight(
-      studyStart: Option[Timestamp],
-      cumWindow: Option[Int],
-      cumStartThreshold: Option[Int],
-      cumEndThreshold: Option[Int],
-      dosageLevelIntervals: Option[List[Int]]): DataFrame
+      studyStart: Option[Timestamp] = None,
+      cumWindow: Option[Int] = None,
+      cumStartThreshold: Option[Int] = None,
+      cumEndThreshold: Option[Int] = None,
+      dosageLevelIntervals: Option[List[Int]] = None,
+      purchaseIntervals: Option[List[Int]] = None): DataFrame
 }

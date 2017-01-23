@@ -154,6 +154,7 @@ object FilteringConfig {
     cumulativeExposureWindow = conf.getInt("exposures.cumulative.window"),
     cumulativeStartThreshold = conf.getInt("exposures.cumulative.start_threshold"),
     cumulativeEndThreshold = conf.getInt("exposures.cumulative.end_threshold"),
-    dosageLevelIntervals = conf.getIntList("exposures.cumulative.dosage_level_intervals").asScala.toList.map(x => x.toInt)
+    dosageLevelIntervals = conf.getIntList("exposures.cumulative.dosage_level_intervals").asScala.map(_.toInt).toList,
+    purchaseIntervals = conf.getIntList("exposures.cumulative.purchase_intervals").asScala.map(_.toInt).toList
   )
 }

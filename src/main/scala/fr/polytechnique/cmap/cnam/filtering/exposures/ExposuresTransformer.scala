@@ -37,7 +37,14 @@ class ExposuresTransformer(config: ExposuresConfig)
       .where(col("category") === "molecule")
       .withStartEnd(config.minPurchases,config.startDelay,config.purchasesWindow)
       .where(col("exposureStart") !== col("exposureEnd")) // This also removes rows where exposureStart = null
-      .aggregateWeight(Some(config.studyStart), Some(config.cumulativeExposureWindow), Some(config.cumulativeStartThreshold), Some(config.cumulativeEndThreshold), Some(config.dosageLevelIntervals))
+      .aggregateWeight(
+        Some(config.studyStart),
+        Some(config.cumulativeExposureWindow),
+        Some(config.cumulativeStartThreshold),
+        Some(config.cumulativeEndThreshold),
+        Some(config.dosageLevelIntervals),
+        Some(config.purchaseIntervals)
+      )
       .dropDuplicates(Seq("patientID", "eventID", "exposureStart", "exposureEnd", "weight"))
       .select(outputColumns: _*)
       .as[FlatEvent]

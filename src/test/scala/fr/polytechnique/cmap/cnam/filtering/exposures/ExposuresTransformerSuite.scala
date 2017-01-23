@@ -186,100 +186,23 @@ class ExposuresTransformerSuite extends SharedContext {
 
     val expected = Seq(
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
-        "PIOGLITAZONE", 2.0, makeTS(2007, 1, 1), Some(makeTS(2009, 7, 11))),
+        "PIOGLITAZONE", 1.0, makeTS(2007, 1, 1), Some(makeTS(2009, 7, 11))),
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
-        "PIOGLITAZONE", 4.0, makeTS(2007, 5, 1), Some(makeTS(2009, 7, 11))),
+        "PIOGLITAZONE", 2.0, makeTS(2007, 5, 1), Some(makeTS(2009, 7, 11))),
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
-        "PIOGLITAZONE", 5.0, makeTS(2008, 10, 1), Some(makeTS(2009, 7, 11))),
+        "PIOGLITAZONE", 3.0, makeTS(2008, 10, 1), Some(makeTS(2009, 7, 11))),
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
         "SULFONYLUREA", 1.0, makeTS(2008, 4, 1), Some(makeTS(2009, 7, 11))),
       FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
-        "SULFONYLUREA", 3.0, makeTS(2008, 5, 1), Some(makeTS(2009, 7, 11))),
+        "SULFONYLUREA", 2.0, makeTS(2008, 5, 10), Some(makeTS(2009, 7, 11))),
       FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "exposure",
-        "PIOGLITAZONE", 3.0, makeTS(2006, 3, 1), Some(makeTS(2008, 9, 1))),
+        "PIOGLITAZONE", 1.0, makeTS(2006, 3, 1), Some(makeTS(2008, 9, 1))),
+      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "exposure",
+        "PIOGLITAZONE", 2.0, makeTS(2006, 3, 30), Some(makeTS(2008, 9, 1))),
       FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "exposure",
         "PIOGLITAZONE", 1.0, makeTS(2007, 5, 1), Some(makeTS(2008, 9, 1))),
       FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "exposure",
-        "PIOGLITAZONE", 3.0, makeTS(2007, 6, 1), Some(makeTS(2008, 9, 1)))
-    ).toDF
-
-    // When
-    val result = ExposuresTransformer(config).transform(input).toDF
-
-    // Then
-    result.toDF.orderBy("patientID", "eventId", "start").show
-    expected.toDF.orderBy("patientID", "eventId", "start").show
-    import RichDataFrames._
-    assert(result === expected)
-  }
-
-  it should "also return a valid Dataset when cumulativeExposureType is purchase-based and " +
-    "purchase-window is greater than one" in {
-
-    val sqlCtx = sqlContext
-    import sqlCtx.implicits._
-
-    // Given
-    val config = ExposuresConfig.init().copy(
-      minPurchases = 2,
-      purchasesWindow = 6,
-      startDelay = 3,
-      filterDelayedPatients = false,
-      weightAggStrategy = WeightAggStrategy.PurchaseBased,
-      cumulativeExposureWindow = 3
-    )
-    val input = Seq(
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "followUpPeriod",
-        "death", 900.0, makeTS(2007, 1, 1), Some(makeTS(2009, 7, 11))),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
-        "PIOGLITAZONE", 900.0, makeTS(2007, 1, 1), None),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
-        "PIOGLITAZONE", 900.0, makeTS(2007, 1, 31), None),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
-        "PIOGLITAZONE", 900.0, makeTS(2007, 5, 1), None),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
-        "PIOGLITAZONE", 900.0, makeTS(2007, 5, 15), None),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
-        "PIOGLITAZONE", 900.0, makeTS(2008, 10, 1), None),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
-        "SULFONYLUREA", 900.0, makeTS(2008, 4, 1), None),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
-        "SULFONYLUREA", 900.0, makeTS(2008, 5, 1), None),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "molecule",
-        "SULFONYLUREA", 900.0, makeTS(2008, 6, 10), None),
-      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "followUpPeriod",
-        "trackloss", 900.0, makeTS(2006, 7, 1), Some(makeTS(2008, 9, 1))),
-      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
-        "PIOGLITAZONE", 900.0, makeTS(2006, 3, 1), None),
-      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
-        "PIOGLITAZONE", 900.0, makeTS(2006, 3, 15), None),
-      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
-        "PIOGLITAZONE", 900.0, makeTS(2006, 2, 30), None),
-      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "followUpPeriod",
-        "trackloss", 900.0, makeTS(2007, 11, 1), Some(makeTS(2008, 9, 1))),
-      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
-        "PIOGLITAZONE", 900.0, makeTS(2007, 5, 1), None),
-      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
-        "PIOGLITAZONE", 900.0, makeTS(2007, 6, 1), None),
-      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "molecule",
-        "PIOGLITAZONE", 900.0, makeTS(2007, 7, 30), None)
-    ).toDS
-
-    val expected = Seq(
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
-        "PIOGLITAZONE", 2.0, makeTS(2007, 1, 1), Some(makeTS(2009, 7, 11))),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
-        "PIOGLITAZONE", 4.0, makeTS(2007, 4, 1), Some(makeTS(2009, 7, 11))),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
-        "PIOGLITAZONE", 5.0, makeTS(2008, 10, 1), Some(makeTS(2009, 7, 11))),
-      FlatEvent("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11)), "exposure",
-        "SULFONYLUREA", 3.0, makeTS(2008, 4, 1), Some(makeTS(2009, 7, 11))),
-      FlatEvent("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "exposure",
-        "PIOGLITAZONE", 3.0, makeTS(2006, 1, 1), Some(makeTS(2008, 9, 1))),
-      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "exposure",
-        "PIOGLITAZONE", 2.0, makeTS(2007, 4, 1), Some(makeTS(2008, 9, 1))),
-      FlatEvent("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1)), "exposure",
-        "PIOGLITAZONE", 3.0, makeTS(2007, 7, 1), Some(makeTS(2008, 9, 1)))
+        "PIOGLITAZONE", 2.0, makeTS(2007, 6, 30), Some(makeTS(2008, 9, 1)))
     ).toDF
 
     // When

@@ -35,16 +35,16 @@ class DosageBasedWeightAggSuite extends SharedContext{
     ).toDF("PatientID", "category", "eventId", "start", "exposureStart", "weight")
 
     val expected = Seq(
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 1, 1)), Some(1)),
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 1, 1)), Some(1)),
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 8, 1)), Some(2)),
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 10, 1)), Some(4)),
-      ("Patient_A", "SULFONYLUREA", Some(makeTS(2008, 2, 1)), Some(1)),
-      ("Patient_A", "SULFONYLUREA", Some(makeTS(2008, 7, 5)), Some(2)),
-      ("Patient_A", "SULFONYLUREA", Some(makeTS(2008, 8, 1)), Some(3)),
-      ("Patient_B", "SULFONYLUREA", Some(makeTS(2008, 2, 1)), Some(2)),
-      ("Patient_B", "SULFONYLUREA", Some(makeTS(2008, 2, 1)), Some(2)),
-      ("Patient_B", "SULFONYLUREA", Some(makeTS(2008, 11, 1)), Some(4))
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 1, 1)), Some(1.0)),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 1, 1)), Some(1.0)),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 8, 1)), Some(2.0)),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 10, 1)), Some(4.0)),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2008, 2, 1)), Some(1.0)),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2008, 7, 5)), Some(2.0)),
+      ("Patient_A", "SULFONYLUREA", Some(makeTS(2008, 8, 1)), Some(3.0)),
+      ("Patient_B", "SULFONYLUREA", Some(makeTS(2008, 2, 1)), Some(2.0)),
+      ("Patient_B", "SULFONYLUREA", Some(makeTS(2008, 2, 1)), Some(2.0)),
+      ("Patient_B", "SULFONYLUREA", Some(makeTS(2008, 11, 1)), Some(4.0))
     ).toDF("PatientID", "eventId", "exposureStart", "weight")
 
     // When
@@ -90,16 +90,16 @@ class DosageBasedWeightAggSuite extends SharedContext{
     ).toDF("PatientID", "category", "eventId", "start", "exposureStart","weight")
 
     val expected = Seq(
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008, 1, 1), Some(1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008, 1, 1), Some(1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008, 1, 1), Some(1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008, 1, 1), Some(1)),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008, 2, 1), Some(1)),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008, 2, 1), Some(1)),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008, 2, 1), Some(1)),
-      ("Patient_B", "SULFONYLUREA", makeTS(2008, 2, 1), Some(1)),
-      ("Patient_B", "SULFONYLUREA", makeTS(2008, 2, 1), Some(1)),
-      ("Patient_B", "SULFONYLUREA", makeTS(2008, 2, 1), Some(1))
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008, 1, 1), Some(1.0)),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008, 1, 1), Some(1.0)),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008, 1, 1), Some(1.0)),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008, 1, 1), Some(1.0)),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008, 2, 1), Some(1.0)),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008, 2, 1), Some(1.0)),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008, 2, 1), Some(1.0)),
+      ("Patient_B", "SULFONYLUREA", makeTS(2008, 2, 1), Some(1.0)),
+      ("Patient_B", "SULFONYLUREA", makeTS(2008, 2, 1), Some(1.0)),
+      ("Patient_B", "SULFONYLUREA", makeTS(2008, 2, 1), Some(1.0))
     ).toDF("PatientID", "eventId", "exposureStart", "weight")
 
     // When
@@ -141,10 +141,10 @@ class DosageBasedWeightAggSuite extends SharedContext{
     ).toDF("PatientID", "category", "eventId", "start", "exposureStart","weight")
 
     val expected = Seq(
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 3, 1)), Some(1)),
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 8, 1)), Some(3)),
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 8, 1)), Some(3)),
-      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 10, 1)), Some(4))
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 3, 1)), Some(1.0)),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 8, 1)), Some(3.0)),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 8, 1)), Some(3.0)),
+      ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 10, 1)), Some(4.0))
     ).toDF("PatientID", "eventId", "exposureStart", "weight")
 
     // When
