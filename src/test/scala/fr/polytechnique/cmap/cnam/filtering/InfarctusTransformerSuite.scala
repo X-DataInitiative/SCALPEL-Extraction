@@ -35,13 +35,16 @@ class InfarctusTransformerSuite extends fakeInfarctusFixture {
 
   "extractDisease" should "return correct result" in {
     // Given
-    val input = fakeMcoData
+    val input = fakeMcoData.select(mcoInputColumns:_*)
 
     // When
-    val output = input.select(mcoInputColumns:_*).extractDisease
+    val output = input.extractDisease
 
     // Then
+    input.show
+    output.show
     assert(output.where(col("patientID") contains "MustBeDropped").count == 0)
+    assert(output.count == 2)
   }
 
   "transform" should "return the correct result" in {
@@ -57,11 +60,13 @@ class InfarctusTransformerSuite extends fakeInfarctusFixture {
     ).toDF
 
     // When
-    val output = InfarctusTransformer.transform(input)
+    val output = InfarctusTransformer.transform(input).toDF
 
     // Then
     import RichDataFrames._
-    assert(output.toDF === expected)
+    output.show
+    expected.show
+    assert(output === expected)
   }
 
 }

@@ -39,7 +39,8 @@ object InfarctusTransformer extends DiseaseTransformer {
 
     def extractDisease: DataFrame = {
       df.filter(
-        mcoDiseaseColumn.isin(DiseaseCode)
+        mcoDiseaseColumn.startsWith("I21") or
+        mcoDiseaseColumn.startsWith("I22")
       )
     }
 
