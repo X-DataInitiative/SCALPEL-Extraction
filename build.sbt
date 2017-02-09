@@ -18,3 +18,6 @@ libraryDependencies += "org.apache.spark" %% "spark-hive" % sparkVersion % "prov
 
 libraryDependencies += "com.databricks" %% "spark-csv" % "1.4.0"
 libraryDependencies += "com.typesafe" % "config" % "1.3.0"
+
+resolvers += "bintray-spark-packages" at "https://dl.bintray.com/spark-packages/maven/"
+libraryDependencies +=   "saurfang" % "spark-sas7bdat" % "1.1.4-s_2.10"
