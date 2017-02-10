@@ -8,7 +8,8 @@ class PurchaseBasedWeightAggSuite extends SharedContext {
 
   "aggregateWeight" should "add a weight column with the purchase based accumulated weight" in {
 
-    import sqlContext.implicits._
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
 
     // Given
     val input = Seq(

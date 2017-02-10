@@ -43,7 +43,6 @@ package object functions {
   }
 
   def unionAll[A](datasets: Dataset[A]*): Dataset[A] = datasets.reduce(_.union(_))
-//  def unionAll(dataframes: DataFrame*): DataFrame = dataframes.reduce(_.unionAll(_))
 
   implicit class IntFunctions(num: Int) {
     def between(lower: Int, upper: Int): Boolean = num >= lower && num <= upper

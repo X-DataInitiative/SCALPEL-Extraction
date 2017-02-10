@@ -15,9 +15,7 @@ object CoxObservationPeriodTransformer extends ObservationPeriodTransformer {
     val correctedStart = when(
       lower(col("category")) === "molecule" && (col("start") >= StudyStart), col("start")
     )
-    val result = data.withColumn("observationStart", min(correctedStart).over(window).cast(TimestampType))
-    result.show()
-    result
+    data.withColumn("observationStart", min(correctedStart).over(window).cast(TimestampType))
   }
 
   override def computeObservationEnd(data: DataFrame): DataFrame = {

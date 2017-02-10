@@ -7,9 +7,10 @@ import fr.polytechnique.cmap.cnam.utilities.functions.makeTS
 
 class UnlimitedExposurePeriodAdderSuite extends SharedContext {
 
+  private lazy val sqlCtx = sqlContext
   "withStartEnd" should "correctly add exposureStart and exposureEnd with default parameters" in {
 
-    import sqlContext.implicits._
+    import sqlCtx.implicits._
 
     // Given
     val input: DataFrame = Seq(
@@ -46,7 +47,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
   }
 
   it should "correctly add exposureStart and exposureEnd for minPurchases = 1" in {
-    val sqlCtx = sqlContext
+
     import sqlCtx.implicits._
 
     // Given
@@ -82,7 +83,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
   }
 
   it should "correctly add exposureStart and exposureEnd for startDelay = 0" in {
-    val sqlCtx = sqlContext
+
     import sqlCtx.implicits._
 
     // Given
@@ -118,7 +119,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
   }
 
   it should "correctly add exposureStart and exposureEnd for purchasesWindow = 9" in {
-    val sqlCtx = sqlContext
+
     import sqlCtx.implicits._
 
     // Given

@@ -85,8 +85,7 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
 
     def withIndices(columnNames: Seq[String]): DataFrame = {
 
-      val dataCopy = data
-      columnNames.foldLeft(dataCopy){
+      columnNames.foldLeft(data){
         (currentData, columnName) => {
 
           // WARNING: The following code is dangerous, but there is no perfect solution.
