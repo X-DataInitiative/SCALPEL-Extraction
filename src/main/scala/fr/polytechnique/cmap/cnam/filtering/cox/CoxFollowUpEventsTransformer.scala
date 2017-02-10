@@ -4,13 +4,14 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.filtering.exposures.ExposuresConfig
 import fr.polytechnique.cmap.cnam.filtering.{DatasetTransformer, FilteringConfig, FlatEvent}
 import fr.polytechnique.cmap.cnam.utilities.ColumnUtilities._
 
 object CoxFollowUpEventsTransformer extends DatasetTransformer[FlatEvent, FlatEvent] {
 
-  final val followUpMonthsDelay: Int = CoxConfig.followUpMonthsDelay
-  final val diseaseCode: String = FilteringConfig.diseaseCode
+  final lazy val followUpMonthsDelay: Int = ExposuresConfig.init().followUpDelay
+  final lazy val diseaseCode: String = FilteringConfig.diseaseCode
 
   val outputColumns = List(
     col("patientID"),

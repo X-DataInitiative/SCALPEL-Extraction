@@ -144,7 +144,63 @@ class FilteringMainSuite extends SharedContext {
     expectedFlatEvents.orderBy("patientID", "category", "start").show
 
     import RichDataFrames._
-        assert(patients === expectedPatients)
-        assert(flatEvents === expectedFlatEvents)
+      assert(patients === expectedPatients)
+      assert(flatEvents === expectedFlatEvents)
+  }
+
+  it should "return a saved flatEventsDataset if reuseFlatEventsPath is defined" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val configPath = "src/test/resources/config/filtering-reuse-flat-events.conf"
+
+    val expected: DataFrame = Seq(
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
+        "PIOGLITAZONE", 840.0, makeTS(2006, 1, 15), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
+        "PIOGLITAZONE", 4200.0, makeTS(2006, 1, 30), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
+        "PIOGLITAZONE", 1680.0, makeTS(2006, 1, 5), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "targetDisease", 1.0, makeTS(2006, 3, 13), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "targetDisease", 1.0, makeTS(2005, 12, 29), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "targetDisease", 1.0, makeTS(2005, 12, 24), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "targetDisease", 1.0, makeTS(2008, 3, 8), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "targetDisease", 1.0, makeTS(2008, 3, 15), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "targetDisease", 1.0, makeTS(2007, 1, 29), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "targetDisease", 1.0, makeTS(2007, 1, 29), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "C67", 1.0, makeTS(2006, 3, 13), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "C67", 1.0, makeTS(2005, 12, 29), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "C67", 1.0, makeTS(2005, 12, 24), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "C67", 1.0, makeTS(2008, 3, 8), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "C67", 1.0, makeTS(2008, 3, 15), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "C67", 1.0, makeTS(2007, 1, 29), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "disease",
+        "C67", 1.0, makeTS(2007, 1, 29), None)  // duplicate event, it's ok. See the
+      // Scaladoc of McoDiseaseTransformer.estimateStayStartTime for explanation.
+    ).toDF
+
+    // When
+    val result = FilteringMain.run(sqlContext, Map("conf" -> configPath)).get.toDF
+
+    // Then
+    result.orderBy("patientID", "category", "start").show
+    expected.orderBy("patientID", "category", "start").show
+
+    import RichDataFrames._
+    assert(result === expected)
   }
 }

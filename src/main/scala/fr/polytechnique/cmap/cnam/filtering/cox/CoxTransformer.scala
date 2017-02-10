@@ -45,7 +45,7 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
 
     def withAge: DataFrame = {
       data.withColumn("age",
-        (months_between(lit(AgeReferenceDate), col("birthDate"))).cast(IntegerType)
+        months_between(lit(AgeReferenceDate), col("birthDate")).cast(IntegerType)
       )
     }
 
@@ -120,6 +120,12 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
         .withColumn("hasCancer", when(col("rank") === 1, col("hasCancer")).otherwise(0))
         .drop("rank")
     }
+
+    def adjustCoxStartAndEnd: DataFrame = {
+      data
+        .withColumn("start", when(col("start") < 0 && col("end") > 0, lit(0))
+          .otherwise(col("start")))
+    }
   }
 
   def transform(events: Dataset[FlatEvent]): Dataset[CoxFeature] = {
@@ -143,7 +149,8 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
       .prepareToPivot(exposures)
       .pivotMolecules
       .adjustCancerValues
-      .where(col("start") >= 0) //Avoids negative start (exposures before followUpStart) in cumulative exposure
+      .adjustCoxStartAndEnd
+      .where(col("start") >= 0)//Avoids negative start (exposures before followUpStart) in cumulative exposure
       .as[CoxFeature]
   }
 }

@@ -4,6 +4,7 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
 import fr.polytechnique.cmap.cnam.Main
+import fr.polytechnique.cmap.cnam.filtering.FilteringConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
 object FilteringMain extends Main {
@@ -30,10 +31,20 @@ object FilteringMain extends Main {
     FilteringConfig.init()
   */
 
-    val inputPaths = FilteringConfig.inputPaths
-    val outputPaths = FilteringConfig.outputPaths
-    val cancerDefinition = FilteringConfig.cancerDefinition
-    val upperBoundQuantityIrpha = FilteringConfig.limits.maxQuantityIrpha
+    val reuseFlatEventsPath: Option[String] = FilteringConfig.reuseFlatEventsPath
+
+    if (reuseFlatEventsPath.isDefined) {
+      val flatEventsPath = reuseFlatEventsPath.get
+      logger.info(s"Reusing flatEvents from $flatEventsPath")
+      val flatEvents = sqlContext.read.parquet(flatEventsPath).as[FlatEvent]
+      return Some(flatEvents)
+    }
+
+    val inputPaths: InputPaths = FilteringConfig.inputPaths
+    val outputPaths: OutputPaths = FilteringConfig.outputPaths
+    val cancerDefinition: String = FilteringConfig.cancerDefinition
+    val upperBoundQuantityIrpha: Int = FilteringConfig.limits.maxQuantityIrpha
+
     logger.info(s"Running for the $cancerDefinition cancer definition")
 
     logger.info("(Lazy) Extracting sources...")

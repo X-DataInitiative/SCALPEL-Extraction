@@ -2,9 +2,11 @@ package fr.polytechnique.cmap.cnam.filtering
 
 import java.sql.Timestamp
 import scala.collection.JavaConverters._
+import scala.util.Try
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 import com.typesafe.config.{Config, ConfigFactory}
+import fr.polytechnique.cmap.cnam.filtering.exposures.{ExposurePeriodStrategy, ExposuresConfig, WeightAggStrategy}
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
 object FilteringConfig {
@@ -91,7 +93,7 @@ object FilteringConfig {
     threshold: Int,
     delay: Int
   )
-
+  lazy val reuseFlatEventsPath: Option[String] = Try(conf.getString("reuse_flat_events_path")).toOption
   lazy val drugCategories: List[String] = conf.getStringList("drug_categories").asScala.toList
   lazy val cancerDefinition: String  = conf.getString("cancer_definition")
   lazy val diseaseCode: String = conf.getString("disease_code")
@@ -136,4 +138,24 @@ object FilteringConfig {
   )
 
   def modelConfig(modelName: String): Config = conf.getConfig(modelName)
+  lazy val exposuresConfig: ExposuresConfig = ExposuresConfig(
+    studyStart = dates.studyStart,
+    diseaseCode = diseaseCode,
+    periodStrategy = ExposurePeriodStrategy.fromString(
+      conf.getString("exposures.period_strategy")
+    ),
+    followUpDelay = conf.getInt("exposures.follow_up_delay"),
+    minPurchases = conf.getInt("exposures.min_purchases"),
+    purchasesWindow = conf.getInt("exposures.purchases_window"),
+    startDelay = conf.getInt("exposures.start_delay"),
+    weightAggStrategy = WeightAggStrategy.fromString(
+      conf.getString("exposures.weight_strategy")
+    ),
+    filterDelayedPatients = conf.getBoolean("filters.delayed_entries"),
+    cumulativeExposureWindow = conf.getInt("exposures.cumulative.window"),
+    cumulativeStartThreshold = conf.getInt("exposures.cumulative.start_threshold"),
+    cumulativeEndThreshold = conf.getInt("exposures.cumulative.end_threshold"),
+    dosageLevelIntervals = conf.getIntList("exposures.cumulative.dosage_level_intervals").asScala.map(_.toInt).toList,
+    purchaseIntervals = conf.getIntList("exposures.cumulative.purchase_intervals").asScala.map(_.toInt).toList
+  )
 }

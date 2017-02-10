@@ -5,6 +5,7 @@ import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.filtering._
+import fr.polytechnique.cmap.cnam.filtering.exposures.ExposuresTransformer
 
 /**
   * Created by sathiya on 09/11/16.
@@ -51,7 +52,6 @@ object CoxMain extends Main {
     logger.info("Number of disease events: " + diseaseFlatEvents.count)
 
     logger.info("Preparing for Cox with the following parameters:")
-    logger.info(CoxConfig.toString)
 
     logger.info("(Lazy) Transforming Follow-up events...")
     val observationFlatEvents = CoxObservationPeriodTransformer.transform(drugFlatEvents)
@@ -75,7 +75,9 @@ object CoxMain extends Main {
       drugFlatEvents
         .union(diseaseFlatEvents)
         .union(followUpFlatEvents)
-    val exposures = CoxExposuresTransformer.transform(flatEventsForExposures).cache()
+
+    val exposuresConfig = FilteringConfig.exposuresConfig
+    val exposures = ExposuresTransformer(exposuresConfig).transform(flatEventsForExposures).cache()
 
     logger.info("Caching exposures...")
     logger.info("Number of exposures: " + exposures.count)
