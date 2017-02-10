@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.filtering.exposures
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.filtering.cox.CoxConfig
 import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
 import fr.polytechnique.cmap.cnam.utilities.functions._
 
@@ -11,15 +10,6 @@ class DosageBasedWeightAggSuite extends SharedContext{
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
-
-    // Given
-    import fr.polytechnique.cmap.cnam.filtering.cox.CoxConfig.CoxExposureDefinition
-    val coxExposureDefintion = CoxExposureDefinition(
-      minPurchases = 2,
-      purchasesWindow = 6,
-      startDelay = 3,
-      cumulativeExposureType = CoxConfig.ExposureType.DosageBasedCumulative
-    )
 
     val input = Seq(
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 3, 1), makeTS(2008, 3, 1), 50),
@@ -67,15 +57,6 @@ class DosageBasedWeightAggSuite extends SharedContext{
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
-    // Given
-    import fr.polytechnique.cmap.cnam.filtering.cox.CoxConfig.CoxExposureDefinition
-    val coxExposureDefintion = CoxExposureDefinition(
-      minPurchases = 2,
-      purchasesWindow = 6,
-      startDelay = 3,
-      cumulativeExposureType = CoxConfig.ExposureType.DosageBasedCumulative
-    )
-
     val input = Seq(
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 3, 1), makeTS(2008, 3, 1), 50),
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 1), makeTS(2008, 1, 1), 30),
@@ -120,18 +101,7 @@ class DosageBasedWeightAggSuite extends SharedContext{
 
   "aggregateWeight" should "compute exposureStart and weight correctly if there are duplicate exposureStart" in {
 
-    val sqlCtx = sqlContext
-    import sqlCtx.implicits._
-
-    // Given
-    import fr.polytechnique.cmap.cnam.filtering.cox.CoxConfig.CoxExposureDefinition
-    val coxExposureDefintion = CoxExposureDefinition(
-      minPurchases = 2,
-      purchasesWindow = 6,
-      startDelay = 3,
-      cumulativeExposureType = CoxConfig.ExposureType.DosageBasedCumulative
-    )
-
+    import sqlContext.implicits._
     val input = Seq(
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 3, 1), makeTS(2008, 3, 1), 75),
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 8, 1), makeTS(2008, 8, 1), 50),

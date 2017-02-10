@@ -144,6 +144,7 @@ object FilteringConfig {
     periodStrategy = ExposurePeriodStrategy.fromString(
       conf.getString("exposures.period_strategy")
     ),
+    followUpDelay = conf.getInt("exposures.follow_up_delay"),
     minPurchases = conf.getInt("exposures.min_purchases"),
     purchasesWindow = conf.getInt("exposures.purchases_window"),
     startDelay = conf.getInt("exposures.start_delay"),

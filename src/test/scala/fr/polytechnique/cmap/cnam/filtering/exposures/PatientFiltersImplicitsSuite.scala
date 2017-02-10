@@ -15,7 +15,7 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     val input = Seq(
       ("Patient_A", "molecule", "", makeTS(2008, 1, 10), makeTS(2006, 6, 1)),
       ("Patient_A", "disease", "C67", makeTS(2006, 5, 30), makeTS(2006, 6, 1)),
-      ("Patient_B", "molecule", "", makeTS(2009, 1, 1), makeTS(2006, 6, 1)),
+      ("Patient_B", "molecule", "", makeTS(2006, 1, 1), makeTS(2006, 6, 1)),
       ("Patient_B", "disease", "C67", makeTS(2006, 8, 1), makeTS(2006, 6, 1)),
       ("Patient_C", "molecule", "", makeTS(2006, 1, 1), makeTS(2006, 6, 1))
     ).toDF("patientID", "category", "eventId", "start", "followUpStart")
@@ -111,7 +111,48 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     assert(result === expected)
   }
 
-  "filterPatients" should "" in {
+  "filterPatients" should "filter correctly based on the arguments" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
 
+    // Given
+    val studyStart = makeTS(2006, 1, 1)
+    val input = Seq(
+      ("Patient_A", "molecule", "", makeTS(2008, 1, 10), makeTS(2006, 6, 1)),
+      ("Patient_A", "disease", "C67", makeTS(2006, 5, 30), makeTS(2006, 6, 1)),
+      ("Patient_B", "molecule", "", makeTS(2006, 1, 1), makeTS(2006, 6, 1)),
+      ("Patient_B", "molecule", "", makeTS(2006, 2, 1), makeTS(2006, 6, 1)),
+      ("Patient_B", "disease", "C67", makeTS(2006, 8, 1), makeTS(2006, 6, 1)),
+      ("Patient_C", "molecule", "", makeTS(2006, 1, 1), makeTS(2006, 6, 1)),
+      ("Patient_D", "molecule", "", makeTS(2008, 1, 1), makeTS(2008,1,1)),
+      ("Patient_D", "molecule", "", makeTS(2008, 2, 1), makeTS(2008,1,1)),
+      ("Patient_E", "molecule", "", makeTS(2009, 1, 1), makeTS(2008,1,1)),
+      ("Patient_F", "molecule", "", makeTS(2006, 2, 1), makeTS(2008,1,1)),
+      ("Patient_F", "molecule", "", makeTS(2006, 1, 1), makeTS(2008,1,1))
+    ).toDF("patientID", "category", "eventId", "start", "followUpStart")
+
+    val expected = Seq(
+      ("Patient_B", "molecule"),
+      ("Patient_B", "molecule"),
+      ("Patient_B", "disease"),
+      ("Patient_C", "molecule"),
+      ("Patient_F", "molecule"),
+      ("Patient_F", "molecule")
+    ).toDF("patientID", "category")
+
+    // When
+    val instance = new PatientFiltersImplicits(input)
+    val result = instance.filterPatients(
+      studyStart = studyStart,
+      diseaseCode = "C67",
+      delayedEntries = true,
+      earlyDiagnosed = true
+    ).select("patientID", "category")
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
+    assert(result === expected)
   }
 }

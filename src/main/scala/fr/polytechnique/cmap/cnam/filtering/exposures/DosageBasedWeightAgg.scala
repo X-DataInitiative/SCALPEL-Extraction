@@ -1,15 +1,11 @@
 package fr.polytechnique.cmap.cnam.filtering.exposures
 
 import java.sql.Timestamp
-
-import fr.polytechnique.cmap.cnam.filtering.cox.CoxConfig.CoxExposureDefinition
-import org.apache.spark.sql.{Column, DataFrame}
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 
 class DosageBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
-
-  val minPurchases = 5
 
   private def aggregateWeightImpl(dosageLevelIntervals: List[Int]): DataFrame = {
 

@@ -14,11 +14,8 @@ class CoxMainSuite extends SharedContext {
   override def beforeEach(): Unit = {
     super.beforeEach()
     val filteringConfig = FilteringConfig.getClass.getDeclaredConstructor()
-    val coxConfig = CoxConfig.getClass.getDeclaredConstructor()
     filteringConfig.setAccessible(true)
     filteringConfig.newInstance()
-    coxConfig.setAccessible(true)
-    coxConfig.newInstance()
   }
 
   "run" should "correctly run the full pipeline from Filtering till CoxFeaturing" in {
