@@ -21,3 +21,11 @@ libraryDependencies += "com.typesafe" % "config" % "1.3.0"
 
 resolvers += "bintray-spark-packages" at "https://dl.bintray.com/spark-packages/maven/"
 libraryDependencies +=   "saurfang" % "spark-sas7bdat" % "1.1.4-s_2.10"
+
+assemblyMergeStrategy in assembly := {
+  case PathList("org", "apache", xs @ _*) => MergeStrategy.last
+  case PathList("com", "ggasoftware", xs @ _*) => MergeStrategy.last
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
