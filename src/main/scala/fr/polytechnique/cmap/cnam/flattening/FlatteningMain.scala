@@ -2,9 +2,9 @@ package fr.polytechnique.cmap.cnam.flattening
 
 import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig
-import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig._
-import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
+import fr.polytechnique.cmap.cnam.util.FlatteningConfig
+import fr.polytechnique.cmap.cnam.util.FlatteningConfig._
+import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 
 object FlatteningMain extends Main {
 

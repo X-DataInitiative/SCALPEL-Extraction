@@ -4,8 +4,8 @@ package fr.polytechnique.cmap.cnam.flattening
 import org.apache.spark.sql.{Column, DataFrame, SQLContext}
 import org.apache.spark.sql.functions._
 import com.typesafe.config.Config
-import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig
-import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig._
+import fr.polytechnique.cmap.cnam.util.FlatteningConfig
+import fr.polytechnique.cmap.cnam.util.FlatteningConfig._
 import JoinedTable._
 
 /**

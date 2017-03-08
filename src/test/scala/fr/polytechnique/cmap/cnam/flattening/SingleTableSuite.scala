@@ -6,8 +6,8 @@ import org.apache.spark.sql.types.{StringType, StructField}
 import org.mockito.Mockito._
 import com.typesafe.config.{Config, ConfigFactory}
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
-import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig
+import fr.polytechnique.cmap.cnam.util.RichDataFrames._
+import fr.polytechnique.cmap.cnam.util.FlatteningConfig
 
 /**
   * Created by burq on 11/07/16.

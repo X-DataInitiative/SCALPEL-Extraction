@@ -2,8 +2,8 @@ package fr.polytechnique.cmap.cnam.flattening
 
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, SQLContext}
-import com.typesafe.config.Config
-import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig._
+import com.typesafe.config.{Config, ConfigFactory}
+import fr.polytechnique.cmap.cnam.util.FlatteningConfig._
 
 
 /**

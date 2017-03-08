@@ -4,9 +4,6 @@ import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 
-/**
-  * Created by admindses on 09/01/2017.
-  */
 object SasConfig {
 
   sealed trait ExportFormatType
@@ -35,6 +32,4 @@ object SasConfig {
   lazy val inputDirectory = conf.getString("inputDir")
   lazy val outputDirectoryCSV = conf.getString("outputDir.csv")
   lazy val outputDirectoryParquet = conf.getString("outputDir.parquet")
-
-
 }

@@ -1,14 +1,10 @@
 package fr.polytechnique.cmap.cnam.flattening
-import java.sql.Timestamp
-import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
-import fr.polytechnique.cmap.cnam.utilities.functions.makeTS
-import org.scalatest.GivenWhenThen
-import org.scalatest.FunSpec
 
-/**
-  * Created by admindses on 06/01/2017.
-  */
+import org.scalatest.GivenWhenThen
+import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.util.RichDataFrames
+import fr.polytechnique.cmap.cnam.util.functions.makeTS
+
 class SASLoaderSuite extends SharedContext with GivenWhenThen{
 
   "run" should "read sas files and return correct converted csv files" in {
@@ -16,8 +12,8 @@ class SASLoaderSuite extends SharedContext with GivenWhenThen{
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
-    //Given
-    val configPath = "src/test/resources/config/sas.conf"
+    // Given
+    val configPath = "src/test/resources/config/sas-default.conf"
 
     val expected = Seq(
       (877:Double,makeTS(2014,7,1),2:Double,0:Double,1:Double,makeTS(2014,6,19),"R0569",null:String,"99","SVI_RPPS","01","IR-PRN",4:Double,3:Double,1:Double,"01M311654","01M311654"),
@@ -61,21 +57,13 @@ class SASLoaderSuite extends SharedContext with GivenWhenThen{
     assert(columnTypes(4)._2 == "DoubleType")
     assert(columnTypes(5)._2 == "TimestampType")
     assert(columnTypes(6)._2 == "StringType")
-
-
-
   }
-
-
 
   "run" should "read sas files and return correct converted parquet files" in {
     val sqlCtx = sqlContext
-    val configPath = "src/test/resources/config/sas.conf"
-    val rs  = SASLoader.ComputeDF(sqlContext,Map("conf" -> configPath,"outputFormat" -> "Parquet"))(0)
+    val configPath = "src/test/resources/config/sas-default.conf"
+    val rs  = SASLoader.ComputeDF(sqlContext, Map("conf" -> configPath,"outputFormat" -> "Parquet"))(0)
     rs.printSchema()
     assert(rs.count() == 100)
   }
-
-
-
 }

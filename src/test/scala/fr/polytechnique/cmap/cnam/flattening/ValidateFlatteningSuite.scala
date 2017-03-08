@@ -31,7 +31,7 @@ class ValidateFlatteningSuite extends SharedContext {
     val outputDf = inputDf.cleanDFColumnNames
 
     // Then
-    import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
+    import fr.polytechnique.cmap.cnam.util.RichDataFrames._
     assert(outputDf === expected)
   }
 
@@ -57,7 +57,7 @@ class ValidateFlatteningSuite extends SharedContext {
     val outputDf = inputDf.prefixColumnNames("anyText")
 
     // Then
-    import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
+    import fr.polytechnique.cmap.cnam.util.RichDataFrames._
     assert(outputDf === expected)
   }
 
@@ -82,7 +82,7 @@ class ValidateFlatteningSuite extends SharedContext {
     val outputDf = inputDf.prefixColumnNames("anyText", Seq("column1", "column4"))
 
     // Then
-    import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
+    import fr.polytechnique.cmap.cnam.util.RichDataFrames._
     outputDf.printSchema
     expected.printSchema
     assert(outputDf === expected)
