@@ -7,11 +7,7 @@ import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.RichDataFrames
 
-/**
-  * @author Daniel de Paula
-  */
 class DcirPatientTransformerSuite extends SharedContext {
-
 
   "findBirthYears" should "return a DataFrame with the birth year for each patient" in {
     val sqlCtx = sqlContext

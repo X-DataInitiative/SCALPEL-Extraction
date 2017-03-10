@@ -6,9 +6,6 @@ import fr.polytechnique.cmap.cnam.etl.old_root.{FilteringConfig, FlatEvent}
 import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-/**
-  * Created by sathiya on 24/11/16.
-  */
 class CoxMainSuite extends SharedContext {
 
   override def beforeEach(): Unit = {

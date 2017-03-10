@@ -4,9 +4,6 @@ import java.sql.Timestamp
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.exceptions.WrongMatchException
 
-/**
-  * @author Daniel de Paula
-  */
 case class FlatEvent(
     patientID: String,
     gender: Int,

@@ -5,12 +5,10 @@ import org.apache.spark.sql.{DataFrame, Dataset}
 import com.github.saurfang.sas.spark._
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.flattening.SasConfig.ExportFormatType
-/**
-  * Created by firas on 06/01/2017.
-  */
+
 object SASLoader extends Main {
 
-  override def appName: String = "ImportSAS"
+  val appName: String = "ImportSAS"
 
   def getListOfFiles(dir: String): List[File] = {
     val d = new File(dir)

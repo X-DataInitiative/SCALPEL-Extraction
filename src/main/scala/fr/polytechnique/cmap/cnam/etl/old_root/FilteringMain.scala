@@ -11,7 +11,7 @@ import fr.polytechnique.cmap.cnam.util.functions._
 
 object FilteringMain extends Main {
 
-  def appName = "Filtering"
+  val appName: String = "Filtering"
 
   /**
     * Arguments expected:
@@ -20,7 +20,7 @@ object FilteringMain extends Main {
     */
   def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[FlatEvent]] = {
 
-    import implicits.SourceExtractor
+    import implicits.SourceReader
     import sqlContext.implicits._
 
     // "get" returns an Option, then we can use foreach to gently ignore when the key was not found.
@@ -50,7 +50,7 @@ object FilteringMain extends Main {
     logger.info(s"Running for the $cancerDefinition cancer definition")
 
     logger.info("(Lazy) Extracting sources...")
-    val sources: Sources = sqlContext.extractAll(inputPaths, upperBoundQuantityIrpha)
+    val sources: Sources = sqlContext.readSources(inputPaths)
 
     logger.info("(Lazy) Creating patients dataset...")
     val patients: Dataset[Patient] = PatientsTransformer.transform(sources).cache()

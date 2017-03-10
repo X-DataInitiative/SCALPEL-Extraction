@@ -1,12 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, SQLContext}
+import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig.InputPaths
 
-/**
-  * Wrapper class for the DataFrames containing the data from the source tables
-  *
-  * @author Daniel de Paula
-  */
 class Sources(
     val dcir: Option[DataFrame] = None,
     val pmsiMco: Option[DataFrame] = None,
@@ -18,6 +14,7 @@ class Sources(
     val dosages: Option[DataFrame] = None)
 
 object Sources {
+
   def apply(
       dcir: Option[DataFrame] = None,
       pmsiMco: Option[DataFrame] = None,
@@ -28,5 +25,19 @@ object Sources {
       irPha: Option[DataFrame] = None,
       dosages: Option[DataFrame] = None) = {
     new Sources(dcir, pmsiMco, pmsiHad, pmsiSsr, irBen, irImb, irPha, dosages)
+  }
+
+  def read(sqlContext: SQLContext, paths: InputPaths): Sources = {
+    Sources(
+      // todo: think about upperBoundIrphaQuantity parameter
+      dcir = Some(Dcir.read(sqlContext, paths.dcir)),
+      pmsiMco = Some(Mco.read(sqlContext, paths.pmsiMco)),
+      // pmsiHad = Some(Had(paths.pmsiHad)),
+      // pmsiSsr = Some(Ssr(paths.pmsiSsr)),
+      irBen = Some(IrBen.read(sqlContext, paths.irBen)),
+      irImb = Some(IrImb.read(sqlContext, paths.irImb)),
+      irPha = Some(IrPha.read(sqlContext, paths.irPha)),
+      dosages = Some(Dosages.read(sqlContext, paths.dosages))
+    )
   }
 }

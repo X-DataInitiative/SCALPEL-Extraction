@@ -6,7 +6,7 @@ import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.util.functions._
 
-object IrBenPatients {
+private[patients] object IrBenPatients {
 
   val inputColumns = List(
     col("NUM_ENQ").as("patientID"),

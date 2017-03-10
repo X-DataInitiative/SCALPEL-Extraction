@@ -3,18 +3,14 @@ package fr.polytechnique.cmap.cnam.featuring.cox
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl._
 import fr.polytechnique.cmap.cnam.etl.exposures.ExposuresTransformer
 import fr.polytechnique.cmap.cnam.etl.old_root._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
-/**
-  * Created by sathiya on 09/11/16.
-  */
 object CoxMain extends Main {
 
-  def appName = "CoxFeaturing"
+  val appName: String = "CoxFeaturing"
 
   def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
 

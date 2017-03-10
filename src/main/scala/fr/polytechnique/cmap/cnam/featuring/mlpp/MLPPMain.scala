@@ -8,14 +8,13 @@ import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.sql.{DataFrame, Dataset}
 >>>>>>> CNAM-173 Very big refactoring in packaging organization:src/main/scala/fr/polytechnique/cmap/cnam/featuring/mlpp/MLPPMain.scala
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl._
 import fr.polytechnique.cmap.cnam.etl.old_root._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 object MLPPMain extends Main {
 
-  override def appName: String = "MLPPFeaturing"
+  val appName: String = "MLPPFeaturing"
 
   def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[MLPPFeature]] = {
 

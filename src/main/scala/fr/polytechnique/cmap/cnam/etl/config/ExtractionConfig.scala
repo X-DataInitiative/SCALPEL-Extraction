@@ -17,9 +17,7 @@ case class ExtractionConfig(
   ageReferenceDate: java.sql.Timestamp,
   tracklossConfig: TracklossConfig,
   lastDate: java.sql.Timestamp,
-  drugCategories: List[String]
-
-)
+  drugCategories: List[String])
 
 object ExtractionConfig {
   def init(): ExtractionConfig = ExtractionConfig(

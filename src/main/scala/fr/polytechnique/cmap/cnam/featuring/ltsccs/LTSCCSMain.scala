@@ -12,7 +12,7 @@ object LTSCCSMain extends Main {
   final val ExposureEndThresholds = List(3, 6)
   final val FilterPatients = List(false)
 
-  override def appName = "LTSCCS"
+  val appName: String = "LTSCCS"
 
   def runLTSCCS(sqlContext: SQLContext, config: Config): Unit = {
     import sqlContext.implicits._

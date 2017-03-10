@@ -1,20 +1,18 @@
-package fr.polytechnique.cmap.cnam.etl.old_root
+package fr.polytechnique.cmap.cnam.etl.sources
 
 import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.SharedContext
 
-class DrugDosageExtractorSuite extends SharedContext {
+class DosagesSuite extends SharedContext {
 
-  "extract" should "return the correct DataFrame" in {
+  "read" should "return the correct DataFrame" in {
     // Given
     val path: String = "src/test/resources/value_tables/DOSE_PER_MOLECULE.CSV"
-    val extractor: Extractor = new DrugDosageExtractor(sqlContext)
-
     val expectedCount = 632
     val expectedLine = "[2200789,METFORMINE,60000]"
 
     // When
-    val result = extractor.extract(path)
+    val result = Dosages.read(sqlContext, path)
 
     // Then
     assert(result.count() == expectedCount)
@@ -24,15 +22,12 @@ class DrugDosageExtractorSuite extends SharedContext {
   it should "return a DataFrame without the molecule BENFLUOREX" in {
     // Given
     val path: String = "src/test/resources/value_tables/DOSE_PER_MOLECULE.CSV"
-    val extractor: Extractor = new DrugDosageExtractor(sqlContext)
-
     val expectedCount = 0
 
     // When
-    val result = extractor.extract(path).where(col("MOLECULE_NAME") === "BENFLUOREX")
+    val result = Dosages.read(sqlContext, path).where(col("MOLECULE_NAME") === "BENFLUOREX")
 
     // Then
     assert(result.count() == expectedCount)
   }
-
 }

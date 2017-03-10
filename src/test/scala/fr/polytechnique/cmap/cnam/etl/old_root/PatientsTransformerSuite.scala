@@ -6,9 +6,6 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.RichDataFrames
 
-/**
-  * @author Daniel de Paula
-  */
 class PatientsTransformerSuite extends SharedContext {
 
   "isDeathDateValid" should "remove absurd deathDate" in {

@@ -1,20 +1,17 @@
 package fr.polytechnique.cmap.cnam.flattening
 
-import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.stats.Comparator
-import fr.polytechnique.cmap.cnam.util.RichDataFrames._
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.hive.HiveContext
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.Main
+import fr.polytechnique.cmap.cnam.stats.Comparator
 import fr.polytechnique.cmap.cnam.util.FlatteningConfig
 import fr.polytechnique.cmap.cnam.util.FlatteningConfig._
+import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 
-/**
-  * Created by sathiya on 21/09/16.
-  */
 object ValidateFlattening extends Main {
 
-  override def appName: String = "ValidateFlattening"
+  val appName: String = "ValidateFlattening"
 
   implicit class ConvertColNameDelimiters(data: DataFrame) {
 

@@ -167,8 +167,6 @@ object MLPPExposuresTransformer extends ExposuresTransformer {
     val l = Logger.getLogger(getClass)
     import input.sqlContext.implicits._
 
-
-    l.error("minPurchases: "+ minPurchases)
     input.toDF
       .filterDelayedEntries(filterDelayedEntries)
       .filterEarlyDiagnosedPatients(filterEarlyDiagnosedPatients)

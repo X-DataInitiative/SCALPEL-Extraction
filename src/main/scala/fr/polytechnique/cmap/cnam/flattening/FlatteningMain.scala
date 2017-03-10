@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 
 object FlatteningMain extends Main {
 
-  def appName = "Flattening"
+  val appName: String = "Flattening"
 
   def loadToParquet(): Unit = {
     val tables = FlatteningConfig.tablesConfig
