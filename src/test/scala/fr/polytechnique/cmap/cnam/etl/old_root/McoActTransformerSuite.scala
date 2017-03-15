@@ -4,7 +4,6 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class McoActTransformerSuite extends SharedContext {
@@ -136,10 +135,7 @@ class McoActTransformerSuite extends SharedContext {
     val result = input.filterActs.select("patientID", "DP", "CCAM")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "return correct events when CCAM in specific acts" in {
@@ -173,10 +169,7 @@ class McoActTransformerSuite extends SharedContext {
     val result = input.filterActs.select("patientID", "DP", "CCAM")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "return correct events when one of the GHS columns has a value larger than 0" in {
@@ -213,10 +206,7 @@ class McoActTransformerSuite extends SharedContext {
     val result = input.filterActs.select(col("patientID"), col("DP"), col("CCAM"), columnToTest.as("GHS"))
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "transform" should "return the correct results for a known input" in {
@@ -253,9 +243,6 @@ class McoActTransformerSuite extends SharedContext {
     val output = McoActTransformer.transform(input)
 
     // Then
-    import RichDataFrames._
-    output.show()
-    expected.show()
-    assert(output.toDF === expected)
-  }
+    assertDFs(output.toDF, expected)
+ }
 }

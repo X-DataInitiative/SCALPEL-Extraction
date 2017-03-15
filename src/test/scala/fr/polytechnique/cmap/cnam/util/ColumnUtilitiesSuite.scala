@@ -34,9 +34,8 @@ class ColumnUtilitiesSuite extends SharedContext{
     val result: DataFrame = givenDf.select(meanTimestampCol.as("ts"))
 
     // Then
-    import RichDataFrames._
-    assert(result === expectedResult)
-  }
+    assertDFs(result, expectedResult)
+ }
 
   "maxColumn" should "correctly return a column with the maximum value among a set of Numeric columns" in {
     val sqlCtx = this.sqlContext
@@ -63,9 +62,8 @@ class ColumnUtilitiesSuite extends SharedContext{
     val result = givenDf.select(ColumnUtilities.maxColumn(col("c1"), col("c2"), col("c3")).as("c"))
 
     // Then
-    import RichDataFrames._
-    assert(result === expectedResult)
-  }
+    assertDFs(result, expectedResult)
+ }
 
   it should "correctly return a column with the maximum value among a set of Timestamp columns" in {
     val sqlCtx = this.sqlContext
@@ -96,9 +94,8 @@ class ColumnUtilitiesSuite extends SharedContext{
     val result = givenDf.select(ColumnUtilities.maxColumn(col("c1"), col("c2"), col("c3")).as("c"))
 
     // Then
-    import RichDataFrames._
-    assert(result === expectedResult)
-  }
+    assertDFs(result, expectedResult)
+ }
 
   "minColumn" should "correctly return a column with the minimum value among a set of Numeric columns" in {
     val sqlCtx = this.sqlContext
@@ -125,9 +122,8 @@ class ColumnUtilitiesSuite extends SharedContext{
     val result = givenDf.select(ColumnUtilities.minColumn(col("c1"), col("c2"), col("c3")).as("c"))
 
     // Then
-    import RichDataFrames._
-    assert(result === expectedResult)
-  }
+    assertDFs(result, expectedResult)
+ }
 
   it should "correctly return a column with the minimum value among a set of Timestamp columns" in {
     val sqlCtx = this.sqlContext
@@ -158,9 +154,8 @@ class ColumnUtilitiesSuite extends SharedContext{
     val result = givenDf.select(ColumnUtilities.minColumn(col("c1"), col("c2"), col("c3")).as("c"))
 
     // Then
-    import RichDataFrames._
-    assert(result === expectedResult)
-  }
+    assertDFs(result, expectedResult)
+ }
 
   "bucketize" should "bucketize (discretize) a timestamp column" in {
     val sqlCtx = sqlContext
@@ -202,9 +197,6 @@ class ColumnUtilitiesSuite extends SharedContext{
     )
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 }

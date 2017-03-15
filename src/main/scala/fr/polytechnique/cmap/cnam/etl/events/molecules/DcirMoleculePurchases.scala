@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.events.molecules
 
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{StringType, TimestampType}
+import org.apache.spark.sql.types.{DoubleType, StringType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.Event
@@ -10,6 +10,10 @@ import fr.polytechnique.cmap.cnam.util.DrugEventsTransformerHelper
 private[molecules] object DcirMoleculePurchases {
 
   implicit class DrugsDataFrame(df: DataFrame) {
+
+    def filterBoxQuantities(maxQuantity: Int): DataFrame = {
+      df.where(col("nBoxes") > 0 and col("nBoxes") <= maxQuantity)
+    }
 
     def addMoleculesInfo(molecules: DataFrame): DataFrame = {
       val moleculesDF = broadcast(molecules)
@@ -24,7 +28,7 @@ private[molecules] object DcirMoleculePurchases {
         .join(moleculesDF, "CIP13")
         .select(joinedByCIP07.columns.map(col): _*)
 
-      joinedByCIP07.unionAll(joinedByCIP13)
+      joinedByCIP07.union(joinedByCIP13)
     }
   }
 
@@ -36,11 +40,12 @@ private[molecules] object DcirMoleculePurchases {
 
     val drugCategories = config.drugCategories
 
+
     val dcirInputColumns: List[Column] = List(
       col("NUM_ENQ").cast(StringType).as("patientID"),
       col("`ER_PHA_F.PHA_PRS_IDE`").cast(StringType).as("CIP07"),
       col("`ER_PHA_F.PHA_PRS_C13`").cast(StringType).as("CIP13"),
-      col("`ER_PHA_F.PHA_ACT_QSN`").as("nBoxes"),
+      col("ER_PHA_F_PHA_ACT_QSN").as("nBoxes"),
       col("EXE_SOI_DTD").cast(TimestampType).as("eventDate")
     )
 
@@ -53,7 +58,7 @@ private[molecules] object DcirMoleculePurchases {
     val dosagesInputColumns: List[Column] = List(
       col("PHA_PRS_IDE").cast(StringType).as("CIP07"),
       col("MOLECULE_NAME").as("moleculeName"),
-      col("TOTAL_MG_PER_UNIT").as("dosage")
+      col("TOTAL_MG_PER_UNIT").cast(DoubleType).as("dosage")
     )
 
     val groupCols: List[Column] = List(col("patientID"), col("moleculeName"), col("eventDate"))
@@ -73,7 +78,9 @@ private[molecules] object DcirMoleculePurchases {
       moleculesInfo.select("CIP13").distinct.where(col("CIP13").isNotNull).collect.map(_.getString(0))
     )
 
-    val validatedDcir: DataFrame = dcir.select(dcirInputColumns: _*)
+    val validatedDcir: DataFrame = dcir
+      .select(dcirInputColumns: _*)
+      .filterBoxQuantities(config.maxBoxQuantity)
       .na.drop("any", Seq("CIP07", "CIP13"))
       .where(col("CIP07").isin(CIP07List.value: _*) || col("CIP13").isin(CIP13List.value: _*))
       .persist()
@@ -81,10 +88,9 @@ private[molecules] object DcirMoleculePurchases {
     import sqlContext.implicits._
     val result = validatedDcir
       .addMoleculesInfo(moleculesInfo) // Add molecule name and dosage
-      .withColumn("totalDose", col("nBoxes") * col("dosage")) // Compute total dose
+      .withColumn("totalDose", col("dosage") * col("nBoxes")) // Compute total dose
       .groupBy(groupCols: _*).agg(sum("totalDose").as("totalDose"))
       .map(Molecule.fromRow(_, nameCol = "moleculeName", dosageCol = "totalDose"))
-      .toDS // todo: remove this for Spark 2 (map already returns a Dataset in Spark 2)
 
     moleculesInfo.unpersist()
     validatedDcir.unpersist()

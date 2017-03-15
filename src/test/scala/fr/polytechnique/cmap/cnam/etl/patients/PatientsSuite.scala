@@ -4,7 +4,6 @@ import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class PatientsSuite extends SharedContext {
@@ -77,12 +76,7 @@ class PatientsSuite extends SharedContext {
     ).toDF("patientID", "gender", "birthDate", "deathDate")
 
     // Then
-    import RichDataFrames._
-    result.show(false)
-    result.printSchema()
-    expected.show(false)
-    expected.printSchema()
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
 }

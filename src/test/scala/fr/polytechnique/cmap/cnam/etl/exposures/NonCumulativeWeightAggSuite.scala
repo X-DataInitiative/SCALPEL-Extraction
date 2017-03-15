@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.etl.exposures
 
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class NonCumulativeWeightAggSuite extends SharedContext {
@@ -28,8 +27,7 @@ class NonCumulativeWeightAggSuite extends SharedContext {
     val result = instance.aggregateWeight
 
     // Then
-    import RichDataFrames._
-    assert(expected === result)
-  }
+    assertDFs(expected, result)
+ }
 
 }

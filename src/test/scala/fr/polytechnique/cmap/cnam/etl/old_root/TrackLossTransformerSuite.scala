@@ -32,8 +32,7 @@ class TrackLossTransformerSuite extends SharedContext {
     val result = input.withInterval
 
     // Then
-    import fr.polytechnique.cmap.cnam.util.RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "filterTrackLosses" should "remove any line with small interval" in {
@@ -57,8 +56,7 @@ class TrackLossTransformerSuite extends SharedContext {
     val result = input.filterTrackLosses
 
     // Then
-    import fr.polytechnique.cmap.cnam.util.RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
 
   }
 
@@ -82,8 +80,7 @@ class TrackLossTransformerSuite extends SharedContext {
     val result = input.withTrackLossDate
 
     // Then
-    import fr.polytechnique.cmap.cnam.util.RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
 
   }
 
@@ -103,7 +100,6 @@ class TrackLossTransformerSuite extends SharedContext {
     val result = TrackLossTransformer.transform(sources)
 
     // Then
-    import fr.polytechnique.cmap.cnam.util.RichDataFrames._
-    assert(result.toDF() === expected)
-  }
+    assertDFs(result.toDF(), expected)
+ }
 }

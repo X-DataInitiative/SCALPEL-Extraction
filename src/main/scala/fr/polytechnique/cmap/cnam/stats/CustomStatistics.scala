@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.stats
 
 import scala.reflect.ClassTag
-
 import org.apache.spark.sql._
 import org.apache.spark.sql.expressions.UserDefinedAggregateFunction
 import org.apache.spark.sql.functions._
@@ -72,7 +71,7 @@ object CustomStatistics {
 
       val outputDF: DataFrame = inputColumns
         .map(computeAvailableAgg(df.schema, _))
-        .reduce(_.unionAll(_))
+        .reduce(_.union(_))
 
       if(forComparison == true)
       {
@@ -138,7 +137,7 @@ object CustomStatistics {
 
       inputColumns
         .map(computeUDAF(_))
-        .reduce(_.unionAll(_))
+        .reduce(_.union(_))
     }
 
     /** This function counts number of unexpected values in a column <i> using UDAF </i>

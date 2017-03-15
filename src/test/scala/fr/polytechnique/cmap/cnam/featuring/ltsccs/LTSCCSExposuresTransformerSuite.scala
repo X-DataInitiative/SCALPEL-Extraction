@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.featuring.ltsccs
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.FlatEvent
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class LTSCCSExposuresTransformerSuite extends SharedContext {
@@ -46,10 +45,7 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
     val result = input.withNextDate
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withDelta" should "add a column with the delta in a patient-molecule window" in {
@@ -90,10 +86,7 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
     val result = input.withDelta
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "filterPatients" should "remove unwanted patients" in {
@@ -118,10 +111,7 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
     val result = input.filterPatients
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "getTrackLosses" should "return the lines where a trackloss has been identified (including the first and last lines)" in {
@@ -164,10 +154,7 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
     val result = input.withNextDate.withDelta.getTracklosses
 
     // Then
-    import RichDataFrames._
-    result.orderBy("patientID", "moleculeName", "eventDate").show
-    expected.orderBy("patientID", "moleculeName", "eventDate").show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withExposureEnd" should "add a column with the end of the exposures" in {
@@ -231,10 +218,7 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
       .select("patientID", "moleculeName", "eventDate", "exposureEnd")
 
     // Then
-    import RichDataFrames._
-    result.orderBy("patientID", "moleculeName", "eventDate").show
-    expected.orderBy("patientID", "moleculeName", "eventDate").show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withExposureStart" should "add a column with the start of the exposures" in {
@@ -302,10 +286,7 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
       .select("patientID", "moleculeName", "eventDate", "exposureStart")
 
     // Then
-    import RichDataFrames._
-    result.orderBy("patientID", "moleculeName", "eventDate").show
-    expected.orderBy("patientID", "moleculeName", "eventDate").show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "transform" should "return a valid Dataset for a known input" in {
@@ -380,11 +361,8 @@ class LTSCCSExposuresTransformerSuite extends SharedContext {
     val result = LTSCCSExposuresTransformer.transform(input)
 
     // Then
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 }
 
 

@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.featuring.ltsccs
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.FlatEvent
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class LTSCCSObservationPeriodTransformerSuite extends SharedContext {
@@ -32,12 +31,11 @@ class LTSCCSObservationPeriodTransformerSuite extends SharedContext {
     ).toDS.toDF
 
     // When
-    import RichDataFrames._
     val result = LTSCCSObservationPeriodTransformer.transform(input)
-    result.show
-    expected.show
-    assert(result.toDF === expected)
-  }
+
+    // Then
+    assertDFs(result.toDF, expected)
+ }
 
   it should "return the correct Observation Period for the death date case" in {
     val sqlCtx = sqlContext
@@ -63,12 +61,11 @@ class LTSCCSObservationPeriodTransformerSuite extends SharedContext {
     ).toDS.toDF
 
     // When
-    import RichDataFrames._
     val result = LTSCCSObservationPeriodTransformer.transform(input)
-    result.show
-    expected.show
-    assert(result.toDF === expected)
-  }
+
+    // Then
+    assertDFs(result.toDF, expected)
+ }
 
   it should "return the correct Observation Period for the study end case" in {
     val sqlCtx = sqlContext
@@ -93,11 +90,10 @@ class LTSCCSObservationPeriodTransformerSuite extends SharedContext {
     ).toDS.toDF
 
     // When
-    import RichDataFrames._
     val result = LTSCCSObservationPeriodTransformer.transform(input)
-    result.show
-    expected.show
-    assert(result.toDF === expected)
-  }
+
+    // Then
+    assertDFs(result.toDF, expected)
+ }
 
 }

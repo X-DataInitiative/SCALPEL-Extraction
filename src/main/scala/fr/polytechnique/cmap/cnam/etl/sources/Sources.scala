@@ -29,7 +29,6 @@ object Sources {
 
   def read(sqlContext: SQLContext, paths: InputPaths): Sources = {
     Sources(
-      // todo: think about upperBoundIrphaQuantity parameter
       dcir = Some(Dcir.read(sqlContext, paths.dcir)),
       pmsiMco = Some(Mco.read(sqlContext, paths.pmsiMco)),
       // pmsiHad = Some(Had(paths.pmsiHad)),

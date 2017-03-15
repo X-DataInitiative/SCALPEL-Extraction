@@ -66,7 +66,7 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
 
     def stackDates: DataFrame = {
       data.withColumn("coxStart", col("start"))
-        .unionAll(data.withColumn("coxStart", col("end")))
+        .union(data.withColumn("coxStart", col("end")))
     }
 
     def withCoxEnd: DataFrame = {

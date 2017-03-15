@@ -5,7 +5,6 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class TargetDiseaseTransformerSuite extends SharedContext {
@@ -34,8 +33,7 @@ class TargetDiseaseTransformerSuite extends SharedContext {
     val result = input.withDelta.select("eventId", "nextDelta", "previousDelta")
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withNextType" should "return the next eventId" in {
@@ -60,8 +58,7 @@ class TargetDiseaseTransformerSuite extends SharedContext {
     val result = input.withNextType.select("eventId", "nextType", "previousType")
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "filterDcirTargetDiseases" should "return event BladderCancer with radiotherapy close after" in {
@@ -88,8 +85,7 @@ class TargetDiseaseTransformerSuite extends SharedContext {
     val result = input.filterDcirTargetDiseases
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "return event BladderCancer with radiotherapy close before" in {
@@ -118,8 +114,7 @@ class TargetDiseaseTransformerSuite extends SharedContext {
     val result = input.filterDcirTargetDiseases
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "transform" should "return the correct result" in {
@@ -167,9 +162,6 @@ class TargetDiseaseTransformerSuite extends SharedContext {
     val output = TargetDiseaseTransformer.transform(input)
 
     // Then
-    import RichDataFrames._
-    output.show()
-    expected.show()
-    assert(output.toDF === expected)
-  }
+    assertDFs(output.toDF, expected)
+ }
 }

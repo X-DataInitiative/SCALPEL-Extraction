@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.flattening
 
 import org.apache.spark.sql.DataFrame
-import org.scalatest.FlatSpecLike
 import fr.polytechnique.cmap.cnam.SharedContext
 
 /**
@@ -31,9 +30,8 @@ class ValidateFlatteningSuite extends SharedContext {
     val outputDf = inputDf.cleanDFColumnNames
 
     // Then
-    import fr.polytechnique.cmap.cnam.util.RichDataFrames._
-    assert(outputDf === expected)
-  }
+    assertDFs(outputDf, expected)
+ }
 
   "prefixColumnNameWithDelimiter" should "prefix a text in front of each column name " +
     "with _ at the end" in {
@@ -57,9 +55,8 @@ class ValidateFlatteningSuite extends SharedContext {
     val outputDf = inputDf.prefixColumnNames("anyText")
 
     // Then
-    import fr.polytechnique.cmap.cnam.util.RichDataFrames._
-    assert(outputDf === expected)
-  }
+    assertDFs(outputDf, expected)
+ }
 
   it should("not prefix the given text to the ignore columns") in {
 
@@ -82,11 +79,8 @@ class ValidateFlatteningSuite extends SharedContext {
     val outputDf = inputDf.prefixColumnNames("anyText", Seq("column1", "column4"))
 
     // Then
-    import fr.polytechnique.cmap.cnam.util.RichDataFrames._
-    outputDf.printSchema
-    expected.printSchema
-    assert(outputDf === expected)
-  }
+    assertDFs(outputDf, expected)
+ }
 
   "validateFlattening" should "modify the column names of flat and individual DFs " +
     "and write the computed statistics under joins folder" in {

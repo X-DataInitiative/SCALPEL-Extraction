@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.etl.exposures
 import org.apache.spark.sql.DataFrame
 import org.mockito.Mockito.mock
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class LimitedExposurePeriodAdderSuite extends SharedContext {
@@ -50,10 +49,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
     val result = input.withNextDate
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withDelta" should "add a column with the delta in a patient-molecule window" in {
@@ -94,10 +90,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
     val result = input.withDelta
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "getTrackLosses" should "return the lines where a trackloss has been identified (including the first and last lines)" in {
@@ -140,10 +133,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
     val result = input.withNextDate.withDelta.getTracklosses()
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
 
@@ -208,10 +198,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       .select("patientID", "eventId", "start", "exposureEnd")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withExposureStart" should "add a column with the start of the exposures" in {
@@ -279,10 +266,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       .select("patientID", "eventId", "start", "exposureStart")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withStartEnd" should "correctly add exposureStart and exposureEnd with default parameters" in {
@@ -336,9 +320,6 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
     val result = instance.withStartEnd()
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 }

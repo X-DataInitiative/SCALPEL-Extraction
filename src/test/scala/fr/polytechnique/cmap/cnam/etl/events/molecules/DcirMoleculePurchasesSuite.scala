@@ -4,15 +4,38 @@ import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
-import org.mockito.Mockito.mock
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.Event
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class DcirMoleculePurchasesSuite extends SharedContext {
+
+  "filterBoxQuantities" should "remove purchases with quantity > upperBound" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val maxBoxQuantity = 10
+    val input: DataFrame = Seq(
+      ("patient", "3541848", "3400935418487", -1, makeTS(2010, 1, 1)),
+      ("patient", "3541848", "3400935418487",  0, makeTS(2010, 2, 1)),
+      ("patient", "3541848", "3400935418487",  1, makeTS(2010, 3, 1)),
+      ("patient", "3541848", "3400935418487", 15, makeTS(2010, 5, 1)),
+      ("patient", "3541848", "3400935418487", 150, makeTS(2010, 6, 1))
+    ).toDF("PatientID", "CIP07", "CIP13", "nBoxes", "eventDate")
+    val expected: DataFrame = Seq(
+      ("patient", "3541848", "3400935418487",  1, makeTS(2010, 3, 1))
+    ).toDF("PatientID", "CIP07", "CIP13", "nBoxes", "eventDate")
+
+    // When
+    import DcirMoleculePurchases.DrugsDataFrame
+    val result = input.filterBoxQuantities(maxBoxQuantity)
+
+    // Then
+    assertDFs(result, expected)
+  }
 
   "addMoleculesInfo" should "return a new dataframe with molecule information" in {
     val sqlCtx = sqlContext
@@ -25,7 +48,7 @@ class DcirMoleculePurchasesSuite extends SharedContext {
       (Some("patient"), Some("3541848"), Some("3400935418487")),
       (Some("patient"), None, None)
     ).toDF("PatientID", "CIP07", "CIP13")
-    val irPha: DataFrame = sqlContext.read.load("src/test/resources/expected/IR_PHA_R.parquet")
+    val irPha: DataFrame = sqlContext.read.load("src/test/resources/test-input/IR_PHA_R.parquet")
       .select(
         col("PHA_PRS_IDE").as("CIP07"),
         col("PHA_CIP_C13").as("CIP13")
@@ -48,14 +71,11 @@ class DcirMoleculePurchasesSuite extends SharedContext {
     // When
     val moleculesDF = irPha.join(dosages, "CIP07")
 
-    import fr.polytechnique.cmap.cnam.etl.events.molecules.DcirMoleculePurchases.DrugsDataFrame
+    import DcirMoleculePurchases.DrugsDataFrame
     val result = input.addMoleculesInfo(moleculesDF).select(expected.columns.map(col): _*)
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "extract" should "return the correct data in a Dataset[Event[Molecule]] for known data" in {
@@ -64,8 +84,8 @@ class DcirMoleculePurchasesSuite extends SharedContext {
 
     // Given
     val config = ExtractionConfig.init()
-    val dcir: DataFrame = sqlContext.read.load("src/test/resources/expected/DCIR.parquet")
-    val irPha: DataFrame = sqlContext.read.load("src/test/resources/expected/IR_PHA_R.parquet")
+    val dcir: DataFrame = sqlContext.read.load("src/test/resources/test-input/DCIR.parquet")
+    val irPha: DataFrame = sqlContext.read.load("src/test/resources/test-input/IR_PHA_R.parquet")
     val dosages: DataFrame = sqlContext.read
       .format("com.databricks.spark.csv")
       .option("header", "true")
@@ -95,11 +115,6 @@ class DcirMoleculePurchasesSuite extends SharedContext {
     val result = MoleculePurchases.extract(config, sources)
 
     // Then
-    import RichDataFrames._
-    result.printSchema
-    expected.printSchema
-    result.show
-    expected.show
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 }

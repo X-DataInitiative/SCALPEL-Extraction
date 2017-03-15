@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.featuring.mlpp
 import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 
 class MLPPMainSuite extends SharedContext {
 
@@ -67,11 +66,8 @@ class MLPPMainSuite extends SharedContext {
     val result = features.toDF
 
     // Then
-    import RichDataFrames._
-    result.orderBy("rowIndex", "colIndex").show
-    expectedFeatures.orderBy("rowIndex", "colIndex").show
-    assert(result === expectedFeatures)
-  }
+    assertDFs(result, expectedFeatures)
+ }
 
 
   "run" should "correctly run the full mlpp featuring pipeline with a new exposure definition" in {
@@ -100,9 +96,6 @@ class MLPPMainSuite extends SharedContext {
     val result = features.toDF
 
     // Then
-    import RichDataFrames._
-    result.orderBy("rowIndex", "colIndex").show
-    expectedFeatures.orderBy("rowIndex", "colIndex").show
-    assert(result === expectedFeatures)
-  }
+    assertDFs(result, expectedFeatures)
+ }
 }

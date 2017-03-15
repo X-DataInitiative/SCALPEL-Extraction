@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.stats
 
-import fr.polytechnique.cmap.cnam.stats.CustomStatistics._
-import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
+import fr.polytechnique.cmap.cnam.stats.CustomStatistics._
+import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 
 /**
   * Created by sathiya on 12/08/16.
@@ -29,9 +29,9 @@ object Comparator {
         colName => {
           tables
             .collect { case table if table.columns.contains(colName) => table.select(col(colName)) }
-            .reduce(_.unionAll(_)).customDescribe(forComparison = true)
+            .reduce(_.union(_)).customDescribe(forComparison = true)
         }
-      ).reduce(_.unionAll(_))
+      ).reduce(_.union(_))
   }
 
   def compare(flatDF: DataFrame, singleDF: DataFrame, otherDFs: DataFrame*): Boolean = {

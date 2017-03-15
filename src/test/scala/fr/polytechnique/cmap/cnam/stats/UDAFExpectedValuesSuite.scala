@@ -32,7 +32,7 @@ class UDAFExpectedValuesSuite extends Config {
     val testDFWithNull = sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
       .toDF("BEN_DTE_INS")
     val combinedDFWithNull = sourceDF.select("BEN_DTE_INS")
-      .unionAll(testDFWithNull)
+      .union(testDFWithNull)
 
     val columnName: String = "BEN_DTE_INS"
     val expectedValues: Set[Int] = (1950 to 1960).toSet

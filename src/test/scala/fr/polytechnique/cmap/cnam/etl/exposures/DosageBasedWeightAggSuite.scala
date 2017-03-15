@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.exposures
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class DosageBasedWeightAggSuite extends SharedContext{
@@ -45,12 +44,7 @@ class DosageBasedWeightAggSuite extends SharedContext{
       .select("PatientID", "eventId", "exposureStart", "weight")
 
     // Then
-    import RichDataFrames._
-    println("Result:")
-    result.show
-    println("Expected:")
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "aggregateWeight" should "compute exposureStart and weight correctly for dosage-level-intervals = [0]" in {
@@ -91,12 +85,7 @@ class DosageBasedWeightAggSuite extends SharedContext{
       .select("PatientID", "eventId", "exposureStart", "weight")
 
     // Then
-    import RichDataFrames._
-    println("Result:")
-    result.show
-    println("Expected:")
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "aggregateWeight" should "compute exposureStart and weight correctly if there are duplicate exposureStart" in {
@@ -123,11 +112,6 @@ class DosageBasedWeightAggSuite extends SharedContext{
     val result = instance.aggregateWeight(None,None,None,None,Some(dosageLevelIntervals))
       .select("PatientID", "eventId", "exposureStart", "weight")
     // Then
-    import RichDataFrames._
-    println("Result:")
-    result.show
-    println("Expected:")
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 }

@@ -4,6 +4,9 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl._
+import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
+import fr.polytechnique.cmap.cnam.etl.patients.Patients
+import fr.polytechnique.cmap.cnam.etl.events.molecules.MoleculePurchases
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
@@ -45,7 +48,7 @@ object FilteringMain extends Main {
     val inputPaths: InputPaths = FilteringConfig.inputPaths
     val outputPaths: OutputPaths = FilteringConfig.outputPaths
     val cancerDefinition: String = FilteringConfig.cancerDefinition
-    val upperBoundQuantityIrpha: Int = FilteringConfig.limits.maxQuantityIrpha
+    val extractionConfig: ExtractionConfig = ExtractionConfig.init()
 
     logger.info(s"Running for the $cancerDefinition cancer definition")
 
@@ -53,10 +56,10 @@ object FilteringMain extends Main {
     val sources: Sources = sqlContext.readSources(inputPaths)
 
     logger.info("(Lazy) Creating patients dataset...")
-    val patients: Dataset[Patient] = PatientsTransformer.transform(sources).cache()
+    val patients: Dataset[Patient] = Patients.extract(extractionConfig, sources).cache()
 
     logger.info("(Lazy) Creating drug events dataset...")
-    val drugEvents: Dataset[Event] = DrugEventsTransformer.transform(sources)
+    val drugEvents: Dataset[Event] = MoleculePurchases.extract(extractionConfig, sources).map(Event.fromNewEvent(_))
 
     logger.info("(Lazy) Creating disease events dataset...")
     val broadDiseaseEvents: Dataset[Event] = DiseaseTransformer.transform(sources)

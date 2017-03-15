@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.featuring.cox
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.FlatEvent
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class CoxObservationPeriodTransformerSuite extends SharedContext {
@@ -35,10 +34,7 @@ class CoxObservationPeriodTransformerSuite extends SharedContext {
     val result = input.withObservationStart
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withObservationPeriod" should "add a column for the observation start and one for the end" in {
@@ -67,11 +63,8 @@ class CoxObservationPeriodTransformerSuite extends SharedContext {
     val result = input.withObservationPeriodFromEvents
       .select("patientID", "observationStart", "observationEnd")
 
-    //Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    // Then
+    assertDFs(result, expected)
   }
 
   "transform" should "return a Dataset[FlatEvent] with the observation events of each patient" in {
@@ -102,10 +95,9 @@ class CoxObservationPeriodTransformerSuite extends SharedContext {
     ).toDF
 
     // When
-    import RichDataFrames._
     val result = CoxObservationPeriodTransformer.transform(input)
-    result.show
-    expected.show
-    assert(result.toDF === expected)
-  }
+
+    // Then
+    assertDFs(result.toDF, expected)
+ }
 }

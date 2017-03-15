@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.etl.old_root
 import java.sql.Timestamp
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 /**
@@ -31,8 +30,7 @@ class DcirActTransformerSuite extends SharedContext {
     val result = input.filterActs
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "transform" should "return correct result" in {
@@ -55,8 +53,7 @@ class DcirActTransformerSuite extends SharedContext {
     val result = DcirActTransformer.transform(input)
 
     // Then
-    import RichDataFrames._
-    assert(result.toDF === expected)
+    assertDFs(result.toDF, expected)
 
   }
 

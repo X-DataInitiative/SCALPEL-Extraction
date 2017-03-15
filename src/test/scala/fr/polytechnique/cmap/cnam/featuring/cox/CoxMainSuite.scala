@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.featuring.cox
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.{FilteringConfig, FlatEvent}
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class CoxMainSuite extends SharedContext {
@@ -28,9 +27,8 @@ class CoxMainSuite extends SharedContext {
     val result = coxFeatures.get.toDF.orderBy("patientID")
 
     // Then
-    import RichDataFrames._
-    assert(result === expectedResult)
-  }
+    assertDFs(result, expectedResult)
+ }
 
   //TODO: We should update the dummy files and test only the above test case in the future.
   // We are testing it for the moment because the dummy data don't have any meaningful exposure.
@@ -84,11 +82,8 @@ class CoxMainSuite extends SharedContext {
     val result = coxFeatures.get.toDF.orderBy("patientID")
 
     // Then
-    result.show
-    expectedResult.show
-    import RichDataFrames._
-    assert(result === expectedResult)
-  }
+    assertDFs(result, expectedResult)
+ }
 
   it should "also return a valid Dataset when cumulativeExposureType is purchase-based" in {
 
@@ -146,11 +141,8 @@ class CoxMainSuite extends SharedContext {
     val result = coxFeatures.get.toDF.orderBy("patientID", "start")
 
     // Then
-    result.show
-    expectedResult.show
-    import RichDataFrames._
-    assert(result === expectedResult)
-  }
+    assertDFs(result, expectedResult)
+ }
 
   it should "also return a valid result for the known input when cumulativeExposureType " +
     "is time-based" in {
@@ -243,10 +235,6 @@ class CoxMainSuite extends SharedContext {
     val result = coxFeatures.get.toDF.orderBy("patientID", "start")
 
     // Then
-    flatEvents.toDF.select("patientID", "eventId", "start", "end").orderBy("patientID", "eventId", "start", "end").show
-    result.show
-    expectedResult.show
-    import RichDataFrames._
-    assert(result === expectedResult)
-  }
+    assertDFs(result, expectedResult)
+ }
 }

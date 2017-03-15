@@ -34,7 +34,7 @@ class UDAFUnexpectedValuesSuite extends Config {
     val sourceDF = getSourceDF
     val testDF = sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
         .toDF("BEN_DTE_INS")
-    val combinedDFWithNull = sourceDF.select("BEN_DTE_INS").unionAll(testDF)
+    val combinedDFWithNull = sourceDF.select("BEN_DTE_INS").union(testDF)
     val expectedValues: Set[Int] = (1950 to 1960).toSet
     val udaf = new UDAFUnexpectedValues(expectedValues)
     val columnName: String = "BEN_DTE_INS"

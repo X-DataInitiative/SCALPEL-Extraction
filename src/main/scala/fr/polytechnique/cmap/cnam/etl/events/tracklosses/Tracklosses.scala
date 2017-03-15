@@ -55,6 +55,5 @@ object Tracklosses extends EventsExtractor[Trackloss] {
       .filterTrackLosses(config.tracklossConfig.emptyMonths)
       .withTrackLossDate(config.tracklossConfig.tracklossMonthDelay)
       .map(Trackloss.fromRow(_, dateCol = "tracklossDate"))
-      .toDS // todo: remove this on Spark 2
   }
 }

@@ -5,7 +5,6 @@ import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.ImbDiseaseTransformer._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 
 class ImbDiseaseTransformerSuite extends SharedContext {
 
@@ -44,7 +43,7 @@ class ImbDiseaseTransformerSuite extends SharedContext {
     val result = ImbDiseaseTransformer.transform(source)
 
     // Then
-    assert(result.toDF === expected)
+    assertDFs(result.toDF, expected)
 
   }
   "transform" should "filter events with None start" in {
@@ -65,6 +64,6 @@ class ImbDiseaseTransformerSuite extends SharedContext {
     val output = ImbDiseaseTransformer.imbDataFrame(input).extractImbDisease
 
     // Then
-    assert(output === expected)
-  }
+    assertDFs(output, expected)
+ }
 }

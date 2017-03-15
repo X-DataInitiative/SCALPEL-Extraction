@@ -27,7 +27,7 @@ class DcirExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) {
   */
   override def extract(dcirPath: String): DataFrame = {
     super.extract(dcirPath)
-      .where(col("BSE_PRS_NAT") !== 0)
+      .where(col("BSE_PRS_NAT") =!= 0)
   }
 }
 
@@ -79,7 +79,7 @@ class IrImbExtractor(sqlContext: SQLContext) extends Extractor(sqlContext)
   override def extract(irImbPath: String): DataFrame = {
     super.extract(irImbPath)
       //.where(col("IMB_ALD_DTD") isNotNull)
-      .where(col("IMB_ALD_DTD") !== (""))
+      .where(col("IMB_ALD_DTD") =!= (""))
   }
 
 }
@@ -104,7 +104,7 @@ class DrugDosageExtractor(sqlContext: SQLContext) extends Extractor(sqlContext) 
         col("MOLECULE_NAME"),
         col("TOTAL_MG_PER_UNIT").cast(IntegerType)
       )
-      .where(col("MOLECULE_NAME") !== "BENFLUOREX")
+      .where(col("MOLECULE_NAME") =!= "BENFLUOREX")
   }
 
 }

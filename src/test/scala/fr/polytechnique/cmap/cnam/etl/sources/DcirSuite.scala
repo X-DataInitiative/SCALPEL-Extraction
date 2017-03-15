@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
-import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.{AnalysisException, DataFrame}
 import fr.polytechnique.cmap.cnam.SharedContext
 
 class DcirSuite extends SharedContext {
@@ -29,29 +29,15 @@ class DcirSuite extends SharedContext {
 
     // Then
     assert(result.filter(column === value).count == 0L)
-  }
+ }
 
   it should "fail if the path is invalid" in {
     // Given
     val path: String = "src/test/resources/expected/invalid_path.parquet"
 
     // Then
-    intercept[java.lang.AssertionError] {
+    intercept[AnalysisException] {
       Dcir.read(sqlContext, path).count
     }
   }
-
-  // todo: think about upperBound parameter
-//  it should "filter lines with quantities > upperBound" in {
-//    // Given
-//    val value = 0L
-//    val column = col("`ER_PHA_F.PHA_ACT_QSN`")
-//    val path: String = "src/test/resources/test-input/DCIR.parquet"
-//
-//    // When
-//    val result = Dcir.read(sqlContext, path)
-//
-//    // Then
-//    assert(result.count == 2)
-//  }
 }

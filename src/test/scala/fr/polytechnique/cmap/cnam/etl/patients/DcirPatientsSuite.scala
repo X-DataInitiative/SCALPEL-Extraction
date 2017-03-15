@@ -5,7 +5,6 @@ import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 
 class DcirPatientsSuite extends SharedContext {
 
@@ -38,9 +37,8 @@ class DcirPatientsSuite extends SharedContext {
     val result = input.findBirthYears
 
     // Then
-    import RichDataFrames._
-    assert(result === expectedResult)
-  }
+    assertDFs(result, expectedResult)
+ }
 
   "groupByIdAndAge" should "return a DataFrame with data aggregated by patient ID and age" in {
     val sqlCtx = sqlContext
@@ -70,10 +68,7 @@ class DcirPatientsSuite extends SharedContext {
     val result = input.groupByIdAndAge
 
     // Then
-    import RichDataFrames._
-    result.show(false)
-    expected.show(false)
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "estimateFields" should "return a Dataset[Patient] from a DataFrame with aggregated data" in {
@@ -108,8 +103,7 @@ class DcirPatientsSuite extends SharedContext {
     val result = input.estimateFields.toDF
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "transform" should "return the correct data in a Dataset[Patient] for a known input" in {
@@ -139,9 +133,6 @@ class DcirPatientsSuite extends SharedContext {
     val result = DcirPatients.extract(config, dcir).toDF
 
     // Then
-    import RichDataFrames._
-    result.show()
-    expected.show()
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 }

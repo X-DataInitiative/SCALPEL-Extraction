@@ -4,7 +4,6 @@ import java.sql.Timestamp
 import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 
 class PatientsTransformerSuite extends SharedContext {
 
@@ -77,12 +76,7 @@ class PatientsTransformerSuite extends SharedContext {
     ).toDF("patientID", "gender", "birthDate", "deathDate")
 
     // Then
-    result.show(false)
-    result.printSchema()
-    expected.show(false)
-    expected.printSchema()
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
 }

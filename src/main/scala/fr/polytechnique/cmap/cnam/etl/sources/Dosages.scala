@@ -8,7 +8,7 @@ private[sources] object Dosages extends SourceReader() {
 
   override def read(sqlContext: SQLContext, path: String): DataFrame = {
     sqlContext.read
-      .format("com.databricks.spark.csv")
+      .format("csv")
       .option("header", "true")
       .load(path)
       .select(
@@ -16,6 +16,6 @@ private[sources] object Dosages extends SourceReader() {
         col("MOLECULE_NAME"),
         col("TOTAL_MG_PER_UNIT").cast(IntegerType)
       )
-      .where(col("MOLECULE_NAME") !== "BENFLUOREX")
+      .where(col("MOLECULE_NAME") =!= "BENFLUOREX")
   }
 }

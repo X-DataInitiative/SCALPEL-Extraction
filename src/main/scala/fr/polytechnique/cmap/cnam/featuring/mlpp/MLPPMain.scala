@@ -1,12 +1,7 @@
 package fr.polytechnique.cmap.cnam.featuring.mlpp
 
 import org.apache.spark.sql.functions._
-<<<<<<< master:src/main/scala/fr/polytechnique/cmap/cnam/filtering/mlpp/MLPPMain.scala
 import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
-=======
-import org.apache.spark.sql.hive.HiveContext
-import org.apache.spark.sql.{DataFrame, Dataset}
->>>>>>> CNAM-173 Very big refactoring in packaging organization:src/main/scala/fr/polytechnique/cmap/cnam/featuring/mlpp/MLPPMain.scala
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.old_root._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient

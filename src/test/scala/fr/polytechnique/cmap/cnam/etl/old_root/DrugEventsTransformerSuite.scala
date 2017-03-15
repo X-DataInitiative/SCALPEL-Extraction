@@ -6,7 +6,6 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 
 
 class DrugEventsTransformerSuite extends SharedContext {
@@ -48,10 +47,7 @@ class DrugEventsTransformerSuite extends SharedContext {
     val result = input.addMoleculesInfo(moleculesDF).select(expected.columns.map(col): _*)
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "transform" should "return the correct data in a Dataset[Event] for known data" in {
@@ -89,11 +85,6 @@ class DrugEventsTransformerSuite extends SharedContext {
     val result = DrugEventsTransformer.transform(sources)
 
     // Then
-    import RichDataFrames._
-    result.printSchema
-    expected.printSchema
-    result.show
-    expected.show
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 }

@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.etl.old_root
 
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class DiseaseTransformerSuite extends fakeMcoDataFixture {
@@ -37,8 +36,7 @@ class DiseaseTransformerSuite extends fakeMcoDataFixture {
 
     // Then
     // TODO: check that all the transform are called instead
-    import RichDataFrames._
-    assert(output.toDF === expected)
-  }
+    assertDFs(output.toDF, expected)
+ }
 
 }

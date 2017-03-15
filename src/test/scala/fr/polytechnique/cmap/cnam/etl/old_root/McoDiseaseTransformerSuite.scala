@@ -6,7 +6,6 @@ import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.McoDiseaseTransformer._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 
@@ -73,11 +72,9 @@ class McoDiseaseTransformerSuite extends fakeMcoDataFixture {
      .toList
      .map(_.getAs[Timestamp]("eventDate"))
 
-    println("Expected:")
-    expected.foreach(println)
-    println("Output:")
-    output.foreach(println)
     // Then
+//    expected.foreach(println)
+//    output.foreach(println)
     assert(output == expected)
   }
 
@@ -115,11 +112,9 @@ class McoDiseaseTransformerSuite extends fakeMcoDataFixture {
       .toList
       .map(_.getAs[Timestamp]("eventDate"))
 
-    println("Expected:")
-    expected.foreach(println)
-    println("Output:")
-    output.foreach(println)
     // Then
+//    expected.foreach(println)
+//    output.foreach(println)
     assert(output == expected)
   }
 
@@ -142,8 +137,7 @@ class McoDiseaseTransformerSuite extends fakeMcoDataFixture {
     val output = McoDiseaseTransformer.transform(input)
 
     // Then
-    import RichDataFrames._
-    assert(output.toDF === expected)
-  }
+    assertDFs(output.toDF, expected)
+ }
 
 }

@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.stats
 
-import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 import org.apache.spark.sql.DataFrame
 
 /**
@@ -35,7 +34,7 @@ class CustomStatisticsSuite extends Config {
     val result = input.customDescribe(forComparison = false)
 
     // Then
-    assert(expected === result)
+    assertDFs(expected, result)
 
   }
 
@@ -59,8 +58,8 @@ class CustomStatisticsSuite extends Config {
     val resultColumns = givenDF.customDescribe(forComparison = false, cols: _*)
 
     // Then
-    assert(resultColumns === expected)
-  }
+    assertDFs(resultColumns, expected)
+ }
 
   it should "throw an exception" in {
 
@@ -106,7 +105,7 @@ class CustomStatisticsSuite extends Config {
     }
     val combinedDfWithNull = {
       getSourceDF.select("BEN_DTE_INS")
-        .unionAll(testDF)
+        .union(testDF)
     }
     val columnName: String = "BEN_DTE_INS"
     val expectedValues: Set[Int] = (1950 to 1960).toSet
@@ -192,7 +191,7 @@ class CustomStatisticsSuite extends Config {
     val testDF = sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
       .toDF("BEN_DTE_INS")
     val combinedDfWithNull = getSourceDF.select("BEN_DTE_INS")
-      .unionAll(testDF)
+      .union(testDF)
     val expectedValues: Set[Int] = (1950 to 1960).toSet
     val columnName: String = "BEN_DTE_INS"
 

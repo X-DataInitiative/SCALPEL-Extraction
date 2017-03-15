@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.exposures
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class PurchaseBasedWeightAggSuite extends SharedContext {
@@ -41,9 +40,6 @@ class PurchaseBasedWeightAggSuite extends SharedContext {
     val result = instance.aggregateWeight(purchaseIntervals = Some(List(0, 2, 4)))
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(expected === result)
-  }
+    assertDFs(expected, result)
+ }
 }

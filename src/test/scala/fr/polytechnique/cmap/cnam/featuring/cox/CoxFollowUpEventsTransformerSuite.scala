@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.featuring.cox
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class CoxFollowUpEventsTransformerSuite extends SharedContext {
@@ -37,10 +36,7 @@ class CoxFollowUpEventsTransformerSuite extends SharedContext {
     val result = input.withFollowUpStart.select("patientID", "followUpStart")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
 
@@ -69,10 +65,7 @@ class CoxFollowUpEventsTransformerSuite extends SharedContext {
     val result = input.withTrackloss.select("patientID", "category", "trackloss")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "get the first trackloss" in {
@@ -104,10 +97,7 @@ class CoxFollowUpEventsTransformerSuite extends SharedContext {
     val result = input.withTrackloss.select("patientID", "category", "trackloss")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "avoid useless trackloss" in {
@@ -135,10 +125,7 @@ class CoxFollowUpEventsTransformerSuite extends SharedContext {
     val result = input.withTrackloss.select("patientID", "category", "trackloss")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withFollowUpEnd" should "add a column with the end of the follow-up period" in {
@@ -167,7 +154,6 @@ class CoxFollowUpEventsTransformerSuite extends SharedContext {
       .toDF("patientID", "deathDate", "category", "eventId", "start", "trackloss")
       .withColumn("observationEnd", lit(makeTS(2009, 12, 31, 23, 59, 59)))
 
-    input.show
 
     val expected = Seq(
       ("Patient_A", makeTS(2007, 12, 1)),
@@ -187,10 +173,7 @@ class CoxFollowUpEventsTransformerSuite extends SharedContext {
     val result = input.withFollowUpEnd.select("patientID", "followUpEnd")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withEndReason" should "add a column for the reason of follow-up end" in {
@@ -224,10 +207,7 @@ class CoxFollowUpEventsTransformerSuite extends SharedContext {
     val result = input.withEndReason.toDF.select("followUpEnd", "endReason")
 
     // Then
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withFollowUpPeriod" should "add a column for the follow-up start and one for the end" in {
@@ -256,10 +236,7 @@ class CoxFollowUpEventsTransformerSuite extends SharedContext {
     val result = input.withFollowUpPeriodFromEvents.select("patientID", "followUpStart", "followUpEnd")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "transform" should "return a Dataset[FlatEvent] with the follow-up events of each patient" in {

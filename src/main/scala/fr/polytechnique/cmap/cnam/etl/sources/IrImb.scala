@@ -8,7 +8,7 @@ private[sources] object IrImb extends SourceReader
   override def read(sqlContext: SQLContext, irImbPath: String): DataFrame = {
     super.read(sqlContext, irImbPath)
       //.where(col("IMB_ALD_DTD") isNotNull)
-      .where(col("IMB_ALD_DTD") !== "")
+      .where(col("IMB_ALD_DTD") =!= "")
   }
 
 }

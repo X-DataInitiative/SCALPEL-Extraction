@@ -4,7 +4,6 @@ import java.io.File
 import org.apache.commons.io.FileUtils
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.FlatEvent
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class LTSCCSWriterSuite extends SharedContext {
@@ -47,12 +46,7 @@ class LTSCCSWriterSuite extends SharedContext {
     val result = input.groundTruth(moleculesList, diseaseCodes).toDF
 
     // Then
-    result.printSchema
-    expected.printSchema
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "filterPatients" should "return only the events of the patients passed as parameter" in {
@@ -99,12 +93,7 @@ class LTSCCSWriterSuite extends SharedContext {
     val result = input.filterPatients(patientIDs).toDF
 
     // Then
-    result.printSchema
-    expected.printSchema
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "toPersons" should "convert patient flat events into a Dataset[Person]" in {
@@ -131,13 +120,8 @@ class LTSCCSWriterSuite extends SharedContext {
     val result = input.toPersons
 
     // Then
-    result.printSchema
-    expected.printSchema
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 
   "toObservationPeriods" should "convert observation period flat events into a Dataset[ObservationPeriod]" in {
     val sqlCtx = sqlContext
@@ -161,13 +145,8 @@ class LTSCCSWriterSuite extends SharedContext {
     val result = input.toObservationPeriods
 
     // Then
-    result.printSchema
-    expected.printSchema
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 
   "toDrugExposures" should "convert exposure flat events into a Dataset[DrugExposure]" in {
     val sqlCtx = sqlContext
@@ -194,13 +173,8 @@ class LTSCCSWriterSuite extends SharedContext {
     val result = input.toDrugExposures
 
     // Then
-    result.printSchema
-    expected.printSchema
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 
   "toConditionEras" should "convert disease flat events into a Dataset[DrugExposure]" in {
     val sqlCtx = sqlContext
@@ -226,13 +200,8 @@ class LTSCCSWriterSuite extends SharedContext {
     val result = input.toConditionEras
 
     // Then
-    result.printSchema
-    expected.printSchema
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 
   "writeLTSCCS" should "write all 5 files with LTSCCS features" in {
     val sqlCtx = sqlContext

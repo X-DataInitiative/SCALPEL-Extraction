@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.etl.old_root
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class FilteringMainSuite extends SharedContext {
@@ -76,15 +75,9 @@ class FilteringMainSuite extends SharedContext {
     // Then
     val patients = sqlCtx.read.parquet(patientsPath)
     val flatEvents = sqlCtx.read.parquet(flatEventsPath)
-    patients.show
-    expectedPatients.show
-    flatEvents.orderBy("patientID", "category", "start").show
-    expectedFlatEvents.orderBy("patientID", "category", "start").show
-
-    import RichDataFrames._
-    assert(patients === expectedPatients)
-    assert(flatEvents === expectedFlatEvents)
-  }
+    assertDFs(patients, expectedPatients)
+    assertDFs(flatEvents, expectedFlatEvents)
+ }
 
 
   // We have a problem in this test because FilteringConfig was already instantiated by the previous
@@ -139,15 +132,9 @@ class FilteringMainSuite extends SharedContext {
     // Then
     val patients = sqlCtx.read.parquet(patientsPath)
     val flatEvents = sqlCtx.read.parquet(flatEventsPath)
-    patients.show
-    expectedPatients.show
-    flatEvents.orderBy("patientID", "category", "start").show
-    expectedFlatEvents.orderBy("patientID", "category", "start").show
-
-    import RichDataFrames._
-      assert(patients === expectedPatients)
-      assert(flatEvents === expectedFlatEvents)
-  }
+      assertDFs(patients, expectedPatients)
+     assertDFs(flatEvents, expectedFlatEvents)
+ }
 
   it should "return a saved flatEventsDataset if reuseFlatEventsPath is defined" in {
     val sqlCtx = sqlContext
@@ -198,10 +185,6 @@ class FilteringMainSuite extends SharedContext {
     val result = FilteringMain.run(sqlContext, Map("conf" -> configPath)).get.toDF
 
     // Then
-    result.orderBy("patientID", "category", "start").show
-    expected.orderBy("patientID", "category", "start").show
-
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 }

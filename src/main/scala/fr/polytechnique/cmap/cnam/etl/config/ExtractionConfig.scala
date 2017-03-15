@@ -17,7 +17,8 @@ case class ExtractionConfig(
   ageReferenceDate: java.sql.Timestamp,
   tracklossConfig: TracklossConfig,
   lastDate: java.sql.Timestamp,
-  drugCategories: List[String])
+  drugCategories: List[String],
+  maxBoxQuantity: Int)
 
 object ExtractionConfig {
   def init(): ExtractionConfig = ExtractionConfig(
@@ -36,6 +37,7 @@ object ExtractionConfig {
       FilteringConfig.tracklossDefinition.delay
     ),
     lastDate = FilteringConfig.dates.studyEnd,
-    drugCategories = FilteringConfig.drugCategories
+    drugCategories = FilteringConfig.drugCategories,
+    maxBoxQuantity = FilteringConfig.limits.maxQuantityIrpha
   )
 }

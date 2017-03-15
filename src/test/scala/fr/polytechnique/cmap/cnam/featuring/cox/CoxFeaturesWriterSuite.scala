@@ -39,10 +39,6 @@ class CoxFeaturesWriterSuite extends SharedContext {
       .as[CoxFeature]
 
     // Then
-    result.printSchema
-    features.printSchema
-    result.show
-    features.show
     assert(result.count == expectedCount)
   }
 }

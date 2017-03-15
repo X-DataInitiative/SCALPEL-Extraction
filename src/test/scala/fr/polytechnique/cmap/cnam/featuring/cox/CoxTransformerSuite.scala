@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.featuring.cox
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.FlatEvent
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class CoxTransformerSuite extends SharedContext {
@@ -40,10 +39,7 @@ class CoxTransformerSuite extends SharedContext {
     val result = input.withAge.select("patientID", "age")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
 
@@ -75,12 +71,7 @@ class CoxTransformerSuite extends SharedContext {
     val result = input.withAgeGroup
 
     // Then
-    import RichDataFrames._
-    result.printSchema
-    expected.printSchema
-    result.orderBy("patientID").show
-    expected.orderBy("patientID").show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withHasCancer" should "add a column with 1 for the values who had a disease as reason for follow-up end" in {
@@ -116,10 +107,7 @@ class CoxTransformerSuite extends SharedContext {
     val result = input.withHasCancer.select("patientID", "hasCancer")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "normalizeDates" should "normalize start and end of exposure based on the follow-up start" in {
@@ -151,10 +139,7 @@ class CoxTransformerSuite extends SharedContext {
     val result = input.normalizeDates.select("patientID", "start", "end")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "stackDates" should "union the dataframe with itself, creating a new column with start stacked with end" in {
@@ -192,10 +177,7 @@ class CoxTransformerSuite extends SharedContext {
     val result = input.stackDates.select("patientID", "coxStart")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withCoxEnd" should "add a column with the normalized exposure end calculated from the normalized start" in {
@@ -239,10 +221,7 @@ class CoxTransformerSuite extends SharedContext {
     val result = input.withCoxEnd.select("patientID", "coxStart", "coxEnd")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "prepareToPivot" should "insert a line for each molecule that was exposed between normalizedStart and normalizedEnd" in {
@@ -287,10 +266,7 @@ class CoxTransformerSuite extends SharedContext {
       .select("patientID", "gender", "moleculeName", "coxStart", "coxEnd", "weight")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "pivotMolecules" should "pivot the values in the molecule column into six different columns" in {
@@ -327,12 +303,7 @@ class CoxTransformerSuite extends SharedContext {
     val result = input.pivotMolecules
 
     // Then
-    import RichDataFrames._
-    result.printSchema
-    expected.printSchema
-    result.orderBy("patientID", "start", "end").show
-    expected.orderBy("patientID", "start", "end").show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "fixCancerValues" should "leave only the last feature of each patient with 1 for the hasCancer value" in {
@@ -363,12 +334,7 @@ class CoxTransformerSuite extends SharedContext {
     val result = input.adjustCancerValues
 
     // Then
-    import RichDataFrames._
-    result.printSchema
-    expected.printSchema
-    result.orderBy("patientID", "start", "end").show
-    expected.orderBy("patientID", "start", "end").show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   // TODO: Improve this test case ( not enough time right now =/ )
@@ -401,11 +367,6 @@ class CoxTransformerSuite extends SharedContext {
     val result = CoxTransformer.transform(input).toDF
 
     // Then
-    import RichDataFrames._
-    result.printSchema
-    expected.printSchema
-    result.orderBy("patientID", "start", "end").show
-    expected.orderBy("patientID", "start", "end").show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 }

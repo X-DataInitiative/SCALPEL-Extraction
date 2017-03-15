@@ -6,7 +6,6 @@ import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 
 class McoPatientsSuite extends SharedContext {
 
@@ -30,8 +29,7 @@ class McoPatientsSuite extends SharedContext {
     val result: DataFrame = input.getDeathDates(9).select(col("patientID"), col("deathDate"))
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "choose minimum death date if a patient has more than one death dates" in {
@@ -52,8 +50,7 @@ class McoPatientsSuite extends SharedContext {
     val result: DataFrame = input.getDeathDates(9).select(col("patientID"), col("deathDate"))
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "transform" should "return correct Dataset" in {
@@ -81,7 +78,6 @@ class McoPatientsSuite extends SharedContext {
     val result = McoPatients.extract(config, mco)
 
     // Then
-    import RichDataFrames._
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 }

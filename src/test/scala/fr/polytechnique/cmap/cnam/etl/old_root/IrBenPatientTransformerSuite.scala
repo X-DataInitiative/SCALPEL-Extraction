@@ -4,7 +4,6 @@ import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 
 /**
   * Created by burq on 13/09/16.
@@ -34,8 +33,7 @@ class IrBenPatientTransformerSuite extends SharedContext {
     val result = irBen.getBirthDate
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "getGender" should "return correct gender" in {
@@ -59,8 +57,7 @@ class IrBenPatientTransformerSuite extends SharedContext {
     val result = input.getGender
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "getIrBenDeathDates" should "collect death dates correctly from IR_BEN_R" in {
@@ -86,8 +83,7 @@ class IrBenPatientTransformerSuite extends SharedContext {
     val result = irBen.getDeathDate
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "transform" should "return correct result" in {
@@ -112,9 +108,8 @@ class IrBenPatientTransformerSuite extends SharedContext {
     val result = IrBenPatientTransformer.transform(input)
 
     // Then
-    import RichDataFrames._
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 
   it should "deal with actual data" in {
     val sqlCtx = sqlContext
@@ -133,8 +128,7 @@ class IrBenPatientTransformerSuite extends SharedContext {
     val result = IrBenPatientTransformer.transform(input)
 
     // Then
-    import RichDataFrames._
-    assert(result.toDF === expected)
+    assertDFs(result.toDF, expected)
 
 
 

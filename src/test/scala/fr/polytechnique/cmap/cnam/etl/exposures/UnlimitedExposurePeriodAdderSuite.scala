@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.etl.exposures
 
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class UnlimitedExposurePeriodAdderSuite extends SharedContext {
@@ -38,13 +37,10 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
     val result = instance.withStartEnd() // minPurchases = 2, purchasesWindow = 6, startDelay = 3
 
     // Then
-    result.show
-    expected.show
-    import RichDataFrames._
     // The first assert is to make sure the method adds no other columns
     assert(result.columns.diff(input.columns).toList == List("exposureStart", "exposureEnd"))
-    assert(expected === result.select("patientID", "eventId", "exposureStart", "exposureEnd"))
-  }
+    assertDFs(expected, result.select("patientID", "eventId", "exposureStart", "exposureEnd"))
+ }
 
   it should "correctly add exposureStart and exposureEnd for minPurchases = 1" in {
 
@@ -76,11 +72,8 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
     val result = instance.withStartEnd(minPurchases = 1) // purchasesWindow = 6, startDelay = 3
 
     // Then
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(expected === result.select("patientID", "eventId", "exposureStart", "exposureEnd"))
-  }
+    assertDFs(expected, result.select("patientID", "eventId", "exposureStart", "exposureEnd"))
+ }
 
   it should "correctly add exposureStart and exposureEnd for startDelay = 0" in {
 
@@ -112,11 +105,8 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
     val result = instance.withStartEnd(startDelay = 0) // minPurchases = 1, purchasesWindow = 6
 
     // Then
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(expected === result.select("patientID", "eventId", "exposureStart", "exposureEnd"))
-  }
+    assertDFs(expected, result.select("patientID", "eventId", "exposureStart", "exposureEnd"))
+ }
 
   it should "correctly add exposureStart and exposureEnd for purchasesWindow = 9" in {
 
@@ -148,9 +138,6 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
     val result = instance.withStartEnd(purchasesWindow = 9) // minPurchases = 1, startDelay = 3
 
     // Then
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(expected === result.select("patientID", "eventId", "exposureStart", "exposureEnd"))
-  }
+    assertDFs(expected, result.select("patientID", "eventId", "exposureStart", "exposureEnd"))
+ }
 }

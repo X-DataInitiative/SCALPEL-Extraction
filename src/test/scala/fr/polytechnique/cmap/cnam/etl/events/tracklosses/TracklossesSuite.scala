@@ -4,7 +4,6 @@ import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class TracklossesSuite extends SharedContext {
@@ -31,8 +30,7 @@ class TracklossesSuite extends SharedContext {
     val result = input.withInterval(makeTS(2009, 12, 31))
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "filterTrackLosses" should "remove any line with small interval" in {
@@ -56,8 +54,7 @@ class TracklossesSuite extends SharedContext {
     val result = input.filterTrackLosses(4)
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withTrackLossDate" should "add the date of the trackloss" in {
@@ -80,8 +77,7 @@ class TracklossesSuite extends SharedContext {
     val result = input.withTrackLossDate(2)
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "extract" should "return correct result" in {
@@ -101,7 +97,6 @@ class TracklossesSuite extends SharedContext {
     val result = Tracklosses.extract(config, sources)
 
     // Then
-    import RichDataFrames._
-    assert(result.toDF() === expected)
-  }
+    assertDFs(result.toDF(), expected)
+ }
 }

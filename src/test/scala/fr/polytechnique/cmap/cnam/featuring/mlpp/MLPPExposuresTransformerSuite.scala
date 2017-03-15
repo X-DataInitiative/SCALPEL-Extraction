@@ -1,8 +1,7 @@
 package fr.polytechnique.cmap.cnam.featuring.mlpp
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.old_root.{FilteringConfig, FlatEvent}
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
+import fr.polytechnique.cmap.cnam.etl.old_root.FlatEvent
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class MLPPExposuresTransformerSuite extends SharedContext {
@@ -30,8 +29,7 @@ class MLPPExposuresTransformerSuite extends SharedContext {
     val result = input.filterDelayedEntries(true).select("patientID", "category")
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "return the same data if we pass false" in {
@@ -52,8 +50,7 @@ class MLPPExposuresTransformerSuite extends SharedContext {
     val result = input.filterDelayedEntries(false)
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "filterDiagnosedPatients" should "keep only patients who did not have a target disease before the study start (+ threshold)" in {
@@ -80,10 +77,7 @@ class MLPPExposuresTransformerSuite extends SharedContext {
     val result = input.filterEarlyDiagnosedPatients(true).select("patientID", "category")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "return the same data if we pass false" in {
@@ -103,8 +97,7 @@ class MLPPExposuresTransformerSuite extends SharedContext {
     val result = input.filterEarlyDiagnosedPatients(false)
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "filterLostPatients" should "remove patients when they have a trackloss events" in {
@@ -131,8 +124,7 @@ class MLPPExposuresTransformerSuite extends SharedContext {
     val result = input.filterLostPatients(true)
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "filterNeverSickPatients" should "remove patients who never have a target disease" in {
@@ -160,10 +152,7 @@ class MLPPExposuresTransformerSuite extends SharedContext {
     val result = input.filterNeverSickPatients(true)
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withExposureStart" should "add a column with the start of the default MLPP exposure definition" in {
@@ -193,10 +182,7 @@ class MLPPExposuresTransformerSuite extends SharedContext {
       .select("PatientID", "eventId", "exposureStart")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "add a column with the start of the exposure, using a 'cox-like' definition" in {
@@ -234,10 +220,7 @@ class MLPPExposuresTransformerSuite extends SharedContext {
     ).select("PatientID", "eventId", "exposureStart")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "transform" should "return a valid Dataset for a known input" in {
@@ -278,9 +261,6 @@ class MLPPExposuresTransformerSuite extends SharedContext {
     val result = MLPPExposuresTransformer.transform(input)
 
     // Then
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 }

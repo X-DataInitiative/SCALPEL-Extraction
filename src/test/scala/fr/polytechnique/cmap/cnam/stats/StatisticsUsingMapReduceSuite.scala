@@ -13,7 +13,7 @@ class StatisticsUsingMapReduceSuite extends Config {
 
     // Given
     val testDF = sc.parallelize(List(1970, 1975, 1970, 1960, 1970)).toDF("BEN_NAI_ANN")
-    val combinedDF = getSourceDF.select("BEN_NAI_ANN").unionAll(testDF)
+    val combinedDF = getSourceDF.select("BEN_NAI_ANN").union(testDF)
 
     // When
     val resultMostOccurence = StatisticsUsingMapReduce.findMostOccurrenceValues(
@@ -34,7 +34,7 @@ class StatisticsUsingMapReduceSuite extends Config {
 
     // Given
     val testDF = sc.parallelize(List("1970", "1975", "1970", "1960", "1970")).toDF("BEN_NAI_ANN")
-    val combinedDFString = getSourceDF.select($"BEN_NAI_ANN" cast "string").unionAll(testDF)
+    val combinedDFString = getSourceDF.select($"BEN_NAI_ANN" cast "string").union(testDF)
 
     // When
     val resultMostOccurrence = StatisticsUsingMapReduce.findMostOccurrenceValues(
@@ -56,7 +56,7 @@ class StatisticsUsingMapReduceSuite extends Config {
     // Given
     val testDF = sc.parallelize(List(1970, 1975, 1970, 1960, 1970)).toDF("BEN_NAI_ANN")
       .select($"BEN_NAI_ANN" cast "double")
-    val combinedDFDouble = getSourceDF.select($"BEN_NAI_ANN" cast "double").unionAll(testDF)
+    val combinedDFDouble = getSourceDF.select($"BEN_NAI_ANN" cast "double").union(testDF)
 
     // When
     val resultMostOccurrence = StatisticsUsingMapReduce.findMostOccurrenceValues(
@@ -79,7 +79,7 @@ class StatisticsUsingMapReduceSuite extends Config {
     // Given combinedDF
     val testDF = sc.parallelize(List(1970, 1975, 1970, 1960, 1970)).toDF("BEN_NAI_ANN")
       .select($"BEN_NAI_ANN" cast "long")
-    val combinedDFLong = getSourceDF.select($"BEN_NAI_ANN" cast "long").unionAll(testDF)
+    val combinedDFLong = getSourceDF.select($"BEN_NAI_ANN" cast "long").union(testDF)
 
     // When
     val resultMostOccurrence = StatisticsUsingMapReduce.findMostOccurrenceValues(
@@ -102,7 +102,7 @@ class StatisticsUsingMapReduceSuite extends Config {
     val testDF = sc.parallelize(List(1970, 1975, 1970, 1960, 1970, 1975))
       .toDF("BEN_DTE_INS")
     val combinedDfWithNull = getSourceDF.select("BEN_DTE_INS")
-      .unionAll(testDF)
+      .union(testDF)
 
     // When
     val resultMostOccurrence = StatisticsUsingMapReduce.findMostOccurrenceValues(

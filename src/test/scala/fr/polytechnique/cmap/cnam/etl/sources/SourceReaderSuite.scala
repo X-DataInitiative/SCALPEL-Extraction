@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{AnalysisException, DataFrame}
 import fr.polytechnique.cmap.cnam.SharedContext
 
 class SourceReaderSuite extends SharedContext {
@@ -27,7 +27,7 @@ class SourceReaderSuite extends SharedContext {
     val path: String = "src/test/resources/expected/invalid_path.parquet"
 
     // Then
-    intercept[java.lang.AssertionError] {
+    intercept[AnalysisException] {
       TestSourceReader.read(sqlContext, path).count
     }
   }

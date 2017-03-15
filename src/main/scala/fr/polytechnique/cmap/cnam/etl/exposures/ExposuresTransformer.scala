@@ -36,7 +36,7 @@ class ExposuresTransformer(config: ExposuresConfig)
       .filterPatients(config.studyStart, config.diseaseCode, config.filterDelayedPatients)
       .where(col("category") === "molecule")
       .withStartEnd(config.minPurchases,config.startDelay,config.purchasesWindow)
-      .where(col("exposureStart") !== col("exposureEnd")) // This also removes rows where exposureStart = null
+      .where(col("exposureStart") =!= col("exposureEnd")) // This also removes rows where exposureStart = null
       .aggregateWeight(
         Some(config.studyStart),
         Some(config.cumulativeExposureWindow),

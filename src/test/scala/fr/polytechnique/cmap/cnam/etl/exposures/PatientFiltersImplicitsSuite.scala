@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.exposures
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class PatientFiltersImplicitsSuite extends SharedContext {
@@ -32,10 +31,7 @@ class PatientFiltersImplicitsSuite extends SharedContext {
       .select("patientID", "category")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "return the same data if we pass false" in {
@@ -55,8 +51,7 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     val result = instance.filterEarlyDiagnosedPatients(doFilter = false, diseaseCode = "C67")
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "filterDelayedEntries" should "drop patients not exposed during the first N months of study" in {
@@ -84,8 +79,7 @@ class PatientFiltersImplicitsSuite extends SharedContext {
       .select("patientID", "category")
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "return the same data if we pass false" in {
@@ -107,8 +101,7 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     val result = instance.filterDelayedEntries(doFilter = false, studyStart = studyStart)
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "filterPatients" should "filter correctly based on the arguments" in {
@@ -150,9 +143,6 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     ).select("patientID", "category")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 }

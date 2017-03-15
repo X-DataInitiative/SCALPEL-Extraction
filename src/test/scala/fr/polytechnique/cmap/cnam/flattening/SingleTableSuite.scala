@@ -6,7 +6,6 @@ import org.apache.spark.sql.types.{StringType, StructField}
 import org.mockito.Mockito._
 import com.typesafe.config.{Config, ConfigFactory}
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 import fr.polytechnique.cmap.cnam.util.FlatteningConfig
 
 /**
@@ -25,7 +24,7 @@ class SingleTableSuite extends SharedContext {
     val result = new SingleTable(config, sqlContext).df
 
     // Then
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "return the ER_PRS_F dataframe" in {
@@ -38,9 +37,7 @@ class SingleTableSuite extends SharedContext {
     val result = new SingleTable(config, sqlContext).df
 
     // Then
-    result.printSchema
-    expected.printSchema
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "return the ER_PHA_F dataframe" in {
@@ -53,9 +50,7 @@ class SingleTableSuite extends SharedContext {
     val result = new SingleTable(config, sqlContext).df
 
     // Then
-    result.show()
-    expected.show()
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "return the ER_UCD_F dataframe" in {
@@ -68,7 +63,7 @@ class SingleTableSuite extends SharedContext {
     val result = new SingleTable(config, sqlContext).df
 
     // Then
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "return the IR_IMB_R dataframe" in {
@@ -81,7 +76,7 @@ class SingleTableSuite extends SharedContext {
     val result = new SingleTable(config, sqlContext).df
 
     // Then
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "fail when config is wrong" in {

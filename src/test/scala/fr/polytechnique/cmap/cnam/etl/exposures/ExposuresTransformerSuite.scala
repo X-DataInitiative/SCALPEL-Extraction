@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.etl.exposures
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.FlatEvent
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class ExposuresTransformerSuite extends SharedContext {
@@ -63,11 +62,8 @@ class ExposuresTransformerSuite extends SharedContext {
     val result = ExposuresTransformer(ExposuresConfig.init()).transform(input)
 
     // Then
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 
   it should "return a valid Dataset for a known input when filterDelayedPatients is false" in {
 
@@ -128,11 +124,8 @@ class ExposuresTransformerSuite extends SharedContext {
     val result = ExposuresTransformer(config).transform(input)
 
     // Then
-    result.show
-    expected.show
-    import RichDataFrames._
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 
   it should "also return a valid Dataset when cumulativeExposureType is purchase-based" in {
 
@@ -209,10 +202,7 @@ class ExposuresTransformerSuite extends SharedContext {
     val result = ExposuresTransformer(config).transform(input).toDF
 
     // Then
-    result.toDF.orderBy("patientID", "eventId", "start").show
-    expected.toDF.orderBy("patientID", "eventId", "start").show
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "also return a valid Dataset when cumulativeExposureType is time-based" in {
@@ -304,10 +294,7 @@ class ExposuresTransformerSuite extends SharedContext {
     val result = ExposuresTransformer(config).transform(input).toDF
 
     // Then
-    result.toDF.orderBy("patientID", "eventId", "start").show
-    expected.toDF.orderBy("patientID", "eventId", "start").show
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 }
 

@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.flattening
 
 import org.scalatest.GivenWhenThen
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class SASLoaderSuite extends SharedContext with GivenWhenThen{
@@ -37,17 +36,14 @@ class SASLoaderSuite extends SharedContext with GivenWhenThen{
     //When
     val rs  = SASLoader.ComputeDF(sqlContext,Map("conf" -> configPath,"outputFormat" -> "CSV"))(0)
 
-    //Then
+    // Then
     assert(rs.count() == 100)
 
     val orderedDf = rs.orderBy("DCT_ORD_NUM","PRS_ORD_NUM").limit(15)
-    import RichDataFrames._
-    orderedDf.show()
 
     //assertion for dataframe equality (only first 15 lines))
-    assert(orderedDf  === expected)
+    assertDFs(orderedDf , expected)
 
-    rs.printSchema()
     val columnTypes = rs.dtypes
     //assertions for columns data types
     assert(columnTypes(0)._2 == "DoubleType")
@@ -63,7 +59,6 @@ class SASLoaderSuite extends SharedContext with GivenWhenThen{
     val sqlCtx = sqlContext
     val configPath = "src/test/resources/config/sas-default.conf"
     val rs  = SASLoader.ComputeDF(sqlContext, Map("conf" -> configPath,"outputFormat" -> "Parquet"))(0)
-    rs.printSchema()
     assert(rs.count() == 100)
   }
 }

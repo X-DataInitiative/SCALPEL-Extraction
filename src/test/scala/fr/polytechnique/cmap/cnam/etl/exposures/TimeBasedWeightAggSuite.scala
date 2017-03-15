@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.exposures
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class TimeBasedWeightAggSuite extends SharedContext {
@@ -50,9 +49,6 @@ class TimeBasedWeightAggSuite extends SharedContext {
     val result = instance.aggregateWeight
 
     // Then
-    import RichDataFrames._
-    result.orderBy("patientID", "eventId", "exposureStart").show
-    expected.orderBy("patientID", "eventId", "exposureStart").show
-    assert(expected === result)
-  }
+    assertDFs(expected, result)
+ }
 }

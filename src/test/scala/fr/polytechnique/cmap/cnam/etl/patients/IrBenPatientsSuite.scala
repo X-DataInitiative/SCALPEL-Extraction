@@ -5,7 +5,6 @@ import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 
 class IrBenPatientsSuite extends SharedContext {
 
@@ -33,8 +32,7 @@ class IrBenPatientsSuite extends SharedContext {
     val result = irBen.getBirthDate()
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "throw an exception in case of conflicting birth dates" in {
@@ -73,8 +71,7 @@ class IrBenPatientsSuite extends SharedContext {
     val result = input.getGender
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "throw an exception in case of conflicting sex code" in {
@@ -115,8 +112,7 @@ class IrBenPatientsSuite extends SharedContext {
     val result = irBen.getDeathDate
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "transform" should "return correct result" in {
@@ -142,9 +138,8 @@ class IrBenPatientsSuite extends SharedContext {
     val result = IrBenPatients.extract(config, irBen)
 
     // Then
-    import RichDataFrames._
-    assert(result.toDF === expected)
-  }
+    assertDFs(result.toDF, expected)
+ }
 
   it should "deal with actual data" in {
     val sqlCtx = sqlContext
@@ -165,8 +160,7 @@ class IrBenPatientsSuite extends SharedContext {
     val result = IrBenPatients.extract(config, irBen)
 
     // Then
-    import RichDataFrames._
-    assert(result.toDF === expected)
+    assertDFs(result.toDF, expected)
 
 
 

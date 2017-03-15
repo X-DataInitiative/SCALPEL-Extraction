@@ -56,7 +56,7 @@ object DrugEventsTransformer extends Transformer[Event] {
         .join(moleculesDF, "CIP13")
         .select(joinedByCIP07.columns.map(col): _*)
 
-      joinedByCIP07.unionAll(joinedByCIP13)
+      joinedByCIP07.union(joinedByCIP13)
     }
   }
 

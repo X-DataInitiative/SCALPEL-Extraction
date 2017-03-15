@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 
 class McoSuite extends SharedContext {
 
@@ -18,7 +17,6 @@ class McoSuite extends SharedContext {
     val result = Mco.read(sqlCtx, path)
 
     // Then
-    import RichDataFrames._
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 }

@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.flattening
 
 import java.io.File
-import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
 import com.github.saurfang.sas.spark._
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.flattening.SasConfig.ExportFormatType

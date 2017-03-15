@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.featuring.mlpp
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.FlatEvent
-import fr.polytechnique.cmap.cnam.util.RichDataFrames
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class MLPPWriterSuite extends SharedContext {
@@ -41,10 +40,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.withAge()
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withStartBucket" should "add a column with the start date bucket of the event" in {
@@ -72,10 +68,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.withStartBucket
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withDeathBucket" should "add a column with the death date bucket of the patient" in {
@@ -105,10 +98,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.withDeathBucket
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withTracklossBucket" should "add a column with the timeBucket of the first trackloss of each patient" in {
@@ -146,10 +136,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.withTracklossBucket
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withDiseaseBucket" should "add a column with the timeBucket of the first targetDisease of each patient" in {
@@ -187,10 +174,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.withDiseaseBucket
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withEndBucket" should "add a column with the minimum among deathBucket and the max number of buckets" in {
@@ -238,10 +222,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.withEndBucket.select("patientID", "endBucket")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "add a column with the minimum among deathBucket + 1, and the max number of buckets if " +
@@ -285,10 +266,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.withEndBucket.select("patientID", "endBucket")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "makeDiscreteExposures" should "return a Dataset containing the 0-lag exposures in the sparse format" in {
@@ -322,10 +300,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.makeDiscreteExposures.toDF
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "withIndices" should "add a column with the indices of each given column" in {
@@ -356,10 +331,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.withIndices(Seq("patientID", "molecule")).toDF
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "still work with larger data" in {
@@ -377,10 +349,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.withIndices(Seq("pID", "mol")).select("pIDIndex", "molIndex")
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "lagExposures" should "create the lagged elements of the matrix for each exposure" in {
@@ -424,10 +393,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.lagExposures.toDF
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "makeMetadata" should "create a metadata dataset with some relevant information" in {
@@ -460,11 +426,8 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.makeMetadata
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result.toDF === expected.toDF)
-  }
+    assertDFs(result.toDF, expected.toDF)
+ }
 
   "toMLPPFeatures" should "create a new Dataset with the final COO sparse matrix format" in {
     val sqlCtx = sqlContext
@@ -526,10 +489,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.toMLPPFeatures.toDF
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "makeStaticExposures" should "compute the static exposures matrix in a DataFrame format" in {
@@ -557,10 +517,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.makeStaticExposures
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "makeOutcomes" should "create a single-column dataframe with the sparse time-dependent outcomes" in {
@@ -588,10 +545,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.makeOutcomes
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "makeStaticOutcomes" should "create a single-column dataframe with the sparse static outcomes" in {
@@ -619,10 +573,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.makeStaticOutcomes
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "write" should "create the final matrices and write them as parquet files" in {
@@ -691,15 +642,10 @@ class MLPPWriterSuite extends SharedContext {
     val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
 
     // Then
-    import RichDataFrames._
-    result.show(100)
-    expectedFeatures.show(100)
-    StaticExposures.show
-    expectedZMatrix.show
-    assert(result === expectedFeatures)
-    assert(writtenResult === expectedFeatures)
-    assert(StaticExposures === expectedZMatrix)
-  }
+    assertDFs(result, expectedFeatures)
+   assertDFs(writtenResult, expectedFeatures)
+   assertDFs(StaticExposures, expectedZMatrix)
+ }
 
 
   it should "create the final matrices and write them as parquet files (removing death bucket)" in {
@@ -771,13 +717,8 @@ class MLPPWriterSuite extends SharedContext {
     val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
 
     // Then
-    import RichDataFrames._
-    result.show(100)
-    expectedFeatures.show(100)
-    StaticExposures.show
-    expectedZMatrix.show
-    assert(result === expectedFeatures)
-    assert(writtenResult === expectedFeatures)
-    assert(StaticExposures === expectedZMatrix)
-  }
+    assertDFs(result, expectedFeatures)
+   assertDFs(writtenResult, expectedFeatures)
+   assertDFs(StaticExposures, expectedZMatrix)
+ }
 }
