@@ -1,8 +1,7 @@
 package fr.polytechnique.cmap.cnam.filtering.cox
 
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.hive.HiveContext
-import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.filtering._
 import fr.polytechnique.cmap.cnam.filtering.exposures.ExposuresTransformer
@@ -14,7 +13,7 @@ object CoxMain extends Main {
 
   def appName = "CoxFeaturing"
 
-  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
+  def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
 
     logger.info("Running FilteringMain...")
     val flatEvents: Dataset[FlatEvent] = FilteringMain.run(sqlContext, argsMap).get
@@ -54,7 +53,7 @@ object CoxMain extends Main {
     logger.info("Preparing for Cox with the following parameters:")
 
     logger.info("(Lazy) Transforming Follow-up events...")
-    val observationFlatEvents = CoxObservationPeriodTransformer.transform(drugFlatEvents)
+    val observationFlatEvents = CoxObservationPeriodTransformer.transform(drugFlatEvents).cache()
 
     val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(Sources(dcir=Some(dcirFlat)))
     val tracklossFlatEvents = tracklossEvents

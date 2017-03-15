@@ -31,10 +31,12 @@ object StatisticsUsingMapReduce {
     // 'filter(! srcDF(colName).isin(""))' is used to remove empty columns. If we are
     // switching to scala 2.11, we can use spar_csv 2.11 and consider empty columns as null
     val sortedAsRdd = {
-      sourceDF.select(colName)
-      .filter(!sourceDF(colName).isin(""))
-      .sort(asc(colName))
-      .map(x => x.get(0))
+      sourceDF
+        .select(colName)
+        .filter(!sourceDF(colName).isin(""))
+        .sort(asc(colName))
+        .rdd
+        .map(x => x.get(0))
     }
 
     val sortedValuesAsKey = sortedAsRdd.zipWithIndex().map(_.swap)
@@ -68,11 +70,13 @@ object StatisticsUsingMapReduce {
                                   columnName: String): RDD[(Long, Any)] = {
 
     val mappedRDD = {
-      sourceDF.select(columnName)
-      .filter(sourceDF(columnName).isNotNull)
-      .groupBy(columnName)
-      .count()
-      .map(x => (x.getLong(1), x.get(0)))
+      sourceDF
+        .select(columnName)
+        .filter(sourceDF(columnName).isNotNull)
+        .groupBy(columnName)
+        .count()
+        .rdd
+        .map(x => (x.getLong(1), x.get(0)))
     }
 
     mappedRDD

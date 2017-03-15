@@ -11,7 +11,7 @@ object CoxFeaturesWriter {
       data.toDF.orderBy("patientID", "start")
         .coalesce(1)
         .write
-        .format("com.databricks.spark.csv")
+        .format("csv")
         .option("delimiter", ",")
         .option("header", "true")
         .save(path)

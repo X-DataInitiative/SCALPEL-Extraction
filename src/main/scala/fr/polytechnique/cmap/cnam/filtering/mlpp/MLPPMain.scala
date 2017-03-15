@@ -1,8 +1,7 @@
 package fr.polytechnique.cmap.cnam.filtering.mlpp
 
-import org.apache.spark.sql.{DataFrame, Dataset}
-import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{DataFrame, Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.filtering._
 
@@ -10,7 +9,7 @@ object MLPPMain extends Main {
 
   override def appName: String = "MLPPFeaturing"
 
-  def run(sqlContext: HiveContext, argsMap: Map[String, String] = Map()): Option[Dataset[MLPPFeature]] = {
+  def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[MLPPFeature]] = {
 
     import sqlContext.implicits._
 

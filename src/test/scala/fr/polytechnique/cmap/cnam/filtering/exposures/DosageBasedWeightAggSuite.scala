@@ -6,9 +6,10 @@ import fr.polytechnique.cmap.cnam.utilities.functions._
 
 class DosageBasedWeightAggSuite extends SharedContext{
 
+  private lazy val sqlCtx = sqlContext
+
   "aggregateWeight" should "compute exposureStart and weight correctly" in {
 
-    val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     val input = Seq(
@@ -54,7 +55,6 @@ class DosageBasedWeightAggSuite extends SharedContext{
 
   "aggregateWeight" should "compute exposureStart and weight correctly for dosage-level-intervals = [0]" in {
 
-    val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     val input = Seq(
@@ -101,7 +101,7 @@ class DosageBasedWeightAggSuite extends SharedContext{
 
   "aggregateWeight" should "compute exposureStart and weight correctly if there are duplicate exposureStart" in {
 
-    import sqlContext.implicits._
+    import sqlCtx.implicits._
     val input = Seq(
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 3, 1), makeTS(2008, 3, 1), 75),
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 8, 1), makeTS(2008, 8, 1), 50),

@@ -105,12 +105,15 @@ object CoxTransformer extends DatasetTransformer[FlatEvent, CoxFeature] {
           col("gender"),
           col("age"),
           col("ageGroup"),
-          col("coxStart").as("start"),
-          col("coxEnd").as("end"),
+          col("coxStart"),
+          col("coxEnd"),
           col("hasCancer")
         )
-        .pivot("moleculeName", moleculesList)
-        .agg(coalesce(max("weight"), lit(0)).cast(IntegerType)).persist
+        .pivot("moleculeName", moleculesList).agg(max("weight").cast(IntegerType))
+        .withColumnRenamed("coxStart", "start")
+        .withColumnRenamed("coxEnd", "end")
+        .na.fill(0)
+        .persist
     }
 
     def adjustCancerValues: DataFrame = {

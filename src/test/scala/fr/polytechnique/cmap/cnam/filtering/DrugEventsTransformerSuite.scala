@@ -27,7 +27,7 @@ class DrugEventsTransformerSuite extends SharedContext {
         col("PHA_CIP_C13").as("CIP13")
       )
     val dosages: DataFrame = sqlContext.read
-      .format("com.databricks.spark.csv")
+      .format("csv")
       .option("header", "true")
       .load("src/test/resources/value_tables/DOSE_PER_MOLECULE.CSV")
       .select(
@@ -61,7 +61,7 @@ class DrugEventsTransformerSuite extends SharedContext {
     val dcir: DataFrame = sqlContext.read.load("src/test/resources/expected/DCIR.parquet")
     val irPha: DataFrame = sqlContext.read.load("src/test/resources/expected/IR_PHA_R.parquet")
     val dosages: DataFrame = sqlContext.read
-      .format("com.databricks.spark.csv")
+      .format("csv")
       .option("header", "true")
       .load("src/test/resources/value_tables/DOSE_PER_MOLECULE.CSV")
       .select(

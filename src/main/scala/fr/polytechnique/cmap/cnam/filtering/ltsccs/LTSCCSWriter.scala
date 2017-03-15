@@ -59,7 +59,7 @@ object LTSCCSWriter {
     def writeCSV(path: String): Unit = {
       data
         .write
-        .format("com.databricks.spark.csv")
+        .format("csv")
         .option("header", "true")
         .option("delimiter", ",")
         .option("nullValue", "")

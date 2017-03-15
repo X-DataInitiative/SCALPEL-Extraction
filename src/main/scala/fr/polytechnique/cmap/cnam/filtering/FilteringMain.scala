@@ -1,8 +1,7 @@
 package fr.polytechnique.cmap.cnam.filtering
 
-import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.hive.HiveContext
+import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.filtering.FilteringConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.utilities.functions._
@@ -16,7 +15,7 @@ object FilteringMain extends Main {
     *   "conf" -> "path/to/file.conf" (default: "$resources/filtering-default.conf")
     *   "env" -> "cnam" | "cmap" | "test" (deafult: "test")
     */
-  def run(sqlContext: HiveContext, argsMap: Map[String, String] = Map()): Option[Dataset[FlatEvent]] = {
+  def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[FlatEvent]] = {
 
     import implicits.SourceExtractor
     import sqlContext.implicits._

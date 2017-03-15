@@ -1,13 +1,12 @@
 package fr.polytechnique.cmap.cnam.flattening
 
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{Column, DataFrame, Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.statistics.Comparator
-import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.hive.HiveContext
 import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig
 import fr.polytechnique.cmap.cnam.utilities.FlatteningConfig._
+import fr.polytechnique.cmap.cnam.utilities.RichDataFrames._
 
 /**
   * Created by sathiya on 21/09/16.
@@ -117,7 +116,7 @@ object ValidateFlattening extends Main {
     }
   }
 
-  def run(sqlContext: HiveContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
+  def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
     computeStoreFlatAndInputDfsStat()
     None
   }

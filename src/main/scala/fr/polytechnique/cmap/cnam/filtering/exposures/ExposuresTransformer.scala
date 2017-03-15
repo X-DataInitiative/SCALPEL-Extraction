@@ -45,8 +45,8 @@ class ExposuresTransformer(config: ExposuresConfig)
         Some(config.dosageLevelIntervals),
         Some(config.purchaseIntervals)
       )
-      .dropDuplicates(Seq("patientID", "eventID", "exposureStart", "exposureEnd", "weight"))
       .select(outputColumns: _*)
+      .dropDuplicates(Seq("patientID", "eventID", "start", "end", "weight"))
       .as[FlatEvent]
   }
 }

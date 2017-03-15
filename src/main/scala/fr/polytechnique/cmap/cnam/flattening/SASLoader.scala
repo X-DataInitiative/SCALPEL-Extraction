@@ -1,15 +1,9 @@
 package fr.polytechnique.cmap.cnam.flattening
 
 import java.io.File
-
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql._
-import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.{DataFrame, Dataset, _}
 import com.github.saurfang.sas.spark._
-import org.apache.spark.sql.hive.HiveContext
-import com.typesafe.config.{Config, ConfigFactory}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.filtering.{FilteringConfig, FlatEvent, implicits}
 import fr.polytechnique.cmap.cnam.flattening.SasConfig.ExportFormatType
 /**
   * Created by firas on 06/01/2017.
@@ -27,7 +21,7 @@ object SASLoader extends Main{
     }
   }
 
-  def readSasAsDF(sqlContext: HiveContext, argsMap: Map[String, String] = Map()): Map[String,DataFrame] ={
+  def readSasAsDF(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Map[String,DataFrame] ={
 
     argsMap.get("conf").foreach(sqlContext.setConf("conf", _))
     argsMap.get("env").foreach(sqlContext.setConf("env", _))
@@ -46,7 +40,7 @@ object SASLoader extends Main{
     ListDF.foreach{case(name,df) =>
       df.write.parquet(outputDir +"/"+ name)}
 
-  def ComputeDF(sqlContext: HiveContext, argsMap: Map[String, String] = Map()): List[DataFrame] = {
+  def ComputeDF(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): List[DataFrame] = {
 
     argsMap.get("conf").foreach(sqlContext.setConf("conf", _))
     argsMap.get("env").foreach(sqlContext.setConf("env", _))
@@ -60,7 +54,7 @@ object SASLoader extends Main{
 
     MapDF.values.toList
   }
-  def run(sqlContext: HiveContext, argsMap: Map[String, String] = Map()): Option[Dataset[_]] = {
+  def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[_]] = {
 
     val res = ComputeDF(sqlContext,argsMap)
     None

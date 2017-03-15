@@ -9,7 +9,8 @@ class NonCumulativeWeightAggSuite extends SharedContext {
 
   "aggregateWeight" should "add a weight column with a constant '1' value" in {
 
-    import sqlContext.implicits._
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
 
     // Given
     val input: DataFrame = Seq(
