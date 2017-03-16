@@ -29,8 +29,10 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
       _spark = SparkSession
         .builder()
         .appName("Tests")
-        .master("local[4]")
+        .master("local[*]")
+        .config("spark.default.parallelism", 4)
         .config("spark.sql.testkey", "true")
+        .config("spark.sql.shuffle.partitions", 4)
         .getOrCreate()
     }
     // Ensure we have initialized the context before calling parent code
