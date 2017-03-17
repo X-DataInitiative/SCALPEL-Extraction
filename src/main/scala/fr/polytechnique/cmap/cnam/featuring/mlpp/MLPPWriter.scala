@@ -18,7 +18,8 @@ object MLPPWriter {
     lagCount: Int = 10,
     minTimestamp: Timestamp = makeTS(2006, 1, 1),
     maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
-    includeDeathBucket: Boolean = false
+    includeDeathBucket: Boolean = false,
+    featuresAsList: Boolean = false
   )
 
   def apply(params: Params = Params()) = new MLPPWriter(params)
@@ -83,6 +84,10 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
       data.withColumn("endBucket", endBucket)
     }
 
+    def withCensoringBucket: DataFrame = {
+      data.withColumn("censoringBucket", minColumn(col("deathBucket"), col("tracklossBucket")))
+    }
+
     def withIndices(columnNames: Seq[String]): DataFrame = {
 
       columnNames.foldLeft(data){
@@ -115,7 +120,8 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
     def makeDiscreteExposures: Dataset[LaggedExposure] = {
 
       val discreteColumns: Seq[Column] = Seq("patientID", "patientIDIndex", "gender", "age",
-        "diseaseBucket", "molecule", "moleculeIndex", "startBucket", "endBucket").map(col)
+        "diseaseBucket", "molecule", "moleculeIndex", "startBucket", "endBucket",
+        "censoringBucket").map(col)
 
       data
         // In the future, we might change it to sum("weight").as("weight")
@@ -136,7 +142,7 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
 
     import exposures.sqlContext.implicits._
 
-    def makeMetadata: Dataset[Metadata] = {
+    def makeMetadata: Metadata = {
       // We already have this information inside the "withIndices" function, in the labels object,
       //   however, I couldn't think of a good readable solution to extract this information to
       //   the outer scope, so I just compute it again here.
@@ -147,17 +153,15 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
       val buckets = bucketCount
       val bucketSize = params.bucketSize
 
-      Seq(
-        Metadata(
-          rows = patientCount * buckets,
-          columns = moleculeCount * lags,
-          patients = patientCount,
-          buckets = buckets,
-          bucketSize = bucketSize,
-          molecules = moleculeCount,
-          lags = lags
-        )
-      ).toDS
+      Metadata(
+        rows = patientCount * buckets,
+        columns = moleculeCount * lags,
+        patients = patientCount,
+        buckets = buckets,
+        bucketSize = bucketSize,
+        molecules = moleculeCount,
+        lags = lags
+      )
     }
 
     def lagExposures: Dataset[LaggedExposure] = {
@@ -224,13 +228,31 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
       pivoted.select(moleculeColumns ++ referenceColumns: _*)
     }
 
+    def makeCensoring: DataFrame = {
+      val filtered = exposures.filter(_.censoringBucket.isDefined)
+      if(params.featuresAsList) {
+        filtered
+          .map(e => (e.patientIDIndex, e.censoringBucket.get))
+          .distinct.toDF("patientIndex", "bucket")
+      }
+      else {
+        val b = bucketCount
+        filtered.map(e => e.patientIDIndex * b + e.censoringBucket.get).distinct.toDF("index")
+      }
+    }
+
     // The following function assumes the data has been filtered and contains only patients with the
     //   disease
     def makeOutcomes: DataFrame = {
-      val b = bucketCount
-      exposures.map(
-        e => e.patientIDIndex * b + e.diseaseBucket.get
-      ).distinct.toDF
+      if(params.featuresAsList) {
+        exposures
+          .map(e => (e.patientIDIndex, e.diseaseBucket.get))
+          .distinct.toDF("patientIndex", "bucket")
+      }
+      else {
+        val b = bucketCount
+        exposures.map(e => e.patientIDIndex * b + e.diseaseBucket.get).distinct.toDF("index")
+      }
     }
 
     // The following function assumes the data has been filtered and contains only patients with the
@@ -271,6 +293,8 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
       .withDeathBucket
       .withDiseaseBucket
       .withEndBucket
+      .withTracklossBucket
+      .withCensoringBucket
       .where(col("category") === "exposure")
       .withColumnRenamed("eventId", "molecule")
       .where(col("startBucket") < col("endBucket"))
@@ -280,8 +304,9 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
 
     val filteredExposures = initialExposures.filter(_.diseaseBucket.isDefined).persist()
 
-    val metadata: DataFrame = initialExposures.makeMetadata.toDF
+    val metadata: Metadata = initialExposures.makeMetadata
     val staticExposures: DataFrame = initialExposures.makeStaticExposures
+    val censoring = initialExposures.makeCensoring
     val outcomes = filteredExposures.makeOutcomes
     val staticOutcomes = filteredExposures.makeStaticOutcomes
     val features: Dataset[MLPPFeature] = filteredExposures.lagExposures.toMLPPFeatures
@@ -290,17 +315,24 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
     // write static exposures ("Z" matrix)
     staticExposures.write.parquet(s"$rootDir/parquet/StaticExposures")
     staticExposures.writeCSV(s"$rootDir/csv/StaticExposures.csv")
+
+    // write Censoring data
+    censoring.writeCSV(s"$rootDir/csv/Censoring.csv")
+
     // write outcomes ("Y" matrices)
     outcomes.writeCSV(s"$rootDir/csv/Outcomes.csv")
     staticOutcomes.writeCSV(s"$rootDir/csv/StaticOutcomes.csv")
+
     // write lookup tables
     initialExposures.writeLookupFiles(rootDir)
+
     // write sparse features ("X" matrix)
     featuresDF.write.parquet(s"$rootDir/parquet/SparseFeatures")
-    featuresDF.select("rowIndex", "colIndex", "value").writeCSV(s"$rootDir/csv/SparseFeatures.csv")
+    featuresDF.writeCSV(s"$rootDir/csv/SparseFeatures.csv")
 
     // write metadata
-    metadata.writeCSV(s"$rootDir/csv/metadata.csv")
+    import data.sqlContext.implicits._
+    Seq(metadata).toDF.writeCSV(s"$rootDir/csv/metadata.csv")
 
     featuresDF.unpersist()
     filteredExposures.unpersist()

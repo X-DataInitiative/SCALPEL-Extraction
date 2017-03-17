@@ -52,7 +52,8 @@ object MLPPMain extends Main {
         lagCount = lagCount,
         minTimestamp = MLPPConfig.minTimestamp,
         maxTimestamp = MLPPConfig.maxTimestamp,
-        includeDeathBucket = MLPPConfig.includeDeathBucket
+        includeDeathBucket = MLPPConfig.includeDeathBucket,
+        featuresAsList = MLPPConfig.featuresAsList
       )
       val mlppWriter = MLPPWriter(mlppParams)
       val path = s"$outputPath/${bucketSize}B-${lagCount}L"

@@ -1,6 +1,7 @@
 package fr.polytechnique.cmap.cnam.featuring.mlpp
 
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.FlatEvent
 import fr.polytechnique.cmap.cnam.util.functions._
@@ -139,6 +140,47 @@ class MLPPWriterSuite extends SharedContext {
     assertDFs(result, expected)
   }
 
+  "withCensoringBucket" should "add a column with the censoring bucket" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val params = MLPPWriter.Params(
+      minTimestamp = makeTS(2006, 1, 1),
+      maxTimestamp = makeTS(2006, 2, 2),
+      bucketSize = 2
+    )
+
+    val input = Seq(
+      ("PA", Some(2),    None),
+      ("PB", Some(4), Some(5)),
+      ("PC",    None, Some(5)),
+      ("PD", Some(5),    None),
+      ("PE", Some(7), Some(6)),
+      ("PF",    None,    None)
+    ).toDF("patientID", "deathBucket", "tracklossBucket")
+
+    val expected = Seq(
+      ("PA", Some(2)),
+      ("PB", Some(4)),
+      ("PC", Some(5)),
+      ("PD", Some(5)),
+      ("PE", Some(6)),
+      ("PF", None)
+    ).toDF("patientID", "censoringBucket")
+
+    // When
+    val writer = MLPPWriter(params)
+    import writer.MLPPDataFrame
+    val result = input.withCensoringBucket.select("patientID", "censoringBucket")
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
+    assert(result === expected)
+  }
+
   "withDiseaseBucket" should "add a column with the timeBucket of the first targetDisease of each patient" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -273,17 +315,18 @@ class MLPPWriterSuite extends SharedContext {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
+    // todo: update this test
     // Given
     val input = Seq(
-      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6),
-      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6),
-      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6),
-      ("PA", 0, 1, 75, Some(6), "Mol2", 1, 3, 6),
-      ("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8),
-      ("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8),
-      ("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8),
-      ("PB", 1, 2, 40,    None, "Mol2", 1, 6, 8)
-    ).toDF("patientID", "patientIDIndex", "gender", "age", "diseaseBucket", "molecule", "moleculeIndex", "startBucket", "endBucket")
+      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, None: Option[Int]),
+      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, None: Option[Int]),
+      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, None: Option[Int]),
+      ("PA", 0, 1, 75, Some(6), "Mol2", 1, 3, 6, None: Option[Int]),
+      ("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8, None: Option[Int]),
+      ("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8, None: Option[Int]),
+      ("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8, None: Option[Int]),
+      ("PB", 1, 2, 40,    None, "Mol2", 1, 6, 8, None: Option[Int])
+    ).toDF("patientID", "patientIDIndex", "gender", "age", "diseaseBucket", "molecule", "moleculeIndex", "startBucket", "endBucket", "censoringBucket")
 
     val expected = Seq(
       LaggedExposure("PA", 0, 1, 75, Some(6),"Mol1", 0, 0, 6, 0, 1.0),
@@ -297,7 +340,7 @@ class MLPPWriterSuite extends SharedContext {
     // When
     val writer = MLPPWriter()
     import writer.MLPPDataFrame
-    val result = input.makeDiscreteExposures.toDF
+    val result = input.makeDiscreteExposures.select(expected.columns.map(col): _*)
 
     // Then
     assertDFs(result, expected)
@@ -416,9 +459,7 @@ class MLPPWriterSuite extends SharedContext {
       LaggedExposure("PB", 1, 2, 40,    None, "Mol4", 3, 6, 8, 2, 1.0),
       LaggedExposure("PB", 1, 2, 40,    None, "Mol5", 4, 7, 8, 3, 1.0)
     ).toDS
-    val expected: Dataset[Metadata] = Seq(
-      Metadata(30, 20, 2, 15, 2, 5, 4)
-    ).toDS
+    val expected: Metadata = Metadata(30, 20, 2, 15, 2, 5, 4)
 
     // When
     val writer = MLPPWriter(params)
@@ -426,8 +467,8 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.makeMetadata
 
     // Then
-    assertDFs(result.toDF, expected.toDF)
- }
+    assert(result == expected)
+  }
 
   "toMLPPFeatures" should "create a new Dataset with the final COO sparse matrix format" in {
     val sqlCtx = sqlContext
@@ -520,6 +561,67 @@ class MLPPWriterSuite extends SharedContext {
     assertDFs(result, expected)
   }
 
+  "makeCensoring" should "create the output dataframe with censoring information" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val params = MLPPWriter.Params(
+      minTimestamp = makeTS(2006, 1, 1),
+      maxTimestamp = makeTS(2006, 2, 1),
+      bucketSize = 3 // bucketCount = 10
+    )
+    val input: Dataset[LaggedExposure] = Seq(
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1, Some(5)),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1, Some(5)),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1, Some(5)),
+      LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1, Some(3))
+    ).toDS()
+
+    val expected = Seq(5, 23).toDS.toDF("index")
+
+    // When
+    val writer = MLPPWriter(params)
+    import writer.DiscreteExposures
+    val result = input.makeCensoring
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
+    assert(result === expected)
+  }
+
+  it should "create in the new format when featuresAsList is true" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val params = MLPPWriter.Params(featuresAsList = true)
+    val input: Dataset[LaggedExposure] = Seq(
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1, Some(5)),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1, Some(5)),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1, Some(5)),
+      LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1, Some(3))
+    ).toDS()
+
+    val expected = Seq(
+      (0, 5),
+      (2, 3)
+    ).toDF("patientIndex", "bucket")
+
+    // When
+    val writer = MLPPWriter(params)
+    import writer.DiscreteExposures
+    val result = input.makeCensoring
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
+    assert(result === expected)
+  }
+
   "makeOutcomes" should "create a single-column dataframe with the sparse time-dependent outcomes" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -537,7 +639,37 @@ class MLPPWriterSuite extends SharedContext {
       LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
     ).toDS()
 
-    val expected = Seq(6, 21).toDS.toDF
+    val expected = Seq(6, 21).toDS.toDF("index")
+
+    // When
+    val writer = MLPPWriter(params)
+    import writer.DiscreteExposures
+    val result = input.makeOutcomes
+
+    // Then
+    import RichDataFrames._
+    result.show
+    expected.show
+    assert(result === expected)
+  }
+
+  it should "create in the new format when featuresAsList is true" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val params = MLPPWriter.Params(featuresAsList = true)
+    val input: Dataset[LaggedExposure] = Seq(
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1),
+      LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
+    ).toDS()
+
+    val expected = Seq(
+      (0, 6),
+      (2, 1)
+    ).toDF("patientIndex", "bucket")
 
     // When
     val writer = MLPPWriter(params)
@@ -646,7 +778,6 @@ class MLPPWriterSuite extends SharedContext {
    assertDFs(writtenResult, expectedFeatures)
    assertDFs(StaticExposures, expectedZMatrix)
  }
-
 
   it should "create the final matrices and write them as parquet files (removing death bucket)" in {
     val sqlCtx = sqlContext
