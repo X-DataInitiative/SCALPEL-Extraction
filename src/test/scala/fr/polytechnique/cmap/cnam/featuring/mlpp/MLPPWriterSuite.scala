@@ -537,10 +537,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.makeCensoring
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "create in the new format when featuresAsList is true" in {
@@ -570,10 +567,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.makeCensoring
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   "makeOutcomes" should "create a single-column dataframe with the sparse time-dependent outcomes" in {
@@ -600,10 +594,7 @@ class MLPPWriterSuite extends SharedContext {
     val result = input.makeOutcomes
 
     // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
+    assertDFs(result, expected)
   }
 
   it should "create in the new format when featuresAsList is true" in {
@@ -728,8 +719,8 @@ class MLPPWriterSuite extends SharedContext {
 
     // Then
     assertDFs(result, expectedFeatures)
-   assertDFs(writtenResult, expectedFeatures)
-   assertDFs(StaticExposures, expectedZMatrix)
+    assertDFs(writtenResult, expectedFeatures)
+    assertDFs(StaticExposures, expectedZMatrix)
  }
 
   it should "create the final matrices and write them as parquet files (removing death bucket)" in {
@@ -802,7 +793,7 @@ class MLPPWriterSuite extends SharedContext {
 
     // Then
     assertDFs(result, expectedFeatures)
-   assertDFs(writtenResult, expectedFeatures)
-   assertDFs(StaticExposures, expectedZMatrix)
+    assertDFs(writtenResult, expectedFeatures)
+    assertDFs(StaticExposures, expectedZMatrix)
  }
 }
