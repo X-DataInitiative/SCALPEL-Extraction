@@ -140,75 +140,34 @@ class MLPPWriterSuite extends SharedContext {
     assertDFs(result, expected)
   }
 
-  "withCensoringBucket" should "add a column with the censoring bucket" in {
-    val sqlCtx = sqlContext
-    import sqlCtx.implicits._
-
-    // Given
-    val params = MLPPWriter.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 2),
-      bucketSize = 2
-    )
-
-    val input = Seq(
-      ("PA", Some(2),    None),
-      ("PB", Some(4), Some(5)),
-      ("PC",    None, Some(5)),
-      ("PD", Some(5),    None),
-      ("PE", Some(7), Some(6)),
-      ("PF",    None,    None)
-    ).toDF("patientID", "deathBucket", "tracklossBucket")
-
-    val expected = Seq(
-      ("PA", Some(2)),
-      ("PB", Some(4)),
-      ("PC", Some(5)),
-      ("PD", Some(5)),
-      ("PE", Some(6)),
-      ("PF", None)
-    ).toDF("patientID", "censoringBucket")
-
-    // When
-    val writer = MLPPWriter(params)
-    import writer.MLPPDataFrame
-    val result = input.withCensoringBucket.select("patientID", "censoringBucket")
-
-    // Then
-    import RichDataFrames._
-    result.show
-    expected.show
-    assert(result === expected)
-  }
-
   "withDiseaseBucket" should "add a column with the timeBucket of the first targetDisease of each patient" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
     val input = Seq(
-      ("PA", "molecule", "PIOGLITAZONE", 0, Some(4),    None),
-      ("PA", "molecule", "PIOGLITAZONE", 5, Some(4),    None),
-      ("PA", "disease", "targetDisease", 3, Some(4),    None),
-      ("PB", "molecule", "PIOGLITAZONE", 2,    None, Some(5)),
-      ("PB", "disease", "targetDisease", 4,    None, Some(5)),
-      ("PC", "molecule", "PIOGLITAZONE", 0, Some(6),    None),
-      ("PD", "molecule", "PIOGLITAZONE", 2, Some(3),    None),
-      ("PD", "molecule", "PIOGLITAZONE", 3, Some(3),    None),
-      ("PD", "disease", "targetDisease", 4, Some(3),    None)
-    ).toDF("patientID", "category", "eventId", "startBucket", "deathBucket", "tracklossBucket")
+      ("PA", "molecule", "PIOGLITAZONE", 0, Some( 4)),
+      ("PA", "molecule", "PIOGLITAZONE", 5, Some( 4)),
+      ("PA", "disease", "targetDisease", 3, Some( 4)),
+      ("PB", "molecule", "PIOGLITAZONE", 2, Some(16)),
+      ("PB", "disease", "targetDisease", 4, Some(16)),
+      ("PC", "molecule", "PIOGLITAZONE", 0, Some( 6)),
+      ("PD", "molecule", "PIOGLITAZONE", 2, Some( 3)),
+      ("PD", "molecule", "PIOGLITAZONE", 3, Some( 3)),
+      ("PD", "disease", "targetDisease", 4, Some( 3))
+    ).toDF("patientID", "category", "eventId", "startBucket", "endBucket")
 
     val expected = Seq(
-      ("PA", "molecule", "PIOGLITAZONE", 0, Some(4),    None, Some(3)),
-      ("PA", "molecule", "PIOGLITAZONE", 5, Some(4),    None, Some(3)),
-      ("PA", "disease", "targetDisease", 3, Some(4),    None, Some(3)),
-      ("PB", "molecule", "PIOGLITAZONE", 2,    None, Some(5), Some(4)),
-      ("PB", "disease", "targetDisease", 4,    None, Some(5), Some(4)),
-      ("PC", "molecule", "PIOGLITAZONE", 0, Some(6),    None,    None),
-      ("PD", "molecule", "PIOGLITAZONE", 2, Some(3),    None,    None),
-      ("PD", "molecule", "PIOGLITAZONE", 3, Some(3),    None,    None),
-      ("PD", "disease", "targetDisease", 4, Some(3),    None,    None)
-    ).toDF("patientID", "category", "eventId", "startBucket", "deathBucket", "tracklossBucket", "diseaseBucket")
+      ("PA", "molecule", "PIOGLITAZONE", 0, Some( 4), Some(3)),
+      ("PA", "molecule", "PIOGLITAZONE", 5, Some( 4), Some(3)),
+      ("PA", "disease", "targetDisease", 3, Some( 4), Some(3)),
+      ("PB", "molecule", "PIOGLITAZONE", 2, Some(16), Some(4)),
+      ("PB", "disease", "targetDisease", 4, Some(16), Some(4)),
+      ("PC", "molecule", "PIOGLITAZONE", 0, Some( 6),    None),
+      ("PD", "molecule", "PIOGLITAZONE", 2, Some( 3),    None),
+      ("PD", "molecule", "PIOGLITAZONE", 3, Some( 3),    None),
+      ("PD", "disease", "targetDisease", 4, Some( 3),    None)
+    ).toDF("patientID", "category", "eventId", "startBucket", "endBucket", "diseaseBucket")
 
     // When
     val writer = MLPPWriter()
@@ -231,31 +190,21 @@ class MLPPWriterSuite extends SharedContext {
     )
 
     val input = Seq(
-      ("PA", Some(2),    None, Some(3)),
-      ("PA", Some(2),    None, Some(3)),
-      ("PB", Some(4), Some(5), Some(3)),
-      ("PB", Some(4), Some(5), Some(3)),
-      ("PC",    None, Some(5), Some(4)),
-      ("PC",    None, Some(5), Some(4)),
-      ("PD", Some(5),    None, None),
-      ("PD", Some(5),    None, None),
-      ("PE", Some(7), Some(6), None),
-      ("PE", Some(7), Some(6), None),
-      ("PF",    None,    None, None)
-    ).toDF("patientID", "deathBucket", "tracklossBucket", "diseaseBucket")
+      ("PA", Some(2),    None),
+      ("PB", Some(4), Some(5)),
+      ("PC",    None, Some(5)),
+      ("PD", Some(5),    None),
+      ("PE", Some(7), Some(6)),
+      ("PF",    None,    None)
+    ).toDF("patientID", "deathBucket", "tracklossBucket")
 
     val expected = Seq(
-      ("PA", Some(2)),
-      ("PA", Some(2)),
-      ("PB", Some(4)),
-      ("PB", Some(4)),
-      ("PC", Some(16)),
-      ("PC", Some(16)),
-      ("PD", Some(5)),
-      ("PD", Some(5)),
-      ("PE", Some(7)),
-      ("PE", Some(7)),
-      ("PF", Some(16))
+      ("PA", 2),
+      ("PB", 4),
+      ("PC", 5),
+      ("PD", 5),
+      ("PE", 6),
+      ("PF", 16)
     ).toDF("patientID", "endBucket")
 
     // When
@@ -277,27 +226,27 @@ class MLPPWriterSuite extends SharedContext {
       minTimestamp = makeTS(2006, 1, 1),
       maxTimestamp = makeTS(2006, 2, 2),
       bucketSize = 2,
-      includeDeathBucket = true
+      includeCensoredBucket = true
     )
 
     val input = Seq(
-      ("PA", Some(16)),
-      ("PA", Some(16)),
-      ("PB", Some( 0)),
-      ("PB", Some( 0)),
-      ("PC", Some( 5)),
-      ("PC", Some( 5)),
-      ("PD",    None),
-      ("PD",    None)
-    ).toDF("patientID", "deathBucket")
+      ("PA", Some(16),    None),
+      ("PA", Some(16),    None),
+      ("PB", Some( 0), Some(2)),
+      ("PB", Some( 0), Some(2)),
+      ("PC", Some( 5), Some(3)),
+      ("PC", Some( 5), Some(3)),
+      ("PD",     None,    None),
+      ("PD",     None,    None)
+    ).toDF("patientID", "deathBucket", "tracklossBucket")
 
     val expected = Seq(
       ("PA", Some(16)),
       ("PA", Some(16)),
       ("PB", Some( 1)),
       ("PB", Some( 1)),
-      ("PC", Some( 6)),
-      ("PC", Some( 6)),
+      ("PC", Some( 4)),
+      ("PC", Some( 4)),
       ("PD", Some(16)),
       ("PD", Some(16))
     ).toDF("patientID", "endBucket")
@@ -318,15 +267,15 @@ class MLPPWriterSuite extends SharedContext {
     // todo: update this test
     // Given
     val input = Seq(
-      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, None: Option[Int]),
-      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, None: Option[Int]),
-      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, None: Option[Int]),
-      ("PA", 0, 1, 75, Some(6), "Mol2", 1, 3, 6, None: Option[Int]),
-      ("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8, None: Option[Int]),
-      ("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8, None: Option[Int]),
-      ("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8, None: Option[Int]),
-      ("PB", 1, 2, 40,    None, "Mol2", 1, 6, 8, None: Option[Int])
-    ).toDF("patientID", "patientIDIndex", "gender", "age", "diseaseBucket", "molecule", "moleculeIndex", "startBucket", "endBucket", "censoringBucket")
+      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6),
+      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6),
+      ("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6),
+      ("PA", 0, 1, 75, Some(6), "Mol2", 1, 3, 6),
+      ("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8),
+      ("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8),
+      ("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8),
+      ("PB", 1, 2, 40,    None, "Mol2", 1, 6, 8)
+    ).toDF("patientID", "patientIDIndex", "gender", "age", "diseaseBucket", "molecule", "moleculeIndex", "startBucket", "endBucket")
 
     val expected = Seq(
       LaggedExposure("PA", 0, 1, 75, Some(6),"Mol1", 0, 0, 6, 0, 1.0),
@@ -572,13 +521,15 @@ class MLPPWriterSuite extends SharedContext {
       bucketSize = 3 // bucketCount = 10
     )
     val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1, Some(5)),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1, Some(5)),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1, Some(5)),
-      LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1, Some(3))
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 5, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 5, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 5, 0, 1),
+      LaggedExposure("PC", 2, 1, 65, Some(8), "PIO", 1, 1, 7, 0, 1),
+      LaggedExposure("PC", 2, 1, 65, Some(8), "ROS", 2, 2, 7, 0, 1),
+      LaggedExposure("PD", 3, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
     ).toDS()
 
-    val expected = Seq(5, 23).toDS.toDF("index")
+    val expected = Seq(5, 27, 31).toDS.toDF("index")
 
     // When
     val writer = MLPPWriter(params)
@@ -599,15 +550,18 @@ class MLPPWriterSuite extends SharedContext {
     // Given
     val params = MLPPWriter.Params(featuresAsList = true)
     val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1, Some(5)),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1, Some(5)),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1, Some(5)),
-      LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1, Some(3))
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 5, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 5, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 5, 0, 1),
+      LaggedExposure("PC", 2, 1, 65,    None, "PIO", 1, 1, 7, 0, 1),
+      LaggedExposure("PC", 2, 1, 65,    None, "ROS", 2, 2, 7, 0, 1),
+      LaggedExposure("PD", 3, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
     ).toDS()
 
     val expected = Seq(
       (0, 5),
-      (2, 3)
+      (2, 7),
+      (3, 1)
     ).toDF("patientIndex", "bucket")
 
     // When
@@ -634,7 +588,6 @@ class MLPPWriterSuite extends SharedContext {
     )
     val input: Dataset[LaggedExposure] = Seq(
       LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1),
       LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1),
       LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
     ).toDS()
@@ -790,7 +743,7 @@ class MLPPWriterSuite extends SharedContext {
       maxTimestamp = makeTS(2006, 8, 1), // 7 total buckets
       bucketSize = 30,
       lagCount = 4,
-      includeDeathBucket = true
+      includeCensoredBucket = true
     )
     val input: Dataset[FlatEvent] = Seq(
       FlatEvent("PC", 2, makeTS(1970, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 5, 15), None),

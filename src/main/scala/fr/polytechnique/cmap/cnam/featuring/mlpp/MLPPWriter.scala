@@ -18,7 +18,7 @@ object MLPPWriter {
     lagCount: Int = 10,
     minTimestamp: Timestamp = makeTS(2006, 1, 1),
     maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
-    includeDeathBucket: Boolean = false,
+    includeCensoredBucket: Boolean = false,
     featuresAsList: Boolean = false
   )
 
@@ -63,29 +63,26 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
       data.withColumn("tracklossBucket", tracklossBucket)
     }
 
+    // We are no longer using disease information for calculating the end bucket.
+    def withEndBucket: DataFrame = {
+
+      val deathBucketRule = if (params.includeCensoredBucket) col("deathBucket") + 1 else col("deathBucket")
+      val tracklossBucketRule = if (params.includeCensoredBucket) col("tracklossBucket") + 1 else col("tracklossBucket")
+
+      val endBucket: Column = minColumn(deathBucketRule, tracklossBucketRule, lit(bucketCount))
+      data.withColumn("endBucket", endBucket)
+    }
+
     def withDiseaseBucket: DataFrame = {
       val window = Window.partitionBy("patientId")
 
       val hadDisease: Column = (col("category") === "disease") &&
-      (col("eventId") === "targetDisease") &&
-      (col("startBucket") < minColumn(col("deathBucket"), lit(bucketCount)))
+        (col("eventId") === "targetDisease") &&
+        (col("startBucket") < minColumn(col("endBucket"), lit(bucketCount)))
 
       val diseaseBucket: Column = min(when(hadDisease, col("startBucket"))).over(window)
 
       data.withColumn("diseaseBucket", diseaseBucket)
-    }
-
-    // We are no longer using trackloss and disease information for calculating the end bucket.
-    def withEndBucket: DataFrame = {
-
-      val deathBucketRule = if (params.includeDeathBucket) col("deathBucket") + 1 else col("deathBucket")
-
-      val endBucket: Column = minColumn(deathBucketRule, lit(bucketCount))
-      data.withColumn("endBucket", endBucket)
-    }
-
-    def withCensoringBucket: DataFrame = {
-      data.withColumn("censoringBucket", minColumn(col("deathBucket"), col("tracklossBucket")))
     }
 
     def withIndices(columnNames: Seq[String]): DataFrame = {
@@ -120,8 +117,7 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
     def makeDiscreteExposures: Dataset[LaggedExposure] = {
 
       val discreteColumns: Seq[Column] = Seq("patientID", "patientIDIndex", "gender", "age",
-        "diseaseBucket", "molecule", "moleculeIndex", "startBucket", "endBucket",
-        "censoringBucket").map(col)
+        "diseaseBucket", "molecule", "moleculeIndex", "startBucket", "endBucket").map(col)
 
       data
         // In the future, we might change it to sum("weight").as("weight")
@@ -229,15 +225,15 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
     }
 
     def makeCensoring: DataFrame = {
-      val filtered = exposures.filter(_.censoringBucket.isDefined)
+      val b = bucketCount
+      val filtered = exposures.filter(_.endBucket < b)
       if(params.featuresAsList) {
         filtered
-          .map(e => (e.patientIDIndex, e.censoringBucket.get))
+          .map(e => (e.patientIDIndex, e.endBucket))
           .distinct.toDF("patientIndex", "bucket")
       }
       else {
-        val b = bucketCount
-        filtered.map(e => e.patientIDIndex * b + e.censoringBucket.get).distinct.toDF("index")
+        filtered.map(e => e.patientIDIndex * b + e.endBucket).distinct.toDF("index")
       }
     }
 
@@ -291,10 +287,9 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
       .withAge(AgeReferenceDate)
       .withStartBucket
       .withDeathBucket
-      .withDiseaseBucket
-      .withEndBucket
       .withTracklossBucket
-      .withCensoringBucket
+      .withEndBucket
+      .withDiseaseBucket
       .where(col("category") === "exposure")
       .withColumnRenamed("eventId", "molecule")
       .where(col("startBucket") < col("endBucket"))

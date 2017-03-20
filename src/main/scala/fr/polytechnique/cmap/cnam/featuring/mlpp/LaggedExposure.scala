@@ -11,6 +11,5 @@ case class LaggedExposure(
     startBucket: Int,
     endBucket: Int,
     lag: Int,
-    weight: Double,
-    censoringBucket: Option[Int] = None // todo: remove this default and update tests
+    weight: Double
 )

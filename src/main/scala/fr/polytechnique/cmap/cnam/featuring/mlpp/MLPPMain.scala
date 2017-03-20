@@ -52,7 +52,7 @@ object MLPPMain extends Main {
         lagCount = lagCount,
         minTimestamp = MLPPConfig.minTimestamp,
         maxTimestamp = MLPPConfig.maxTimestamp,
-        includeDeathBucket = MLPPConfig.includeDeathBucket,
+        includeCensoredBucket = MLPPConfig.includeCensoredBucket,
         featuresAsList = MLPPConfig.featuresAsList
       )
       val mlppWriter = MLPPWriter(mlppParams)
