@@ -45,7 +45,7 @@ private[molecules] object DcirMoleculePurchases {
       col("NUM_ENQ").cast(StringType).as("patientID"),
       col("`ER_PHA_F.PHA_PRS_IDE`").cast(StringType).as("CIP07"),
       col("`ER_PHA_F.PHA_PRS_C13`").cast(StringType).as("CIP13"),
-      col("ER_PHA_F_PHA_ACT_QSN").as("nBoxes"),
+      col("ER_PHA_F_PHA_ACT_QSN").as("nBoxes"), // The DCIR parquet must contain this version of the column
       col("EXE_SOI_DTD").cast(TimestampType).as("eventDate")
     )
 
@@ -89,7 +89,8 @@ private[molecules] object DcirMoleculePurchases {
     val result = validatedDcir
       .addMoleculesInfo(moleculesInfo) // Add molecule name and dosage
       .withColumn("totalDose", col("dosage") * col("nBoxes")) // Compute total dose
-      .groupBy(groupCols: _*).agg(sum("totalDose").as("totalDose"))
+      .groupBy(groupCols: _*)
+      .agg(sum("totalDose").as("totalDose"))
       .map(Molecule.fromRow(_, nameCol = "moleculeName", dosageCol = "totalDose"))
 
     moleculesInfo.unpersist()

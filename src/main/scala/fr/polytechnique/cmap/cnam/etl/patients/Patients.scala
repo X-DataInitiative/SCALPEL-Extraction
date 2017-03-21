@@ -49,7 +49,7 @@ object Patients extends PatientsExtractor {
     )
 
     val age = floor(months_between(lit(config.ageReferenceDate), birthDate) / 12)
-    val filterPatientsByAge = age >= 40 && age < 80
+    val filterPatientsByAge = age >= config.minAge && age < config.maxAge
 
     patients.where(filterPatientsByAge)
       .select(
