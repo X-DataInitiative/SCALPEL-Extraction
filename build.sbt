@@ -18,12 +18,8 @@ libraryDependencies += "org.apache.spark" %% "spark-hive" % sparkVersion % "prov
 
 libraryDependencies += "com.typesafe" % "config" % "1.3.1"
 
-resolvers += "bintray-spark-packages" at "https://dl.bintray.com/spark-packages/maven/"
-libraryDependencies += "saurfang" % "spark-sas7bdat" % "1.1.5-s_2.11"
-
 assemblyMergeStrategy in assembly := {
   case PathList("org", "apache", xs @ _*) => MergeStrategy.last
-  case PathList("com", "ggasoftware", xs @ _*) => MergeStrategy.last
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
