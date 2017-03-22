@@ -5,8 +5,8 @@ version := "1.0"
 scalaVersion := "2.11.7"
 val sparkVersion = "2.1.0"
 
+logLevel in compile := Level.Warn
 parallelExecution in Test := false
-
 test in assembly := {}
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
