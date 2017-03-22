@@ -1,79 +1,78 @@
 [![Build Status](https://travis-ci.com/X-DataInitiative/SNIIRAM-flattening.svg?token=LzAm1iAXuXZzFBCrak5F&branch=master)](https://travis-ci.com/X-DataInitiative/SNIIRAM-flattening)
 [![codecov](https://codecov.io/gh/X-DataInitiative/SNIIRAM-flattening/branch/master/graph/badge.svg?token=4a0h501t8P)](https://codecov.io/gh/X-DataInitiative/SNIIRAM-flattening)
 
-# Flattening
+This repository contains the ETL (Extract, Transform & Load) and Featuring stages of the processing pipeline for the SNIIRAM pharmacovigilance project in partnership with CNAMTS.
 
-This repository hosts a cleaner version of flattening, including testing and statistics computation
+# ETL stage
 
-The src/test/resources contains different fake csv including 2 different patients:
-* Patient_01 is a female, who took GLICLAZIDE medicine and did not get cancer.
-* Patient_02 is a male, he took PIOGLITAZONE and got cancer and died on 25/01/2006. But there is one purchase action for him in the PRS file.
+The ETL process of this project consists of the following steps:
 
+1) Reading data from parquet files generated in the Flattening part;
+2) Extracting events from raw data, such as diagnoses and drug purchases;
+3) Transforming events into processed events, such as outcomes and exposures.
 
-To add a new table for the CNAM scope, we should modify the cnam.conf file.
-It should be formatted like this : 
+This processing stage can be executed by running the `ETLMain` class, which can be done with spark-shell as in the following example:
 
-        cnam {
-          tables = [
-            {
-            //here should come the description of one table
-            }
-
-            {
-            // here should come another table
-            }
-
-          ]
-        }
-        
-The object should be formatted like this :
-
-    {
-      name = IR_IMB_R
-      paths = [
-        "src/test/resources/IR_IMB_R.csv"
-      ]
-      fields = [
-        {name: NUM_ENQ, type: StringType}
-        {name: BEN_RNG_GEM, type: IntegerType}
-        {name: IMB_ALD_DTD, type: DateType}
-        {name: IMB_ALD_DTF, type: DateType}
-        {name: IMB_ALD_NUM, type: IntegerType}
-        {name: IMB_ETM_NAT, type: IntegerType}
-        {name: IMB_MLP_BTR, type: StringType}
-        {name: IMB_MLP_TAB, type: StringType}
-        {name: IMB_SDR_LOP, type: StringType}
-        {name: INS_DTE, type: DateType}
-        {name: MED_MTF_COD, type: StringType}
-        {name: MED_NCL_IDT, type: StringType}
-        {name: UPD_DTE, type: DateType}
-      ]
-      output {
-        table_name = "IR_IMB_R"
-        key=2006
-      }
-    }
-    
-It is possible to add a "date_format" field that will describe how the date 
-should be formatted following the java DateTime API.
-
-# Filtering
-
-The filtering package contains the ETL logic used to convert the flattened tables into two new tables: one containing the patients data and another one containing the normalized events as well as the outcomes. More details can be found in the [Software Architecture page](https://datainitiative.atlassian.net/wiki/display/CNAM/Software+architecture), on Confluence.
-
-## FilteringMain
-
-This package also contains a runnable object called `FilteringMain`. It can be run with spark-submit and it expects an "environment" parameter that can be either "test", "cnam" or "cmap", this will define which part of the `filtering.conf` configuration file will be used. Please make sure this file contains the correct paths before submitting the job. 
-
-After a successful execution, the output tables will be written as parquet files in the paths defined in the `filtering.conf` file.
-
-An example of execution of this class with the "test" environment is shown below:
-
-```
-$SPARK_HOME/bin/spark-submit \
-   --class fr.polytechnique.cmap.cnam.filtering.FilteringMain \
-   --master local[4] \
-   this_package.jar test
+```bash
+#!/bin/sh
+spark-submit \
+  --driver-memory 40G \
+  --executor-memory 110G \
+  --class fr.polytechnique.cmap.cnam.etl.ETLMain \
+  --conf spark.task.maxFailures=20 \
+  SNIIRAM-flattening-assembly-1.0.jar conf=./config.conf env=cnam
 ```
 
+As shown above, the ETL step needs a configuration file. All the available configuration items can be found in the file [`src/main/resources/config/filtering-default.conf`](https://github.com/X-DataInitiative/SNIIRAM-flattening/blob/master/src/main/resources/config/filtering-default.conf).
+However, the file passed at execution time does not need to contain all items, only those that different from default. Some examples are shown in the [Configuration](#configuration) section below.
 
+# Featuring stage
+
+The output of the ETL step is then passed into the Featuring step for converting specific events into formatted features ready to be used by a specific mathematical model.
+
+Currently, the supported models are:
+
++ R's Coxph
++ Schuemie's LTSCCS
++ CMAP's AR-SCCS (a.k.a "MLPP")
+
+For each model there is a main class that can be used to execute the featuring. These classes are listed below:
+
+|Model|Class|
+|:---|:---|
+| Cox | `fr.polytechnique.cmap.cnam.featuring.cox.CoxMain` |
+| LTSCCS | `fr.polytechnique.cmap.cnam.featuring.ltsccs.LTSCCSMain` |
+| AR-SCCS | `fr.polytechnique.cmap.cnam.featuring.mlpp.MLPPMain` |
+
+For these classes, a configuration file is also needed and the format is the same as for the ETL code.
+
+# Configuration
+
+The configuration file passed at execution time can contain only the items that are different from the default. For example, to run only the ETL stage, but changing the list of diagnosis codes and the output paths, one could use a file such as the following:
+
+```hocon
+main_diagnosis_codes = ["I50", "I110", "130", "132"]
+
+paths.output = {
+    patients = "/new/output/path/patients"
+    flat_events = "/new/output/path/new_events"
+} 
+```
+
+Similarly when running the featuring for the AR-SCCS model, for example, we can change the number of lags and size of time buckets, in addition to the changes to the ETL configuration items:
+ 
+```hocon
+main_diagnosis_codes = ["I50", "I110", "130", "132"]
+
+paths.output = {
+    patients = "/new/output/path/patients"
+    flat_events = "/new/output/path/new_events"
+}
+
+mlpp_parameters = {
+    bucket_size = [60]  # Number of days of each bucket of time
+    lag_count = [16]  # Number of lags to be created
+}
+```
+
+All the available configuration items, with a quick description and the default values, can be found on the file [`src/main/resources/config/filtering-default.conf`](https://github.com/X-DataInitiative/SNIIRAM-flattening/blob/master/src/main/resources/config/filtering-default.conf). 
