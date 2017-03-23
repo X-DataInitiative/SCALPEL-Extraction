@@ -6,8 +6,10 @@ env:
   - linux
 
 language: scala
+
 scala:
-  - 2.10.6
+  - 2.11.7
+
 # JDK8 not available with OpenJDK
 jdk:
   - oraclejdk8
@@ -15,6 +17,7 @@ jdk:
 branches:
   only:
   - master
+
 git:
   depth: 1
 
