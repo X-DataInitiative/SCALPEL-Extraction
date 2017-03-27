@@ -42,7 +42,7 @@ package object functions {
     (end.getTime - start.getTime) / (24.0 * 3600.0 * 1000.0)
   }
 
-  def unionDatasets[A](datasets: Dataset[A]*): Dataset[A] = datasets.reduce(_.union(_))
+  def unionDatasets[T](datasets: Dataset[T]*): Dataset[T] = datasets.reduce(_.union(_))
 
   implicit class IntFunctions(num: Int) {
     def between(lower: Int, upper: Int): Boolean = num >= lower && num <= upper

@@ -80,6 +80,7 @@ private[molecules] object DcirMoleculePurchases {
 
     val validatedDcir: DataFrame = dcir
       .select(dcirInputColumns: _*)
+      .where(col("eventDate").isNotNull)
       .filterBoxQuantities(config.maxBoxQuantity)
       .na.drop("any", Seq("CIP07", "CIP13"))
       .where(col("CIP07").isin(CIP07List.value: _*) || col("CIP13").isin(CIP13List.value: _*))
