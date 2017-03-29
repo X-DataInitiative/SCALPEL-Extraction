@@ -10,8 +10,12 @@ import org.apache.spark.sql.{Column, DataFrame, Dataset}
 object InfarctusTransformer extends DiseaseTransformer {
 
   val DiseaseCodes = List(
-    "I21",
-    "I22"
+    "I110",
+    "I130",
+    "I132",
+    "I139",
+    "K761",
+    "J81"
   )
 
   override val outputColumns: List[Column] = List(
@@ -26,6 +30,8 @@ object InfarctusTransformer extends DiseaseTransformer {
   val mcoInputColumns: List[Column] = List(
     col("NUM_ENQ").as("patientID"),
     col("`MCO_B.DGN_PAL`").as("diseasePal"),
+    col("`MCO_B.DGN_REL`").as("diseaseRel"),
+    col("`MCO_D.ASS_DGN`").as("diseaseAss"),
     col("`MCO_B.SOR_MOI`").as("stayMonthEndDate"),
     col("`MCO_B.SOR_ANN`").as("stayYearEndDate"),
     col("`MCO_B.SEJ_NBJ`").as("stayLength"),
@@ -33,17 +39,16 @@ object InfarctusTransformer extends DiseaseTransformer {
     col("`SOR_DAT`").as("stayEndDate").cast("Timestamp")
   )
 
-  val mcoDiseaseColumn: Column = col("diseasePal")
-
   implicit class InfarctusDataFrame(df: DataFrame) {
 
     def extractDisease: DataFrame = {
-      df.filter(
-        mcoDiseaseColumn.startsWith("I21") or
-        mcoDiseaseColumn.startsWith("I22")
+      df.where(
+        col("diseasePal").startsWith("I50").or(
+        DiseaseCodes.map(col("diseasePal").startsWith).reduce(_ or _)
+          and (col("diseaseRel").startsWith("I50") or col("diseaseAss").startsWith("I50"))
+        )
       )
     }
-
   }
 
   override def transform(sources: Sources): Dataset[Event] = {
