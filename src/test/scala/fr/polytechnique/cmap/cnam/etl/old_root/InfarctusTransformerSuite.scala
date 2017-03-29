@@ -1,11 +1,11 @@
-package fr.polytechnique.cmap.cnam.filtering
+package fr.polytechnique.cmap.cnam.etl.old_root
 
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.utilities.functions.makeTS
-import fr.polytechnique.cmap.cnam.filtering.InfarctusTransformer._
-import fr.polytechnique.cmap.cnam.utilities.RichDataFrames
+import fr.polytechnique.cmap.cnam.etl.old_root.InfarctusTransformer._
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import org.apache.spark.sql.DataFrame
+import fr.polytechnique.cmap.cnam.util.functions._
+import org.apache.spark.sql.functions.col
 
 trait fakeInfarctusFixture extends SharedContext {
 
@@ -67,10 +67,7 @@ class InfarctusTransformerSuite extends fakeInfarctusFixture {
     val output = InfarctusTransformer.transform(input).toDF
 
     // Then
-    import RichDataFrames._
-    output.show
-    expected.show
-    assert(output === expected)
+    assertDFs(output, expected)
   }
 
 }

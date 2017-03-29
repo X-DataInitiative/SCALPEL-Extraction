@@ -1,7 +1,8 @@
-package fr.polytechnique.cmap.cnam.filtering
-import fr.polytechnique.cmap.cnam.filtering.McoDiseaseTransformer.{DiseaseCode, outputColumns}
+package fr.polytechnique.cmap.cnam.etl.old_root
+
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{LongType, TimestampType}
+import org.apache.spark.sql.types.TimestampType
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 
 /**
@@ -55,8 +56,8 @@ object InfarctusTransformer extends DiseaseTransformer {
 
     val pmsiMco: DataFrame = sources.pmsiMco.get
 
-    import pmsiMco.sqlContext.implicits._
     import McoDiseaseTransformer.pmsiMcoDataFrame
+    import pmsiMco.sqlContext.implicits._
 
     pmsiMco.select(mcoInputColumns: _*)
       .extractDisease

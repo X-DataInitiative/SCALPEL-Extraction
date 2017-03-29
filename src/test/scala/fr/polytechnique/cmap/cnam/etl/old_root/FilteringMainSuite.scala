@@ -187,4 +187,46 @@ class FilteringMainSuite extends SharedContext {
     // Then
     assertDFs(result, expected)
   }
+
+  it should "correctly run the full filtering pipeline for infarctus without exceptions" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val configPath = "src/test/resources/config/filtering-infarctus.conf"
+    lazy val patientsPath = FilteringConfig.outputPaths.patients
+    lazy val flatEventsPath = FilteringConfig.outputPaths.flatEvents
+    val expectedPatients: DataFrame = Seq(
+      Patient(
+        patientID = "Patient_02",
+        gender = 1,
+        birthDate = makeTS(1959, 10, 1),
+        deathDate = Some(makeTS(2008, 1, 25))
+      )
+    ).toDF
+
+    val expectedFlatEvents: DataFrame = Seq(
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
+        "PIOGLITAZONE", 840.0, makeTS(2006, 1, 15), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
+        "PIOGLITAZONE", 4200.0, makeTS(2006, 1, 30), None),
+      FlatEvent("Patient_02", 1, makeTS(1959, 10, 1), Some(makeTS(2008, 1, 25)), "molecule",
+        "PIOGLITAZONE", 1680.0, makeTS(2006, 1, 5), None)// duplicate event, it's ok. See the
+      // Scaladoc of McoDiseaseTransformer.estimateStayStartTime for explanation.
+    ).toDF
+
+    // When
+    FilteringMain.run(sqlContext, Map("conf" -> configPath))
+
+    // Then
+    val patients = sqlCtx.read.parquet(patientsPath)
+    val flatEvents = sqlCtx.read.parquet(flatEventsPath)
+    patients.show
+    expectedPatients.show
+    flatEvents.orderBy("patientID", "category", "start").show
+    expectedFlatEvents.orderBy("patientID", "category", "start").show
+
+    assertDFs(patients, expectedPatients)
+    assertDFs(flatEvents, expectedFlatEvents)
+  }
 }
