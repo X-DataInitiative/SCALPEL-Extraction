@@ -23,7 +23,6 @@ object ImbDiseaseTransformer extends DiseaseTransformer {
         .filter(col("disease").contains(DiseaseCode))
         .filter(col("eventDate").isNotNull)
     }
-
   }
 
   override def transform(sources: Sources): Dataset[Event] = {

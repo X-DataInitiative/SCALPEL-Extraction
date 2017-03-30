@@ -18,7 +18,11 @@ case class ExtractionConfig(
   tracklossConfig: TracklossConfig,
   lastDate: java.sql.Timestamp,
   drugCategories: List[String],
-  maxBoxQuantity: Int)
+  maxBoxQuantity: Int,
+  mainDiagnosisCodes: List[String],
+  linkedDiagnosisCodes: List[String],
+  associatedDiagnosisCodes: List[String],
+  imbDiagnosisCodes: List[String])
 
 object ExtractionConfig {
   def init(): ExtractionConfig = ExtractionConfig(
@@ -38,6 +42,10 @@ object ExtractionConfig {
     ),
     lastDate = FilteringConfig.dates.studyEnd,
     drugCategories = FilteringConfig.drugCategories,
-    maxBoxQuantity = FilteringConfig.limits.maxQuantityIrpha
+    maxBoxQuantity = FilteringConfig.limits.maxQuantityIrpha,
+    mainDiagnosisCodes = FilteringConfig.mainDiagnosisCodes,
+    linkedDiagnosisCodes = FilteringConfig.linkedDiagnosisCodes,
+    associatedDiagnosisCodes = FilteringConfig.associatedDiagnosisCodes,
+    imbDiagnosisCodes = FilteringConfig.imbDiagnosisCodes
   )
 }

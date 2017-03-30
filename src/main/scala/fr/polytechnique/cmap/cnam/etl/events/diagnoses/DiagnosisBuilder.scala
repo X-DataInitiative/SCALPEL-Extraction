@@ -6,9 +6,9 @@ import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventCategory}
 
 trait Diagnosis extends AnyEvent
 
-object Diagnosis extends Diagnosis {
+trait DiagnosisBuilder extends Diagnosis with Serializable {
 
-  val category: EventCategory[Diagnosis] = "diagnosis"
+  val category: EventCategory[Diagnosis]
 
   def apply(patientID: String, code: String, date: Timestamp): Event[Diagnosis] =
     Event(patientID, category, code, 0.0, date, None)
@@ -19,7 +19,7 @@ object Diagnosis extends Diagnosis {
       codeCol: String = "code",
       dateCol: String = "eventDate"): Event[Diagnosis] = {
 
-    Diagnosis(
+    apply(
       r.getAs[String](patientIDCol),
       r.getAs[String](codeCol),
       r.getAs[Timestamp](dateCol)

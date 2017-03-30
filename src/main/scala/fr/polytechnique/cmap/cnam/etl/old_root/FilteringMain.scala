@@ -80,7 +80,7 @@ object FilteringMain extends Main {
       .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))
       .map((FlatEvent.merge _).tupled)
 
-    val flatEvents: Dataset[FlatEvent] = unionAll(drugFlatEvents, diseaseFlatEvents)
+    val flatEvents: Dataset[FlatEvent] = unionDatasets(drugFlatEvents, diseaseFlatEvents)
 
     logger.info("Writing Patients...")
     patients.toDF.write.parquet(outputPaths.patients)

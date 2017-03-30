@@ -93,11 +93,17 @@ object FilteringConfig {
     threshold: Int,
     delay: Int
   )
+
   lazy val reuseFlatEventsPath: Option[String] = Try(conf.getString("reuse_flat_events_path")).toOption
   lazy val drugCategories: List[String] = conf.getStringList("drug_categories").asScala.toList
   lazy val cancerDefinition: String  = conf.getString("cancer_definition")
   lazy val diseaseCode: String = conf.getString("disease_code")
   lazy val mcoDeathCode: Int = conf.getInt("mco_death_code")
+  lazy val mainDiagnosisCodes: List[String] = conf.getStringList("main_diagnosis_codes").asScala.toList
+  lazy val linkedDiagnosisCodes: List[String] = conf.getStringList("linked_diagnosis_codes").asScala.toList
+  lazy val associatedDiagnosisCodes: List[String] = conf.getStringList("associated_diagnosis_codes").asScala.toList
+  lazy val imbDiagnosisCodes: List[String] = conf.getStringList("imb_diagnosis_codes").asScala.toList
+
   lazy val inputPaths = InputPaths(
     dcir = conf.getString("paths.input.dcir"),
     pmsiMco = conf.getString("paths.input.pmsi_mco"),
