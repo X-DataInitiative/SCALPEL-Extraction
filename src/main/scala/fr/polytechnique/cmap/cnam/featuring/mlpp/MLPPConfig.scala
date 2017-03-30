@@ -27,7 +27,8 @@ object MLPPConfig {
   lazy val lagCounts: List[Int] = conf.getIntList("lag_count").asScala.toList.map(_.toInt)
   lazy val minTimestamp: Timestamp = makeTS(conf.getIntList("min_timestamp").asScala.toList)
   lazy val maxTimestamp: Timestamp = makeTS(conf.getIntList("max_timestamp").asScala.toList)
-  lazy val includeDeathBucket: Boolean = conf.getBoolean("include_death_bucket")
+  lazy val includeCensoredBucket: Boolean = conf.getBoolean("include_censored_bucket")
+  lazy val featuresAsList: Boolean = conf.getBoolean("features_as_list")
 
   lazy val exposureDefinition = MLPPExposureDefinition(
     minPurchases = conf.getInt("exposures.min_purchases"),
