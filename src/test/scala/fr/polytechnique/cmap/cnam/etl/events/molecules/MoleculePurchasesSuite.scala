@@ -15,7 +15,7 @@ class MoleculePurchasesSuite extends SharedContext {
     val dcir: DataFrame = sqlContext.read.load("src/test/resources/test-input/DCIR.parquet")
     val irPha: DataFrame = sqlContext.read.load("src/test/resources/test-input/IR_PHA_R.parquet")
     val dosages: DataFrame = sqlContext.read
-      .format("com.databricks.spark.csv")
+      .format("csv")
       .option("header", "true")
       .load("src/test/resources/test-input/DOSE_PER_MOLECULE.CSV")
       .select(

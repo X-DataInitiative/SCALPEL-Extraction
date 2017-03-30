@@ -19,27 +19,21 @@ object ETLMain extends Main {
   /**
     * Arguments expected:
     *   "conf" -> "path/to/file.conf" (default: "$resources/filtering-default.conf")
-    *   "env" -> "cnam" | "cmap" | "test" (deafult: "test")
+    *   "env" -> "cnam" | "cmap" | "test" (default: "test")
     */
   def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[Event[AnyEvent]]] = {
 
-    import implicits.SourceReader
     import sqlContext.implicits._
 
     // "get" returns an Option, then we can use foreach to gently ignore when the key was not found.
     argsMap.get("conf").foreach(sqlContext.setConf("conf", _))
     argsMap.get("env").foreach(sqlContext.setConf("env", _))
 
-  /* Alternative option using vars instead of SQLContext:
-    argsMap.get("conf").foreach(FilteringConfig.setPath)
-    argsMap.get("env").foreach(FilteringConfig.setEnv)
-    FilteringConfig.init()
-  */
+    // todo rename the config variable
+    val reuseLastETLPath: Option[String] = FilteringConfig.reuseFlatEventsPath
 
-    val reuseFlatEventsPath: Option[String] = FilteringConfig.reuseFlatEventsPath
-
-    if (reuseFlatEventsPath.isDefined) {
-      val eventsPath = reuseFlatEventsPath.get
+    if (reuseLastETLPath.isDefined) {
+      val eventsPath = reuseLastETLPath.get
       logger.info(s"Reusing events from $eventsPath")
       val events = sqlContext.read.parquet(eventsPath).as[Event[AnyEvent]]
       return Some(events)
@@ -55,6 +49,7 @@ object ETLMain extends Main {
     logger.info("===================================")
 
     logger.info("Reading sources")
+    import implicits.SourceReader
     val sources: Sources = sqlContext.readSources(inputPaths)
 
     logger.info("Extracting patients...")
