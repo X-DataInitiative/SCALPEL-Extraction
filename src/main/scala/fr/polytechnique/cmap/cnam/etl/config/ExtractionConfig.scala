@@ -22,7 +22,10 @@ case class ExtractionConfig(
   mainDiagnosisCodes: List[String],
   linkedDiagnosisCodes: List[String],
   associatedDiagnosisCodes: List[String],
-  imbDiagnosisCodes: List[String])
+  imbDiagnosisCodes: List[String],
+  dcirActCodes: List[String],
+  mcoActCodes: List[String]
+ )
 
 object ExtractionConfig {
   def init(): ExtractionConfig = ExtractionConfig(
@@ -46,6 +49,8 @@ object ExtractionConfig {
     mainDiagnosisCodes = FilteringConfig.mainDiagnosisCodes,
     linkedDiagnosisCodes = FilteringConfig.linkedDiagnosisCodes,
     associatedDiagnosisCodes = FilteringConfig.associatedDiagnosisCodes,
-    imbDiagnosisCodes = FilteringConfig.imbDiagnosisCodes
+    imbDiagnosisCodes = FilteringConfig.imbDiagnosisCodes,
+    dcirActCodes = FilteringConfig.dcirActCodes,
+    mcoActCodes = FilteringConfig.mcoActCodes
   )
 }
