@@ -25,7 +25,10 @@ private[acts] object DcirActs {
     import DcirColumns._
 
     def filterActs(acts: List[String]): DataFrame = {
-      data.where(acts.map(codeColumn.startsWith).reduce(_ or _))
+      if (acts.isEmpty)
+        data.sparkSession.emptyDataFrame
+      else
+        data.where(acts.map(codeColumn.startsWith).reduce(_ or _))
     }
   }
 

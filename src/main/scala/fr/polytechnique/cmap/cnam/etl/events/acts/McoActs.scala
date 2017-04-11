@@ -27,7 +27,10 @@ object McoActs {
 
   implicit class ActDF(data: DataFrame) {
     def filterActs(acts: List[String]): DataFrame = {
-      data.where(acts.map(McoColumns.code.startsWith).reduce(_ or _))
+      if (acts.isEmpty)
+        data.sparkSession.emptyDataFrame
+      else
+        data.where(acts.map(McoColumns.code.startsWith).reduce(_ or _))
     }
   }
 

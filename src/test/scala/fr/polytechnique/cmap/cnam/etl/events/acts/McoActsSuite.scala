@@ -33,6 +33,26 @@ class McoActsSuite extends SharedContext{
     assertDFs(result, expected)
   }
 
+  it should "return an empty dataset when no acts are specified" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input: DataFrame = Seq(
+      ("george", "Z51123", makeTS(2011, 12, 12)),
+      ("pierre", "ABCDEFFG", makeTS(2011, 12, 12))
+    ).toDF("patientID", "code", "event_date")
+
+    val acts: List[String] = List()
+
+    // When
+    import McoActs.ActDF
+    val result = input.filterActs(acts)
+
+    // Then
+    assert(result.rdd.isEmpty())
+  }
+
   "extract" should "return the correct dataframe" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
