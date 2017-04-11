@@ -1,10 +1,11 @@
 package fr.polytechnique.cmap.cnam.etl.old_root
 
 import java.sql.Timestamp
+
 import scala.collection.JavaConverters._
 import scala.util.Try
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.{SQLContext, SparkSession}
 import com.typesafe.config.{Config, ConfigFactory}
 import fr.polytechnique.cmap.cnam.etl.exposures.{ExposurePeriodStrategy, ExposuresConfig, WeightAggStrategy}
 import fr.polytechnique.cmap.cnam.util.functions._
@@ -41,9 +42,9 @@ object FilteringConfig {
 
   private lazy val conf: Config = {
     // This is a little hacky. In the future, it may be nice to find a better way.
-    val sqlContext = SQLContext.getOrCreate(SparkContext.getOrCreate())
-    val configPath: String = sqlContext.getConf("conf", "")
-    val environment: String = sqlContext.getConf("env", "test")
+    val spark = SparkSession.builder().getOrCreate()
+    val configPath: String = spark.conf.get("conf", "")
+    val environment: String = spark.conf.get("env", "test")
 
     val defaultConfig = ConfigFactory.parseResources("config/filtering-default.conf").resolve().getConfig(environment)
     val newConfig = ConfigFactory.parseFile(new java.io.File(configPath)).resolve()
@@ -103,6 +104,8 @@ object FilteringConfig {
   lazy val linkedDiagnosisCodes: List[String] = conf.getStringList("linked_diagnosis_codes").asScala.toList
   lazy val associatedDiagnosisCodes: List[String] = conf.getStringList("associated_diagnosis_codes").asScala.toList
   lazy val imbDiagnosisCodes: List[String] = conf.getStringList("imb_diagnosis_codes").asScala.toList
+  lazy val dcirActCodes: List[String] = conf.getStringList("dcir_act_codes").asScala.toList
+  lazy val mcoActCodes: List[String] = conf.getStringList("mco_act_codes").asScala.toList
 
   lazy val inputPaths = InputPaths(
     dcir = conf.getString("paths.input.dcir"),

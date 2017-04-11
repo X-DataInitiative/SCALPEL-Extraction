@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.old_root
 
-import org.apache.spark.sql.expressions.Window
+import org.apache.spark.sql.expressions.{Window, WindowSpec}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 trait TargetDiseaseTransformer extends Transformer[Event] {
 
-  final val DiseaseCode = FilteringConfig.diseaseCode
+  final val DiseaseCode: String = FilteringConfig.diseaseCode
 
   val outputColumns: List[Column] = List(
     col("patientID"),
@@ -21,7 +21,7 @@ trait TargetDiseaseTransformer extends Transformer[Event] {
 
   implicit class TargetDiseaseDataFrame(data: DataFrame) {
 
-    val window = Window.partitionBy(col("patientID")).orderBy(col("start"))
+    val window: WindowSpec = Window.partitionBy(col("patientID")).orderBy(col("start"))
 
     def withDelta: DataFrame = {
       data

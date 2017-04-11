@@ -23,7 +23,7 @@ object Sources {
       irBen: Option[DataFrame] = None,
       irImb: Option[DataFrame] = None,
       irPha: Option[DataFrame] = None,
-      dosages: Option[DataFrame] = None) = {
+      dosages: Option[DataFrame] = None): Sources = {
     new Sources(dcir, pmsiMco, pmsiHad, pmsiSsr, irBen, irImb, irPha, dosages)
   }
 

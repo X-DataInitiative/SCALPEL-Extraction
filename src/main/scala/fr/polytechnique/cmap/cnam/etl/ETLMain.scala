@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
+import fr.polytechnique.cmap.cnam.etl.events.acts._
 import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{Diagnoses, Diagnosis}
 import fr.polytechnique.cmap.cnam.etl.events.molecules.{Molecule, MoleculePurchases}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
@@ -61,10 +62,14 @@ object ETLMain extends Main {
     logger.info("Extracting diagnosis events...")
     val diseaseEvents: Dataset[Event[Diagnosis]] = Diagnoses.extract(extractionConfig, sources)
 
+    logger.info("Extracting medical act events...")
+    val medicalActEvents: Dataset[Event[MedicalAct]] = Acts.extract(extractionConfig, sources)
+
     logger.info("Merging all events...")
     val allEvents: Dataset[Event[AnyEvent]] = unionDatasets(
       drugEvents.as[Event[AnyEvent]],
-      diseaseEvents.as[Event[AnyEvent]]
+      diseaseEvents.as[Event[AnyEvent]],
+      medicalActEvents.as[Event[AnyEvent]]
     )
 
     logger.info("Writing patients...")
