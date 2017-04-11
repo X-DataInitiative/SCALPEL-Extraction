@@ -4,37 +4,30 @@ import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.Event
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.functions.col
+import fr.polytechnique.cmap.cnam.util.McoUtils._
 
 object McoActs {
 
-  private object McoColumns {
-    val patientID: Column = col("NUM_ENQ")
-    val stayStart: Column = col("ENT_DAT").cast("Timestamp")
-    val stayEnd: Column = col("SOR_DAT").cast("Timestamp")
-    val stayEndMonth: Column = col("`MCO_B.SOR_MOI`")
-    val stayEndYear: Column = col("`MCO_B.SOR_ANN`")
-    val stayLength: Column = col("`MCO_B.SEJ_NBJ`")
-    val actCode: Column = col("`MCO_A.CDC_ACT`")
-  }
+  object McoColumns extends McoTimeColumns{
+    val patientID: Column = col("NUM_ENQ").as("patientID")
+    val actCode: Column = col("`MCO_A.CDC_ACT`").as("code")
 
-  val inputColumns: List[Column] = {
-    import McoColumns._
-    List(
-      patientID,
-      stayStart,
-      stayEnd,
-      stayEndMonth,
-      stayEndYear,
-      stayLength,
-      actCode
-    )
+    override def inputColumns: List[Column] = {
+      /*this.getClass.getDeclaredFields.map {
+        field =>
+          field.setAccessible(true)
+          field.get(this).asInstanceOf[Column]
+      }.toList*/
+      List(patientID, actCode, stayStart, stayEnd, stayEndMonth, stayEndYear, stayLength)
+    }
+
+    def code: Column = col("code")
+
   }
 
   implicit class ActDF(data: DataFrame) {
-    import McoColumns._
-
     def filterActs(acts: List[String]): DataFrame = {
-      data.where(acts.map(actCode.startsWith).reduce(_ or _))
+      data.where(acts.map(McoColumns.code.startsWith).reduce(_ or _))
     }
   }
 
@@ -43,7 +36,8 @@ object McoActs {
 
     val acts = config.dcirActCodes
 
-    dcir.select(inputColumns: _*)
+    dcir.select(McoColumns.inputColumns: _*)
+      .estimateStayStartTime
       .filterActs(acts)
       .map(HospitalizedAct.fromRow(_))
   }

@@ -19,7 +19,7 @@ trait MedicalActBuilder extends MedicalAct with Serializable {
                r: Row,
                patientIDCol: String = "patientID",
                codeCol: String = "code",
-               dateCol: String = "event_date"): Event[MedicalAct] = {
+               dateCol: String = "eventDate"): Event[MedicalAct] = {
 
     apply(
       r.getAs[String](patientIDCol),

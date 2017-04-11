@@ -2,11 +2,13 @@ package fr.polytechnique.cmap.cnam
 
 import java.io.File
 import java.util.{Locale, TimeZone}
+
 import org.apache.commons.io.FileUtils
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.{DataFrame, SQLContext, SparkSession}
 import org.scalatest._
 import fr.polytechnique.cmap.cnam.util.RichDataFrames
+import org.apache.spark.SparkContext
 
 abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with BeforeAndAfterEach {
     self: Suite =>
@@ -24,10 +26,11 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
 
   protected def spark: SparkSession = _spark
   protected def sqlContext: SQLContext = _spark.sqlContext
-  protected def sc = _spark.sparkContext
+  protected def sc: SparkContext = _spark.sparkContext
 
 
   def assertDFs(df1: DataFrame, df2: DataFrame, debug: Boolean = this.debug): Unit = {
+    var truncate = false
     try {
 
       df1.persist()
@@ -36,8 +39,8 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
       if(debug) {
         df1.printSchema()
         df2.printSchema()
-        df1.show(100, false)
-        df2.show(100, false)
+        df1.show(100, truncate)
+        df2.show(100, truncate)
       }
 
       import RichDataFrames._

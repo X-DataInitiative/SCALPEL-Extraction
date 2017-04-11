@@ -14,8 +14,8 @@ class DcirActsSuite extends SharedContext{
     // Given
     val input: DataFrame = Seq(
       ("george", "Z51123", makeTS(2011, 12, 12)),
-      ("pierre", "ABCDEFFG", makeTS(2011, 12, 12))
-    ).toDF("patientID", "code", "event_date")
+      ("pierre", "TEST", makeTS(2011, 12, 12))
+    ).toDF("patientID", "code", "eventDate")
 
     val acts: List[String] = List(
       "Z511"
@@ -23,7 +23,7 @@ class DcirActsSuite extends SharedContext{
 
     val expected: DataFrame = Seq(
       ("george", "Z51123", makeTS(2011, 12, 12))
-    ).toDF("patientID", "code", "event_date")
+    ).toDF("patientID", "code", "eventDate")
 
     // When
     import DcirActs.ActDF
@@ -43,7 +43,7 @@ class DcirActsSuite extends SharedContext{
 
     val dcir: DataFrame = Seq(
       ("george", "Z51123", makeTS(2011, 12, 12)),
-      ("pierre", "ABCDEFFG", makeTS(2011, 12, 12))
+      ("pierre", "TEST", makeTS(2011, 12, 12))
     ).toDF("NUM_ENQ", "ER_CAM_F.CAM_PRS_IDE", "EXE_SOI_DTD")
 
     val expected: DataFrame = Seq(
