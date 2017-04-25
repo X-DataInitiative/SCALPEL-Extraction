@@ -2,11 +2,11 @@ package fr.polytechnique.cmap.cnam.etl.events.diagnoses
 
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventCategory}
+import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder, EventCategory}
 
 trait Diagnosis extends AnyEvent
 
-trait DiagnosisBuilder extends Diagnosis with Serializable {
+trait DiagnosisBuilder extends EventBuilder with Diagnosis with Serializable {
 
   val category: EventCategory[Diagnosis]
 

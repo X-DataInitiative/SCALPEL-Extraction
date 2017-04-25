@@ -22,7 +22,8 @@ case class ExtractionConfig(
   mainDiagnosisCodes: List[String],
   linkedDiagnosisCodes: List[String],
   associatedDiagnosisCodes: List[String],
-  imbDiagnosisCodes: List[String])
+  imbDiagnosisCodes: List[String],
+  codesMap: Map[String, List[String]])
 
 object ExtractionConfig {
   def init(): ExtractionConfig = ExtractionConfig(
@@ -46,6 +47,11 @@ object ExtractionConfig {
     mainDiagnosisCodes = FilteringConfig.mainDiagnosisCodes,
     linkedDiagnosisCodes = FilteringConfig.linkedDiagnosisCodes,
     associatedDiagnosisCodes = FilteringConfig.associatedDiagnosisCodes,
-    imbDiagnosisCodes = FilteringConfig.imbDiagnosisCodes
+    imbDiagnosisCodes = FilteringConfig.imbDiagnosisCodes,
+    codesMap = Map(
+      "dp" -> FilteringConfig.mainDiagnosisCodes,
+      "dr" -> FilteringConfig.linkedDiagnosisCodes,
+      "da" -> FilteringConfig.associatedDiagnosisCodes
+    )
   )
 }
