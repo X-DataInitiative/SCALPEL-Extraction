@@ -14,6 +14,6 @@ case class Event(
 object Event {
 
   def fromNewEvent(e: NewEvent[AnyEvent]) = {
-    Event(e.patientID, e.category, e.eventID, e.weight, e.start, e.end)
+    Event(e.patientID, e.category, e.value, e.weight, e.start, e.end)
   }
 }

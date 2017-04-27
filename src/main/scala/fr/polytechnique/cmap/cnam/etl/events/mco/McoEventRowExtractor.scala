@@ -10,12 +10,14 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
     r.getAs[String](ColNames.PatientID)
   }
 
-  def getEventCode(r: Row, colName: ColName, codes: List[String]): Option[String] = {
-    codes.find(r.getAs[String](colName).startsWith(_))
+  def getGroupId(r: Row): String = {
+    r.getAs[String](ColNames.EtaNum) + "_" +
+    r.getAs[String](ColNames.RsaNum) + "_" +
+    r.getAs[Int](ColNames.StayEndYear).toString
   }
 
-  def getEventId(r: Row): String = {
-    r.getAs[String](ColNames.StayCode) + "_" + r.getAs[Int](ColNames.StayEndYear).toString
+  def getCode(r: Row, colName: ColName, codes: List[String]): Option[String] = {
+    codes.find(r.getAs[String](colName).startsWith(_))
   }
 
   def getWeight(r: Row): Double = 1.0

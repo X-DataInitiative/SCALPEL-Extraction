@@ -18,10 +18,10 @@ class EventSuite extends FlatSpec {
   "apply" should "allow creation of new Events" in {
 
     // Given
-    val expected: Event[SomeEvent] = Event(patientID, "some_category", "some_id", 0.0, timestamp, None)
+    val expected: Event[SomeEvent] = Event(patientID, "some_category", "some_group", "some_value", 0.0, timestamp, None)
 
     // When
-    val result: Event[SomeEvent] = Event(patientID, SomeEvent.category, "some_id", 0.0, timestamp, None)
+    val result: Event[SomeEvent] = Event(patientID, SomeEvent.category, "some_group", "some_value", 0.0, timestamp, None)
 
     // Then
     assert(result == expected)

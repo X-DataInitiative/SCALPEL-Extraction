@@ -16,7 +16,7 @@ class ExposureSuite extends FlatSpec {
 
   "apply" should "allow creation of an Exposure event" in {
     // Given
-    val expected = Event[Exposure.type](patientID, Exposure.category, "pioglitazone", 100.0, start, Some(end))
+    val expected = Event[Exposure.type](patientID, Exposure.category, "", "pioglitazone", 100.0, start, Some(end))
     // When
     val result = Exposure(patientID, "pioglitazone", 100.0, start, end)
     // Then

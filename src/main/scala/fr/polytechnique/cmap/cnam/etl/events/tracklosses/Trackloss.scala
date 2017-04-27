@@ -10,7 +10,7 @@ object Trackloss extends Trackloss {
   val category: EventCategory[Trackloss] = "trackloss"
 
   def apply(patientID: String, timestamp: Timestamp): Event[Trackloss] = {
-    Event(patientID, category, "trackloss", 0.0, timestamp, None)
+    Event(patientID, category, "", "trackloss", 0.0, timestamp, None)
   }
 
   def fromRow(

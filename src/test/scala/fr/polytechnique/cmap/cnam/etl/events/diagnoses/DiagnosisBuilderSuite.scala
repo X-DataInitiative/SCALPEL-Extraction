@@ -20,7 +20,7 @@ class DiagnosisBuilderSuite extends FlatSpec {
   "apply" should "allow creation of a DiagnosisBuilder event" in {
 
     // Given
-    val expected = Event[Diagnosis](patientID, MockDiagnosis.category, "C67", 0.0, timestamp, None)
+    val expected = Event[Diagnosis](patientID, MockDiagnosis.category, "", "C67", 0.0, timestamp, None)
 
     // When
     val result = MockDiagnosis(patientID, "C67", timestamp)

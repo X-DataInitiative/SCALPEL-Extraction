@@ -102,11 +102,11 @@ class DcirMoleculePurchasesSuite extends SharedContext {
 
     // Note: there is a row in the dummy dataset where the field "EXE_SOI_DTD" is null.
     val expected = Seq(
-      Event("Patient_01", "molecule", "SULFONYLUREA", 1800.0, makeTS(2006, 1, 15), None),
-      Event("Patient_01", "molecule", "SULFONYLUREA", 900.0, makeTS(2006, 1, 30), None),
-      Event("Patient_02", "molecule", "PIOGLITAZONE", 840.0, makeTS(2006, 1, 15), None),
-      Event("Patient_02", "molecule", "PIOGLITAZONE", 4200.0, makeTS(2006, 1, 30), None),
-      Event("Patient_02", "molecule", "PIOGLITAZONE", 1680.0, makeTS(2006, 1, 5), None)
+      Event("Patient_01", "molecule", "", "SULFONYLUREA", 1800.0, makeTS(2006, 1, 15), None),
+      Event("Patient_01", "molecule", "", "SULFONYLUREA", 900.0, makeTS(2006, 1, 30), None),
+      Event("Patient_02", "molecule", "", "PIOGLITAZONE", 840.0, makeTS(2006, 1, 15), None),
+      Event("Patient_02", "molecule", "", "PIOGLITAZONE", 4200.0, makeTS(2006, 1, 30), None),
+      Event("Patient_02", "molecule", "", "PIOGLITAZONE", 1680.0, makeTS(2006, 1, 5), None)
     ).toDF
 
     // When

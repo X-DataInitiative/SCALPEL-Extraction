@@ -8,15 +8,15 @@ object McoCodesExtractor extends McoEventRowExtractor {
 
   def eventsFromRow(codesMap: Map[ColName, List[String]])(r: Row): List[Event[AnyEvent]] = {
 
-    val eId = getEventId(r)
-
     val foundCodes: Map[ColName, Option[String]] = codesMap.map {
-      case (colName, codes) => colName -> getEventCode(r, colName, codes)
+      case (colName, codes) => colName -> getCode(r, colName, codes)
     }
 
     foundCodes.collect {
       case (colName, code) if code.isDefined =>
-        eventBuilder(colName).apply(getPatientId(r), code.get, getWeight(r), getStart(r), None)
+        eventBuilder(colName).apply(
+          getPatientId(r), getGroupId(r), code.get, getWeight(r), getStart(r), None
+        )
     }.toList
   }
 

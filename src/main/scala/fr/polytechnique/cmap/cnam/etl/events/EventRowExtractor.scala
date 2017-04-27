@@ -8,7 +8,7 @@ trait EventRowExtractor { self: ColumnNames =>
 
   def getPatientId(r: Row): String
 
-  def getEventId(r: Row): String
+  def getGroupId(r: Row): String
 
   def getWeight(r: Row): Double
 
