@@ -13,14 +13,15 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
   def getGroupId(r: Row): String = {
     r.getAs[String](ColNames.EtaNum) + "_" +
     r.getAs[String](ColNames.RsaNum) + "_" +
-    r.getAs[Int](ColNames.StayEndYear).toString
+    r.getAs[Int](ColNames.Year).toString
   }
 
   def getCode(r: Row, colName: ColName, codes: List[String]): Option[String] = {
-    codes.find(r.getAs[String](colName).startsWith(_))
+    val idx = r.fieldIndex(colName)
+    codes.find(!r.isNullAt(idx) && r.getString(idx).startsWith(_))
   }
 
-  def getWeight(r: Row): Double = 1.0
+  def getWeight(r: Row): Double = 0.0
 
   def getStart(r: Row): Timestamp = r.getAs[Timestamp](NewColumns.EstimatedStayStart)
 

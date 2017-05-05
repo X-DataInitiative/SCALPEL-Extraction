@@ -4,7 +4,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
 
-object McoCodesExtractor extends McoEventRowExtractor {
+object McoCodeEventsExtractor extends McoEventRowExtractor {
 
   def eventsFromRow(codesMap: Map[ColName, List[String]])(r: Row): List[Event[AnyEvent]] = {
 

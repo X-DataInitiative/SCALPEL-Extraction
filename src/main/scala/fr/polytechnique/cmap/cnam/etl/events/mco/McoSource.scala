@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.events.mco
 
-import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{LongType, TimestampType}
+import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.etl.ColumnNames
 import fr.polytechnique.cmap.cnam.etl.events.EventBuilder
 import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{AssociatedDiagnosis, LinkedDiagnosis, MainDiagnosis}
@@ -15,12 +15,13 @@ trait McoSource extends ColumnNames {
 
   final object ColNames {
     val PatientID: ColName = "NUM_ENQ"
-    val DP: ColName = "`MCO_B.DGN_PAL`"
-    val DR: ColName = "`MCO_B.DGN_REL`"
-    val DA: ColName = "`MCO_D.ASS_DGN`"
+    val DP: ColName = "MCO_B.DGN_PAL"
+    val DR: ColName = "MCO_B.DGN_REL"
+    val DA: ColName = "MCO_D.ASS_DGN"
     val CCAM: ColName = "`MCO_A.CDC_ACT`"
     val EtaNum: ColName = "ETA_NUM"
     val RsaNum: ColName = "RSA_NUM"
+    val Year: ColName = "SOR_ANN"
     val StayEndMonth: ColName = "`MCO_B.SOR_MOI`"
     val StayEndYear: ColName = "`MCO_B.SOR_ANN`"
     val StayLength: ColName = "`MCO_B.SEJ_NBJ`"
@@ -44,7 +45,7 @@ trait McoSource extends ColumnNames {
     "da" -> ColNames.DA
   )
 
-  private implicit class McoDataFrame(df: DataFrame) {
+  implicit class McoDataFrame(df: DataFrame) {
 
     /**
       * Estimate the stay starting date according to the different versions of PMSI MCO
