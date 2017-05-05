@@ -3,6 +3,8 @@
 
 This repository contains the ETL (Extract, Transform & Load) and Featuring stages of the processing pipeline for the SNIIRAM pharmacovigilance project in partnership with CNAMTS.
 
+Please read our **[code conventions](https://datainitiative.atlassian.net/wiki/display/CFC/Development#)** before contributing to this repository.
+
 # ETL stage
 
 The ETL process of this project consists of the following steps:
@@ -75,4 +77,5 @@ mlpp_parameters = {
 }
 ```
 
-All the available configuration items, with a quick description and the default values, can be found on the file [`src/main/resources/config/filtering-default.conf`](https://github.com/X-DataInitiative/SNIIRAM-flattening/blob/master/src/main/resources/config/filtering-default.conf). 
+All the available configuration items, with a quick description and the default values, can be found on the file
+ [`src/main/resources/config/filtering-default.conf`](https://github.com/X-DataInitiative/SNIIRAM-flattening/blob/master/src/main/resources/config/filtering-default.conf). 
