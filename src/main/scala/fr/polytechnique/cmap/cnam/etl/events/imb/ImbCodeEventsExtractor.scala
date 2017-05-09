@@ -1,0 +1,27 @@
+package fr.polytechnique.cmap.cnam.etl.events.imb
+
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
+import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses.ImbDiagnosis
+import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
+
+object ImbCodeEventsExtractor extends ImbEventRowExtractor {
+
+  def eventsFromRow(codes: List[String])(r: Row): List[Event[AnyEvent]] = {
+
+    val foundCode: Option[String] = getCode(r, ColNames.Code, codes)
+
+    foundCode.map {
+      code => ImbDiagnosis(
+        getPatientId(r), getGroupId(r), code, getWeight(r), getStart(r), None
+      )
+    }.toList
+  }
+
+  def extract(config: ExtractionConfig, imb: DataFrame): Dataset[Event[AnyEvent]] = {
+
+    import imb.sqlContext.implicits._
+    val imbCodes: List[String] = config.codesMap("imb")
+    imb.flatMap(eventsFromRow(imbCodes))
+  }
+}

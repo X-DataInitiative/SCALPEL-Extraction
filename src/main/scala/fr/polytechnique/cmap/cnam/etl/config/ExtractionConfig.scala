@@ -51,7 +51,8 @@ object ExtractionConfig {
     codesMap = Map(
       "dp" -> FilteringConfig.mainDiagnosisCodes,
       "dr" -> FilteringConfig.linkedDiagnosisCodes,
-      "da" -> FilteringConfig.associatedDiagnosisCodes
+      "da" -> FilteringConfig.associatedDiagnosisCodes,
+      "imb" -> FilteringConfig.imbDiagnosisCodes
     )
   )
 }
