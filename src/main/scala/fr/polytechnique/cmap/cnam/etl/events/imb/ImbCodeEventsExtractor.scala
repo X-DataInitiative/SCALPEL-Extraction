@@ -1,5 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.events.imb
 
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.diagnoses.ImbDiagnosis
@@ -9,11 +11,11 @@ object ImbCodeEventsExtractor extends ImbEventRowExtractor {
 
   def eventsFromRow(codes: List[String])(r: Row): List[Event[AnyEvent]] = {
 
-    val foundCode: Option[String] = getCode(r, ColNames.Code, codes)
+    val foundCode: Option[String] = extractCode(r, codes)
 
     foundCode.map {
       code => ImbDiagnosis(
-        getPatientId(r), getGroupId(r), code, getWeight(r), getStart(r), None
+        extractPatientId(r), extractGroupId(r), code, extractWeight(r), extractStart(r), None
       )
     }.toList
   }
@@ -22,6 +24,8 @@ object ImbCodeEventsExtractor extends ImbEventRowExtractor {
 
     import imb.sqlContext.implicits._
     val imbCodes: List[String] = config.codesMap("imb")
-    imb.flatMap(eventsFromRow(imbCodes))
+    imb
+      .withColumn(ColNames.Date, col(ColNames.Date).cast(TimestampType))
+      .flatMap(eventsFromRow(imbCodes))
   }
 }

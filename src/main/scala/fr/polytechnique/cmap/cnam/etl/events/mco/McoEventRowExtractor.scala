@@ -6,11 +6,11 @@ import fr.polytechnique.cmap.cnam.etl.events.EventRowExtractor
 
 trait McoEventRowExtractor extends EventRowExtractor with McoSource {
 
-  def extractPatientId(r: Row): String = {
+  override def extractPatientId(r: Row): String = {
     r.getAs[String](ColNames.PatientID)
   }
 
-  def extractGroupId(r: Row): String = {
+  override def extractGroupId(r: Row): String = {
     r.getAs[String](ColNames.EtaNum) + "_" +
     r.getAs[String](ColNames.RsaNum) + "_" +
     r.getAs[Int](ColNames.Year).toString
@@ -21,9 +21,5 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
     codes.find(!r.isNullAt(idx) && r.getString(idx).startsWith(_))
   }
 
-  def extractWeight(r: Row): Double = 0.0
-
-  def extractStart(r: Row): Timestamp = r.getAs[Timestamp](NewColumns.EstimatedStayStart)
-
-  def extractEnd(r: Row): Option[Timestamp] = None: Option[Timestamp]
+  override def extractStart(r: Row): Timestamp = r.getAs[Timestamp](NewColumns.EstimatedStayStart)
 }
