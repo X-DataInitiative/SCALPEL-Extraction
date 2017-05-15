@@ -55,7 +55,6 @@ trait McoSource extends ColumnNames {
       * length in one month, it results in duplicate events.
       */
     def estimateStayStartTime: DataFrame = {
-      val cols = ColNames
       val dayInMs = 24L * 60 * 60
       val timeDelta: Column = coalesce(ColNames.StayLength.toCol, lit(0)) * dayInMs
       val estimate: Column = (ColNames.StayEndDate.toCol.cast(LongType) - timeDelta).cast(TimestampType)

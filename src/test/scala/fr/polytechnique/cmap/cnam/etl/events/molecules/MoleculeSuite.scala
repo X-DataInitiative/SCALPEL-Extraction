@@ -15,7 +15,9 @@ class MoleculeSuite extends FlatSpec {
 
   "apply" should "allow creation of a Molecule event" in {
     // Given
-    val expected = Event[Molecule.type](patientID, Molecule.category, "", "pioglitazone", 100.0, timestamp, None)
+    val expected = Event[Molecule.type](
+      patientID, Molecule.category, "NA", "pioglitazone", 100.0, timestamp, None
+    )
     // When
     val result = Molecule(patientID, "pioglitazone", 100.0, timestamp)
     // Then

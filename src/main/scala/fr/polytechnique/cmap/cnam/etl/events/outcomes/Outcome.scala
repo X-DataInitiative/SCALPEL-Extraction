@@ -11,7 +11,7 @@ object Outcome extends Outcome {
   val category: EventCategory[Outcome] = "outcome"
 
   def apply(patientID: String, name: String, date: Timestamp): Event[Outcome] =
-    Event(patientID, category, groupID = "", name, 0.0, date, None)
+    Event(patientID, category, groupID = "NA", name, 0.0, date, None)
 
   def fromRow(
       r: Row,

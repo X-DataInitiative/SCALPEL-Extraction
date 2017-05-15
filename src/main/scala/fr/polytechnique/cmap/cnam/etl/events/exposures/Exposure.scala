@@ -12,7 +12,7 @@ object Exposure extends Exposure {
 
   def apply(
     patientID: String, molecule: String, weight: Double, start: Timestamp, end: Timestamp
-  ): Event[Exposure] = Event(patientID, category, "", molecule, weight, start, Some(end))
+  ): Event[Exposure] = Event(patientID, category, groupID = "NA", molecule, weight, start, Some(end))
 
   def fromRow(
       r: Row,

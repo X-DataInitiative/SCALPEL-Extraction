@@ -6,13 +6,13 @@ import fr.polytechnique.cmap.cnam.etl.ColumnNames
 
 trait EventRowExtractor { self: ColumnNames =>
 
-  def getPatientId(r: Row): String
+  def extractPatientId(r: Row): String
 
-  def getGroupId(r: Row): String
+  def extractGroupId(r: Row): String
 
-  def getWeight(r: Row): Double
+  def extractWeight(r: Row): Double
 
-  def getStart(r: Row): Timestamp
+  def extractStart(r: Row): Timestamp
 
-  def getEnd(r: Row): Option[Timestamp]
+  def extractEnd(r: Row): Option[Timestamp]
 }

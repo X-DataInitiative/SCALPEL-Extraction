@@ -9,7 +9,7 @@ import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class McoEventRowExtractorSuite extends SharedContext with McoEventRowExtractor {
 
-  "getPatientId" should "return the patientID value of a row" in {
+  "extractPatientId" should "return the patientID value of a row" in {
 
     // Given
     val schema = StructType(StructField(ColNames.PatientID, StringType) :: Nil)
@@ -17,13 +17,13 @@ class McoEventRowExtractorSuite extends SharedContext with McoEventRowExtractor 
     val expected = "Patient_A"
 
     // When
-    val result = getPatientId(row)
+    val result = extractPatientId(row)
 
     // Then
     assert(result == expected)
   }
 
-  "getCode" should "search a given column for a list of codes and return the found one" in {
+  "extractCode" should "search a given column for a list of codes and return the found one" in {
 
     // Given
     val codes = List("C67", "C77")
@@ -33,7 +33,7 @@ class McoEventRowExtractorSuite extends SharedContext with McoEventRowExtractor 
     val expected = Some("C77")
 
     // When
-    val result = getCode(row, colName, codes)
+    val result = extractCode(row, colName, codes)
 
     // Then
     assert(result == expected)
@@ -49,13 +49,13 @@ class McoEventRowExtractorSuite extends SharedContext with McoEventRowExtractor 
     val expected = None
 
     // When
-    val result = getCode(row, colName, codes)
+    val result = extractCode(row, colName, codes)
 
     // Then
     assert(result == expected)
   }
 
-  "getGroupId" should "return the getGroupId (hospitalization ID for MCO)" in {
+  "extractGroupId" should "return the extractGroupId (hospitalization ID for MCO)" in {
 
     // Given
     val schema = StructType(
@@ -68,25 +68,25 @@ class McoEventRowExtractorSuite extends SharedContext with McoEventRowExtractor 
     val expected = "010008407_0000000793_2010"
 
     // When
-    val result = getGroupId(row)
+    val result = extractGroupId(row)
 
     // Then
     assert(result == expected)
   }
 
-  "weight" should "return the weight value" in {
+  "extractWeight" should "return the weight value" in {
 
     // Given
     val expected = 0.0
 
     // When
-    val result = getWeight(Row())
+    val result = extractWeight(Row())
 
     // Then
     assert(result == expected)
   }
 
-  "start" should "compute the start date of the event from the row" in {
+  "extractStart" should "compute the start date of the event from the row" in {
 
     // Given
     val schema = StructType(StructField(NewColumns.EstimatedStayStart, TimestampType) :: Nil)
@@ -94,19 +94,19 @@ class McoEventRowExtractorSuite extends SharedContext with McoEventRowExtractor 
     val expected = makeTS(2010, 1, 1)
 
     // When
-    val result = getStart(row)
+    val result = extractStart(row)
 
     // Then
     assert(result == expected)
   }
 
-  "end" should "compute the end date of the event" in {
+  "extractEnd" should "compute the end date of the event" in {
 
     // Given
     val expected: Option[Timestamp] = None
 
     // When
-    val result = getEnd(Row())
+    val result = extractEnd(Row())
 
     // Then
     assert(result == expected)

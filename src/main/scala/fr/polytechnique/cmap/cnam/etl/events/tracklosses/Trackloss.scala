@@ -5,12 +5,13 @@ import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventCategory}
 
 trait Trackloss extends AnyEvent
+
 object Trackloss extends Trackloss {
 
   val category: EventCategory[Trackloss] = "trackloss"
 
   def apply(patientID: String, timestamp: Timestamp): Event[Trackloss] = {
-    Event(patientID, category, "", "trackloss", 0.0, timestamp, None)
+    Event(patientID, category, groupID = "NA", "trackloss", 0.0, timestamp, None)
   }
 
   def fromRow(
