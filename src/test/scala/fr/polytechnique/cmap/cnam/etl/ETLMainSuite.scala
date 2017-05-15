@@ -84,6 +84,6 @@ class ETLMainSuite extends SharedContext {
     val result = ETLMain.run(sqlContext, Map("conf" -> configPath)).get.toDF
 
     // Then
-    assertDFs(result, expected)
+    assertDFs(result, expected, true)
   }
 }

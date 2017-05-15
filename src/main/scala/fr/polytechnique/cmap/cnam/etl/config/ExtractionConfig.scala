@@ -5,24 +5,25 @@ import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
 case class TracklossConfig(emptyMonths: Int, tracklossMonthDelay: Int)
 
 case class ExtractionConfig(
-  minAge: Int,
-  maxAge: Int,
-  minGender: Int,
-  maxGender: Int,
-  minYear: Int,
-  maxYear: Int,
-  minMonth: Int,
-  maxMonth: Int,
-  deathCode: Int,
-  ageReferenceDate: java.sql.Timestamp,
-  tracklossConfig: TracklossConfig,
-  lastDate: java.sql.Timestamp,
-  drugCategories: List[String],
-  maxBoxQuantity: Int,
-  mainDiagnosisCodes: List[String],
-  linkedDiagnosisCodes: List[String],
-  associatedDiagnosisCodes: List[String],
-  imbDiagnosisCodes: List[String])
+    minAge: Int,
+    maxAge: Int,
+    minGender: Int,
+    maxGender: Int,
+    minYear: Int,
+    maxYear: Int,
+    minMonth: Int,
+    maxMonth: Int,
+    deathCode: Int,
+    ageReferenceDate: java.sql.Timestamp,
+    tracklossConfig: TracklossConfig,
+    lastDate: java.sql.Timestamp,
+    drugCategories: List[String],
+    maxBoxQuantity: Int,
+    mainDiagnosisCodes: List[String],
+    linkedDiagnosisCodes: List[String],
+    associatedDiagnosisCodes: List[String],
+    imbDiagnosisCodes: List[String],
+    codesMap: Map[String, List[String]])
 
 object ExtractionConfig {
   def init(): ExtractionConfig = ExtractionConfig(
@@ -46,6 +47,11 @@ object ExtractionConfig {
     mainDiagnosisCodes = FilteringConfig.mainDiagnosisCodes,
     linkedDiagnosisCodes = FilteringConfig.linkedDiagnosisCodes,
     associatedDiagnosisCodes = FilteringConfig.associatedDiagnosisCodes,
-    imbDiagnosisCodes = FilteringConfig.imbDiagnosisCodes
+    imbDiagnosisCodes = FilteringConfig.imbDiagnosisCodes,
+    codesMap = Map(
+      "dp" -> FilteringConfig.mainDiagnosisCodes,
+      "dr" -> FilteringConfig.linkedDiagnosisCodes,
+      "da" -> FilteringConfig.associatedDiagnosisCodes
+    )
   )
 }

@@ -11,7 +11,7 @@ object Molecule extends Molecule {
   val category: EventCategory[Molecule] = "molecule"
 
   def apply(patientID: String, name: String, dosage: Double, date: Timestamp): Event[Molecule] =
-    Event(patientID, category, name, dosage, date, None)
+    Event(patientID, category, groupID = "NA", name, dosage, date, None)
 
   def fromRow(
       r: Row,

@@ -15,7 +15,9 @@ class OutcomeSuite extends FlatSpec {
 
   "apply" should "allow creation of an Outcome event" in {
     // Given
-    val expected = Event[Outcome.type](patientID, Outcome.category, "bladder_cancer", 0.0, timestamp, None)
+    val expected = Event[Outcome.type](
+      patientID, Outcome.category, "NA", "bladder_cancer", 0.0, timestamp, None
+    )
     // When
     val result = Outcome(patientID, "bladder_cancer", timestamp)
     // Then
