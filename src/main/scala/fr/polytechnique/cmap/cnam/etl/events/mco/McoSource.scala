@@ -9,10 +9,6 @@ import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{AssociatedDiagnosis, Lin
 
 trait McoSource extends ColumnNames {
 
-  implicit class RichColName(colName: ColName) {
-    def toCol: Column = col(colName)
-  }
-
   final object ColNames {
     val PatientID: ColName = "NUM_ENQ"
     val DP: ColName = "MCO_B.DGN_PAL"

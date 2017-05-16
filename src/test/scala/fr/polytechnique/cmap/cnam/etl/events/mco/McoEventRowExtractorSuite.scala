@@ -74,18 +74,6 @@ class McoEventRowExtractorSuite extends SharedContext with McoEventRowExtractor 
     assert(result == expected)
   }
 
-  "extractWeight" should "return the weight value" in {
-
-    // Given
-    val expected = 0.0
-
-    // When
-    val result = extractWeight(Row())
-
-    // Then
-    assert(result == expected)
-  }
-
   "extractStart" should "compute the start date of the event from the row" in {
 
     // Given
@@ -95,18 +83,6 @@ class McoEventRowExtractorSuite extends SharedContext with McoEventRowExtractor 
 
     // When
     val result = extractStart(row)
-
-    // Then
-    assert(result == expected)
-  }
-
-  "extractEnd" should "compute the end date of the event" in {
-
-    // Given
-    val expected: Option[Timestamp] = None
-
-    // When
-    val result = extractEnd(Row())
 
     // Then
     assert(result == expected)
