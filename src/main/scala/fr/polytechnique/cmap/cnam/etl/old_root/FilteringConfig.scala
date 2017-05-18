@@ -6,8 +6,9 @@ import scala.util.Try
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 import com.typesafe.config.{Config, ConfigFactory}
-import fr.polytechnique.cmap.cnam.etl.exposures.{ExposurePeriodStrategy, ExposuresConfig, WeightAggStrategy}
 import fr.polytechnique.cmap.cnam.util.functions._
+import fr.polytechnique.cmap.cnam.etl.exposures._
+import fr.polytechnique.cmap.cnam.etl.transformer.{exposure => new_exposure}
 
 object FilteringConfig {
 
@@ -146,6 +147,8 @@ object FilteringConfig {
   )
 
   def modelConfig(modelName: String): Config = conf.getConfig(modelName)
+
+
   lazy val exposuresConfig: ExposuresConfig = ExposuresConfig(
     studyStart = dates.studyStart,
     diseaseCode = diseaseCode,
@@ -166,4 +169,29 @@ object FilteringConfig {
     dosageLevelIntervals = conf.getIntList("exposures.cumulative.dosage_level_intervals").asScala.map(_.toInt).toList,
     purchaseIntervals = conf.getIntList("exposures.cumulative.purchase_intervals").asScala.map(_.toInt).toList
   )
+
+  lazy val newExposuresConfig: new_exposure.ExposuresConfig = {
+    import new_exposure._
+
+    ExposuresConfig(
+      studyStart = dates.studyStart,
+      diseaseCode = diseaseCode,
+      periodStrategy = ExposurePeriodStrategy.fromString(
+        conf.getString("exposures.period_strategy")
+      ),
+      followUpDelay = conf.getInt("exposures.follow_up_delay"),
+      minPurchases = conf.getInt("exposures.min_purchases"),
+      purchasesWindow = conf.getInt("exposures.purchases_window"),
+      startDelay = conf.getInt("exposures.start_delay"),
+      weightAggStrategy = WeightAggStrategy.fromString(
+        conf.getString("exposures.weight_strategy")
+      ),
+      filterDelayedPatients = conf.getBoolean("filters.delayed_entries"),
+      cumulativeExposureWindow = conf.getInt("exposures.cumulative.window"),
+      cumulativeStartThreshold = conf.getInt("exposures.cumulative.start_threshold"),
+      cumulativeEndThreshold = conf.getInt("exposures.cumulative.end_threshold"),
+      dosageLevelIntervals = conf.getIntList("exposures.cumulative.dosage_level_intervals").asScala.map(_.toInt).toList,
+      purchaseIntervals = conf.getIntList("exposures.cumulative.purchase_intervals").asScala.map(_.toInt).toList
+    )
+  }
 }

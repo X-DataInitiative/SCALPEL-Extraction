@@ -1,17 +1,13 @@
 package fr.polytechnique.cmap.cnam.util
 
-
+import scala.reflect.runtime.universe.{typeOf, TypeTag}
 import org.apache.spark.sql.types.{DataType, StructField, StructType}
-import org.apache.spark.sql.{DataFrame, SaveMode}
+import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 
-/**
-  * Created by burq on 30/06/16.
-  */
+
 object RichDataFrames {
 
   implicit class CSVDataFrame(dataFrame: DataFrame) {
-
-    override def toString: String = dataFrame.toString
 
     def writeParquet(path: String, isOverwrite: Boolean = true ): Unit = {
       val saveMode : SaveMode = if(isOverwrite) SaveMode.Ignore else SaveMode.Overwrite
@@ -48,5 +44,12 @@ object RichDataFrames {
         checkDuplicateRows
     }
 
+  }
+
+  def renameTupleColumns[A: TypeTag, B: TypeTag](input: Dataset[(A, B)]): Dataset[(A, B)] = {
+    import input.sqlContext.implicits._
+    val aName = typeOf[A].toString().split('.').last
+    val bName = typeOf[B].toString().split('.').last
+    input.withColumnRenamed("_1", aName).withColumnRenamed("_2", bName).as[(A,B)]
   }
 }
