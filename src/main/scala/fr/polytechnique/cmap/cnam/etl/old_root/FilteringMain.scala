@@ -8,6 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.patients.Patients
 import fr.polytechnique.cmap.cnam.etl.events.molecules.MoleculePurchases
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.etl.old_root.InfarctusTransformer
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
@@ -62,12 +63,17 @@ object FilteringMain extends Main {
     val drugEvents: Dataset[Event] = MoleculePurchases.extract(extractionConfig, sources).map(Event.fromNewEvent(_))
 
     logger.info("(Lazy) Creating disease events dataset...")
-    val broadDiseaseEvents: Dataset[Event] = DiseaseTransformer.transform(sources)
-    val targetDiseaseEvents: Dataset[Event] = (
-      if (cancerDefinition == "broad")
-        broadDiseaseEvents
+    val broadDiseaseEvents: Dataset[Event] =
+      if(cancerDefinition == "infarctus")
+        InfarctusTransformer.transform(sources)
       else
+        DiseaseTransformer.transform(sources)
+
+    val targetDiseaseEvents: Dataset[Event] = (
+      if (cancerDefinition == "narrow")
         TargetDiseaseTransformer.transform(sources)
+      else
+          broadDiseaseEvents
     ).map(_.copy(eventId = "targetDisease"))
     val diseaseEvents: Dataset[Event] = broadDiseaseEvents.union(targetDiseaseEvents)
 
