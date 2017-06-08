@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.events.diagnoses
+package fr.polytechnique.cmap.cnam.etl.events.diagnoses.old
 
 import java.sql.Timestamp
 import org.apache.spark.sql.functions._
@@ -6,6 +6,7 @@ import org.apache.spark.sql.types.{LongType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.Event
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{AssociatedDiagnosis, Diagnosis, LinkedDiagnosis, MainDiagnosis}
 
 private[diagnoses] object McoDiagnoses {
 

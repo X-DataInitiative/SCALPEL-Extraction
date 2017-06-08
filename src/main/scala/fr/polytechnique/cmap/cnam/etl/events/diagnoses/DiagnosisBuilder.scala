@@ -17,6 +17,16 @@ object Diagnosis {
 
 trait Diagnosis extends AnyEvent
 
+object Diagnosis {
+
+  val categories = List(
+    ImbDiagnosis.category,
+    MainDiagnosis.category,
+    LinkedDiagnosis.category,
+    AssociatedDiagnosis.category
+  )
+}
+
 trait DiagnosisBuilder extends EventBuilder with Diagnosis with Serializable {
 
   val category: EventCategory[Diagnosis]
