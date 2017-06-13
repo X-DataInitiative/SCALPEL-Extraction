@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.com/X-DataInitiative/SNIIRAM-flattening.svg?token=LzAm1iAXuXZzFBCrak5F&branch=master)](https://travis-ci.com/X-DataInitiative/SNIIRAM-flattening)
-[![codecov](https://codecov.io/gh/X-DataInitiative/SNIIRAM-flattening/branch/master/graph/badge.svg?token=4a0h501t8P)](https://codecov.io/gh/X-DataInitiative/SNIIRAM-flattening)
+[![Build Status](https://travis-ci.com/X-DataInitiative/SNIIRAM-featuring.svg?token=LzAm1iAXuXZzFBCrak5F&branch=master)](https://travis-ci.com/X-DataInitiative/SNIIRAM-featuring)
+[![codecov](https://codecov.io/gh/X-DataInitiative/SNIIRAM-featuring/branch/master/graph/badge.svg?token=4a0h501t8P)](https://codecov.io/gh/X-DataInitiative/SNIIRAM-featuring)
 
 This repository contains the ETL (Extract, Transform & Load) and Featuring stages of the processing pipeline for the SNIIRAM pharmacovigilance project in partnership with CNAMTS.
 
@@ -22,10 +22,10 @@ spark-submit \
   --executor-memory 110G \
   --class fr.polytechnique.cmap.cnam.etl.ETLMain \
   --conf spark.task.maxFailures=20 \
-  SNIIRAM-flattening-assembly-1.0.jar conf=./config.conf env=cnam
+  SNIIRAM-featuring-assembly-1.0.jar conf=./config.conf env=cnam
 ```
 
-As shown above, the ETL step needs a configuration file. All the available configuration items can be found in the file [`src/main/resources/config/filtering-default.conf`](https://github.com/X-DataInitiative/SNIIRAM-flattening/blob/master/src/main/resources/config/filtering-default.conf).
+As shown above, the ETL step needs a configuration file. All the available configuration items can be found in the file [`src/main/resources/config/filtering-default.conf`](https://github.com/X-DataInitiative/SNIIRAM-featuring/blob/master/src/main/resources/config/filtering-default.conf).
 However, the file passed at execution time does not need to contain all items, only those that different from default. Some examples are shown in the [Configuration](#configuration) section below.
 
 # Featuring stage
@@ -78,4 +78,4 @@ mlpp_parameters = {
 ```
 
 All the available configuration items, with a quick description and the default values, can be found on the file
- [`src/main/resources/config/filtering-default.conf`](https://github.com/X-DataInitiative/SNIIRAM-flattening/blob/master/src/main/resources/config/filtering-default.conf). 
+ [`src/main/resources/config/filtering-default.conf`](https://github.com/X-DataInitiative/SNIIRAM-featuring/blob/master/src/main/resources/config/filtering-default.conf). 

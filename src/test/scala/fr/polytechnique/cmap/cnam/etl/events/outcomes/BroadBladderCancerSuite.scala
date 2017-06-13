@@ -1,7 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.events.outcomes
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
+import fr.polytechnique.cmap.cnam.etl.events.Event
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnosis
 
 class BroadBladderCancerSuite extends SharedContext {
 
@@ -13,30 +14,30 @@ class BroadBladderCancerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     val inputDS = Seq(
-      Event[AnyEvent]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient3", "linked_diagnosis", "g3", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient4", "associated_diagnosis", "g4", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient4", "linked_diagnosis", "g4", "C77", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient5", "associated_diagnosis", "g5", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
-      Event[AnyEvent]("Patient5", "main_diagnosis", "g5", "C79", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
-      Event[AnyEvent]("Patient6", "associated_diagnosis", "g6", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient6", "linked_diagnosis", "g7", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient8", "linked_diagnosis", "g8", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient9", "main_diagnosis", "g9", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient10", "ssr_main_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20))),
-      Event[AnyEvent]("Patient11", "ssr_etiologique_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20))),
-      Event[AnyEvent]("Patient12", "had_main_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20))),
-      Event[AnyEvent]("Patient13", "ssr_etiologique_diagnosis", "g10", "C77", 1.0, makeTS(2006, 5, 20), Some(makeTS(2006, 5, 20)))
+      Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient3", "linked_diagnosis", "g3", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient4", "associated_diagnosis", "g4", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient4", "linked_diagnosis", "g4", "C77", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient5", "associated_diagnosis", "g5", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
+      Event[Diagnosis]("Patient5", "main_diagnosis", "g5", "C79", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
+      Event[Diagnosis]("Patient6", "associated_diagnosis", "g6", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient6", "linked_diagnosis", "g7", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient8", "linked_diagnosis", "g8", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient9", "main_diagnosis", "g9", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient10", "ssr_main_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20))),
+      Event[Diagnosis]("Patient11", "ssr_etiologic_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20))),
+      Event[Diagnosis]("Patient12", "had_main_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20))),
+      Event[Diagnosis]("Patient13", "ssr_etiologic_diagnosis", "g10", "C77", 1.0, makeTS(2006, 5, 20), Some(makeTS(2006, 5, 20)))
     ).toDS
 
     val expectedDS = Seq(
-      Event[AnyEvent]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient3", "linked_diagnosis", "g3", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient10", "ssr_main_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20))),
-      Event[AnyEvent]("Patient11", "ssr_etiologique_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20))),
-      Event[AnyEvent]("Patient12", "had_main_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20)))
+      Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient3", "linked_diagnosis", "g3", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient10", "ssr_main_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20))),
+      Event[Diagnosis]("Patient11", "ssr_etiologic_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20))),
+      Event[Diagnosis]("Patient12", "had_main_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20)))
     ).toDS
 
     // When
@@ -47,7 +48,7 @@ class BroadBladderCancerSuite extends SharedContext {
     assertDSs(result, expectedDS)
   }
 
-  "directOutcome" should "map Dataset[Event[AnyEvent]] to Dataset[Event[Outcome]]" in {
+  "directOutcome" should "map Dataset[Event[Diagnosis]] to Dataset[Event[Outcome]]" in {
 
     // Given
     val sqlCtx = sqlContext
@@ -55,9 +56,9 @@ class BroadBladderCancerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     val inputDS = Seq(
-      Event[AnyEvent]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
-      Event[AnyEvent]("Patient3", "linked_diagnosis", "g3", "C67", 1.0, makeTS(2006, 3, 20), Some(makeTS(2006, 3, 20)))
+      Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
+      Event[Diagnosis]("Patient3", "linked_diagnosis", "g3", "C67", 1.0, makeTS(2006, 3, 20), Some(makeTS(2006, 3, 20)))
     ).toDS
 
     val expectedDS = Seq(
@@ -79,17 +80,17 @@ class BroadBladderCancerSuite extends SharedContext {
 
     // Given
     import fr.polytechnique.cmap.cnam.util.functions.makeTS
-    val input1 = Iterator(
-      Event[AnyEvent]("Patient4", "associated_diagnosis", "g4", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient4", "linked_diagnosis", "g4", "C77", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
+    val input1 = Seq(
+      Event[Diagnosis]("Patient4", "associated_diagnosis", "g4", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient4", "linked_diagnosis", "g4", "C77", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
     )
-    val input2 = Iterator(
-      Event[AnyEvent]("Patient4", "associated_diagnosis", "g5", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient4", "main_diagnosis", "g5", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
+    val input2 = Seq(
+      Event[Diagnosis]("Patient4", "main_diagnosis", "g5", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient4", "associated_diagnosis", "g5", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
     )
-    val input3 = Iterator(
-      Event[AnyEvent]("Patient4", "associated_diagnosis", "g6", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient4", "main_diagnosis", "g6", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
+    val input3 = Seq(
+      Event[Diagnosis]("Patient4", "associated_diagnosis", "g6", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient4", "main_diagnosis", "g6", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
     )
 
     // When
@@ -107,17 +108,17 @@ class BroadBladderCancerSuite extends SharedContext {
 
     // Given
     import fr.polytechnique.cmap.cnam.util.functions.makeTS
-    val input1 = Iterator(
-      Event[AnyEvent]("Patient4", "associated_diagnosis", "g4", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient4", "linked_diagnosis", "g4", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
+    val input1 = Seq(
+      Event[Diagnosis]("Patient4", "associated_diagnosis", "g4", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient4", "linked_diagnosis", "g4", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
     )
-    val input2 = Iterator(
-      Event[AnyEvent]("Patient5", "associated_diagnosis", "g5", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient5", "main_diagnosis", "g5", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
+    val input2 = Seq(
+      Event[Diagnosis]("Patient5", "main_diagnosis", "g5", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient5", "associated_diagnosis", "g5", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
     )
-    val input3 = Iterator(
-      Event[AnyEvent]("Patient6", "associated_diagnosis", "g6", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient6", "associated_diagnosis", "g6", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
+    val input3 = Seq(
+      Event[Diagnosis]("Patient6", "associated_diagnosis", "g6", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient6", "associated_diagnosis", "g6", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
     )
 
     // When
@@ -140,17 +141,17 @@ class BroadBladderCancerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     val inputDS = Seq(
-      Event[AnyEvent]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient3", "linked_diagnosis", "g3", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient4", "associated_diagnosis", "g4", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient4", "linked_diagnosis", "g4", "C77", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient5", "associated_diagnosis", "g5", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
-      Event[AnyEvent]("Patient5", "main_diagnosis", "g5", "C79", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
-      Event[AnyEvent]("Patient6", "associated_diagnosis", "g6", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient6", "linked_diagnosis", "g7", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient8", "linked_diagnosis", "g8", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient1", "main_diagnosis", "g9", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
+      Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient3", "linked_diagnosis", "g3", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient4", "associated_diagnosis", "g4", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient4", "linked_diagnosis", "g4", "C77", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient5", "associated_diagnosis", "g5", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
+      Event[Diagnosis]("Patient5", "main_diagnosis", "g5", "C79", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
+      Event[Diagnosis]("Patient6", "associated_diagnosis", "g6", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient6", "linked_diagnosis", "g7", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient8", "linked_diagnosis", "g8", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient1", "main_diagnosis", "g9", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
     ).toDS
 
     val expectedDS = Seq(
@@ -172,20 +173,20 @@ class BroadBladderCancerSuite extends SharedContext {
     import fr.polytechnique.cmap.cnam.util.functions.makeTS
     import sqlCtx.implicits._
     val inputDS = Seq(
-      Event[AnyEvent]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
-      Event[AnyEvent]("Patient3", "linked_diagnosis", "g3", "C67", 1.0, makeTS(2006, 3, 20), Some(makeTS(2006, 3, 20))),
-      Event[AnyEvent]("Patient4", "associated_diagnosis", "g4", "C67", 1.0, makeTS(2006, 4, 20), Some(makeTS(2006, 4, 20))),
-      Event[AnyEvent]("Patient4", "linked_diagnosis", "g4", "C77", 1.0, makeTS(2006, 4, 20), Some(makeTS(2006, 4, 20))),
-      Event[AnyEvent]("Patient5", "associated_diagnosis", "g5", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient5", "main_diagnosis", "g5", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient6", "associated_diagnosis", "g6", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient6", "linked_diagnosis", "g7", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient8", "linked_diagnosis", "g8", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient1", "main_diagnosis", "g9", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[AnyEvent]("Patient10", "ssr_main_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20))),
-      Event[AnyEvent]("Patient11", "ssr_etiologique_diagnosis", "g11", "C77", 1.0, makeTS(2006, 11, 20), Some(makeTS(2006, 11, 20))),
-      Event[AnyEvent]("Patient12", "had_main_diagnosis", "g12", "C67", 1.0, makeTS(2006, 12, 20), Some(makeTS(2006, 12, 20)))
+      Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
+      Event[Diagnosis]("Patient3", "linked_diagnosis", "g3", "C67", 1.0, makeTS(2006, 3, 20), Some(makeTS(2006, 3, 20))),
+      Event[Diagnosis]("Patient4", "associated_diagnosis", "g4", "C67", 1.0, makeTS(2006, 4, 20), Some(makeTS(2006, 4, 20))),
+      Event[Diagnosis]("Patient4", "linked_diagnosis", "g4", "C77", 1.0, makeTS(2006, 4, 20), Some(makeTS(2006, 4, 20))),
+      Event[Diagnosis]("Patient5", "associated_diagnosis", "g5", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient5", "main_diagnosis", "g5", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient6", "associated_diagnosis", "g6", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient6", "linked_diagnosis", "g7", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient8", "linked_diagnosis", "g8", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient1", "main_diagnosis", "g9", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient10", "ssr_main_diagnosis", "g10", "C67", 1.0, makeTS(2006, 10, 20), Some(makeTS(2006, 10, 20))),
+      Event[Diagnosis]("Patient11", "ssr_etiologic_diagnosis", "g11", "C77", 1.0, makeTS(2006, 11, 20), Some(makeTS(2006, 11, 20))),
+      Event[Diagnosis]("Patient12", "had_main_diagnosis", "g12", "C67", 1.0, makeTS(2006, 12, 20), Some(makeTS(2006, 12, 20)))
     ).toDS
 
     val expectedDS = Seq(
