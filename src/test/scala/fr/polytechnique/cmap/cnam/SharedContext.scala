@@ -4,7 +4,7 @@ import java.io.File
 import java.util.{Locale, TimeZone}
 import org.apache.commons.io.FileUtils
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.sql.{DataFrame, SQLContext, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, SQLContext, SparkSession}
 import org.scalatest._
 import fr.polytechnique.cmap.cnam.util.RichDataFrames
 
@@ -47,6 +47,10 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
       df1.unpersist()
       df2.unpersist()
     }
+  }
+
+  def assertDSs[A](ds1: Dataset[A], ds2: Dataset[A], debug: Boolean = this.debug): Unit = {
+    assertDFs(ds1.toDF, ds2.toDF, debug)
   }
 
   protected override def beforeAll(): Unit = {

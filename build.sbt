@@ -1,4 +1,4 @@
-name := "SNIIRAM-flattening"
+name := "SNIIRAM-featuring"
 
 version := "1.0"
 
