@@ -42,3 +42,27 @@ trait DiagnosisBuilder extends EventBuilder with Diagnosis with Serializable {
     )
   }
 }
+
+object MainDiagnosis extends DiagnosisBuilder {
+  override val category: EventCategory[Diagnosis] = "main_diagnosis"
+}
+
+object LinkedDiagnosis extends DiagnosisBuilder {
+  override val category: EventCategory[Diagnosis] = "linked_diagnosis"
+}
+
+object HADMainDiagnosis extends DiagnosisBuilder {
+  override val category: EventCategory[Diagnosis] = "had_main_diagnosis"
+}
+
+object SSRMainDiagnosis extends DiagnosisBuilder {
+  override val category: EventCategory[Diagnosis] = "ssr_main_diagnosis"
+}
+
+object SSREtiologicDiagnosis extends DiagnosisBuilder {
+  override val category: EventCategory[Diagnosis] = "ssr_etiologic_diagnosis"
+}
+
+object ImbDiagnosis extends DiagnosisBuilder {
+  override val category: EventCategory[Diagnosis] = "imb_diagnosis"
+}
