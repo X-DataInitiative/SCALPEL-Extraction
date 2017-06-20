@@ -1,5 +1,6 @@
 sudo: required
 dist: trusty
+group: edge
 
 # Building on centOS require pulling a docker image
 env:

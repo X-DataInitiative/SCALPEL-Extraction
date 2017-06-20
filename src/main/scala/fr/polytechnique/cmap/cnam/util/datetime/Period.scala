@@ -8,6 +8,14 @@ private[datetime] class Period(
     val totalMonths: Int = 0,
     val totalMilliseconds: Long = 0) extends Serializable {
 
+  def years: Int = this.toMap.apply("years").toInt
+  def months: Int = this.toMap.apply("months").toInt
+  def days: Int = this.toMap.apply("days").toInt
+  def hours: Int = this.toMap.apply("hours").toInt
+  def minutes: Int = this.toMap.apply("minutes").toInt
+  def seconds: Int = this.toMap.apply("seconds").toInt
+  def milliseconds: Long = this.toMap.apply("milliseconds")
+
   def unary_-(): Period = new Period(-totalMonths, -totalMilliseconds)
 
   def +(other: Period): Period = {
@@ -31,6 +39,14 @@ private[datetime] class Period(
       case ((newMap, rest), (unitName, msPerUnit)) =>
         (newMap + (unitName -> rest / msPerUnit), rest % msPerUnit)
     }._1
+  }
+
+  def canEqual(a: Any): Boolean = a.isInstanceOf[Period]
+  override def equals(that: Any): Boolean = that match {
+    case that: Period => that.canEqual(this) &&
+      this.totalMonths == that.totalMonths &&
+      this.totalMilliseconds == that.totalMilliseconds
+    case _ => false
   }
 
   override def toString: String = {

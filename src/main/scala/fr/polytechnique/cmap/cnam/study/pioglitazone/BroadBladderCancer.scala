@@ -1,8 +1,9 @@
-package fr.polytechnique.cmap.cnam.etl.events.outcomes
+package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events.Event
 import fr.polytechnique.cmap.cnam.etl.events.diagnoses._
+import fr.polytechnique.cmap.cnam.etl.events.outcomes.{Outcome, OutcomeTransformer}
 
 object BroadBladderCancer extends OutcomeTransformer {
 
@@ -39,8 +40,7 @@ object BroadBladderCancer extends OutcomeTransformer {
   }
 
   implicit class BroadBladderCancerOutcome(ds: Dataset[Event[Diagnosis]]) {
-    val sqlCtx = ds.sqlContext
-    import sqlCtx.implicits._
+    import ds.sqlContext.implicits._
 
     def directOutcomes: Dataset[Event[Outcome]] = {
       ds.map(event => Outcome(event.patientID, outcomeName, event.start))

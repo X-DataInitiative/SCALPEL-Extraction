@@ -6,7 +6,7 @@ import org.apache.spark.sql.types.{LongType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.Event
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{AssociatedDiagnosis, Diagnosis, LinkedDiagnosis, MainDiagnosis}
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses._
 
 private[diagnoses] object McoDiagnoses {
 

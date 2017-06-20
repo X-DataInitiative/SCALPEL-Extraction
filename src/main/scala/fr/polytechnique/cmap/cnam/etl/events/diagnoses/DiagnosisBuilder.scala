@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.events.diagnoses
 
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder, EventCategory}
+import fr.polytechnique.cmap.cnam.etl.events._
 
 object Diagnosis {
 
@@ -16,16 +16,6 @@ object Diagnosis {
 
 
 trait Diagnosis extends AnyEvent
-
-object Diagnosis {
-
-  val categories = List(
-    ImbDiagnosis.category,
-    MainDiagnosis.category,
-    LinkedDiagnosis.category,
-    AssociatedDiagnosis.category
-  )
-}
 
 trait DiagnosisBuilder extends EventBuilder with Diagnosis with Serializable {
 
@@ -59,6 +49,10 @@ object MainDiagnosis extends DiagnosisBuilder {
 
 object LinkedDiagnosis extends DiagnosisBuilder {
   override val category: EventCategory[Diagnosis] = "linked_diagnosis"
+}
+
+object AssociatedDiagnosis extends DiagnosisBuilder {
+  override val category: EventCategory[Diagnosis] = "associated_diagnosis"
 }
 
 object HADMainDiagnosis extends DiagnosisBuilder {

@@ -1,14 +1,15 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
-import org.apache.spark.sql.{DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.etl.events.acts.{DcirCamAct, MedicalAct}
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{AssociatedDiagnosis, Diagnosis, LinkedDiagnosis, MainDiagnosis}
+import org.apache.log4j.Logger
+import org.apache.spark.sql.Dataset
+import fr.polytechnique.cmap.cnam.etl.events.acts._
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses._
 import fr.polytechnique.cmap.cnam.etl.events.outcomes.{Outcome, OutcomeTransformer}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
 import fr.polytechnique.cmap.cnam.util.functions._
-import fr.polytechnique.cmap.cnam.util.{datetime, collections}
+import fr.polytechnique.cmap.cnam.util.{collections, datetime}
 
-class NarrowBladderCancer extends OutcomeTransformer {
+object NarrowBladderCancer extends OutcomeTransformer {
 
   val name: String = "narrow_bladder_cancer"
   val primaryDiagCode: String = "C67"
@@ -40,25 +41,58 @@ class NarrowBladderCancer extends OutcomeTransformer {
     "YYYY577", "YYYY588", "YYYY599", "YYYY306", "YYYY016", "YYYY021", "YYYY023"
   )
 
-  def checkHospitalStay(eventsInStay: Seq[Event[AnyEvent]], dcirCamEvents: Seq[Event[AnyEvent]]): Boolean = {
+  private val DP = MainDiagnosis.category
+  private val DR = LinkedDiagnosis.category
+  private val DAS = AssociatedDiagnosis.category
+  private val MCO_CIM_ACT = McoCimAct.category
+  private val MCO_CAM_ACT = McoCamAct.category
+  private val DCIR_CAM_ACT = DcirCamAct.category
+
+  // Checks if all events in stay have the same dates
+  def checkDates(eventsInStay: Seq[Event[AnyEvent]]): Boolean = {
+    val res = !eventsInStay.exists(_.start != eventsInStay.head.start)
+    if(!res) {
+      val groupID = eventsInStay.head.groupID
+      Logger.getLogger(getClass).warn(s"The dates for the GroupID: $groupID are not consistent")
+    }
+    res
+  }
+
+  def checkDiagnosesInStay(eventsInStay: Seq[Event[AnyEvent]]): Boolean = {
+
     import collections.implicits._
+
+    eventsInStay.exists { e =>
+      e.checkValue(DP, "C67") ||
+      e.checkValue(DR, "C67") ||
+      eventsInStay.existAll(
+        e => e.checkValue(DAS, "C67"),
+        e =>
+          e.checkValue(DP, Seq("C77", "C78", "C79")) ||
+          e.checkValue(DR, Seq("C77", "C78", "C79"))
+      )
+    }
+  }
+
+  def checkMcoActsInStay(eventsInStay: Seq[Event[AnyEvent]]): Boolean = {
+    eventsInStay.exists { e =>
+      e.checkValue(MCO_CIM_ACT, Seq("Z510", "Z511")) ||
+      e.checkValue(MCO_CAM_ACT, mcoActCAMCodes)
+    }
+  }
+
+  def checkDcirActs(dcirCamEvents: Seq[Event[AnyEvent]], stayDate: java.util.Date): Boolean = {
     import datetime.implicits._
-    eventsInStay.existAll(
-      { e =>
-          e.checkValue("DP", "C67") ||
-            e.checkValue("DR", "C67") ||
-            eventsInStay.existAll(
-              e => e.checkValue("DAS", "C67"),
-              e =>
-                e.checkValue("DP", Seq("C77", "C78", "C79")) ||
-                e.checkValue("DR", Seq("C77", "C78", "C79"))
-            )
-      },
-      { e =>
-          e.checkValue("DP_ACT", Seq("Z510", "Z511")) ||
-            e.checkValue("MCO_CAM", mcoActCAMCodes) ||
-            dcirCamEvents.exists(dcirEv => e.start.between(dcirEv.start - 3.months , dcirEv.start + 3.months))
-      }
+    val filteredDcirEvents = dcirCamEvents.filter(_.checkValue(DCIR_CAM_ACT, dcirCamCodes))
+    filteredDcirEvents.exists {
+      dcirEvent => dcirEvent.start.between(stayDate - 3.months, stayDate + 3.months)
+    }
+  }
+
+  def checkHospitalStay(eventsInStay: Seq[Event[AnyEvent]], dcirCamEvents: Seq[Event[AnyEvent]]): Boolean = {
+    checkDates(eventsInStay) &&
+    checkDiagnosesInStay(eventsInStay) && (
+      checkMcoActsInStay(eventsInStay) || checkDcirActs(dcirCamEvents, eventsInStay.head.start)
     )
   }
 
@@ -68,12 +102,12 @@ class NarrowBladderCancer extends OutcomeTransformer {
     val groupedEvents: Map[String, Seq[Event[AnyEvent]]] = eventsOfPatient.toStream.groupBy(_.groupID)
 
     // We need all the dcir CAM codes
-    val dcirCamEvents: Seq[Event[AnyEvent]] = groupedEvents.getOrElse(DcirCamAct.category, Seq[Event[AnyEvent]]())
+    val dcirCamEvents: Seq[Event[AnyEvent]] = groupedEvents.getOrElse(DCIR_CAM_ACT, Seq.empty)
 
     // Creates an outcome for each hospital stay with the right combination of events
     groupedEvents.collect {
       case (_, events) if checkHospitalStay(events, dcirCamEvents) =>
-        Outcome(events.head.patientID, "outcome", events.head.start)
+        Outcome(events.head.patientID, name, events.head.start)
     }.toStream
   }
 
@@ -86,10 +120,6 @@ class NarrowBladderCancer extends OutcomeTransformer {
     val events = unionDatasets(diagnoses.as[Event[AnyEvent]], acts.as[Event[AnyEvent]])
 
     events
-      .filter(e =>
-        e.category != DcirCamAct.category ||
-        e.checkValue(DcirCamAct.category, dcirCamCodes)
-      )
       .groupByKey(_.patientID)
       .flatMapGroups {
         case (_, eventsPerPatient: Iterator[Event[AnyEvent]]) => findOutcomes(eventsPerPatient)

@@ -4,7 +4,7 @@ import java.util.Calendar
 
 // inspired by https://github.com/danielpes/spark-datetime-lite
 
-private[datetime] class RichDate[A <: java.util.Date](datetime: A) {
+private[datetime] class RichDate[A <: java.util.Date](val datetime: A) {
 
   def +(period: Period): A = {
     val c = Calendar.getInstance()

@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.events.extracted.diagnoses
+package fr.polytechnique.cmap.cnam.etl.events.diagnoses
 
 import java.sql.Timestamp
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
