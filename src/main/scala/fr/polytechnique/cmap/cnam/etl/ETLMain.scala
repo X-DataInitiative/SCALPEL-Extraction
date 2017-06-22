@@ -3,13 +3,15 @@ package fr.polytechnique.cmap.cnam.etl
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{Diagnoses, Diagnosis}
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnosis
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnoses
 import fr.polytechnique.cmap.cnam.etl.events.molecules.{Molecule, MoleculePurchases}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.patients.{Patient, Patients}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.study.pioglitazone.NaiveBladderCancer
 import fr.polytechnique.cmap.cnam.util.functions._
 
 object ETLMain extends Main {
@@ -72,6 +74,12 @@ object ETLMain extends Main {
 
     logger.info("Writing events...")
     allEvents.toDF.write.parquet(outputPaths.flatEvents)
+
+    logger.info("Extracting bladder cancer outcomes...")
+    val naiveBladderCancerOutcomes = NaiveBladderCancer.transform(allEvents)
+
+    logger.info("Writing bladder cancer outcomes...")
+    naiveBladderCancerOutcomes.toDF.write.parquet(outputPaths.NaiveBladderCancerOutcomes)
 
     Some(allEvents)
   }
