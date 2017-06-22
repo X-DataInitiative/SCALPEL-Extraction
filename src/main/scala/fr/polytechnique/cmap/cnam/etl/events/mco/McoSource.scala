@@ -5,7 +5,7 @@ import org.apache.spark.sql.types.{LongType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.etl.ColumnNames
 import fr.polytechnique.cmap.cnam.etl.events.EventBuilder
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{AssociatedDiagnosis, LinkedDiagnosis, MainDiagnosis}
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{MainDiagnosis, LinkedDiagnosis, AssociatedDiagnosis}
 
 trait McoSource extends ColumnNames {
 

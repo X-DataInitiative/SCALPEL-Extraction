@@ -26,7 +26,6 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
   protected def sqlContext: SQLContext = _spark.sqlContext
   protected def sc = _spark.sparkContext
 
-
   def assertDFs(df1: DataFrame, df2: DataFrame, debug: Boolean = this.debug): Unit = {
     try {
 
