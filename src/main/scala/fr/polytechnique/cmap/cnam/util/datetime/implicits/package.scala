@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.util.datetime
 
-// inspired by https://github.com/danielpes/spark-datetime-lite
+/* inspired by https://github.com/danielpes/spark-datetime-lite */
 
 package object implicits {
 

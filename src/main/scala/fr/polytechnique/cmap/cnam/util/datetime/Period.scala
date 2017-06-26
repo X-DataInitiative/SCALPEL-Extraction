@@ -2,11 +2,12 @@ package fr.polytechnique.cmap.cnam.util.datetime
 
 import scala.collection.immutable.ListMap
 
-// inspired by https://github.com/danielpes/spark-datetime-lite
+/* inspired by https://github.com/danielpes/spark-datetime-lite */
 
 private[datetime] class Period(
     val totalMonths: Int = 0,
-    val totalMilliseconds: Long = 0) extends Serializable {
+    val totalMilliseconds: Long = 0)
+  extends Serializable {
 
   def years: Int = this.toMap.apply("years").toInt
   def months: Int = this.toMap.apply("months").toInt
@@ -35,10 +36,12 @@ private[datetime] class Period(
       "years" -> totalMonths / 12L,
       "months" -> totalMonths % 12L
     )
-    msCounts.foldLeft((initialMap, totalMilliseconds)) {
-      case ((newMap, rest), (unitName, msPerUnit)) =>
-        (newMap + (unitName -> rest / msPerUnit), rest % msPerUnit)
-    }._1
+    val (finalMap, _) = msCounts.foldLeft((initialMap, this.totalMilliseconds)) {
+      case ((newMap, remainder), (unitName, msPerUnit)) =>
+        (newMap + (unitName -> remainder / msPerUnit), remainder % msPerUnit)
+    }
+
+    finalMap
   }
 
   def canEqual(a: Any): Boolean = a.isInstanceOf[Period]
@@ -54,8 +57,7 @@ private[datetime] class Period(
       case (k, v) if v == 1 => s"$v ${k.dropRight(1)}"
       case (k, v) if v != 0 => s"$v $k"
     }
-    if (stringList.isEmpty) "Empty Period"
-    else stringList.mkString(", ")
+    if (stringList.isEmpty) "Empty Period" else stringList.mkString(", ")
   }
 }
 

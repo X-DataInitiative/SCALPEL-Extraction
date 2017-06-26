@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.util.datetime
 
 import java.util.Calendar
 
-// inspired by https://github.com/danielpes/spark-datetime-lite
+/* inspired by https://github.com/danielpes/spark-datetime-lite */
 
 private[datetime] class RichDate[A <: java.util.Date](val datetime: A) {
 

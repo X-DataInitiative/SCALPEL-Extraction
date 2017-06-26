@@ -24,7 +24,7 @@ class NaiveBladderCancerSuite extends SharedContext {
     ).toDS
 
     val expected = Seq(
-      Outcome("PatientA", NaiveBladderCancer.name, makeTS(2010, 1, 1))
+      Outcome("PatientA", NaiveBladderCancer.outcomeName, makeTS(2010, 1, 1))
     )
 
     // When

@@ -5,7 +5,6 @@ import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
 import org.mockito.Mockito.mock
 import org.scalatest.FlatSpec
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{Diagnosis, DiagnosisBuilder}
 import fr.polytechnique.cmap.cnam.etl.events.{Event, EventCategory}
 import fr.polytechnique.cmap.cnam.util.functions._
 

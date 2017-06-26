@@ -189,8 +189,8 @@ class NarrowBladderCancerSuite extends SharedContext {
       LinkedDiagnosis(patientID, "hosp3", "C67", date + 9.months)
     )
     val expected: Seq[Event[Outcome]] = Stream(
-      Outcome(patientID, NarrowBladderCancer.name, date + 6.months),
-      Outcome(patientID, NarrowBladderCancer.name, date)
+      Outcome(patientID, NarrowBladderCancer.outcomeName, date + 6.months),
+      Outcome(patientID, NarrowBladderCancer.outcomeName, date)
     )
 
     // When
@@ -222,9 +222,9 @@ class NarrowBladderCancerSuite extends SharedContext {
     ).toDS
 
     val expected: Dataset[Event[Outcome]] = Seq(
-      Outcome("PatientA", NarrowBladderCancer.name, date),
-      Outcome("PatientA", NarrowBladderCancer.name, date + 4.months),
-      Outcome("PatientB", NarrowBladderCancer.name, date + 8.months)
+      Outcome("PatientA", NarrowBladderCancer.outcomeName, date),
+      Outcome("PatientA", NarrowBladderCancer.outcomeName, date + 4.months),
+      Outcome("PatientB", NarrowBladderCancer.outcomeName, date + 8.months)
     ).toDS
 
     // When

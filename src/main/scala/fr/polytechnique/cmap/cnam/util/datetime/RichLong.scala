@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.util.datetime
 
-// inspired by https://github.com/danielpes/spark-datetime-lite
+/* inspired by https://github.com/danielpes/spark-datetime-lite */
 
 private[datetime] class RichLong(val value: Long) extends AnyVal {
 
