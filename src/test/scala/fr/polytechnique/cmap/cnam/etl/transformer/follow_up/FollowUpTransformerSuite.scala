@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.transformer.follow_up
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.transformer.exposure.ExposuresConfig
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.ExposureDefinition
 import fr.polytechnique.cmap.cnam.etl.transformer.observation.ObservationPeriod
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 import org.apache.spark.sql.functions.lit
@@ -235,7 +235,7 @@ class FollowUpTransformerSuite extends SharedContext {
       FollowUp("Regis", makeTS(2006, 3, 1), makeTS(2009, 1, 1))
     ).toDS
 
-    val transformer = new FollowUpTransformer(2, "cancer")
+    val transformer = new FollowUpTransformer(2)
 
     // When
     val result = transformer.transform(patients, prescriptions)
@@ -243,21 +243,6 @@ class FollowUpTransformerSuite extends SharedContext {
     // Then
 
     assertDSs(result, expected, true)
-  }
-
-  "apply" should "create a correct Transformer" in {
-    // Given
-    val mockConfig = Mockito.mock(classOf[ExposuresConfig])
-    Mockito.when(mockConfig.diseaseCode).thenReturn("code")
-    Mockito.when(mockConfig.followUpDelay).thenReturn(3)
-
-
-    // When
-    val result = FollowUpTransformer.apply(mockConfig)
-
-    // Then
-    assert(result.delay == 3)
-    assert(result.diseaseCode == "code")
   }
 
 }

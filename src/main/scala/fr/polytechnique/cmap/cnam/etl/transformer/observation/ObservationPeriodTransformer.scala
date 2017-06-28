@@ -10,7 +10,9 @@ import org.apache.spark.sql.types.TimestampType
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
 
 
-class ObservationPeriodTransformer (val studyStart: Timestamp, val studyEnd: Timestamp) {
+class ObservationPeriodTransformer (
+  val studyStart: Timestamp,
+  val studyEnd: Timestamp) {
 
   val outputColumns = List(
     col("patientID"),
@@ -47,17 +49,4 @@ class ObservationPeriodTransformer (val studyStart: Timestamp, val studyEnd: Tim
       .dropDuplicates(Seq("patientID"))
       .as[ObservationPeriod]
   }
-}
-
-object ObservationPeriodTransformer {
-
-  def apply(): ObservationPeriodTransformer = {
-    import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
-
-    val start: Timestamp = FilteringConfig.dates.studyStart
-    val end: Timestamp = FilteringConfig.dates.studyEnd
-
-    new ObservationPeriodTransformer(start, end)
-  }
-
 }

@@ -170,28 +170,4 @@ object FilteringConfig {
     purchaseIntervals = conf.getIntList("exposures.cumulative.purchase_intervals").asScala.map(_.toInt).toList
   )
 
-  lazy val newExposuresConfig: new_exposure.ExposuresConfig = {
-    import new_exposure._
-
-    ExposuresConfig(
-      studyStart = dates.studyStart,
-      diseaseCode = diseaseCode,
-      periodStrategy = ExposurePeriodStrategy.fromString(
-        conf.getString("exposures.period_strategy")
-      ),
-      followUpDelay = conf.getInt("exposures.follow_up_delay"),
-      minPurchases = conf.getInt("exposures.min_purchases"),
-      purchasesWindow = conf.getInt("exposures.purchases_window"),
-      startDelay = conf.getInt("exposures.start_delay"),
-      weightAggStrategy = WeightAggStrategy.fromString(
-        conf.getString("exposures.weight_strategy")
-      ),
-      filterDelayedPatients = conf.getBoolean("filters.delayed_entries"),
-      cumulativeExposureWindow = conf.getInt("exposures.cumulative.window"),
-      cumulativeStartThreshold = conf.getInt("exposures.cumulative.start_threshold"),
-      cumulativeEndThreshold = conf.getInt("exposures.cumulative.end_threshold"),
-      dosageLevelIntervals = conf.getIntList("exposures.cumulative.dosage_level_intervals").asScala.map(_.toInt).toList,
-      purchaseIntervals = conf.getIntList("exposures.cumulative.purchase_intervals").asScala.map(_.toInt).toList
-    )
-  }
 }

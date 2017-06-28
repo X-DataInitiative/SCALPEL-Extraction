@@ -72,16 +72,4 @@ class ObservationPeriodTransformerSuite extends SharedContext {
       assertDSs(result, expected)
     }
 
-    "apply" should "create the correct ObservationPeriodTransformer" in {
-      // Given
-      val expectedStart = makeTS(2006, 1, 1)
-      val expectedEnd = makeTS(2009, 12, 31, 23, 59, 59)
-
-      // When
-      val result = ObservationPeriodTransformer()
-
-      // Then
-      assert(result.studyStart == expectedStart)
-      assert(result.studyEnd == expectedEnd)
-    }
 }

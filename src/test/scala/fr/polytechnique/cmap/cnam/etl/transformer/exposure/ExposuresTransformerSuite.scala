@@ -50,8 +50,13 @@ class ExposuresTransformerSuite extends SharedContext {
       Exposure("Patient_B", "PIOGLITAZONE", 1.0, makeTS(2006, 8, 1), makeTS(2008, 9, 1))
     ).toDS
 
+    val exposure = ExposureDefinition(
+      studyStart =  makeTS(2006, 1, 1),
+      diseaseCode = "C67",
+      filterDelayedPatients = true)
+
     // When
-    val result = new ExposuresTransformer(ExposuresConfig.init()).transform(patients, prescriptions)
+    val result = new ExposuresTransformer(exposure).transform(patients, prescriptions)
 
     // Then
     assertDSs(result, expected, true)
@@ -63,7 +68,11 @@ class ExposuresTransformerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val config = ExposuresConfig.init().copy(filterDelayedPatients = false)
+    val exposure = ExposureDefinition(
+      studyStart =  makeTS(2006, 1, 1),
+      diseaseCode = "C67",
+      filterDelayedPatients = false)
+
     val patients = Seq(
       (Patient("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11))), FollowUp("Patient_A", makeTS(2007, 1, 1), makeTS(2009, 7, 11))),
       (Patient("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2008, 9, 1))),
@@ -95,7 +104,7 @@ class ExposuresTransformerSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = new ExposuresTransformer(config).transform(patients, molecules)
+    val result = new ExposuresTransformer(exposure).transform(patients, molecules)
 
     // Then
     assertDSs(result, expected)
@@ -107,13 +116,13 @@ class ExposuresTransformerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val config = ExposuresConfig.init().copy(
-      minPurchases = 2,
-      purchasesWindow = 6,
-      startDelay = 3,
+    val exposure = ExposureDefinition(
+      studyStart =  makeTS(2006, 1, 1),
+      diseaseCode = "C67",
       filterDelayedPatients = false,
       weightAggStrategy = WeightAggStrategy.PurchaseBased
     )
+
     val patients = Seq(
       (Patient("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11))), FollowUp("Patient_A", makeTS(2007, 1, 1), makeTS(2009, 7, 11))),
       (Patient("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2008, 9, 1))),
@@ -150,7 +159,7 @@ class ExposuresTransformerSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = new ExposuresTransformer(config).transform(patients, molecules)
+    val result = new ExposuresTransformer(exposure).transform(patients, molecules)
 
     // Then
     assertDSs(result, expected)
@@ -162,10 +171,9 @@ class ExposuresTransformerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val config = ExposuresConfig.init().copy(
-      minPurchases = 2,
-      purchasesWindow = 6,
-      startDelay = 3,
+    val exposure = ExposureDefinition(
+      studyStart =  makeTS(2006, 1, 1),
+      diseaseCode = "C67",
       filterDelayedPatients = false,
       periodStrategy = ExposurePeriodStrategy.Limited,
       weightAggStrategy = WeightAggStrategy.TimeBased
@@ -215,7 +223,7 @@ class ExposuresTransformerSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = new ExposuresTransformer(config).transform(patients, molecules)
+    val result = new ExposuresTransformer(exposure).transform(patients, molecules)
 
     // Then
     assertDSs(result, expected)
@@ -223,21 +231,20 @@ class ExposuresTransformerSuite extends SharedContext {
 
   "constructor" should "create correct Transformer" in {
     // Given
-    val config = ExposuresConfig(
-      makeTS(2006, 1, 1),
-      "FootCancer",
-      ExposurePeriodStrategy.Limited,
-      1,
-      2,
-      3,
-      4,
-      WeightAggStrategy.NonCumulative,
-      true,
-      5,
-      6,
-      7,
-      List(8),
-      List(9, 10)
+    val config = ExposureDefinition(
+      periodStrategy = ExposurePeriodStrategy.Limited,
+      minPurchases = 2,
+      purchasesWindow = 3,
+      startDelay = 4,
+      weightAggStrategy = WeightAggStrategy.NonCumulative,
+      cumulativeExposureWindow = 5,
+      cumulativeStartThreshold = 6,
+      cumulativeEndThreshold = 7,
+      dosageLevelIntervals = List(8),
+      purchaseIntervals = List(9, 10),
+        studyStart = makeTS(2006, 1, 1),
+      filterDelayedPatients = true,
+      diseaseCode = "FootCancer"
     )
 
     // When

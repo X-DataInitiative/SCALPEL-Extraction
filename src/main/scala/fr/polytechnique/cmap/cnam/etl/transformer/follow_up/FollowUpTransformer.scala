@@ -1,19 +1,18 @@
 package fr.polytechnique.cmap.cnam.etl.transformer.follow_up
 
-
-import fr.polytechnique.cmap.cnam.etl.events.Event
-import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
-import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.transformer.exposure.ExposuresConfig
-import fr.polytechnique.cmap.cnam.etl.transformer.observation._
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.events.Event
+import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
+import fr.polytechnique.cmap.cnam.etl.transformer.observation._
 import fr.polytechnique.cmap.cnam.util.RichDataFrames._
+import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
 
-class FollowUpTransformer(val delay: Int, val diseaseCode: String) {
+
+class FollowUpTransformer(val delay: Int) {
 
   val outputColumns = List(
     col("patientID"),
@@ -59,12 +58,6 @@ class FollowUpTransformer(val delay: Int, val diseaseCode: String) {
 }
 
 object FollowUpTransformer {
-
-  def apply(config: ExposuresConfig): FollowUpTransformer = {
-    val followUpMonthsDelay: Int = config.followUpDelay
-    val diseaseCode: String = config.diseaseCode
-    new FollowUpTransformer(followUpMonthsDelay, diseaseCode)
-  }
 
   implicit class FollowUpDataFrame(data: DataFrame) {
 
