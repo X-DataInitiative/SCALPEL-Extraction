@@ -3,10 +3,11 @@ package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
 
 class NonCumulativeWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
 
-  private def aggregateWeightImpl = data.withColumn("weight", lit(1D))
+  private def aggregateWeightImpl = data.withColumn(Weight, lit(1D))
 
   def aggregateWeight(
       studyStart: Option[Timestamp],

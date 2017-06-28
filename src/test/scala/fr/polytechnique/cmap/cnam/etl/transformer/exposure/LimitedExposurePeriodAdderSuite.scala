@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 import org.apache.spark.sql.DataFrame
 import org.mockito.Mockito.mock
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class LimitedExposurePeriodAdderSuite extends SharedContext {
@@ -27,7 +28,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1)),
       ("Patient_B", "SULFONYLUREA", makeTS(2008,  3, 1)),
       ("Patient_B", "SULFONYLUREA", makeTS(2008,  4, 1))
-    ).toDF("patientID", "value" , "start")
+    ).toDF(PatientID, Value , Start)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1))),
@@ -41,7 +42,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), None),
       ("Patient_B", "SULFONYLUREA", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1))),
       ("Patient_B", "SULFONYLUREA", makeTS(2008,  4, 1), None)
-    ).toDF("patientID", "value", "start", "nextDate")
+    ).toDF(PatientID, Value, Start, "nextDate")
 
 
     // When
@@ -69,7 +70,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), None),
       ("Patient_B", "SULFONYLUREA", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1))),
       ("Patient_B", "SULFONYLUREA", makeTS(2008,  4, 1), None)
-    ).toDF("PatientID", "value" , "start", "nextDate")
+    ).toDF(PatientID, Value , Start, "nextDate")
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0)),
@@ -83,7 +84,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), None, None),
       ("Patient_B", "SULFONYLUREA", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1)), Some(1.0)),
       ("Patient_B", "SULFONYLUREA", makeTS(2008,  4, 1), None, None)
-    ).toDF("PatientID", "value", "start", "nextDate", "delta")
+    ).toDF(PatientID, Value, Start, "nextDate", "delta")
 
     // When
     import mockInstance.InnerImplicits
@@ -116,7 +117,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  3, 1)), Some(1.0)),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1)), Some(1.0)),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), None, None)
-    ).toDF("patientID", "value", "start", "nextDate", "delta")
+    ).toDF(PatientID, Value, Start, "nextDate", "delta")
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), makeTS(2008,  5, 1)),
@@ -126,7 +127,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), makeTS(2008, 12, 1)),
       ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), makeTS(2009, 12, 1)),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), makeTS(2008,  4, 1))
-    ).toDF("patientID", "value", "start", "tracklossDate")
+    ).toDF(PatientID, Value, Start, TracklossDate)
 
     // When
     import mockInstance.InnerImplicits
@@ -160,7 +161,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  3, 1)), Some(1.0)),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1)), Some(1.0)),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), None, None)
-    ).toDF("patientID", "value", "start", "nextDate", "delta")
+    ).toDF(PatientID, Value, Start, "nextDate", "delta")
 
     val tracklosses = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), makeTS(2008,  5, 1)),
@@ -170,7 +171,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), makeTS(2008, 12, 1)),
       ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), makeTS(2009, 12, 1)),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), makeTS(2008,  4, 1))
-    ).toDF("patientID", "value", "start", "tracklossDate")
+    ).toDF(PatientID, Value, Start, TracklossDate)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  5, 1))),
@@ -190,12 +191,12 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  4, 1))),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1))),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), None)
-    ).toDF("patientID", "value", "start", "exposureEnd")
+    ).toDF(PatientID, Value, Start, ExposureEnd)
 
     // When
     import mockInstance.InnerImplicits
     val result = input.withNextDate.withDelta.withExposureEnd(tracklosses)
-      .select("patientID", "value", "start", "exposureEnd")
+      .select(PatientID, Value, Start, ExposureEnd)
 
     // Then
     assertDFs(result, expected)
@@ -238,7 +239,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1)), Some(1.0),
         Some(makeTS(2008,  4, 1))),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), None, None, None)
-    ).toDF("patientID", "value", "start", "nextDate", "delta", "exposureEnd")
+    ).toDF(PatientID, Value, Start, "nextDate", "delta", ExposureEnd)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1))),
@@ -258,12 +259,12 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  2, 1))),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), Some(makeTS(2008,  2, 1))),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), None)
-    ).toDF("patientID", "value", "start", "exposureStart")
+    ).toDF(PatientID, Value, Start, ExposureStart)
 
     // When
     import mockInstance.InnerImplicits
     val result = input.withNextDate.withDelta.withExposureStart()
-      .select("patientID", "value", "start", "exposureStart")
+      .select(PatientID, Value, Start, ExposureStart)
 
     // Then
     assertDFs(result, expected)
@@ -293,7 +294,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1)),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1)),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1))
-    ).toDF("patientID", "value", "start")
+    ).toDF(PatientID, Value, Start)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(makeTS(2008,  5, 1))),
@@ -313,7 +314,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  2, 1)), Some(makeTS(2008,  4, 1))),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), Some(makeTS(2008,  2, 1)), Some(makeTS(2008,  4, 1))),
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), None, None)
-    ).toDF("patientID", "value", "start", "exposureStart", "exposureEnd")
+    ).toDF(PatientID, Value, Start, ExposureStart, ExposureEnd)
 
     // When
     val instance = new LimitedExposurePeriodAdder(input)

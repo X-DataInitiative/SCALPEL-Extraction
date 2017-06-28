@@ -1,10 +1,12 @@
 package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 
 import java.sql.Timestamp
+
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
-import fr.polytechnique.cmap.cnam.etl.events.Event.Columns._
+
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
 
 class TimeBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
 
@@ -16,12 +18,12 @@ class TimeBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
       dosageLevelIntervals: Option[List[Int]],
       purchaseIntervals: Option[List[Int]]): DataFrame = {
 
-    val window = Window.partitionBy(PatientID, Value).orderBy("exposureStart", "exposureEnd")
+    val window = Window.partitionBy(PatientID, Value).orderBy(ExposureStart, ExposureEnd)
     data
-      .dropDuplicates(Seq(PatientID, Value, "exposureStart", "exposureEnd"))
-      .withColumn("weight", months_between(col("exposureEnd"), col("exposureStart")))
-      .withColumn("weight", sum(col("weight")).over(window))
-      .withColumn("exposureEnd", col("followUpEnd"))
+      .dropDuplicates(Seq(PatientID, Value, ExposureStart, ExposureEnd))
+      .withColumn(Weight, months_between(col(ExposureEnd), col(ExposureStart)))
+      .withColumn(Weight, sum(col(Weight)).over(window))
+      .withColumn(ExposureEnd, col(FollowUpEnd))
   }
 
   def aggregateWeight: DataFrame = aggregateWeight(None, None, None, None, None, None)

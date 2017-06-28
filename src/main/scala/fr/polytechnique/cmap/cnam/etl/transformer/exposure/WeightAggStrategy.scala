@@ -1,6 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 
+
 sealed trait WeightAggStrategy
+
 
 object WeightAggStrategy  {
   case object NonCumulative extends WeightAggStrategy

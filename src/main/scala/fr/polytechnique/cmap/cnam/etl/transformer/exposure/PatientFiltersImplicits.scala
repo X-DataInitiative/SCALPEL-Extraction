@@ -2,12 +2,14 @@ package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 
 import java.sql.Timestamp
 
-import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame}
-import fr.polytechnique.cmap.cnam.etl.events.Event.Columns._
+
+import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
+
 
 class PatientFiltersImplicits(data: DataFrame) {
 
@@ -19,9 +21,9 @@ class PatientFiltersImplicits(data: DataFrame) {
 
       val diseaseFilter: Column = min(
         when(
-          col(Category) === "disease" &&
+          col(Category) === "disease" && // TODO : refacto this
             col(Value) === diseaseCode &&
-            col(Start) < col("followUpStart"), lit(0))
+            col(Start) < col(FollowUpStart), lit(0))
           .otherwise(lit(1))
       ).over(window).cast(BooleanType)
 

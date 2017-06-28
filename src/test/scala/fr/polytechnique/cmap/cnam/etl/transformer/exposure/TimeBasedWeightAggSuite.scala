@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
 
 class TimeBasedWeightAggSuite extends SharedContext {
 
@@ -29,7 +30,7 @@ class TimeBasedWeightAggSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", Some(makeTS(2008,  2, 1)), Some(makeTS(2008,  4, 1)), makeTS(2008, 12, 31)),
       ("Patient_B", "PIOGLITAZONE", Some(makeTS(2008,  2, 1)), Some(makeTS(2008,  4, 1)), makeTS(2008, 12, 31)),
       ("Patient_B", "PIOGLITAZONE", None, None, makeTS(2008, 12, 31))
-    ).toDF("patientID", "value", "exposureStart", "exposureEnd", "followUpEnd")
+    ).toDF(PatientID, Value, ExposureStart, ExposureEnd, FollowUpEnd)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008,  2, 1)), Some(makeTS(2009, 12, 31)), makeTS(2009, 12, 31), Some(3D)),
@@ -42,7 +43,7 @@ class TimeBasedWeightAggSuite extends SharedContext {
       ("Patient_A", "SULFONYLUREA", None, Some(makeTS(2009, 12, 31)), makeTS(2009, 12, 31), None),
       ("Patient_B", "PIOGLITAZONE", Some(makeTS(2008,  2, 1)), Some(makeTS(2008, 12, 31)), makeTS(2008, 12, 31), Some(2D)),
       ("Patient_B", "PIOGLITAZONE", None, Some(makeTS(2008, 12, 31)), makeTS(2008, 12, 31), None)
-    ).toDF("patientID", "value", "exposureStart", "exposureEnd", "followUpEnd", "weight")
+    ).toDF(PatientID, Value, ExposureStart, ExposureEnd, FollowUpEnd, Weight)
 
     // When
     val instance = new TimeBasedWeightAgg(input)

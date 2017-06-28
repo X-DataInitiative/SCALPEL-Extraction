@@ -1,7 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 
 import java.sql.Timestamp
+
 import org.apache.spark.sql.DataFrame
+
 
 trait WeightAggregator {
 
@@ -16,6 +18,7 @@ trait WeightAggregator {
     }
   }
 }
+
 
 abstract class WeightAggregatorImpl(data: DataFrame) {
 

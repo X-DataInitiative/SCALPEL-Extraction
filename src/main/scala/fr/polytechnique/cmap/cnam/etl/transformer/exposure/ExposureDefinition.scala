@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 
 import java.sql.Timestamp
 
-
 /**
   * A class to represent the exposure we want to generate from the data
   *

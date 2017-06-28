@@ -4,7 +4,9 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame}
-import fr.polytechnique.cmap.cnam.etl.events.Event.Columns._
+
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
+
 
 private class UnlimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriodAdderImpl(data) {
 
@@ -25,12 +27,12 @@ private class UnlimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeri
 
     data
       .withColumn("previousStartDate", potentialExposureStart)
-      .withColumn("exposureStart", exposureStartRule)
-      .withColumn("exposureStart", when(col("exposureStart") < col("followUpStart"),
-        col("followUpStart")).otherwise(col("exposureStart"))
+      .withColumn(ExposureStart, exposureStartRule)
+      .withColumn(ExposureStart, when(col(ExposureStart) < col(FollowUpStart),
+        col(FollowUpStart)).otherwise(col(ExposureStart))
       )
-      .withColumn("exposureStart", min("exposureStart").over(window))
-      .withColumn("exposureEnd", col("followUpEnd"))
+      .withColumn(ExposureStart, min(ExposureStart).over(window))
+      .withColumn(ExposureEnd, col(FollowUpEnd))
       .drop("previousStartDate")
   }
 }

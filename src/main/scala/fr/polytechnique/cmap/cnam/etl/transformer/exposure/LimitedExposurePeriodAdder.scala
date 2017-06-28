@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{min, _}
 import org.apache.spark.sql.{Column, DataFrame}
-import fr.polytechnique.cmap.cnam.etl.events.Event.Columns._
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
 
 private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriodAdderImpl(data) {
 
@@ -25,8 +25,8 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
             (col("delta") > endThreshold)  // All the lines that represent a trackloss
         )
         .select(col(PatientID), col(Value), col(Start))
-        .withColumn("tracklossDate", lead(col(Start), 1).over(orderedWindow))
-        .where(col("tracklossDate").isNotNull)
+        .withColumn(TracklossDate, lead(col(Start), 1).over(orderedWindow))
+        .where(col(TracklossDate).isNotNull)
     }
 
     def withExposureEnd(tracklosses: DataFrame): DataFrame = {
@@ -38,7 +38,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
         col(PatientID).as("t_patientID"),
         col(Value).as("t_moleculeName"),
         col(Start).as("t_eventDate"),
-        col("tracklossDate")
+        col(TracklossDate)
       )
 
       // For every row in the tracklosses DataFrame, we will take the trackloss date and add it as
@@ -48,26 +48,26 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       (col(PatientID) === col("t_patientID")) &&
         (col(Value) === col("t_moleculeName")) &&
         (col(Start) >= col("t_eventDate")) &&
-        (col(Start) < col("tracklossDate"))
+        (col(Start) < col(TracklossDate))
 
       innerData
         .join(adjustedTracklosses, joinConditions, "left_outer")
-        .withColumnRenamed("tracklossDate", "exposureEnd")
+        .withColumnRenamed(TracklossDate, ExposureEnd)
     }
 
     def withExposureStart(purchasesWindow: Int = 6): DataFrame = {
-      val window = Window.partitionBy(PatientID, Value, "exposureEnd")
+      val window = Window.partitionBy(PatientID, Value, ExposureEnd)
 
       // We take the first pair of purchases that happened within the threshold and set the
       //   the exposureStart date as the date of the second purchase of the pair.
       val adjustedNextDate: Column = when(col("delta") <= purchasesWindow, col("nextDate"))
-      innerData.withColumn("exposureStart", min(adjustedNextDate).over(window))
+      innerData.withColumn(ExposureStart, min(adjustedNextDate).over(window))
     }
   }
 
   def withStartEnd(minPurchases: Int = 2, startDelay: Int = 3, purchasesWindow: Int = 6): DataFrame = {
 
-    val outputColumns = (data.columns.toList ++ List("exposureStart", "exposureEnd")).map(col)
+    val outputColumns = (data.columns.toList ++ List(ExposureStart, ExposureEnd)).map(col)
 
     val eventsWithDelta = data
       .withNextDate

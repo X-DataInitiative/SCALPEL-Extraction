@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
 
 class UnlimitedExposurePeriodAdderSuite extends SharedContext {
 
@@ -20,7 +21,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2009, 4, 1), makeTS(2008, 6, 29), makeTS(2008, 11, 30)),
       ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2009, 1, 1), makeTS(2009, 6, 29), makeTS(2009, 12, 31)),
       ("Patient_B", "molecule", "BENFLUOREX", makeTS(2007, 1, 1), makeTS(2009, 6, 29), makeTS(2009, 12, 31))
-    ).toDF("patientID", "category", "value", "start", "followUpStart", "followUpEnd")
+    ).toDF(PatientID, Category, Value, Start, FollowUpStart, FollowUpEnd)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 12, 1)), Some(makeTS(2008, 11, 30))),
@@ -30,7 +31,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_A", "SULFONYLUREA", Some(makeTS(2009, 7, 1)), Some(makeTS(2008, 11, 30))),
       ("Patient_B", "PIOGLITAZONE", None, Some(makeTS(2009, 12, 31))),
       ("Patient_B", "BENFLUOREX", None, Some(makeTS(2009, 12, 31)))
-    ).toDF("patientID", "value", "exposureStart", "exposureEnd")
+    ).toDF(PatientID, Value, ExposureStart, ExposureEnd)
 
     // When
     val instance = new UnlimitedExposurePeriodAdder(input)
@@ -38,8 +39,8 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Then
     // The first assert is to make sure the method adds no other columns
-    assert(result.columns.diff(input.columns).toList == List("exposureStart", "exposureEnd"))
-    assertDFs(expected, result.select("patientID", "value", "exposureStart", "exposureEnd"))
+    assert(result.columns.diff(input.columns).toList == List(ExposureStart, ExposureEnd))
+    assertDFs(expected, result.select(PatientID, Value, ExposureStart, ExposureEnd))
  }
 
   it should "correctly add exposureStart and exposureEnd for minPurchases = 1" in {
@@ -55,7 +56,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2009, 4, 1), makeTS(2008, 6, 29), makeTS(2008, 11, 30)),
       ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2009, 1, 1), makeTS(2009, 6, 29), makeTS(2009, 12, 31)),
       ("Patient_B", "molecule", "BENFLUOREX", makeTS(2009, 6, 1), makeTS(2009, 6, 29), makeTS(2009, 12, 31))
-    ).toDF("PatientID", "category", "value", "start", "followUpStart", "followUpEnd")
+    ).toDF(PatientID, Category, Value, Start, FollowUpStart, FollowUpEnd)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 6, 29)), makeTS(2008, 11, 30)),
@@ -65,14 +66,14 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_A", "SULFONYLUREA", Some(makeTS(2009, 6, 1)), makeTS(2008, 11, 30)),
       ("Patient_B", "PIOGLITAZONE", Some(makeTS(2009, 6, 29)), makeTS(2009, 12, 31)),
       ("Patient_B", "BENFLUOREX", Some(makeTS(2009, 9, 1)), makeTS(2009, 12, 31))
-    ).toDF("patientID", "value", "exposureStart", "exposureEnd")
+    ).toDF(PatientID, Value, ExposureStart, ExposureEnd)
 
     // When
     val instance = new UnlimitedExposurePeriodAdder(input)
     val result = instance.withStartEnd(minPurchases = 1) // purchasesWindow = 6, startDelay = 3
 
     // Then
-    assertDFs(expected, result.select("patientID", "value", "exposureStart", "exposureEnd"))
+    assertDFs(expected, result.select(PatientID, Value, ExposureStart, ExposureEnd))
  }
 
   it should "correctly add exposureStart and exposureEnd for startDelay = 0" in {
@@ -88,7 +89,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2009, 4, 1), makeTS(2008, 6, 29), makeTS(2008, 11, 30)),
       ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2009, 1, 1), makeTS(2009, 6, 29), makeTS(2009, 12, 31)),
       ("Patient_B", "molecule", "BENFLUOREX", makeTS(2007, 1, 1), makeTS(2009, 6, 29), makeTS(2009, 12, 31))
-    ).toDF("patientID", "category", "value", "start", "followUpStart", "followUpEnd")
+    ).toDF(PatientID, Category, Value, Start, FollowUpStart, FollowUpEnd)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 9, 1)), Some(makeTS(2008, 11, 30))),
@@ -98,14 +99,14 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_A", "SULFONYLUREA", Some(makeTS(2009, 4, 1)), Some(makeTS(2008, 11, 30))),
       ("Patient_B", "PIOGLITAZONE", None, Some(makeTS(2009, 12, 31))),
       ("Patient_B", "BENFLUOREX", None, Some(makeTS(2009, 12, 31)))
-    ).toDF("patientID", "value", "exposureStart", "exposureEnd")
+    ).toDF(PatientID, Value, ExposureStart, ExposureEnd)
 
     // When
     val instance = new UnlimitedExposurePeriodAdder(input)
     val result = instance.withStartEnd(startDelay = 0) // minPurchases = 1, purchasesWindow = 6
 
     // Then
-    assertDFs(expected, result.select("patientID", "value", "exposureStart", "exposureEnd"))
+    assertDFs(expected, result.select(PatientID, Value, ExposureStart, ExposureEnd))
  }
 
   it should "correctly add exposureStart and exposureEnd for purchasesWindow = 9" in {
@@ -121,7 +122,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_A", "molecule", "SULFONYLUREA", makeTS(2009, 4, 1), makeTS(2008, 6, 29), makeTS(2008, 11, 30)),
       ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2009, 1, 1), makeTS(2009, 6, 29), makeTS(2009, 12, 31)),
       ("Patient_B", "molecule", "BENFLUOREX", makeTS(2007, 1, 1), makeTS(2009, 6, 29), makeTS(2009, 12, 31))
-    ).toDF("patientID", "category", "value", "start", "followUpStart", "followUpEnd")
+    ).toDF(PatientID, Category, Value, Start, FollowUpStart, FollowUpEnd)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 11, 1)), Some(makeTS(2008, 11, 30))),
@@ -131,13 +132,13 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_A", "SULFONYLUREA", Some(makeTS(2009, 7, 1)), Some(makeTS(2008, 11, 30))),
       ("Patient_B", "PIOGLITAZONE", None, Some(makeTS(2009, 12, 31))),
       ("Patient_B", "BENFLUOREX", None, Some(makeTS(2009, 12, 31)))
-    ).toDF("patientID", "value", "exposureStart", "exposureEnd")
+    ).toDF(PatientID, Value, ExposureStart, ExposureEnd)
 
     // When
     val instance = new UnlimitedExposurePeriodAdder(input)
     val result = instance.withStartEnd(purchasesWindow = 9) // minPurchases = 1, startDelay = 3
 
     // Then
-    assertDFs(expected, result.select("patientID", "value", "exposureStart", "exposureEnd"))
+    assertDFs(expected, result.select(PatientID, Value, ExposureStart, ExposureEnd))
  }
 }

@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
 
 class PatientFiltersImplicitsSuite extends SharedContext {
 
@@ -17,18 +18,18 @@ class PatientFiltersImplicitsSuite extends SharedContext {
       ("Patient_B", "molecule", "", makeTS(2006, 1, 1), makeTS(2006, 6, 1)),
       ("Patient_B", "disease", "C67", makeTS(2006, 8, 1), makeTS(2006, 6, 1)),
       ("Patient_C", "molecule", "", makeTS(2006, 1, 1), makeTS(2006, 6, 1))
-    ).toDF("patientID", "category", "value", "start", "followUpStart")
+    ).toDF(PatientID, Category, Value, Start, FollowUpStart)
 
     val expected = Seq(
       ("Patient_B", "molecule"),
       ("Patient_B", "disease"),
       ("Patient_C", "molecule")
-    ).toDF("patientID", "category")
+    ).toDF(PatientID, Category)
 
     // When
     val instance = new PatientFiltersImplicits(input)
     val result = instance.filterEarlyDiagnosedPatients(doFilter = true, diseaseCode = "C67")
-      .select("patientID", "category")
+      .select(PatientID, Category)
 
     // Then
     assertDFs(result, expected)
@@ -42,7 +43,7 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     val input = Seq(
       ("Patient_A", "molecule", "", makeTS(2008, 1, 10)),
       ("Patient_A", "disease", "C67", makeTS(2007, 1, 1))
-    ).toDF("patientID", "category", "eventId", "start")
+    ).toDF(PatientID, Category, Value, Start)
 
     val expected = input
 
@@ -66,17 +67,17 @@ class PatientFiltersImplicitsSuite extends SharedContext {
       ("Patient_B", "molecule", "", makeTS(2009, 1, 1)),
       ("Patient_C", "molecule", "", makeTS(2006, 2, 1)),
       ("Patient_C", "molecule", "", makeTS(2006, 1, 1))
-    ).toDF("patientID", "category", "eventId", "start")
+    ).toDF(PatientID, Category, Value, Start)
 
     val expected = Seq(
       ("Patient_C", "molecule"),
       ("Patient_C", "molecule")
-    ).toDF("patientID", "category")
+    ).toDF(PatientID, Category)
 
     // When
     val instance = new PatientFiltersImplicits(input)
     val result = instance.filterDelayedEntries(doFilter = true, studyStart = studyStart)
-      .select("patientID", "category")
+      .select(PatientID, Category)
 
     // Then
     assertDFs(result, expected)
@@ -92,7 +93,7 @@ class PatientFiltersImplicitsSuite extends SharedContext {
       ("Patient_A", "molecule", "", makeTS(2008, 1, 1)),
       ("Patient_B", "molecule", "", makeTS(2009, 1, 1)),
       ("Patient_C", "molecule", "", makeTS(2006, 1, 1))
-    ).toDF("patientID", "category", "eventId", "start")
+    ).toDF(PatientID, Category, Value, Start)
 
     val expected = input
 
@@ -122,7 +123,7 @@ class PatientFiltersImplicitsSuite extends SharedContext {
       ("Patient_E", "molecule", "", makeTS(2009, 1, 1), makeTS(2008,1,1)),
       ("Patient_F", "molecule", "", makeTS(2006, 2, 1), makeTS(2008,1,1)),
       ("Patient_F", "molecule", "", makeTS(2006, 1, 1), makeTS(2008,1,1))
-    ).toDF("patientID", "category", "value", "start", "followUpStart")
+    ).toDF(PatientID, Category, Value, Start, FollowUpStart)
 
     val expected = Seq(
       ("Patient_B", "molecule"),
@@ -131,7 +132,7 @@ class PatientFiltersImplicitsSuite extends SharedContext {
       ("Patient_C", "molecule"),
       ("Patient_F", "molecule"),
       ("Patient_F", "molecule")
-    ).toDF("patientID", "category")
+    ).toDF(PatientID, Category)
 
     // When
     val instance = new PatientFiltersImplicits(input)
@@ -140,7 +141,7 @@ class PatientFiltersImplicitsSuite extends SharedContext {
       diseaseCode = "C67",
       delayedEntries = true,
       earlyDiagnosed = true
-    ).select("patientID", "category")
+    ).select(PatientID, Category)
 
     // Then
     assertDFs(result, expected)

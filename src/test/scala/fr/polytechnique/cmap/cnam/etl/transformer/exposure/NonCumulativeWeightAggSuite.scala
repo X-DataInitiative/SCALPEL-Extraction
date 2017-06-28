@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
 
 class NonCumulativeWeightAggSuite extends SharedContext {
 
@@ -15,12 +16,12 @@ class NonCumulativeWeightAggSuite extends SharedContext {
     val input: DataFrame = Seq(
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 8, 1)),
       ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2009, 1, 1))
-    ).toDF("patientID", "category", "eventId", "start")
+    ).toDF(PatientID, Category, Value, Start)
 
     val expected: DataFrame = Seq(
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 8, 1), 1D),
       ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2009, 1, 1), 1D)
-    ).toDF("patientID", "category", "eventId", "start", "weight")
+    ).toDF(PatientID, Category, Value, Start, Weight)
 
     // When
     val instance = new NonCumulativeWeightAgg(input)

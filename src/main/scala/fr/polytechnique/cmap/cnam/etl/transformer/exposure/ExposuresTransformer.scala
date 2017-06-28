@@ -2,15 +2,17 @@ package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 
 import java.sql.Timestamp
 
-import fr.polytechnique.cmap.cnam.etl.events.Event
-import fr.polytechnique.cmap.cnam.etl.events.Event.Columns._
-import fr.polytechnique.cmap.cnam.etl.events.exposures.Exposure
-import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
+
+import fr.polytechnique.cmap.cnam.etl.events.Event
+import fr.polytechnique.cmap.cnam.etl.events.exposures.Exposure
+import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformer.follow_up.FollowUp
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
 import fr.polytechnique.cmap.cnam.util.RichDataFrames._
+
 
 class ExposuresTransformer(config: ExposureDefinition)
   extends ExposurePeriodAdder with WeightAggregator with PatientFilters {
@@ -36,11 +38,11 @@ class ExposuresTransformer(config: ExposureDefinition)
 
     val inputCols = Seq(
       col("Patient.patientID").as(PatientID),
-      col("Patient.gender").as("gender"),
-      col("Patient.birthDate").as("birthdate"),
-      col("Patient.deathDate").as("deathDate"),
-      col("FollowUp.start").as("followUpStart"),
-      col("FollowUp.stop").as("followUpEnd")
+      col("Patient.gender").as(Gender),
+      col("Patient.birthDate").as(BirthDate),
+      col("Patient.deathDate").as(DeathDate),
+      col("FollowUp.start").as(FollowUpStart),
+      col("FollowUp.stop").as(FollowUpEnd)
     )
 
     val input = renameTupleColumns(patients).select(inputCols:_*).join(dispensations, Seq(PatientID))
@@ -51,7 +53,7 @@ class ExposuresTransformer(config: ExposureDefinition)
       .filterPatients(studyStart, diseaseCode, filterDelayedPatients) // TODO: remove
       .where(col(Category) === Molecule.category)
       .withStartEnd(minPurchases, startDelay, purchasesWindow)
-      .where(col("exposureStart") =!= col("exposureEnd")) // This also removes rows where exposureStart = null
+      .where(col(ExposureStart) =!= col(ExposureEnd)) // This also removes rows where exposureStart = null
       .aggregateWeight(
         Some(studyStart),
         Some(cumulativeExposureWindow),
@@ -63,8 +65,8 @@ class ExposuresTransformer(config: ExposureDefinition)
       .map(Exposure.fromRow(
         _,
         nameCol = Value,
-        startCol = "exposureStart",
-        endCol = "exposureEnd"))
+        startCol = ExposureStart,
+        endCol = ExposureEnd))
       .distinct()
   }
 }
