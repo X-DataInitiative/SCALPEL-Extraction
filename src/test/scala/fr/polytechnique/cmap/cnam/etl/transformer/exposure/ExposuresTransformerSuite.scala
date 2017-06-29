@@ -16,9 +16,9 @@ class ExposuresTransformerSuite extends SharedContext {
 
     // Given
     val patients = Seq(
-      (Patient("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11))), FollowUp("Patient_A", makeTS(2007, 1, 1), makeTS(2009, 7, 11))),
-      (Patient("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2008, 9, 1))),
-      (Patient("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B.1", makeTS(2007, 11, 1), makeTS(2008, 9, 1)))
+      (Patient("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11))), FollowUp("Patient_A", makeTS(2007, 1, 1), makeTS(2009, 7, 11), "death")),
+      (Patient("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2008, 9, 1), "death")),
+      (Patient("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B.1", makeTS(2007, 11, 1), makeTS(2008, 9, 1), "death"))
     ).toDS
 
     val prescriptions = Seq(
@@ -74,9 +74,9 @@ class ExposuresTransformerSuite extends SharedContext {
       filterDelayedPatients = false)
 
     val patients = Seq(
-      (Patient("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11))), FollowUp("Patient_A", makeTS(2007, 1, 1), makeTS(2009, 7, 11))),
-      (Patient("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2008, 9, 1))),
-      (Patient("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B.1", makeTS(2007, 11, 1), makeTS(2008, 9, 1)))
+      (Patient("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11))), FollowUp("Patient_A", makeTS(2007, 1, 1), makeTS(2009, 7, 11), "death")),
+      (Patient("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2008, 9, 1), "death")),
+      (Patient("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B.1", makeTS(2007, 11, 1), makeTS(2008, 9, 1), "death"))
     ).toDS
 
     val molecules = Seq(
@@ -124,9 +124,9 @@ class ExposuresTransformerSuite extends SharedContext {
     )
 
     val patients = Seq(
-      (Patient("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11))), FollowUp("Patient_A", makeTS(2007, 1, 1), makeTS(2009, 7, 11))),
-      (Patient("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2008, 9, 1))),
-      (Patient("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B.1", makeTS(2007, 11, 1), makeTS(2008, 9, 1)))
+      (Patient("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 7, 11))), FollowUp("Patient_A", makeTS(2007, 1, 1), makeTS(2009, 7, 11), "death")),
+      (Patient("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2008, 9, 1), "death")),
+      (Patient("Patient_B.1", 1, makeTS(1940, 1, 1), Some(makeTS(2008, 9, 1))), FollowUp("Patient_B.1", makeTS(2007, 11, 1), makeTS(2008, 9, 1), "death"))
     ).toDS
 
     val molecules = Seq(
@@ -179,9 +179,9 @@ class ExposuresTransformerSuite extends SharedContext {
       weightAggStrategy = WeightAggStrategy.TimeBased
     )
     val patients = Seq(
-      (Patient("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 12, 31))), FollowUp("Patient_A", makeTS(2006,  1, 1), makeTS(2009, 1, 1))),
-      (Patient("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31))), FollowUp("Patient_B", makeTS(2008, 1, 1), makeTS(2008, 4, 30))),
-      (Patient("Patient_C", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31))), FollowUp("Patient_C", makeTS(2008,  1, 1), makeTS(2009, 5, 1)))
+      (Patient("Patient_A", 1, makeTS(1950, 1, 1), Some(makeTS(2009, 12, 31))), FollowUp("Patient_A", makeTS(2006,  1, 1), makeTS(2009, 1, 1), "death")),
+      (Patient("Patient_B", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31))), FollowUp("Patient_B", makeTS(2008, 1, 1), makeTS(2008, 4, 30), "trackloss")),
+      (Patient("Patient_C", 1, makeTS(1940, 1, 1), Some(makeTS(2010, 12, 31))), FollowUp("Patient_C", makeTS(2008,  1, 1), makeTS(2009, 5, 1), "trackloss"))
     ).toDS
     val molecules = Seq(
       Molecule("Patient_A", "PIOGLITAZONE", 1.0, makeTS(2006,  1, 1)),

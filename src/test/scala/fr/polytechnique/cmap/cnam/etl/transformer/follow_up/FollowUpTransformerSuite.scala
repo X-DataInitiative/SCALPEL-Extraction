@@ -1,7 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.transformer.follow_up
 
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.events.Event
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnosis
 import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
+import fr.polytechnique.cmap.cnam.etl.events.tracklosses.Trackloss
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformer.exposure.ExposureDefinition
 import fr.polytechnique.cmap.cnam.etl.transformer.observation.ObservationPeriod
@@ -231,14 +234,18 @@ class FollowUpTransformerSuite extends SharedContext {
       Molecule("Regis", "doliprane", 200.00, makeTS(2007, 3, 1))
     ).toDS
 
+    val tracklosses = Seq.empty[Event[Trackloss]].toDS
+
+    val outcomes = Seq.empty[Event[Diagnosis]].toDS
+
     val expected = Seq(
-      FollowUp("Regis", makeTS(2006, 3, 1), makeTS(2009, 1, 1))
+      FollowUp("Regis", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "observationEnd")
     ).toDS
 
     val transformer = new FollowUpTransformer(2)
 
     // When
-    val result = transformer.transform(patients, prescriptions)
+    val result = transformer.transform(patients, prescriptions, outcomes, tracklosses)
 
     // Then
 

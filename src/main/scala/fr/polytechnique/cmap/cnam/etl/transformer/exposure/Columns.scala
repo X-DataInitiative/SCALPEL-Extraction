@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 import fr.polytechnique.cmap.cnam.etl.events.Event
 
 
-object Columns {
+private[exposure] object Columns {
   final val PatientID = Event.Columns.PatientID
   final val Category = Event.Columns.Category
   final val GroupID = Event.Columns.GroupID
