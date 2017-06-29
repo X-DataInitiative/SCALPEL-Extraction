@@ -4,11 +4,11 @@ import org.mockito._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 
-/**
-  * Created by burq on 05/07/16.
-  */
-class RichDataFramesSuite extends SharedContext {
 
+private case class Alpha(name: String, param: Int=2)
+private case class Beta(name: String, age: Int)
+
+class RichDataFramesSuite extends SharedContext {
 
   "===" should "return true" in {
     val sqlCtx = sqlContext
@@ -64,6 +64,32 @@ class RichDataFramesSuite extends SharedContext {
 
     // Then
     Mockito.verify(spyDF).write
+  }
+
+  "renameDataset" should "rename the two columns of a dataset from tuple" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val ds = Seq(
+      (Alpha("toto"), Beta("toto", 3)),
+      (Alpha("gerard"), Beta("gerard", 18))
+    ).toDS
+
+    val expected = Seq(
+      (Alpha("toto"), Beta("toto", 3)),
+      (Alpha("gerard"), Beta("gerard", 18))
+    ).toDS
+      .withColumnRenamed("_1", "Alpha")
+      .withColumnRenamed("_2", "Beta")
+      .as[(Alpha, Beta)]
+
+    // When
+    val result = renameTupleColumns(ds)
+
+    // Then
+    assertDSs(result, expected)
+
   }
 
 }

@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.exposures
+package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 
 import java.sql.Timestamp
 
@@ -7,19 +7,24 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame}
 
+import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
+
+
 class PatientFiltersImplicits(data: DataFrame) {
+
+  import Columns._
 
   // Drop patients who got the disease before the start of the follow up
   def filterEarlyDiagnosedPatients(doFilter: Boolean, diseaseCode: String): DataFrame = {
 
     if (doFilter) {
-      val window = Window.partitionBy("patientID")
+      val window = Window.partitionBy(PatientID)
 
       val diseaseFilter: Column = min(
         when(
-          col("category") === "disease" &&
-            col("eventId") === diseaseCode &&
-            col("start") < col("followUpStart"), lit(0))
+          col(Category) === "disease" && // TODO : refacto this
+            col(Value) === diseaseCode &&
+            col(Start) < col(FollowUpStart), lit(0))
           .otherwise(lit(1))
       ).over(window).cast(BooleanType)
 
@@ -33,7 +38,7 @@ class PatientFiltersImplicits(data: DataFrame) {
     delayedEntriesThreshold: Int = 12): DataFrame = {
 
     if (doFilter) {
-      val window = Window.partitionBy("patientID")
+      val window = Window.partitionBy(PatientID)
 
       val firstYearObservation = add_months(
         lit(studyStart),
@@ -42,7 +47,7 @@ class PatientFiltersImplicits(data: DataFrame) {
 
       val drugFilter = max(
         when(
-          col("category") === "molecule" && (col("start") <= firstYearObservation),
+          col(Category) === Molecule.category && (col(Start) <= firstYearObservation),
           lit(1)
         ).otherwise(lit(0))
       ).over(window).cast(BooleanType)

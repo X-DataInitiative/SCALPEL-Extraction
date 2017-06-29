@@ -6,8 +6,9 @@ import scala.util.Try
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 import com.typesafe.config.{Config, ConfigFactory}
-import fr.polytechnique.cmap.cnam.etl.exposures.{ExposurePeriodStrategy, ExposuresConfig, WeightAggStrategy}
 import fr.polytechnique.cmap.cnam.util.functions._
+import fr.polytechnique.cmap.cnam.etl.exposures._
+import fr.polytechnique.cmap.cnam.etl.transformer.{exposure => new_exposure}
 
 object FilteringConfig {
 
@@ -146,6 +147,8 @@ object FilteringConfig {
   )
 
   def modelConfig(modelName: String): Config = conf.getConfig(modelName)
+
+
   lazy val exposuresConfig: ExposuresConfig = ExposuresConfig(
     studyStart = dates.studyStart,
     diseaseCode = diseaseCode,
@@ -166,4 +169,5 @@ object FilteringConfig {
     dosageLevelIntervals = conf.getIntList("exposures.cumulative.dosage_level_intervals").asScala.map(_.toInt).toList,
     purchaseIntervals = conf.getIntList("exposures.cumulative.purchase_intervals").asScala.map(_.toInt).toList
   )
+
 }

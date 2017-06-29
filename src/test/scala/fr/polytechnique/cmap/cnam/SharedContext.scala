@@ -2,9 +2,10 @@ package fr.polytechnique.cmap.cnam
 
 import java.io.File
 import java.util.{Locale, TimeZone}
+
 import org.apache.commons.io.FileUtils
 import org.apache.log4j.{Level, Logger}
-import org.apache.spark.sql.{DataFrame, Dataset, SQLContext, SparkSession}
+import org.apache.spark.sql._
 import org.scalatest._
 import fr.polytechnique.cmap.cnam.util.RichDataFrames
 
@@ -26,13 +27,17 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
   protected def sqlContext: SQLContext = _spark.sqlContext
   protected def sc = _spark.sparkContext
 
-  def assertDFs(df1: DataFrame, df2: DataFrame, debug: Boolean = this.debug): Unit = {
+  def assertDFs(ds1: DataFrame, ds2: DataFrame, debug: Boolean = this.debug) = assertDSs[Row](ds1, ds2)
+
+  def assertDSs[A](ds1: Dataset[A], ds2: Dataset[A], debug: Boolean = this.debug): Unit = {
+    val df1 = ds1.toDF
+    val df2 = ds2.toDF
     try {
 
       df1.persist()
       df2.persist()
 
-      if(debug) {
+      if (debug) {
         df1.printSchema()
         df2.printSchema()
         df1.show(100, false)
@@ -46,10 +51,6 @@ abstract class SharedContext extends FlatSpecLike with BeforeAndAfterAll with Be
       df1.unpersist()
       df2.unpersist()
     }
-  }
-
-  def assertDSs[A](ds1: Dataset[A], ds2: Dataset[A], debug: Boolean = this.debug): Unit = {
-    assertDFs(ds1.toDF, ds2.toDF, debug)
   }
 
   protected override def beforeAll(): Unit = {

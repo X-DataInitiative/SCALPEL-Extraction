@@ -87,4 +87,5 @@ class FunctionsSuite extends FlatSpecLike {
       makeTS(List(1935, 12, 23, 59, 59, 59, 59))
     }
   }
+
 }

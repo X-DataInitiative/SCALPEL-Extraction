@@ -21,3 +21,15 @@ case class Event[+A <: AnyEvent](
   }
 }
 
+object Event {
+  object Columns {
+    val PatientID = "patientID"
+    val Category = "category"
+    val GroupID = "groupID"
+    val Value = "value"
+    val Weight = "weight"
+    val Start = "start"
+    val End = "end"
+  }
+}
+
