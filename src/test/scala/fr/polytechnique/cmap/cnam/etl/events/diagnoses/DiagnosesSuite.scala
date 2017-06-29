@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.events.diagnoses
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses.old.{Diagnoses, ImbDiagnoses, McoDiagnoses}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
 

@@ -5,6 +5,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses.old.McoDiagnoses
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class McoDiagnosesSuite extends SharedContext {
@@ -44,7 +45,7 @@ class McoDiagnosesSuite extends SharedContext {
 
 
     // When
-    import McoDiagnoses.McoDataFrame
+    import fr.polytechnique.cmap.cnam.etl.events.diagnoses.old.McoDiagnoses.McoDataFrame
     val output: List[Timestamp] = input.select(McoDiagnoses.inputColumns: _*)
       .estimateStayStartTime
       .select("eventDate")

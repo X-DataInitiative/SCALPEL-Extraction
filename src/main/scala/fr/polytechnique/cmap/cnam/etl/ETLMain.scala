@@ -4,7 +4,7 @@ import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnosis
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnoses
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses.old.Diagnoses
 import fr.polytechnique.cmap.cnam.etl.events.molecules.{Molecule, MoleculePurchases}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig

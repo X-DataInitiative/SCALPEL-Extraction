@@ -1,8 +1,9 @@
-package fr.polytechnique.cmap.cnam.etl.events.outcomes
+package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.Event
 import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnosis
+import fr.polytechnique.cmap.cnam.etl.events.outcomes.Outcome
 
 class BroadBladderCancerSuite extends SharedContext {
 
@@ -41,7 +42,7 @@ class BroadBladderCancerSuite extends SharedContext {
     ).toDS
 
     // When
-    import BroadBladderCancer.isDirectDiagnosis
+    import fr.polytechnique.cmap.cnam.study.pioglitazone.BroadBladderCancer.isDirectDiagnosis
     val result = inputDS.filter(ev => isDirectDiagnosis(ev))
 
     // Then
@@ -68,7 +69,7 @@ class BroadBladderCancerSuite extends SharedContext {
     ).toDS
 
     // When
-    import BroadBladderCancer.BroadBladderCancerOutcome
+    import fr.polytechnique.cmap.cnam.study.pioglitazone.BroadBladderCancer.BroadBladderCancerOutcome
     val result = inputDS.directOutcomes
 
     // Then
@@ -99,9 +100,9 @@ class BroadBladderCancerSuite extends SharedContext {
     val result3 = BroadBladderCancer.isGroupDiagnosis(input3)
 
     // Then
-    assert(result1 == true)
-    assert(result2 == true)
-    assert(result3 == true)
+    assert(result1)
+    assert(result2)
+    assert(result3)
   }
 
   it should "return false when the conditions are not met" in {
@@ -127,9 +128,9 @@ class BroadBladderCancerSuite extends SharedContext {
     val result3 = BroadBladderCancer.isGroupDiagnosis(input3)
 
     // Then
-    assert(result1 == false)
-    assert(result2 == false)
-    assert(result3 == false)
+    assert(!result1)
+    assert(!result2)
+    assert(!result3)
   }
 
   "groupDiagnosis" should "group events based on groupId and tranform each group into Event[Outcome], " +

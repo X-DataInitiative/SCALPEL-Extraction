@@ -88,6 +88,6 @@ class McoCodeEventsExtractorSuite extends SharedContext with McoSource {
     val result = McoCodeEventsExtractor.extract(config, mco)
 
     // Then
-    assertDFs(result.toDF, expected.toDF, true)
+    assertDFs(result.toDF, expected.toDF)
   }
 }

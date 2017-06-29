@@ -1,7 +1,8 @@
-package fr.polytechnique.cmap.cnam.etl.events.diagnoses
+package fr.polytechnique.cmap.cnam.etl.events.diagnoses.old
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnosis
 import fr.polytechnique.cmap.cnam.etl.events.{Event, EventsExtractor}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets

@@ -1,14 +1,18 @@
-package fr.polytechnique.cmap.cnam.etl.events.outcomes
+package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events.Event
 import fr.polytechnique.cmap.cnam.etl.events.diagnoses._
+import fr.polytechnique.cmap.cnam.etl.events.outcomes.{Outcome, OutcomeTransformer}
 
-object BroadBladderCancer extends OutcomeTransformer {
+/*
+ * The rules for this Outcome definition can be found on the following page:
+ * https://datainitiative.atlassian.net/wiki/pages/viewpage.action?pageId=60093165
+ */
 
-  val outcomeName: String = "broad_bladder_cancer"
+object BroadBladderCancer extends OutcomeTransformer with PioglitazoneStudyCodes {
 
-  val diagnosisCode: String = "C67"
+  override val outcomeName: String = "broad_bladder_cancer"
 
   val directDiagnosisCategories = List(
     MainDiagnosis.category,
@@ -23,24 +27,21 @@ object BroadBladderCancer extends OutcomeTransformer {
     LinkedDiagnosis.category
   )
 
-  val groupDiagnosisValues = List("C77", "C78", "C79")
-
   def isDirectDiagnosis(ev: Event[Diagnosis]): Boolean = {
-    directDiagnosisCategories.contains(ev.category) && ev.value == diagnosisCode
+    directDiagnosisCategories.contains(ev.category) && ev.value == primaryDiagCode
   }
 
   def isGroupDiagnosis(eventsGroup: Seq[Event[Diagnosis]]): Boolean = {
     eventsGroup.exists { ev =>
-      ev.category == AssociatedDiagnosis.category && ev.value == diagnosisCode
+      ev.category == AssociatedDiagnosis.category && ev.value == primaryDiagCode
     } &&
     eventsGroup.exists { ev =>
-      groupDiagnosisCategories.contains(ev.category) && groupDiagnosisValues.contains(ev.value)
+      groupDiagnosisCategories.contains(ev.category) && secondaryDiagCodes.contains(ev.value)
     }
   }
 
   implicit class BroadBladderCancerOutcome(ds: Dataset[Event[Diagnosis]]) {
-    val sqlCtx = ds.sqlContext
-    import sqlCtx.implicits._
+    import ds.sqlContext.implicits._
 
     def directOutcomes: Dataset[Event[Outcome]] = {
       ds.map(event => Outcome(event.patientID, outcomeName, event.start))
@@ -67,7 +68,7 @@ object BroadBladderCancer extends OutcomeTransformer {
     val groupOutcomes: Dataset[Event[Outcome]] = extracted.filter(ev => !isDirectDiagnosis(ev)).groupOutcomes
 
     directDiagnosisEvents
-        .directOutcomes
-        .union(groupOutcomes)
+      .directOutcomes
+      .union(groupOutcomes)
   }
 }

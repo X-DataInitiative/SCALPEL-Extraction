@@ -32,4 +32,25 @@ class EventSuite extends FlatSpec {
       "val e: Event[AnotherEvent] = Event(patient, SomeEvent, \"some_id\", 0.0, timestamp, None)"
     )
   }
+
+  "checkValue" should "check if the event's value matches a given value for the given category" in {
+    // Given
+    val someEvent = Event[SomeEvent](patientID, SomeEvent.category, "some_group", "some_value" ,0.0, timestamp, None)
+
+    // When|Then
+    assert(someEvent.checkValue(SomeEvent.category, "some_value"))
+    assert(!someEvent.checkValue(SomeEvent.category, "wrong_value"))
+    assert(!someEvent.checkValue("wrong_category", "some_value"))
+  }
+
+  "checkValue" should "check if the event's value is found in a list for a given category" in {
+    // Given
+    val someEvent = Event[SomeEvent](patientID, SomeEvent.category, "some_group", "some_value" ,0.0, timestamp, None)
+    val values: List[String] = List("some_value", "another_value")
+
+    // When|Then
+    assert(someEvent.checkValue(SomeEvent.category, values))
+    assert(!someEvent.checkValue(SomeEvent.category, Nil))
+    assert(!someEvent.checkValue("wrong_category", values))
+  }
 }

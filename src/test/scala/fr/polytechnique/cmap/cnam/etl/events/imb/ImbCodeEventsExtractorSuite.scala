@@ -89,6 +89,6 @@ class ImbCodeEventsExtractorSuite extends SharedContext with ImbSource {
     val result = ImbCodeEventsExtractor.extract(config, imb)
 
     // Then
-    assertDFs(result.toDF, expected.toDF, true)
+    assertDFs(result.toDF, expected.toDF)
   }
 }
