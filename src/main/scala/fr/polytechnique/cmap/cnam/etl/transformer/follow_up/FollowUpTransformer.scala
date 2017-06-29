@@ -83,7 +83,7 @@ object FollowUpTransformer {
         when(col(Category) === Trackloss.category && (col(Start) > col(FollowUpStart)), col(Start))
       ).over(window)
 
-      data.withColumn(TrackLossDate, firstCorrectTrackloss)
+      data.withColumn(TracklossDate, firstCorrectTrackloss)
     }
 
     def withFollowUpEnd: DataFrame = {
@@ -99,7 +99,7 @@ object FollowUpTransformer {
           minColumn(
             col(DeathDate),
             col(FirstTargetDiseaseDate),
-            col(TrackLossDate),
+            col(TracklossDate),
             col(ObservationEnd)
           )
         )
@@ -111,7 +111,7 @@ object FollowUpTransformer {
       ).when(
         col(FollowUpEnd) === col(FirstTargetDiseaseDate), "disease"
       ).when(
-        col(FollowUpEnd) === col(TrackLossDate), "trackloss"
+        col(FollowUpEnd) === col(TracklossDate), "trackloss"
       ).when(
         col(FollowUpEnd) === col(ObservationEnd), "observationEnd"
       )

@@ -22,7 +22,7 @@ private[follow_up] object Columns {
   final val FollowUpStart = "followUpStart"
   final val FollowUpEnd = "followUpEnd"
 
-  final val TrackLossDate = "trackloss"
+  final val TracklossDate = "trackloss"
   final val FirstTargetDiseaseDate = "firstTargetDisease"
 
 }
