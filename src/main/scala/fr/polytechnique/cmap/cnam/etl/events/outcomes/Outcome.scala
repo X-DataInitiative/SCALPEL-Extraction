@@ -2,13 +2,13 @@ package fr.polytechnique.cmap.cnam.etl.events.outcomes
 
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventCategory}
+import fr.polytechnique.cmap.cnam.etl.events._
 
-trait Outcome extends AnyEvent
+object Outcome extends Outcome
 
-object Outcome extends Outcome {
+trait Outcome extends AnyEvent with EventBuilder {
 
-  val category: EventCategory[Outcome] = "outcome"
+  override val category: EventCategory[Outcome] = "outcome"
 
   def apply(patientID: String, name: String, date: Timestamp): Event[Outcome] =
     Event(patientID, category, groupID = "NA", name, 0.0, date, None)
@@ -26,3 +26,4 @@ object Outcome extends Outcome {
     )
   }
 }
+

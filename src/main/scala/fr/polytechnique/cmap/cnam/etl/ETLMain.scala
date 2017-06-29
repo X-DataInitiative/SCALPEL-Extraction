@@ -76,7 +76,7 @@ object ETLMain extends Main {
     allEvents.toDF.write.parquet(outputPaths.flatEvents)
 
     logger.info("Extracting bladder cancer outcomes...")
-    val naiveBladderCancerOutcomes = NaiveBladderCancer.transform(allEvents)
+    val naiveBladderCancerOutcomes = NaiveBladderCancer.transform(diseaseEvents)
 
     logger.info("Writing bladder cancer outcomes...")
     naiveBladderCancerOutcomes.toDF.write.parquet(outputPaths.NaiveBladderCancerOutcomes)

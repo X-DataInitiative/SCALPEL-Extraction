@@ -8,9 +8,9 @@ import org.scalatest.FlatSpec
 import fr.polytechnique.cmap.cnam.etl.events.{Event, EventCategory}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class MedicalActBuilderSuite extends FlatSpec {
+class MedicalActSuite extends FlatSpec {
 
-  object MockMedicalAct extends MedicalActBuilder {
+  object MockMedicalAct extends MedicalAct {
     val category: EventCategory[MedicalAct] = "mock_act"
   }
 

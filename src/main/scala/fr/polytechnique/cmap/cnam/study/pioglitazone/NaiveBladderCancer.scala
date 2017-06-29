@@ -14,10 +14,10 @@ object NaiveBladderCancer extends OutcomeTransformer with PioglitazoneStudyCodes
 
   override val outcomeName: String = "naive_bladder_cancer"
 
-   def transform(extracted: Dataset[Event[AnyEvent]]): Dataset[Event[Outcome]] = {
+   def transform(extracted: Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
     import extracted.sqlContext.implicits._
     extracted
-      .filter(event => Diagnosis.categories.contains(event.category) && event.value == primaryDiagCode)
+      .filter(e => e.value == primaryDiagCode)
       .dropDuplicates("patientId", "groupID")
       .map(event => Outcome(event.patientID, outcomeName, event.start))
   }
