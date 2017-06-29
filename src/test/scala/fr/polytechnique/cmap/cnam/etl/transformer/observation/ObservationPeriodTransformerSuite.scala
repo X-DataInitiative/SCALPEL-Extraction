@@ -1,6 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.transformer.observation
 
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
 import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
 import fr.polytechnique.cmap.cnam.etl.events.outcomes.Outcome
 import fr.polytechnique.cmap.cnam.util.functions._
@@ -47,7 +48,7 @@ class ObservationPeriodTransformerSuite extends SharedContext {
       import sqlCtx.implicits._
 
       // Given
-      val events = Seq(
+      val events = Seq[Event[AnyEvent]](
         Molecule("Patient_A", "PIOGLITAZONE", 1.0, makeTS(2008, 1, 20)),
         Molecule("Patient_A", "PIOGLITAZONE", 1.0, makeTS(2008, 1, 1)),
         Molecule("Patient_A", "PIOGLITAZONE", 1.0, makeTS(2008, 1, 10)),

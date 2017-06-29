@@ -28,14 +28,14 @@ trait MedicalAct extends AnyEvent with EventBuilder {
   }
 }
 
-object DcirCamAct extends MedicalAct {
+object DcirAct extends MedicalAct {
   val category: EventCategory[MedicalAct] = "dcir_act"
 }
 
-object McoCamAct extends MedicalAct {
-  val category: EventCategory[MedicalAct] = "mco_cam_act"
+object McoCCAMAct extends MedicalAct {
+  val category: EventCategory[MedicalAct] = "mco_ccam_act"
 }
 
-object McoCimAct extends MedicalAct {
-  val category: EventCategory[MedicalAct] = "mco_cim_act"
+object McoCIM10Act extends MedicalAct {
+  val category: EventCategory[MedicalAct] = "mco_cim10_act"
 }

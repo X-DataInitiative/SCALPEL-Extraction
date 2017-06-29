@@ -105,6 +105,9 @@ object FilteringConfig {
   lazy val linkedDiagnosisCodes: List[String] = conf.getStringList("linked_diagnosis_codes").asScala.toList
   lazy val associatedDiagnosisCodes: List[String] = conf.getStringList("associated_diagnosis_codes").asScala.toList
   lazy val imbDiagnosisCodes: List[String] = conf.getStringList("imb_diagnosis_codes").asScala.toList
+  lazy val dcirMedicalActCodes: List[String] = conf.getStringList("dcir_act_codes").asScala.toList
+  lazy val mcoCCAMMedicalActCodes: List[String] = conf.getStringList("mco_ccam_act_codes").asScala.toList
+  lazy val mcoCIM10MedicalActCodes: List[String] = conf.getStringList("mco_cim10_act_codes").asScala.toList
 
   lazy val inputPaths = InputPaths(
     dcir = conf.getString("paths.input.dcir"),

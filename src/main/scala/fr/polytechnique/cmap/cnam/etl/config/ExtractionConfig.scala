@@ -23,6 +23,9 @@ case class ExtractionConfig(
     linkedDiagnosisCodes: List[String],
     associatedDiagnosisCodes: List[String],
     imbDiagnosisCodes: List[String],
+    dcirMedicalActCodes: List[String],
+    mcoCCAMMedicalActCodes: List[String],
+    mcoCIM10MedicalActCodes: List[String],
     codesMap: Map[String, List[String]])
 
 object ExtractionConfig {
@@ -48,6 +51,9 @@ object ExtractionConfig {
     linkedDiagnosisCodes = FilteringConfig.linkedDiagnosisCodes,
     associatedDiagnosisCodes = FilteringConfig.associatedDiagnosisCodes,
     imbDiagnosisCodes = FilteringConfig.imbDiagnosisCodes,
+    dcirMedicalActCodes = FilteringConfig.dcirMedicalActCodes,
+    mcoCCAMMedicalActCodes = FilteringConfig.mcoCCAMMedicalActCodes,
+    mcoCIM10MedicalActCodes = FilteringConfig.mcoCIM10MedicalActCodes,
     codesMap = Map(
       "dp" -> FilteringConfig.mainDiagnosisCodes,
       "dr" -> FilteringConfig.linkedDiagnosisCodes,

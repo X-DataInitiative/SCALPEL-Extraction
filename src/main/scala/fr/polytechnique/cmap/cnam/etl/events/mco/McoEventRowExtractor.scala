@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.events.mco
 
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
-import fr.polytechnique.cmap.cnam.etl.events.EventRowExtractor
+import fr.polytechnique.cmap.cnam.etl.events._
 
 trait McoEventRowExtractor extends EventRowExtractor with McoSource {
 
@@ -16,10 +16,26 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
     r.getAs[Int](ColNames.Year).toString
   }
 
-  def extractCode(r: Row, colName: ColName, codes: List[String]): Option[String] = {
+  override def extractStart(r: Row): Timestamp = r.getAs[Timestamp](NewColumns.EstimatedStayStart)
+
+  def extractCode(r: Row, colName: ColName, codes: Seq[String]): Option[String] = {
     val idx = r.fieldIndex(colName)
     codes.find(!r.isNullAt(idx) && r.getString(idx).startsWith(_))
   }
 
-  override def extractStart(r: Row): Timestamp = r.getAs[Timestamp](NewColumns.EstimatedStayStart)
+  // todo: add test
+  def eventFromRow[A <: AnyEvent](
+      r: Row, builder: EventBuilder, colName: ColName, codes: Seq[String]): Option[Event[A]] = {
+
+    val patientId: String = extractPatientId(r)
+    val foundCode: Option[String] = extractCode(r, colName, codes)
+    val groupId: String = extractGroupId(r)
+    val eventDate: Timestamp = extractStart(r)
+
+    foundCode match {
+      case None => None
+      case Some(code) => Some(
+        builder[A](patientId, groupId, code, extractWeight(r), eventDate, extractEnd(r)))
+    }
+  }
 }

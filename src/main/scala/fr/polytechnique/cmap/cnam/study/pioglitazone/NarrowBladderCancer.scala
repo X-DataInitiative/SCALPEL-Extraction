@@ -21,9 +21,9 @@ object NarrowBladderCancer extends OutcomeTransformer with PioglitazoneStudyCode
   private val DP = MainDiagnosis.category
   private val DR = LinkedDiagnosis.category
   private val DAS = AssociatedDiagnosis.category
-  private val MCO_CIM_ACT = McoCimAct.category
-  private val MCO_CAM_ACT = McoCamAct.category
-  private val DCIR_CAM_ACT = DcirCamAct.category
+  private val MCO_CIM_ACT = McoCIM10Act.category
+  private val MCO_CAM_ACT = McoCCAMAct.category
+  private val DCIR_CAM_ACT = DcirAct.category
 
   // Checks if all events in stay have the same dates
   def checkDates(eventsInStay: Seq[Event[AnyEvent]]): Boolean = {

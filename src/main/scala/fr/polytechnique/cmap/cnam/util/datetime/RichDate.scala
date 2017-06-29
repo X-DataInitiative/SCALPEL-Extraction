@@ -24,4 +24,7 @@ private[datetime] class RichDate[A <: java.util.Date](val datetime: A) {
     if (includeBounds) datetime.getTime >= lower.getTime && datetime.getTime <= upper.getTime
     else datetime.getTime > lower.getTime && datetime.getTime < upper.getTime
   }
+
+  def toTimestamp = new java.sql.Timestamp(datetime.getTime)
+  def toDate = new java.sql.Date(datetime.getTime)
 }
