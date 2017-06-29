@@ -8,7 +8,6 @@ import org.apache.spark.sql.types.{BooleanType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame}
 
 import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
-import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns
 
 
 class PatientFiltersImplicits(data: DataFrame) {

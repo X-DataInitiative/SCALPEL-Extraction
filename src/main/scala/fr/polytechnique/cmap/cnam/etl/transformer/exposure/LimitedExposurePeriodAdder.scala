@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.transformer.exposure
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{min, _}
 import org.apache.spark.sql.{Column, DataFrame}
-import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns
+
 
 private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriodAdderImpl(data) {
 

@@ -10,7 +10,6 @@ import fr.polytechnique.cmap.cnam.etl.events.exposures.Exposure
 import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformer.follow_up.FollowUp
-import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns
 import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 
 

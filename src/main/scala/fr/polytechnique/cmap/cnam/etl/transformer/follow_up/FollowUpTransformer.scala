@@ -10,12 +10,12 @@ import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnosis
 import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
 import fr.polytechnique.cmap.cnam.etl.events.tracklosses.Trackloss
 import fr.polytechnique.cmap.cnam.etl.transformer.observation._
-import fr.polytechnique.cmap.cnam.etl.transformer.follow_up.Columns._
 import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
 
 
 class FollowUpTransformer(val delay: Int) {
+  import Columns._
 
   val outputColumns = List(
     col(PatientID),
@@ -64,6 +64,7 @@ class FollowUpTransformer(val delay: Int) {
 }
 
 object FollowUpTransformer {
+  import Columns._
 
   implicit class FollowUpDataFrame(data: DataFrame) {
 
