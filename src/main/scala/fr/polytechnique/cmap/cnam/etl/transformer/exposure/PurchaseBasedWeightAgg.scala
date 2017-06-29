@@ -6,10 +6,12 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 
-import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns
 
 
 class PurchaseBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
+
+  import Columns._
 
   private def aggregateWeightImpl(purchaseIntervals: List[Int]): DataFrame = {
 

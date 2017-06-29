@@ -4,9 +4,10 @@ import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
-import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns
 
 class DosageBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
+  import Columns._
 
   private def aggregateWeightImpl(dosageLevelIntervals: List[Int]): DataFrame = {
 

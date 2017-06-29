@@ -8,7 +8,6 @@ import fr.polytechnique.cmap.cnam.etl.events.Event
 import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnosis
 import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
 import fr.polytechnique.cmap.cnam.etl.events.tracklosses.Trackloss
-import fr.polytechnique.cmap.cnam.etl.transformer.follow_up.Columns._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
@@ -22,6 +21,7 @@ class FollowUpTransformerSuite extends SharedContext {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
+    import Columns._
 
     // Given
     val input = Seq(
@@ -40,7 +40,7 @@ class FollowUpTransformerSuite extends SharedContext {
       ("Patient_B", Some(makeTS(2009, 7, 1))),
       ("Patient_C", None),
       ("Patient_C", None)
-    ).toDF(PatientID, FollowUpEnd)
+    ).toDF(PatientID, FollowUpStart)
 
     // When
     import FollowUpTransformer.FollowUpDataFrame
@@ -55,19 +55,20 @@ class FollowUpTransformerSuite extends SharedContext {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
+    import Columns._
 
     // Given
     val input = Seq(
       ("Patient_D", "molecule", makeTS(2006, 2, 1), makeTS(2006, 6, 30)),
       ("Patient_D", "molecule", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
-      ("Patient_D", Trackloss, makeTS(2006, 8, 1), makeTS(2006, 6, 30)),
+      ("Patient_D", "trackloss", makeTS(2006, 8, 1), makeTS(2006, 6, 30)),
       ("Patient_D", "disease", makeTS(2007, 1, 1), makeTS(2006, 6, 30))
     ).toDF(PatientID, Category, Start, FollowUpStart)
 
     val expected = Seq(
       ("Patient_D", "molecule", makeTS(2006, 8, 1)),
       ("Patient_D", "molecule", makeTS(2006, 8, 1)),
-      ("Patient_D", Trackloss, makeTS(2006, 8, 1)),
+      ("Patient_D", "trackloss", makeTS(2006, 8, 1)),
       ("Patient_D", "disease", makeTS(2006, 8, 1))
     ).toDF(PatientID, Category, TracklossDate)
 
@@ -83,23 +84,24 @@ class FollowUpTransformerSuite extends SharedContext {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
+    import Columns._
 
     // Given
     val input = Seq(
       ("Patient_D", "molecule", makeTS(2006, 2, 1), makeTS(2006, 6, 30)),
       ("Patient_D", "molecule", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
-      ("Patient_D", Trackloss, makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
-      ("Patient_D", Trackloss, makeTS(2006, 8, 1), makeTS(2006, 6, 30)),
-      ("Patient_D", Trackloss, makeTS(2006, 12, 1), makeTS(2006, 6, 30)),
+      ("Patient_D", "trackloss", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
+      ("Patient_D", "trackloss", makeTS(2006, 8, 1), makeTS(2006, 6, 30)),
+      ("Patient_D", "trackloss", makeTS(2006, 12, 1), makeTS(2006, 6, 30)),
       ("Patient_D", "disease", makeTS(2007, 1, 1), makeTS(2006, 6, 30))
     ).toDF(PatientID, Category, Start, FollowUpStart)
 
     val expected = Seq(
       ("Patient_D", "molecule", makeTS(2006, 8, 1)),
       ("Patient_D", "molecule", makeTS(2006, 8, 1)),
-      ("Patient_D", Trackloss, makeTS(2006, 8, 1)),
-      ("Patient_D", Trackloss, makeTS(2006, 8, 1)),
-      ("Patient_D", Trackloss, makeTS(2006, 8, 1)),
+      ("Patient_D", "trackloss", makeTS(2006, 8, 1)),
+      ("Patient_D", "trackloss", makeTS(2006, 8, 1)),
+      ("Patient_D", "trackloss", makeTS(2006, 8, 1)),
       ("Patient_D", "disease", makeTS(2006, 8, 1))
     ).toDF(PatientID, Category, TracklossDate)
 
@@ -115,19 +117,20 @@ class FollowUpTransformerSuite extends SharedContext {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
+    import Columns._
 
     // Given
     val input = Seq(
       ("Patient_C", "molecule", makeTS(2006, 2, 1), makeTS(2006, 6, 30)),
       ("Patient_C", "molecule", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
-      ("Patient_C", Trackloss, makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
+      ("Patient_C", "trackloss", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
       ("Patient_C", "disease", makeTS(2007, 1, 1), makeTS(2006, 6, 30))
     ).toDF(PatientID, Category, Start, FollowUpStart)
 
     val expected = Seq(
       ("Patient_C", "molecule"),
       ("Patient_C", "molecule"),
-      ("Patient_C", Trackloss),
+      ("Patient_C", "trackloss"),
       ("Patient_C", "disease")
     ).toDF(PatientID, Category).withColumn(TracklossDate, lit(null).cast(TimestampType))
 
@@ -142,6 +145,7 @@ class FollowUpTransformerSuite extends SharedContext {
   "withFollowUpEnd" should "add a column with the end of the follow-up period" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
+    import Columns._
 
     // Given
     val input = Seq(
@@ -190,6 +194,7 @@ class FollowUpTransformerSuite extends SharedContext {
   "withEndReason" should "add a column for the reason of follow-up end" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
+    import Columns._
 
     // Given
     val input = Seq(

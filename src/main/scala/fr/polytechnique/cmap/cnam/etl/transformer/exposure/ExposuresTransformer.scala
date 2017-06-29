@@ -10,12 +10,14 @@ import fr.polytechnique.cmap.cnam.etl.events.exposures.Exposure
 import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformer.follow_up.FollowUp
-import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns
 import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 
 
 class ExposuresTransformer(config: ExposureDefinition)
   extends ExposurePeriodAdder with WeightAggregator with PatientFilters {
+
+  import Columns._
 
   val exposurePeriodStrategy: ExposurePeriodStrategy = config.periodStrategy
   val weightAggStrategy: WeightAggStrategy = config.weightAggStrategy

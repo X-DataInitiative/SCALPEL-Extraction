@@ -6,9 +6,11 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 
-import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns._
+import fr.polytechnique.cmap.cnam.etl.transformer.exposure.Columns
 
 class TimeBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
+
+  import Columns._
 
   def aggregateWeight(
       studyStart: Option[Timestamp],
