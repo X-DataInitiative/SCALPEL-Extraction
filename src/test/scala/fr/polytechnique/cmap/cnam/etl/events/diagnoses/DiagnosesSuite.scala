@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.etl.events.diagnoses
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.old.{Diagnoses, ImbDiagnoses, McoDiagnoses}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
 
@@ -19,14 +18,15 @@ class DiagnosesSuite extends SharedContext {
       pmsiMco = Some(mco),
       irImb = Some(irImb)
     )
+    val expectedMco = McoDiagnoses.extract(
+      mco, config.mainDiagnosisCodes, config.linkedDiagnosisCodes, config.associatedDiagnosisCodes
+    )
+    val expectedImb = ImbDiagnoses.extract(irImb, config.imbDiagnosisCodes)
 
     // Then
     assertDFs(
       Diagnoses.extract(config, sources).toDF,
-      unionDatasets(
-        McoDiagnoses.extract(config, mco),
-        ImbDiagnoses.extract(config, irImb)
-      ).toDF
+      unionDatasets(expectedMco, expectedImb).toDF
     )
   }
 }

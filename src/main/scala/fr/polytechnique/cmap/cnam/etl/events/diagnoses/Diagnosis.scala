@@ -4,20 +4,7 @@ import java.sql.Timestamp
 import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.etl.events._
 
-object Diagnosis {
-
-  val categories = List(
-    ImbDiagnosis.category,
-    MainDiagnosis.category,
-    LinkedDiagnosis.category,
-    AssociatedDiagnosis.category
-  )
-}
-
-
-trait Diagnosis extends AnyEvent
-
-trait DiagnosisBuilder extends EventBuilder with Diagnosis with Serializable {
+trait Diagnosis extends AnyEvent with EventBuilder {
 
   val category: EventCategory[Diagnosis]
 
@@ -43,30 +30,30 @@ trait DiagnosisBuilder extends EventBuilder with Diagnosis with Serializable {
   }
 }
 
-object MainDiagnosis extends DiagnosisBuilder {
+object MainDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "main_diagnosis"
 }
 
-object LinkedDiagnosis extends DiagnosisBuilder {
+object LinkedDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "linked_diagnosis"
 }
 
-object AssociatedDiagnosis extends DiagnosisBuilder {
+object AssociatedDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "associated_diagnosis"
 }
 
-object HADMainDiagnosis extends DiagnosisBuilder {
+object HADMainDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "had_main_diagnosis"
 }
 
-object SSRMainDiagnosis extends DiagnosisBuilder {
+object SSRMainDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "ssr_main_diagnosis"
 }
 
-object SSREtiologicDiagnosis extends DiagnosisBuilder {
+object SSREtiologicDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "ssr_etiologic_diagnosis"
 }
 
-object ImbDiagnosis extends DiagnosisBuilder {
+object ImbDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "imb_diagnosis"
 }

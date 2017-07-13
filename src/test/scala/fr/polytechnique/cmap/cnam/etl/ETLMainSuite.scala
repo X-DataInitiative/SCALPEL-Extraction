@@ -40,12 +40,12 @@ class ETLMainSuite extends SharedContext {
       Molecule("Patient_02", "PIOGLITAZONE", 840.0, makeTS(2006, 1, 15)),
       Molecule("Patient_02", "PIOGLITAZONE", 4200.0, makeTS(2006, 1, 30)),
       Molecule("Patient_02", "PIOGLITAZONE", 1680.0, makeTS(2006, 1, 5)),
-      MainDiagnosis("Patient_02", "C67", makeTS(2007,  1, 29)),
-      MainDiagnosis("Patient_02", "C67", makeTS(2007,  1, 29)),
-      MainDiagnosis("Patient_02", "C67", makeTS(2005, 12, 29)),
-      MainDiagnosis("Patient_02", "C67", makeTS(2005, 12, 24)),
-      MainDiagnosis("Patient_02", "C67", makeTS(2008,  3,  8)),
-      MainDiagnosis("Patient_02", "C67", makeTS(2008,  3, 15)),
+      MainDiagnosis("Patient_02", "10000123_20000123_2007", "C67", makeTS(2007,  1, 29)),
+      MainDiagnosis("Patient_02", "10000123_20000345_2007", "C67", makeTS(2007,  1, 29)),
+      MainDiagnosis("Patient_02", "10000123_10000987_2006", "C67", makeTS(2005, 12, 29)),
+      MainDiagnosis("Patient_02", "10000123_10000543_2006", "C67", makeTS(2005, 12, 24)),
+      MainDiagnosis("Patient_02", "10000123_30000546_2008", "C67", makeTS(2008,  3,  8)),
+      MainDiagnosis("Patient_02", "10000123_30000852_2008", "C67", makeTS(2008,  3, 15)),
       ImbDiagnosis("Patient_02", "C67", makeTS(2006, 3, 13))
     ).toDF
 
@@ -55,8 +55,8 @@ class ETLMainSuite extends SharedContext {
     // Then
     val patients = sqlCtx.read.parquet(patientsPath)
     val flatEvents = sqlCtx.read.parquet(flatEventsPath)
-    assertDFs(patients, expectedPatients)
-    assertDFs(flatEvents, expectedFlatEvents)
+    assertDFs(patients, expectedPatients, true)
+    assertDFs(flatEvents, expectedFlatEvents, true)
  }
 
   it should "return a saved events Dataset if reuseFlatEventsPath is defined" in {
@@ -77,7 +77,7 @@ class ETLMainSuite extends SharedContext {
       MainDiagnosis("Patient_02", "C67", makeTS(2005, 12, 24)),
       MainDiagnosis("Patient_02", "C67", makeTS(2008,  3,  8)),
       MainDiagnosis("Patient_02", "C67", makeTS(2008,  3, 15)),
-      ImbDiagnosis("Patient_02", "C67", makeTS(2006, 3, 13))
+      ImbDiagnosis("Patient_02", "NA", "C67", makeTS(2006, 3, 13))
     ).toDF
 
     // When

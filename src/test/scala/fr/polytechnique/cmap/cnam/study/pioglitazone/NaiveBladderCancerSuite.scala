@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.events.Event
 import fr.polytechnique.cmap.cnam.etl.events.diagnoses._
-import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
 import fr.polytechnique.cmap.cnam.etl.events.outcomes.Outcome
 import fr.polytechnique.cmap.cnam.util.functions._
 
@@ -14,13 +14,12 @@ class NaiveBladderCancerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val input = Seq(
+    val input = Seq[Event[Diagnosis]](
       MainDiagnosis("PatientA", "C67", makeTS(2010, 1, 1)),
       LinkedDiagnosis("PatientA", "C67", makeTS(2010, 2, 1)),
       AssociatedDiagnosis("PatientA", "C67", makeTS(2010, 3, 1)),
       ImbDiagnosis("PatientA", "C67", makeTS(2010, 4, 1)),
-      MainDiagnosis("PatientA", "ABC", makeTS(2010, 5, 1)),
-      Molecule("PatientA", "PIOGLITAZONE", 100.0, makeTS(2010, 6, 1))
+      MainDiagnosis("PatientA", "ABC", makeTS(2010, 5, 1))
     ).toDS
 
     val expected = Seq(

@@ -2,11 +2,11 @@ package fr.polytechnique.cmap.cnam.etl.events.exposures
 
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventCategory}
+import fr.polytechnique.cmap.cnam.etl.events._
 
-trait Exposure extends AnyEvent
+object Exposure extends Exposure
 
-object Exposure extends Exposure {
+trait Exposure extends AnyEvent with EventBuilder {
 
   val category: EventCategory[Exposure] = "exposure"
 

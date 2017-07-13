@@ -3,8 +3,7 @@ package fr.polytechnique.cmap.cnam.etl
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnosis
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.old.Diagnoses
+import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{Diagnoses, Diagnosis}
 import fr.polytechnique.cmap.cnam.etl.events.molecules.{Molecule, MoleculePurchases}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
@@ -76,7 +75,7 @@ object ETLMain extends Main {
     allEvents.toDF.write.parquet(outputPaths.flatEvents)
 
     logger.info("Extracting bladder cancer outcomes...")
-    val naiveBladderCancerOutcomes = NaiveBladderCancer.transform(allEvents)
+    val naiveBladderCancerOutcomes = NaiveBladderCancer.transform(diseaseEvents)
 
     logger.info("Writing bladder cancer outcomes...")
     naiveBladderCancerOutcomes.toDF.write.parquet(outputPaths.NaiveBladderCancerOutcomes)
