@@ -5,7 +5,7 @@ import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.{Event, EventsExtractor}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
-class MedicalActs extends EventsExtractor[MedicalAct] {
+object MedicalActs extends EventsExtractor[MedicalAct] {
 
   override def extract(config: ExtractionConfig, sources: Sources): Dataset[Event[MedicalAct]] = {
 

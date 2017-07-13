@@ -81,4 +81,35 @@ class RichDateSuite extends FlatSpec {
     // Then
     assert(!result)
   }
+
+  "toTimestamp" should "cast an instance of T <: java.util.Date to java.sql.Timestamp" in {
+    // Given
+    val inputDate = java.sql.Date.valueOf("2010-08-15")
+    val inputTimestamp = java.sql.Timestamp.valueOf("2010-08-15 15:42:42.512")
+    val expectedFromDate = java.sql.Timestamp.valueOf("2010-08-15 00:00:00.0")
+    val expectedFromTimestamp = inputTimestamp
+
+    // When
+    val result1 = new RichDate(inputDate).toTimestamp
+    val result2 = new RichDate(inputTimestamp).toTimestamp
+
+    // Then
+    assert(result1 == expectedFromDate)
+    assert(result2 == expectedFromTimestamp)
+  }
+
+  "toDate" should "cast an instance of T <: java.util.Date to java.sql.Date" in {
+    // Given
+    val inputDate = java.sql.Date.valueOf("2010-08-15")
+    val inputTimestamp = java.sql.Timestamp.valueOf("2010-08-15 15:42:42.512")
+    val expected = java.sql.Date.valueOf("2010-08-15")
+
+    // When
+    val result1 = new RichDate(inputDate).toDate
+    val result2 = new RichDate(inputTimestamp).toDate
+
+    // Then
+    assert(result1 == expected)
+    assert(result2 == expected)
+  }
 }

@@ -13,12 +13,12 @@ class ImbDiagnosesSuite extends SharedContext {
     // Given
     val config = ExtractionConfig.init().copy(imbDiagnosisCodes = List("C67"))
     val input = sqlContext.read.load("src/test/resources/test-input/IR_IMB_R.parquet")
-    val expected = Seq(ImbDiagnosis("Patient_02", "C67", makeTS(2006, 3, 13))).toDF
+    val expected = Seq(ImbDiagnosis("Patient_02", "C67", makeTS(2006, 3, 13))).toDS
 
     // When
     val output = ImbDiagnoses.extract(input, config.imbDiagnosisCodes)
 
     // Then
-    assertDFs(expected.toDF, output.toDF)
+    assertDSs(expected, output)
   }
 }

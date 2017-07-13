@@ -23,7 +23,6 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
     codes.find(!r.isNullAt(idx) && r.getString(idx).startsWith(_))
   }
 
-  // todo: add test
   def eventFromRow[A <: AnyEvent](
       r: Row, builder: EventBuilder, colName: ColName, codes: Seq[String]): Option[Event[A]] = {
 

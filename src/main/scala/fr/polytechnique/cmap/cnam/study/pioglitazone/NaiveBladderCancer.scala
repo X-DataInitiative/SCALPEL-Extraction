@@ -18,7 +18,7 @@ object NaiveBladderCancer extends OutcomeTransformer with PioglitazoneStudyCodes
     import extracted.sqlContext.implicits._
     extracted
       .filter(e => e.value == primaryDiagCode)
-      .dropDuplicates("patientId", "groupID")
+      .dropDuplicates(Event.Columns.PatientID, Event.Columns.GroupID)
       .map(event => Outcome(event.patientID, outcomeName, event.start))
   }
 }

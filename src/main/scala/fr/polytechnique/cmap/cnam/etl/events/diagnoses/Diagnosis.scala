@@ -30,18 +30,6 @@ trait Diagnosis extends AnyEvent with EventBuilder {
   }
 }
 
-object Diagnosis {
-  val categories = List(
-    ImbDiagnosis.category,
-    MainDiagnosis.category,
-    LinkedDiagnosis.category,
-    AssociatedDiagnosis.category,
-    HADMainDiagnosis.category,
-    SSRMainDiagnosis.category,
-    SSREtiologicDiagnosis.category
-  )
-}
-
 object MainDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "main_diagnosis"
 }

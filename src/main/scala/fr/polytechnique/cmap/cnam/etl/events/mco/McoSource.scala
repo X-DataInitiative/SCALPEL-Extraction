@@ -14,7 +14,7 @@ trait McoSource extends ColumnNames {
     val DP: ColName = "MCO_B.DGN_PAL"
     val DR: ColName = "MCO_B.DGN_REL"
     val DA: ColName = "MCO_D.ASS_DGN"
-    val CCAM: ColName = "`MCO_A.CDC_ACT`"
+    val CCAM: ColName = "MCO_A.CDC_ACT"
     val EtaNum: ColName = "ETA_NUM"
     val RsaNum: ColName = "RSA_NUM"
     val Year: ColName = "SOR_ANN"

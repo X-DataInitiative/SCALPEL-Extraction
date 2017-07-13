@@ -8,19 +8,26 @@ import fr.polytechnique.cmap.cnam.util.datetime
 private[diagnoses] object ImbDiagnoses {
 
   final object ColNames {
-    final val PatientID = "NUM_ENQ"
-    final val Encoding = "MED_NCL_IDT"
-    final val Code = "MED_MTF_COD"
-    final val Date = "IMB_ALD_DTD"
+    final lazy val PatientID = "NUM_ENQ"
+    final lazy val Encoding = "MED_NCL_IDT"
+    final lazy val Code = "MED_MTF_COD"
+    final lazy val Date = "IMB_ALD_DTD"
   }
 
   def eventFromRow(codes: Seq[String])(r: Row): Option[Event[Diagnosis]] = {
 
     import datetime.implicits._
 
-    val foundCode: Option[String] = codes.find {
+    val foundCode: Option[String] = {
+      val encoding = r.getAs[String](ColNames.Encoding)
       val idx = r.fieldIndex(ColNames.Code)
-      !r.isNullAt(idx) && r.getString(idx).startsWith(_)
+
+      if (encoding != "CIM10" || r.isNullAt(idx)) {
+        None
+      }
+      else {
+        codes.find(r.getString(idx).startsWith(_))
+      }
     }
 
     foundCode match {

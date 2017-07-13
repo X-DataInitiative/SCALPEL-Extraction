@@ -5,7 +5,7 @@ import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.ColumnNames
 
-class EventRowExtractorTest extends SharedContext {
+class EventRowExtractorSuite extends SharedContext {
 
   object MockRowExtractor extends EventRowExtractor with ColumnNames {
     def extractPatientId(r: Row) = ""
