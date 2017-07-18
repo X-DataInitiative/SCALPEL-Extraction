@@ -1,20 +1,21 @@
 package fr.polytechnique.cmap.cnam.etl.transformer.follow_up
 
+
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.events.Event
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnosis
 import fr.polytechnique.cmap.cnam.etl.events.molecules.Molecule
+import fr.polytechnique.cmap.cnam.etl.events.outcomes.Outcome
 import fr.polytechnique.cmap.cnam.etl.events.tracklosses.Trackloss
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformer.observation._
-import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
+import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 
 
-class FollowUpTransformer(val delay: Int) {
+class FollowUpTransformer(delay: Int, firstTargetDisease: Boolean, outcomeName: Option[String]) {
   import Columns._
 
   val outputColumns = List(
@@ -24,13 +25,16 @@ class FollowUpTransformer(val delay: Int) {
     col(EndReason)
   )
 
+  val followupEndModelCandidates = if(firstTargetDisease)
+    List(col(TracklossDate), col(DeathDate), col(ObservationEnd), col(FirstTargetDiseaseDate))
+  else
+    List(col(TracklossDate), col(DeathDate), col(ObservationEnd))
 
   def transform(
       patients: Dataset[(Patient, ObservationPeriod)],
       dispensations: Dataset[Event[Molecule]],
-      outcomes: Dataset[Event[Diagnosis]],
-      tracklosses: Dataset[Event[Trackloss]])
-    : Dataset[FollowUp] = {
+      outcomes: Dataset[Event[Outcome]],
+      tracklosses: Dataset[Event[Trackloss]]): Dataset[FollowUp] = {
 
     import FollowUpTransformer._
 
@@ -49,18 +53,27 @@ class FollowUpTransformer(val delay: Int) {
       .select(inputCols:_*)
       .join(events, Seq(PatientID))
 
+    val window = Window.partitionBy(PatientID)
+
+    val firstTargetDiseaseDate = min(
+        when(col(Category) === Outcome.category && col(Value).contains(outcomeName.getOrElse(None)), col(Start))
+    ).over(window)
+
     import input.sqlContext.implicits._
 
     input.repartition(col(PatientID))
       .withFollowUpStart(delay)
       .withTrackloss
-      .withFollowUpEnd
+      .withColumn(FirstTargetDiseaseDate, firstTargetDiseaseDate)
+      .withColumn(FollowUpEnd,  minColumn(followupEndModelCandidates:_*))
       .na.drop("any", Seq(FollowUpStart, FollowUpEnd))
       .withEndReason
       .select(outputColumns: _*)
       .dropDuplicates(Seq(PatientID))
       .as[FollowUp]
   }
+
+
 }
 
 object FollowUpTransformer {
@@ -87,34 +100,15 @@ object FollowUpTransformer {
       data.withColumn(TracklossDate, firstCorrectTrackloss)
     }
 
-    def withFollowUpEnd: DataFrame = {
-      val window = Window.partitionBy(PatientID)
-
-      val firstTargetDisease = min(
-        when(col(Category) === "disease" && col(Value) === "targetDisease", col(Start)) // TODO need refacto
-      ).over(window)
-
-      data
-        .withColumn(FirstTargetDiseaseDate, firstTargetDisease)
-        .withColumn(FollowUpEnd,
-          minColumn(
-            col(DeathDate),
-            col(FirstTargetDiseaseDate),
-            col(TracklossDate),
-            col(ObservationEnd)
-          )
-        )
-    }
-
     def withEndReason: DataFrame = {
       val endReason = when(
-        col(FollowUpEnd) === col(DeathDate), "death"
+        col(FollowUpEnd) === col(DeathDate), EndReasons.Death.toString
       ).when(
-        col(FollowUpEnd) === col(FirstTargetDiseaseDate), "disease"
+        col(FollowUpEnd) === col(FirstTargetDiseaseDate), EndReasons.Disease.toString
       ).when(
-        col(FollowUpEnd) === col(TracklossDate), "trackloss"
+        col(FollowUpEnd) === col(TracklossDate), EndReasons.Trackloss.toString
       ).when(
-        col(FollowUpEnd) === col(ObservationEnd), "observationEnd"
+        col(FollowUpEnd) === col(ObservationEnd), EndReasons.ObservationEnd.toString
       )
 
       data.withColumn(EndReason, endReason)
