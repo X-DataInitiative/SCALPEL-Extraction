@@ -1,5 +1,4 @@
 package fr.polytechnique.cmap.cnam.etl.transformer.follow_up
-
 import fr.polytechnique.cmap.cnam.etl.events.Event
 
 
@@ -25,4 +24,7 @@ private[follow_up] object Columns {
   final val TracklossDate = "trackloss"
   final val FirstTargetDiseaseDate = "firstTargetDisease"
 
+  object EndReasons extends Enumeration {
+    val Death, Disease, Trackloss, ObservationEnd = Value
+  }
 }
