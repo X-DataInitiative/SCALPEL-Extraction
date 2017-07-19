@@ -7,9 +7,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 
-import fr.polytechnique.cmap.cnam.etl.events.outcomes.Outcome
-import fr.polytechnique.cmap.cnam.etl.events.Event
-import fr.polytechnique.cmap.cnam.etl.events.exposures.Exposure
+import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
 import fr.polytechnique.cmap.cnam.util.functions._

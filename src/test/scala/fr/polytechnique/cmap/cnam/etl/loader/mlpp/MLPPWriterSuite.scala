@@ -1,9 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.loader.mlpp
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.Event
-import fr.polytechnique.cmap.cnam.etl.events.exposures.Exposure
-import fr.polytechnique.cmap.cnam.etl.events.outcomes.Outcome
+import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.util.functions._
 import org.apache.spark.sql.Dataset
