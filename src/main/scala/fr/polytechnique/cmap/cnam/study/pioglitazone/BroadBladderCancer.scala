@@ -1,9 +1,8 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import org.apache.spark.sql.Dataset
-import fr.polytechnique.cmap.cnam.etl.events.Event
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses._
-import fr.polytechnique.cmap.cnam.etl.events.outcomes.{Outcome, OutcomeTransformer}
+import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
 
 /*
  * The rules for this Outcome definition can be found on the following page:

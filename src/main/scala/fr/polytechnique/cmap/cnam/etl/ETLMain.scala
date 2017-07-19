@@ -3,12 +3,13 @@ package fr.polytechnique.cmap.cnam.etl
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{Diagnoses, Diagnosis}
-import fr.polytechnique.cmap.cnam.etl.events.molecules.{Molecule, MoleculePurchases}
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
+import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.Diagnoses
+import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
+import fr.polytechnique.cmap.cnam.etl.extractors.patients.Patients
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig.{InputPaths, OutputPaths}
-import fr.polytechnique.cmap.cnam.etl.patients.{Patient, Patients}
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.pioglitazone.NaiveBladderCancer
 import fr.polytechnique.cmap.cnam.util.functions._

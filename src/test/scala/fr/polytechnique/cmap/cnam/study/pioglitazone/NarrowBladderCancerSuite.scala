@@ -2,10 +2,7 @@ package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.acts._
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses._
-import fr.polytechnique.cmap.cnam.etl.events.outcomes.Outcome
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
+import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.util._
 import fr.polytechnique.cmap.cnam.util.functions._
 
