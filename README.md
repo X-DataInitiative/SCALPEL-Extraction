@@ -42,9 +42,9 @@ For each model there is a main class that can be used to execute the featuring. 
 
 |Model|Class|
 |:---|:---|
-| Cox | `fr.polytechnique.cmap.cnam.featuring.cox.CoxMain` |
-| LTSCCS | `fr.polytechnique.cmap.cnam.featuring.ltsccs.LTSCCSMain` |
-| AR-SCCS | `fr.polytechnique.cmap.cnam.featuring.mlpp.MLPPMain` |
+| Cox | `fr.polytechnique.cmap.cnam.etl.old_root.featuring.cox.CoxMain` |
+| LTSCCS | `fr.polytechnique.cmap.cnam.etl.old_root.featuring.ltsccs.LTSCCSMain` |
+| AR-SCCS | `fr.polytechnique.cmap.cnam.etl.old_root.featuring.mlpp.MLPPMain` |
 
 For these classes, a configuration file is also needed and the format is the same as for the ETL code.
 

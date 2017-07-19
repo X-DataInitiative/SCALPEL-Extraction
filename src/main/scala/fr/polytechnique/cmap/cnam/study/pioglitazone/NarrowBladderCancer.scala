@@ -2,10 +2,8 @@ package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import org.apache.log4j.Logger
 import org.apache.spark.sql.Dataset
-import fr.polytechnique.cmap.cnam.etl.events.acts._
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses._
-import fr.polytechnique.cmap.cnam.etl.events.outcomes.{Outcome, OutcomeTransformer}
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
+import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.transform.outcomes.OutcomeTransformer
 import fr.polytechnique.cmap.cnam.util.functions._
 import fr.polytechnique.cmap.cnam.util.{collections, datetime}
 

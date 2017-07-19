@@ -1,9 +1,7 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.Event
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.Diagnosis
-import fr.polytechnique.cmap.cnam.etl.events.outcomes.Outcome
+import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, Outcome}
 
 class BroadBladderCancerSuite extends SharedContext {
 

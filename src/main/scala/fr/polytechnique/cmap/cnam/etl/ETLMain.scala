@@ -3,9 +3,9 @@ package fr.polytechnique.cmap.cnam.etl
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
-import fr.polytechnique.cmap.cnam.etl.events.diagnoses.{Diagnoses, Diagnosis}
-import fr.polytechnique.cmap.cnam.etl.events.molecules.{Molecule, MoleculePurchases}
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
+import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.extract.diagnoses.Diagnoses
+import fr.polytechnique.cmap.cnam.etl.extract.molecules.MoleculePurchases
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.patients.{Patient, Patients}
