@@ -7,7 +7,7 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 import com.typesafe.config.{Config, ConfigFactory}
 import fr.polytechnique.cmap.cnam.etl.old_root.exposures._
-import fr.polytechnique.cmap.cnam.etl.transform.{exposures => new_exposure}
+import fr.polytechnique.cmap.cnam.etl.transformers.{exposures => new_exposure}
 import fr.polytechnique.cmap.cnam.util.functions._
 
 object FilteringConfig {

@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.study.pioglitazone
 import org.apache.log4j.Logger
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.transform.outcomes.OutcomeTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
 import fr.polytechnique.cmap.cnam.util.functions._
 import fr.polytechnique.cmap.cnam.util.{collections, datetime}
 
