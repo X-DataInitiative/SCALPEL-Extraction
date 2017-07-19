@@ -1,9 +1,10 @@
-package fr.polytechnique.cmap.cnam.etl.patients
+package fr.polytechnique.cmap.cnam.etl.extract.patients
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.util.functions._
 
 private[patients] object IrBenPatients {

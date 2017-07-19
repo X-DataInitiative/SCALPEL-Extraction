@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.patients
+package fr.polytechnique.cmap.cnam.etl.extract.patients
 
 import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class IrBenPatientsSuite extends SharedContext {
 
-  import fr.polytechnique.cmap.cnam.etl.patients.IrBenPatients.IrBenPatientsDataFrame
+  import fr.polytechnique.cmap.cnam.etl.extract.patients.IrBenPatients.IrBenPatientsDataFrame
 
   "getBirthDates" should "collect birth dates correctly from IR_BEN_R" in {
     val sqlCtx = sqlContext

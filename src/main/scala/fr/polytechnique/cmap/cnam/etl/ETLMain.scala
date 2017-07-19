@@ -6,9 +6,10 @@ import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extract.diagnoses.Diagnoses
 import fr.polytechnique.cmap.cnam.etl.extract.molecules.MoleculePurchases
+import fr.polytechnique.cmap.cnam.etl.extract.patients.Patients
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig.{InputPaths, OutputPaths}
-import fr.polytechnique.cmap.cnam.etl.patients.{Patient, Patients}
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.pioglitazone.NaiveBladderCancer
 import fr.polytechnique.cmap.cnam.util.functions._

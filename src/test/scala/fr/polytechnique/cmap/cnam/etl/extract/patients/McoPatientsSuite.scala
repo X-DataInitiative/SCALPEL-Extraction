@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.patients
+package fr.polytechnique.cmap.cnam.etl.extract.patients
 
 import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
@@ -9,7 +9,7 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class McoPatientsSuite extends SharedContext {
 
-  import fr.polytechnique.cmap.cnam.etl.patients.McoPatients.McoPatientsDataFrame
+  import fr.polytechnique.cmap.cnam.etl.extract.patients.McoPatients.McoPatientsDataFrame
 
   "getDeathDates" should "collect death dates correctly from flat MCO" in {
     val sqlCtx = sqlContext

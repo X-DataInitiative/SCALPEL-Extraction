@@ -1,8 +1,9 @@
-package fr.polytechnique.cmap.cnam.etl.patients
+package fr.polytechnique.cmap.cnam.etl.extract.patients
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
+import fr.polytechnique.cmap.cnam.etl.patients._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 

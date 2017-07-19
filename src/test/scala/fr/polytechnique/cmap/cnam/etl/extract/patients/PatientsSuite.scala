@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.patients
+package fr.polytechnique.cmap.cnam.etl.extract.patients
 
 import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.SharedContext

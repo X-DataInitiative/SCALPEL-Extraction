@@ -1,14 +1,15 @@
-package fr.polytechnique.cmap.cnam.etl.patients
+package fr.polytechnique.cmap.cnam.etl.extract.patients
 
 import java.sql.{Date, Timestamp}
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class DcirPatientsSuite extends SharedContext {
 
-  import fr.polytechnique.cmap.cnam.etl.patients.DcirPatients.DcirPatientsDataFrame
+  import fr.polytechnique.cmap.cnam.etl.extract.patients.DcirPatients.DcirPatientsDataFrame
 
   "findBirthYears" should "return a DataFrame with the birth year for each patient" in {
     val sqlCtx = sqlContext
