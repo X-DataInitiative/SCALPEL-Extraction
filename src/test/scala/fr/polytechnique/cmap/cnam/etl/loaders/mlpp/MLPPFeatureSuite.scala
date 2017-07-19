@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.loader.mlpp
+package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
 import org.scalatest.FlatSpec
 

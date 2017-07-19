@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.loader.mlpp
+package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
@@ -7,7 +7,7 @@ import fr.polytechnique.cmap.cnam.util.functions._
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 
-class MLPPWriterSuite extends SharedContext {
+class MLPPLoaderSuite extends SharedContext {
 
   "withAge" should "add a column with the patients age at the reference date" in {
     val sqlCtx = sqlContext
@@ -37,7 +37,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("patientID", "birthDate", "age")
 
     // When
-    val writer = MLPPWriter()
+    val writer = MLPPLoader()
     import writer.MLPPDataFrame
     val result = input.withAge()
 
@@ -50,7 +50,7 @@ class MLPPWriterSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPWriter.Params(
+    val params = MLPPLoader.Params(
       minTimestamp = makeTS(2006, 1, 1),
       maxTimestamp = makeTS(2006, 2, 2),
       bucketSize = 2
@@ -65,7 +65,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("patientID", "start", "startBucket")
 
     // When
-    val writer = MLPPWriter(params)
+    val writer = MLPPLoader(params)
     import writer.MLPPDataFrame
     val result = input.withStartBucket
 
@@ -78,7 +78,7 @@ class MLPPWriterSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPWriter.Params(
+    val params = MLPPLoader.Params(
       minTimestamp = makeTS(2006, 1, 1),
       maxTimestamp = makeTS(2006, 2, 2),
       bucketSize = 2
@@ -95,7 +95,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("patientID", "deathDate", "deathBucket")
 
     // When
-    val writer = MLPPWriter(params)
+    val writer = MLPPLoader(params)
     import writer.MLPPDataFrame
     val result = input.withDeathBucket
 
@@ -133,7 +133,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("patientID", "category", "eventId", "startBucket", "deathBucket", "tracklossBucket")
 
     // When
-    val writer = MLPPWriter()
+    val writer = MLPPLoader()
     import writer.MLPPDataFrame
     val result = input.withTracklossBucket
 
@@ -171,7 +171,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("patientID", "category", "value", "startBucket", "endBucket", "diseaseBucket")
 
     // When
-    val writer = MLPPWriter()
+    val writer = MLPPLoader()
     import writer.MLPPDataFrame
     val result = input.withDiseaseBucket
 
@@ -184,7 +184,7 @@ class MLPPWriterSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPWriter.Params(
+    val params = MLPPLoader.Params(
       minTimestamp = makeTS(2006, 1, 1),
       maxTimestamp = makeTS(2006, 2, 2),
       bucketSize = 2
@@ -209,7 +209,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("patientID", "endBucket")
 
     // When
-    val writer = MLPPWriter(params)
+    val writer = MLPPLoader(params)
     import writer.MLPPDataFrame
     val result = input.withEndBucket.select("patientID", "endBucket")
 
@@ -223,7 +223,7 @@ class MLPPWriterSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPWriter.Params(
+    val params = MLPPLoader.Params(
       minTimestamp = makeTS(2006, 1, 1),
       maxTimestamp = makeTS(2006, 2, 2),
       bucketSize = 2,
@@ -253,7 +253,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("patientID", "endBucket")
 
     // When
-    val writer = MLPPWriter(params)
+    val writer = MLPPLoader(params)
     import writer.MLPPDataFrame
     val result = input.withEndBucket.select("patientID", "endBucket")
 
@@ -288,7 +288,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF
 
     // When
-    val writer = MLPPWriter()
+    val writer = MLPPLoader()
     import writer.MLPPDataFrame
     val result = input.makeDiscreteExposures.select(expected.columns.map(col): _*)
 
@@ -319,7 +319,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("patientID", "molecule", "patientIDIndex", "moleculeIndex")
 
     // When
-    val writer = MLPPWriter()
+    val writer = MLPPLoader()
     import writer.MLPPDataFrame
     val result = input.withIndices(Seq("patientID", "molecule")).toDF
 
@@ -337,7 +337,7 @@ class MLPPWriterSuite extends SharedContext {
     val expected = rdd.map(i => (i._1, i._2 )).toDF("pIDIndex", "molIndex")
 
     // When
-    val writer = MLPPWriter()
+    val writer = MLPPLoader()
     import writer.MLPPDataFrame
     val result = input.withIndices(Seq("pID", "mol")).select("pIDIndex", "molIndex")
 
@@ -350,7 +350,7 @@ class MLPPWriterSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPWriter.Params(lagCount = 4)
+    val params = MLPPLoader.Params(lagCount = 4)
     val input: Dataset[LaggedExposure] = Seq(
       LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, 0, 1.0),
       LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, 0, 1.0),
@@ -381,7 +381,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF
 
     // When
-    val writer = MLPPWriter(params)
+    val writer = MLPPLoader(params)
     import writer.DiscreteExposures
     val result = input.lagExposures.toDF
 
@@ -394,7 +394,7 @@ class MLPPWriterSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPWriter.Params(
+    val params = MLPPLoader.Params(
       minTimestamp = makeTS(2006, 1, 1),
       maxTimestamp = makeTS(2006, 2, 1),
       bucketSize = 2,
@@ -412,7 +412,7 @@ class MLPPWriterSuite extends SharedContext {
     val expected: Metadata = Metadata(30, 20, 2, 15, 2, 5, 4)
 
     // When
-    val writer = MLPPWriter(params)
+    val writer = MLPPLoader(params)
     import writer.DiscreteExposures
     val result = input.makeMetadata
 
@@ -425,7 +425,7 @@ class MLPPWriterSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPWriter.Params(
+    val params = MLPPLoader.Params(
       minTimestamp = makeTS(2006, 1, 1),
       maxTimestamp = makeTS(2006, 2, 2),
       bucketSize = 2,
@@ -475,7 +475,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF
 
     // When
-    val writer = MLPPWriter(params)
+    val writer = MLPPLoader(params)
     import writer.DiscreteExposures
     val result = input.toMLPPFeatures.toDF
 
@@ -503,7 +503,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("MOL0000_INS", "MOL0001_PIO", "MOL0002_ROS", "age", "gender", "patientID", "patientIDIndex")
 
     // When
-    val writer = MLPPWriter()
+    val writer = MLPPLoader()
     import writer.DiscreteExposures
     val result = input.makeStaticExposures
 
@@ -516,7 +516,7 @@ class MLPPWriterSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPWriter.Params(
+    val params = MLPPLoader.Params(
       minTimestamp = makeTS(2006, 1, 1),
       maxTimestamp = makeTS(2006, 2, 1),
       bucketSize = 3 // bucketCount = 10
@@ -533,7 +533,7 @@ class MLPPWriterSuite extends SharedContext {
     val expected = Seq(5, 27, 31).toDS.toDF("index")
 
     // When
-    val writer = MLPPWriter(params)
+    val writer = MLPPLoader(params)
     import writer.DiscreteExposures
     val result = input.makeCensoring
 
@@ -546,7 +546,7 @@ class MLPPWriterSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPWriter.Params(featuresAsList = true)
+    val params = MLPPLoader.Params(featuresAsList = true)
     val input: Dataset[LaggedExposure] = Seq(
       LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 5, 0, 1),
       LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 5, 0, 1),
@@ -563,7 +563,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("patientIndex", "bucket")
 
     // When
-    val writer = MLPPWriter(params)
+    val writer = MLPPLoader(params)
     import writer.DiscreteExposures
     val result = input.makeCensoring
 
@@ -576,7 +576,7 @@ class MLPPWriterSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPWriter.Params(
+    val params = MLPPLoader.Params(
       minTimestamp = makeTS(2006, 1, 1),
       maxTimestamp = makeTS(2006, 2, 1),
       bucketSize = 3 // bucketCount = 10
@@ -590,7 +590,7 @@ class MLPPWriterSuite extends SharedContext {
     val expected = Seq(6, 21).toDS.toDF("index")
 
     // When
-    val writer = MLPPWriter(params)
+    val writer = MLPPLoader(params)
     import writer.DiscreteExposures
     val result = input.makeOutcomes
 
@@ -603,7 +603,7 @@ class MLPPWriterSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPWriter.Params(featuresAsList = true)
+    val params = MLPPLoader.Params(featuresAsList = true)
     val input: Dataset[LaggedExposure] = Seq(
       LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1),
       LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1),
@@ -617,7 +617,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("patientIndex", "bucket")
 
     // When
-    val writer = MLPPWriter(params)
+    val writer = MLPPLoader(params)
     import writer.DiscreteExposures
     val result = input.makeOutcomes
 
@@ -630,7 +630,7 @@ class MLPPWriterSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPWriter.Params(
+    val params = MLPPLoader.Params(
       minTimestamp = makeTS(2006, 1, 1),
       maxTimestamp = makeTS(2006, 2, 1),
       bucketSize = 3 // bucketCount = 10
@@ -645,7 +645,7 @@ class MLPPWriterSuite extends SharedContext {
     val expected = Seq(0, 2).toDS.toDF
 
     // When
-    val writer = MLPPWriter(params)
+    val writer = MLPPLoader(params)
     import writer.DiscreteExposures
     val result = input.makeStaticOutcomes
 
@@ -653,13 +653,13 @@ class MLPPWriterSuite extends SharedContext {
     assertDFs(result, expected)
   }
 
-  "write" should "create the final matrices and write them as parquet files" in {
+  "load" should "create the final matrices and write them as parquet files" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
     val rootDir = "target/test/output"
-    val params = MLPPWriter.Params(
+    val params = MLPPLoader.Params(
       minTimestamp = makeTS(2006, 1, 1),
       maxTimestamp = makeTS(2006, 8, 1), // 7 total buckets
       bucketSize = 30,
@@ -724,8 +724,8 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("MOL0000_Mol1", "MOL0001_Mol2", "MOL0002_Mol3", "age", "gender", "patientID", "patientIDIndex")
 
     // When
-    val result = MLPPWriter(params)
-      .write(patient = patient,
+    val result = MLPPLoader(params)
+      .load(patient = patient,
         outcome = outcome,
         exposure = exposure,
         path = rootDir).toDF
@@ -744,7 +744,7 @@ class MLPPWriterSuite extends SharedContext {
 
     // Given
     val rootDir = "target/test/output"
-    val params = MLPPWriter.Params(
+    val params = MLPPLoader.Params(
       minTimestamp = makeTS(2006, 1, 1),
       maxTimestamp = makeTS(2006, 8, 1), // 7 total buckets
       bucketSize = 30,
@@ -811,7 +811,7 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("MOL0000_Mol1", "MOL0001_Mol2", "MOL0002_Mol3", "age", "gender", "patientID", "patientIDIndex")
 
     // When
-    val result = MLPPWriter(params).write(
+    val result = MLPPLoader(params).load(
       patient = patient,
       outcome = outcome,
       exposure = exposure,

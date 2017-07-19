@@ -1,10 +1,12 @@
-package fr.polytechnique.cmap.cnam.etl.loader.mlpp
+package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
 import java.sql.Timestamp
-import scala.collection.JavaConverters._
+
 import com.typesafe.config.Config
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
+
+import scala.collection.JavaConverters._
 
 object MLPPConfig {
 

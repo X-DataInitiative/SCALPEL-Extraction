@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.loader.mlpp
+package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
 import java.sql.Timestamp
 
@@ -16,7 +16,7 @@ import fr.polytechnique.cmap.cnam.util.functions._
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
 
 
-object MLPPWriter {
+object MLPPLoader {
 
   final val AgeReferenceDate = FilteringConfig.dates.ageReference
 
@@ -29,12 +29,12 @@ object MLPPWriter {
                      featuresAsList: Boolean = false
                    )
 
-  def apply(params: Params = Params()) = new MLPPWriter(params)
+  def apply(params: Params = Params()) = new MLPPLoader(params)
 }
 
-class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
+class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
 
-  import MLPPWriter._
+  import MLPPLoader._
 
   val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
 
@@ -286,10 +286,10 @@ class MLPPWriter(params: MLPPWriter.Params = MLPPWriter.Params()) {
   //   data.write(path)
   //
   // Returns the features dataset for convenience
-  def write(outcome: Dataset[Event[Outcome]],
-            exposure: Dataset[Event[Exposure]],
-            patient: Dataset[Patient],
-            path: String): Dataset[MLPPFeature] = {
+  def load(outcome: Dataset[Event[Outcome]],
+           exposure: Dataset[Event[Exposure]],
+           patient: Dataset[Patient],
+           path: String): Dataset[MLPPFeature] = {
 
     val rootDir = if(path.last == '/') path.dropRight(1) else path
     val input = patient.join(outcome.toDF.union(exposure.toDF), "patientID")

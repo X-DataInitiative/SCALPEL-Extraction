@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.loader.mlpp
+package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
 case class Metadata(
   rows: Int,
