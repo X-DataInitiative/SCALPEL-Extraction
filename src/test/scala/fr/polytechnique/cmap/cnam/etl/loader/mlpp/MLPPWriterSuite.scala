@@ -740,7 +740,7 @@ class MLPPWriterSuite extends SharedContext {
     assertDFs(StaticExposures, expectedZMatrix)
  }
 
-  /*it should "create the final matrices and write them as parquet files (removing death bucket)" in {
+  it should "create the final matrices and write them as parquet files (removing death bucket)" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -753,17 +753,26 @@ class MLPPWriterSuite extends SharedContext {
       lagCount = 4,
       includeCensoredBucket = true
     )
-    val input: Dataset[FlatEvent] = Seq(
-      FlatEvent("PC", 2, makeTS(1970, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 5, 15), None),
-      FlatEvent("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15)), "exposure", "Mol1", 1.0, makeTS(2006, 1, 15), None),
-      FlatEvent("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15)), "exposure", "Mol1", 1.0, makeTS(2006, 3, 15), None),
-      FlatEvent("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15)), "disease", "targetDisease", 1.0, makeTS(2006, 3, 15), None),
-      FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 1, 15), None),
-      FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 3, 15), None),
-      FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol1", 1.0, makeTS(2006, 4, 15), None),
-      FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol2", 1.0, makeTS(2006, 3, 15), None),
-      FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "exposure", "Mol3", 1.0, makeTS(2006, 4, 15), None),
-      FlatEvent("PA", 1, makeTS(1960, 1, 1), None, "disease", "targetDisease", 1.0, makeTS(2006, 5, 15), None)
+    val patient: Dataset[Patient] = Seq(
+      Patient("PC", 2, makeTS(1970, 1, 1), None),
+      Patient("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15))),
+      Patient("PA", 1, makeTS(1960, 1, 1), None)
+    ).toDS
+
+    val outcome: Dataset[Event[Outcome]] = Seq(
+      Outcome("PB", "targetDisease", makeTS(2006, 3, 15)),
+      Outcome("PA", "targetDisease", makeTS(2006, 5, 15))
+    ).toDS
+
+    val exposure: Dataset[Event[Exposure]] = Seq(
+      Exposure("PC", "Mol1", 1.0, makeTS(2006, 5, 15), makeTS(1789, 12, 31)),
+      Exposure("PB", "Mol1", 1.0, makeTS(2006, 1, 15), makeTS(1789, 12, 31)),
+      Exposure("PB", "Mol1", 1.0, makeTS(2006, 3, 15), makeTS(1789, 12, 31)),
+      Exposure("PA", "Mol1", 1.0, makeTS(2006, 1, 15), makeTS(1789, 12, 31)),
+      Exposure("PA", "Mol1", 1.0, makeTS(2006, 3, 15), makeTS(1789, 12, 31)),
+      Exposure("PA", "Mol1", 1.0, makeTS(2006, 4, 15), makeTS(1789, 12, 31)),
+      Exposure("PA", "Mol2", 1.0, makeTS(2006, 3, 15), makeTS(1789, 12, 31)),
+      Exposure("PA", "Mol3", 1.0, makeTS(2006, 4, 15), makeTS(1789, 12, 31))
     ).toDS
 
     val expectedFeatures = Seq(
@@ -804,7 +813,11 @@ class MLPPWriterSuite extends SharedContext {
     ).toDF("MOL0000_Mol1", "MOL0001_Mol2", "MOL0002_Mol3", "age", "gender", "patientID", "patientIDIndex")
 
     // When
-    val result = MLPPWriter(params).write(input, rootDir).toDF
+    val result = MLPPWriter(params).write(
+      patient = patient,
+      outcome = outcome,
+      exposure = exposure,
+      path = rootDir).toDF
     val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
     val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
 
@@ -812,5 +825,5 @@ class MLPPWriterSuite extends SharedContext {
     assertDFs(result, expectedFeatures)
     assertDFs(writtenResult, expectedFeatures)
     assertDFs(StaticExposures, expectedZMatrix)
- }*/
+ }
 }
