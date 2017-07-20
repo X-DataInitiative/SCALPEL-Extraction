@@ -1,15 +1,15 @@
 package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
 case class MLPPFeature(
-  patientID: String,
-  patientIndex: Int,
-  moleculeName: String,
-  moleculeIndex: Int,
-  bucketIndex: Int,
-  lagIndex: Int,
-  rowIndex: Int,
-  colIndex: Int,
-  value: Double)
+    patientID: String,
+    patientIndex: Int,
+    moleculeName: String,
+    moleculeIndex: Int,
+    bucketIndex: Int,
+    lagIndex: Int,
+    rowIndex: Int,
+    colIndex: Int,
+    value: Double)
 
 object MLPPFeature {
 

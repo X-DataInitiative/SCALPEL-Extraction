@@ -16,22 +16,6 @@ import fr.polytechnique.cmap.cnam.util.functions._
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
 
 
-object MLPPLoader {
-
-  final val AgeReferenceDate = FilteringConfig.dates.ageReference
-
-  case class Params(
-      bucketSize: Int = 30,
-      lagCount: Int = 10,
-      minTimestamp: Timestamp = makeTS(2006, 1, 1),
-      maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
-      includeCensoredBucket: Boolean = false,
-      featuresAsList: Boolean = false)
-
-  def apply(params: Params = Params()) = new MLPPLoader(params)
-
-}
-
 class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
 
   import MLPPLoader._
@@ -255,7 +239,9 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
       }
       else {
         val b = bucketCount
-        exposures.map(e => e.patientIDIndex * b + e.diseaseBucket.get).distinct.toDF("index")
+        exposures
+          .map(e => e.patientIDIndex * b + e.diseaseBucket.get)
+          .distinct.toDF("index")
       }
     }
 
@@ -286,10 +272,11 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
   //   data.write(path)
   //
   // Returns the features dataset for convenience
-  def load(outcome: Dataset[Event[Outcome]],
-           exposure: Dataset[Event[Exposure]],
-           patient: Dataset[Patient],
-           path: String): Dataset[MLPPFeature] = {
+  def load(
+      outcome: Dataset[Event[Outcome]],
+      exposure: Dataset[Event[Exposure]],
+      patient: Dataset[Patient],
+      path: String): Dataset[MLPPFeature] = {
 
     val rootDir = if(path.last == '/') path.dropRight(1) else path
     val input = patient.join(outcome.toDF.union(exposure.toDF), "patientID")
@@ -349,3 +336,19 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
   }
 }
 
+
+object MLPPLoader {
+
+  final val AgeReferenceDate = FilteringConfig.dates.ageReference
+
+  case class Params(
+      bucketSize: Int = 30,
+      lagCount: Int = 10,
+      minTimestamp: Timestamp = makeTS(2006, 1, 1),
+      maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
+      includeCensoredBucket: Boolean = false,
+      featuresAsList: Boolean = false)
+
+  def apply(params: Params = Params()) = new MLPPLoader(params)
+
+}
