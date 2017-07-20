@@ -6,7 +6,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.old_root.FlatEvent
 import fr.polytechnique.cmap.cnam.util.functions._
 
-class MLPPWriterSuite extends SharedContext {
+class MLPPLoaderSuite extends SharedContext {
 
   "withAge" should "add a column with the patients age at the reference date" in {
     val sqlCtx = sqlContext
