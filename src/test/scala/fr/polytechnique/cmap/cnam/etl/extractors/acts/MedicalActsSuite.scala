@@ -14,9 +14,9 @@ class MedicalActsSuite extends SharedContext {
 
     // Given
     val config = MedicalActsConfig(
-      dcirMedicalActCodes = List("ABCD123"),
-      mcoCIM10MedicalActCodes = List("C670", "C671"),
-      mcoCCAMMedicalActCodes = List("AAAA123")
+      dcirCodes = List("ABCD123"),
+      mcoCIMCodes = List("C670", "C671"),
+      mcoCCAMCodes = List("AAAA123")
     )
     val sources = {
       val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")

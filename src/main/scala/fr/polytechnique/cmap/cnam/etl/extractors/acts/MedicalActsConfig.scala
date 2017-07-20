@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.acts
 import fr.polytechnique.cmap.cnam.etl.config.CaseClassConfig
 
 case class MedicalActsConfig(
-    dcirMedicalActCodes: List[String],
-    mcoCIM10MedicalActCodes: List[String],
-    mcoCCAMMedicalActCodes: List[String])
+    dcirCodes: List[String],
+    mcoCIMCodes: List[String],
+    mcoCCAMCodes: List[String])
   extends CaseClassConfig

@@ -8,12 +8,12 @@ class MedicalActs(config: MedicalActsConfig) {
 
   def extract(sources: Sources): Dataset[Event[MedicalAct]] = {
 
-    val dcirActs = DcirMedicalActs.extract(sources.dcir.get, config.dcirMedicalActCodes)
+    val dcirActs = DcirMedicalActs.extract(sources.dcir.get, config.dcirCodes)
 
     val mcoActs = McoMedicalActs.extract(
       sources.pmsiMco.get,
-      config.mcoCIM10MedicalActCodes,
-      config.mcoCCAMMedicalActCodes
+      config.mcoCIMCodes,
+      config.mcoCCAMCodes
     )
 
     dcirActs.union(mcoActs)

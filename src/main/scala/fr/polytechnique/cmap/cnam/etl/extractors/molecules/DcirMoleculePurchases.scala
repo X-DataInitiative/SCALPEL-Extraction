@@ -38,9 +38,6 @@ private[molecules] object DcirMoleculePurchases {
 
     val sqlContext = dcir.sqlContext
 
-    val drugCategories = drugClasses
-
-
     val dcirInputColumns: List[Column] = List(
       col("NUM_ENQ").cast(StringType).as("patientID"),
       col("`ER_PHA_F.PHA_PRS_IDE`").cast(StringType).as("CIP07"),
@@ -66,7 +63,7 @@ private[molecules] object DcirMoleculePurchases {
     val moleculeMappingUDF = udf(DrugEventsTransformerHelper.moleculeMapping)
 
     val moleculesInfo = irPha.select(irPhaInputColumns: _*)
-      .where(col("category").isin(drugCategories: _*)) // Only anti-diabetics
+      .where(col("category").isin(drugClasses: _*)) // Only anti-diabetics
       .join(broadcast(dosages.select(dosagesInputColumns: _*)), "CIP07")
       .withColumn("moleculeName", moleculeMappingUDF(col("moleculeName")))
       .persist()

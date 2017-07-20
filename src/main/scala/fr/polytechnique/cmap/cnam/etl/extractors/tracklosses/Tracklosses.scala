@@ -44,10 +44,10 @@ object Tracklosses {
     def withInterval(lastDate: Timestamp): DataFrame = {
       val window = Window.partitionBy(col("patientID")).orderBy(col("eventDate").asc)
       data
-      .withColumn("nextDate", lead(col("eventDate"), 1, lastDate).over(window))
-      .filter(col("nextDate").isNotNull)
-      .withColumn("interval", months_between(col("nextDate"), col("eventDate")).cast("int"))
-      .drop(col("nextDate"))
+        .withColumn("nextDate", lead(col("eventDate"), 1, lastDate).over(window))
+        .filter(col("nextDate").isNotNull)
+        .withColumn("interval", months_between(col("nextDate"), col("eventDate")).cast("int"))
+        .drop(col("nextDate"))
     }
 
     def filterTrackLosses(emptyMonths: Int): DataFrame = {

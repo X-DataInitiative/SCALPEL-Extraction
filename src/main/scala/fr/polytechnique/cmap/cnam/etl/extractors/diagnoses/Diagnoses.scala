@@ -11,13 +11,13 @@ class Diagnoses(config: DiagnosesConfig) {
 
     val imbDiagnoses = ImbDiagnoses.extract(
       sources.irImb.get,
-      config.imbDiagnosisCodes
+      config.imbCodes
     )
     val mcoDiagnoses = McoDiagnoses.extract(
       sources.pmsiMco.get,
-      config.mainDiagnosisCodes,
-      config.linkedDiagnosisCodes,
-      config.associatedDiagnosisCodes
+      config.dpCodes,
+      config.drCodes,
+      config.daCodes
     )
 
     unionDatasets(imbDiagnoses, mcoDiagnoses)

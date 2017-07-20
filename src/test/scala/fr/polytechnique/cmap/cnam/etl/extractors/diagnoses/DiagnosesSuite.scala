@@ -11,10 +11,10 @@ class DiagnosesSuite extends SharedContext {
 
     // Given
     val config = DiagnosesConfig(
-      mainDiagnosisCodes = List("C67", "C77", "C78", "C79"),
-      linkedDiagnosisCodes = List("C67", "C77", "C78", "C79"),
-      associatedDiagnosisCodes = List("C67"),
-      imbDiagnosisCodes = List("C67")
+      dpCodes = List("C67", "C77", "C78", "C79"),
+      drCodes = List("C67", "C77", "C78", "C79"),
+      daCodes = List("C67"),
+      imbCodes = List("C67")
     )
     val mco: DataFrame = sqlContext.read.load("src/test/resources/test-input/MCO.parquet")
     val irImb: DataFrame = sqlContext.read.load("src/test/resources/test-input/IR_IMB_R.parquet")
@@ -23,9 +23,9 @@ class DiagnosesSuite extends SharedContext {
       irImb = Some(irImb)
     )
     val expectedMco = McoDiagnoses.extract(
-      mco, config.mainDiagnosisCodes, config.linkedDiagnosisCodes, config.associatedDiagnosisCodes
+      mco, config.dpCodes, config.drCodes, config.daCodes
     )
-    val expectedImb = ImbDiagnoses.extract(irImb, config.imbDiagnosisCodes)
+    val expectedImb = ImbDiagnoses.extract(irImb, config.imbCodes)
 
     // Then
     assertDFs(
