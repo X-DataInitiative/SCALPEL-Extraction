@@ -29,7 +29,12 @@ trait MedicalAct extends AnyEvent with EventBuilder {
 
 object DcirAct extends MedicalAct {
   val category: EventCategory[MedicalAct] = "dcir_act"
-  val groupID: String = "dcir"
+
+  object groupID {
+    val PrivateAmbulatory = "private_ambulatory"
+    val PublicAmbulatory = "public_ambulatory"
+    val PrivateHospital = "private_hospital"
+  }
 }
 
 object McoCCAMAct extends MedicalAct {
