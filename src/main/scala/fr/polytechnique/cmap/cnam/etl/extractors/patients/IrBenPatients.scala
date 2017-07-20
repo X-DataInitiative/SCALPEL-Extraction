@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.etl.extractors.patients
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.util.functions._
 
@@ -67,12 +66,12 @@ private[patients] object IrBenPatients {
     }
   }
 
-  def extract(config: ExtractionConfig, irBen: DataFrame): Dataset[Patient] = {
+  def extract(irBen: DataFrame, minYear: Int, maxYear: Int): Dataset[Patient] = {
 
     val persistedIrBen = irBen.select(inputColumns: _*).persist()
     import persistedIrBen.sqlContext.implicits._
 
-    val birthDates = persistedIrBen.getBirthDate(config.minYear, config.maxYear)
+    val birthDates = persistedIrBen.getBirthDate(minYear, maxYear)
     val deathDates = persistedIrBen.getDeathDate
 
     persistedIrBen.unpersist()

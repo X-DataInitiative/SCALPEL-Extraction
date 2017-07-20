@@ -14,6 +14,9 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.pioglitazone.NaiveBladderCancer
 import fr.polytechnique.cmap.cnam.util.functions._
 
+/**
+  * @deprecated This class will be removed soon
+  */
 object ETLMain extends Main {
 
   val appName: String = "Filtering"
@@ -55,13 +58,13 @@ object ETLMain extends Main {
     val sources: Sources = sqlContext.readSources(inputPaths)
 
     logger.info("Extracting patients...")
-    val patients: Dataset[Patient] = Patients.extract(extractionConfig, sources).cache()
+    val patients: Dataset[Patient] = new Patients(extractionConfig.patients).extract(sources).cache()
 
     logger.info("Extracting molecule events...")
-    val drugEvents: Dataset[Event[Molecule]] = MoleculePurchases.extract(extractionConfig, sources)
+    val drugEvents: Dataset[Event[Molecule]] = new MoleculePurchases(extractionConfig.moleculePurchases).extract(sources)
 
     logger.info("Extracting diagnosis events...")
-    val diseaseEvents: Dataset[Event[Diagnosis]] = Diagnoses.extract(extractionConfig, sources)
+    val diseaseEvents: Dataset[Event[Diagnosis]] = new Diagnoses(extractionConfig.diagnoses).extract(sources)
 
     logger.info("Merging all events...")
     val allEvents: Dataset[Event[AnyEvent]] = unionDatasets(

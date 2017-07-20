@@ -1,9 +1,20 @@
 package fr.polytechnique.cmap.cnam.etl.config
 
+import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchasesConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.patients.PatientsConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.tracklosses.TracklossesConfig
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
 
+/**
+  * @deprecated todo: remove soon
+  */
 case class TracklossConfig(emptyMonths: Int, tracklossMonthDelay: Int)
 
+/**
+  * @deprecated todo: remove soon
+  */
 case class ExtractionConfig(
     minAge: Int,
     maxAge: Int,
@@ -26,8 +37,19 @@ case class ExtractionConfig(
     dcirMedicalActCodes: List[String],
     mcoCCAMMedicalActCodes: List[String],
     mcoCIM10MedicalActCodes: List[String],
-    codesMap: Map[String, List[String]])
+    codesMap: Map[String, List[String]]) {
 
+  // Added getters to support new config strategy:
+  def patients = PatientsConfig(ageReferenceDate, minAge, maxAge, minYear, maxYear, minGender, maxGender, deathCode)
+  def tracklosses = TracklossesConfig(lastDate, tracklossConfig.emptyMonths, tracklossConfig.tracklossMonthDelay)
+  def diagnoses = DiagnosesConfig(imbDiagnosisCodes, mainDiagnosisCodes, linkedDiagnosisCodes, associatedDiagnosisCodes)
+  def moleculePurchases = MoleculePurchasesConfig(drugCategories, maxBoxQuantity)
+  def medicalActs = MedicalActsConfig(dcirMedicalActCodes, mcoCIM10MedicalActCodes, mcoCCAMMedicalActCodes)
+}
+
+/**
+  * @deprecated todo: remove soon
+  */
 object ExtractionConfig {
   def init(): ExtractionConfig = ExtractionConfig(
     minAge = FilteringConfig.limits.minAge,

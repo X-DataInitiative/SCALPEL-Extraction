@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
 import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
 
@@ -38,7 +37,7 @@ class PatientsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val config = ExtractionConfig.init()
+    val config = PatientsConfig(ageReferenceDate = makeTS(2006, 1, 1))
     val dcirDf: DataFrame = Seq(
       ("Patient_01", 2, 31, 1945, Some(makeTS(2006, 1, 15)), None),
       ("Patient_01", 2, 31, 1945, Some(makeTS(2006, 1, 30)), None),
@@ -67,7 +66,7 @@ class PatientsSuite extends SharedContext {
     val sources = new Sources(dcir = Some(dcirDf), pmsiMco = Some(mcoDf), irBen = Some(irBenDf))
 
     // When
-    val result = Patients.extract(config, sources).toDF
+    val result = new Patients(config).extract(sources).toDF
     val expected: DataFrame = Seq(
       ("Patient_01", 1, makeTS(1945, 1, 1), None),
       ("Patient_02", 1, makeTS(1956, 2, 1), Some(makeTS(2009, 3, 13))),

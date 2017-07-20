@@ -4,9 +4,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.Event
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class DcirMoleculePurchasesSuite extends SharedContext {
@@ -82,7 +80,6 @@ class DcirMoleculePurchasesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val config = ExtractionConfig.init()
     val dcir: DataFrame = sqlContext.read.load("src/test/resources/test-input/DCIR.parquet")
     val irPha: DataFrame = sqlContext.read.load("src/test/resources/test-input/IR_PHA_R.parquet")
     val dosages: DataFrame = sqlContext.read
@@ -94,11 +91,6 @@ class DcirMoleculePurchasesSuite extends SharedContext {
         col("MOLECULE_NAME"),
         col("TOTAL_MG_PER_UNIT")
       )
-    val sources = new Sources(
-      dcir = Some(dcir),
-      irPha = Some(irPha),
-      dosages = Some(dosages)
-    )
 
     // Note: there is a row in the dummy dataset where the field "EXE_SOI_DTD" is null.
     val expected = Seq(
@@ -110,7 +102,7 @@ class DcirMoleculePurchasesSuite extends SharedContext {
     ).toDF
 
     // When
-    val result = MoleculePurchases.extract(config, sources)
+    val result = DcirMoleculePurchases.extract(dcir, irPha, dosages, List("A10"), 10)
 
     // Then
     assertDFs(result.toDF, expected)

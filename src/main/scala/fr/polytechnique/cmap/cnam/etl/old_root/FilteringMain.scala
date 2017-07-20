@@ -56,10 +56,12 @@ object FilteringMain extends Main {
     val sources: Sources = sqlContext.readSources(inputPaths)
 
     logger.info("(Lazy) Creating patients dataset...")
-    val patients: Dataset[Patient] = Patients.extract(extractionConfig, sources).cache()
+    val patients: Dataset[Patient] = new Patients(extractionConfig.patients).extract(sources).cache()
 
     logger.info("(Lazy) Creating drug events dataset...")
-    val drugEvents: Dataset[Event] = MoleculePurchases.extract(extractionConfig, sources).map(Event.fromNewEvent(_))
+    val drugEvents: Dataset[Event] = new MoleculePurchases(extractionConfig.moleculePurchases)
+      .extract(sources)
+      .map(Event.fromNewEvent(_))
 
     logger.info("(Lazy) Creating disease events dataset...")
     val broadDiseaseEvents: Dataset[Event] = DiseaseTransformer.transform(sources)

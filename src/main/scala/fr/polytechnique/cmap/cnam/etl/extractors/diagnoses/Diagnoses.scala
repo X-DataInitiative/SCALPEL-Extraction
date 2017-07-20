@@ -1,17 +1,13 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
 import org.apache.spark.sql.Dataset
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event}
-import fr.polytechnique.cmap.cnam.etl.extractors.EventsExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
 
-object Diagnoses extends EventsExtractor[Diagnosis] {
+class Diagnoses(config: DiagnosesConfig) {
 
-  def extract(
-      config: ExtractionConfig,
-      sources: Sources): Dataset[Event[Diagnosis]] = {
+  def extract(sources: Sources): Dataset[Event[Diagnosis]] = {
 
     val imbDiagnoses = ImbDiagnoses.extract(
       sources.irImb.get,
