@@ -21,15 +21,15 @@ object MLPPLoader {
   final val AgeReferenceDate = FilteringConfig.dates.ageReference
 
   case class Params(
-                     bucketSize: Int = 30,
-                     lagCount: Int = 10,
-                     minTimestamp: Timestamp = makeTS(2006, 1, 1),
-                     maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
-                     includeCensoredBucket: Boolean = false,
-                     featuresAsList: Boolean = false
-                   )
+      bucketSize: Int = 30,
+      lagCount: Int = 10,
+      minTimestamp: Timestamp = makeTS(2006, 1, 1),
+      maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
+      includeCensoredBucket: Boolean = false,
+      featuresAsList: Boolean = false)
 
   def apply(params: Params = Params()) = new MLPPLoader(params)
+
 }
 
 class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
