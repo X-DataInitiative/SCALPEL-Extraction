@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
@@ -14,10 +13,10 @@ class MedicalActsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val config = ExtractionConfig.init().copy(
-      dcirMedicalActCodes = List("ABCD123"),
-      mcoCIM10MedicalActCodes = List("C670", "C671"),
-      mcoCCAMMedicalActCodes = List("AAAA123")
+    val config = MedicalActsConfig(
+      dcirCodes = List("ABCD123"),
+      mcoCIMCodes = List("C670", "C671"),
+      mcoCCAMCodes = List("AAAA123")
     )
     val sources = {
       val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
@@ -38,7 +37,7 @@ class MedicalActsSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = MedicalActs.extract(config, sources)
+    val result = new MedicalActs(config).extract(sources)
 
     // Then
     sources.dcir.get.show

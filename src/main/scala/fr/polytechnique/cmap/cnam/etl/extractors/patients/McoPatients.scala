@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.etl.extractors.patients
 import org.apache.log4j.Logger
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame}
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.util.functions._
 
 private[patients] object McoPatients {
@@ -49,12 +48,12 @@ private[patients] object McoPatients {
     }
   }
 
-  def extract(config: ExtractionConfig, mco: DataFrame): DataFrame = {
+  def extract(mco: DataFrame, mcoDeathCode: Int = 9): DataFrame = {
 
     mco
       .select(inputColumns: _*)
       .distinct
-      .getDeathDates(config.deathCode)
+      .getDeathDates(mcoDeathCode)
       .select(outputColumns: _*)
   }
 }

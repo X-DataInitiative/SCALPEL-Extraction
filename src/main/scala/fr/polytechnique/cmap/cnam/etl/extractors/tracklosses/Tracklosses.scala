@@ -5,12 +5,30 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Trackloss}
-import fr.polytechnique.cmap.cnam.etl.extractors.EventsExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
-object Tracklosses extends EventsExtractor[Trackloss] {
+class Tracklosses(config: TracklossesConfig) {
+
+  import Tracklosses._
+
+  def extract(sources: Sources): Dataset[Event[Trackloss]] = {
+
+    val dcir: DataFrame = sources.dcir.get
+
+    import dcir.sqlContext.implicits._
+    dcir.select(inputColumns:_*)
+      .filter(col("drug").isNotNull)
+      .select(col("patientID"), col("eventDate"))
+      .distinct
+      .withInterval(config.studyEnd)
+      .filterTrackLosses(config.emptyMonths)
+      .withTrackLossDate(config.tracklossMonthDelay)
+      .map(Trackloss.fromRow(_, dateCol = "tracklossDate"))
+  }
+}
+
+object Tracklosses {
 
   val inputColumns: List[Column] = List(
     col("NUM_ENQ").as("patientID"),
@@ -41,20 +59,4 @@ object Tracklosses extends EventsExtractor[Trackloss] {
     }
   }
 
-  def extract(
-      config: ExtractionConfig,
-      sources: Sources): Dataset[Event[Trackloss]] = {
-
-    val dcir: DataFrame = sources.dcir.get
-
-    import dcir.sqlContext.implicits._
-    dcir.select(inputColumns:_*)
-      .filter(col("drug").isNotNull)
-      .select(col("patientID"), col("eventDate"))
-      .distinct
-      .withInterval(config.lastDate)
-      .filterTrackLosses(config.tracklossConfig.emptyMonths)
-      .withTrackLossDate(config.tracklossConfig.tracklossMonthDelay)
-      .map(Trackloss.fromRow(_, dateCol = "tracklossDate"))
-  }
 }

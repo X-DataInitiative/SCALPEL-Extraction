@@ -1,21 +1,19 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import org.apache.spark.sql.Dataset
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.{Event, MedicalAct}
-import fr.polytechnique.cmap.cnam.etl.extractors.EventsExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
-object MedicalActs extends EventsExtractor[MedicalAct] {
+class MedicalActs(config: MedicalActsConfig) {
 
-  override def extract(config: ExtractionConfig, sources: Sources): Dataset[Event[MedicalAct]] = {
+  def extract(sources: Sources): Dataset[Event[MedicalAct]] = {
 
-    val dcirActs = DcirMedicalActs.extract(sources.dcir.get, config.dcirMedicalActCodes)
+    val dcirActs = DcirMedicalActs.extract(sources.dcir.get, config.dcirCodes)
 
     val mcoActs = McoMedicalActs.extract(
       sources.pmsiMco.get,
-      config.mcoCIM10MedicalActCodes,
-      config.mcoCCAMMedicalActCodes
+      config.mcoCIMCodes,
+      config.mcoCCAMCodes
     )
 
     dcirActs.union(mcoActs)

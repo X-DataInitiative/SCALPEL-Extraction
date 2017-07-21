@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.etl.extractors.molecules
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DoubleType, StringType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Molecule}
 import fr.polytechnique.cmap.cnam.util.DrugEventsTransformerHelper
 
@@ -33,13 +32,13 @@ private[molecules] object DcirMoleculePurchases {
   }
 
   def extract(
-      config: ExtractionConfig,
-      dcir: DataFrame, irPha: DataFrame, dosages: DataFrame): Dataset[Event[Molecule]] = {
+      dcir: DataFrame,
+      irPha: DataFrame,
+      dosages: DataFrame,
+      drugClasses: List[String],
+      maxBoxQuantity: Int): Dataset[Event[Molecule]] = {
 
     val sqlContext = dcir.sqlContext
-
-    val drugCategories = config.drugCategories
-
 
     val dcirInputColumns: List[Column] = List(
       col("NUM_ENQ").cast(StringType).as("patientID"),
@@ -66,7 +65,7 @@ private[molecules] object DcirMoleculePurchases {
     val moleculeMappingUDF = udf(DrugEventsTransformerHelper.moleculeMapping)
 
     val moleculesInfo = irPha.select(irPhaInputColumns: _*)
-      .where(col("category").isin(drugCategories: _*)) // Only anti-diabetics
+      .where(col("category").isin(drugClasses: _*)) // Only anti-diabetics
       .join(broadcast(dosages.select(dosagesInputColumns: _*)), "CIP07")
       .withColumn("moleculeName", moleculeMappingUDF(col("moleculeName")))
       .persist()
@@ -81,7 +80,7 @@ private[molecules] object DcirMoleculePurchases {
     val validatedDcir: DataFrame = dcir
       .select(dcirInputColumns: _*)
       .where(col("eventDate").isNotNull)
-      .filterBoxQuantities(config.maxBoxQuantity)
+      .filterBoxQuantities(maxBoxQuantity)
       .na.drop("any", Seq("CIP07", "CIP13"))
       .where(col("CIP07").isin(CIP07List.value: _*) || col("CIP13").isin(CIP13List.value: _*))
       .persist()

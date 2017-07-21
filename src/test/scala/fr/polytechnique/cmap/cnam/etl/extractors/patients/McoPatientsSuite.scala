@@ -5,7 +5,6 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class McoPatientsSuite extends SharedContext {
 
@@ -66,8 +65,6 @@ class McoPatientsSuite extends SharedContext {
       ("Patient_03", 9, 4, 1984),
       ("Patient_04", 3, 5, 1995)
     ).toDF("NUM_ENQ", "MCO_B.SOR_MOD", "SOR_MOI", "SOR_ANN")
-    val sources = new Sources(pmsiMco = Some(mco))
-
 
     val expected: DataFrame = Seq(
       ("Patient_02", Timestamp.valueOf("1986-03-01 00:00:00")),
@@ -75,7 +72,7 @@ class McoPatientsSuite extends SharedContext {
     ).toDF("patientID", "deathDate")
 
     // When
-    val result = McoPatients.extract(config, mco)
+    val result = McoPatients.extract(mco)
 
     // Then
     assertDFs(result.toDF, expected)

@@ -3,9 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.patients
 import java.sql.{Date, Timestamp}
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class DcirPatientsSuite extends SharedContext {
 
@@ -112,9 +110,7 @@ class DcirPatientsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val config = ExtractionConfig.init()
     val dcir: DataFrame = sqlCtx.read.parquet("src/test/resources/expected/DCIR.parquet")
-    val sources = new Sources(dcir = Some(dcir))
     val expected: DataFrame = Seq(
       Patient(
         patientID = "Patient_01",
@@ -131,7 +127,7 @@ class DcirPatientsSuite extends SharedContext {
     ).toDF
 
     // When
-    val result = DcirPatients.extract(config, dcir).toDF
+    val result = DcirPatients.extract(dcir, 1, 2, 1900, 2020).toDF
 
     // Then
     assertDFs(result, expected)

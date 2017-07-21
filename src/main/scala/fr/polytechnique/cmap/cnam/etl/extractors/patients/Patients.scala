@@ -2,25 +2,29 @@ package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.patients._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-object Patients extends PatientsExtractor {
+class Patients(config: PatientsConfig) {
 
-  def validateDeathDate(deathDate: Column, birthDate: Column, maxYear: Int): Column =
-    deathDate.between(birthDate, makeTS(maxYear, 1, 1))
+  import Patients.validateDeathDate
 
-  def extract(config: ExtractionConfig, sources: Sources): Dataset[Patient] = {
+  def extract(sources: Sources): Dataset[Patient] = {
 
     val dcir = sources.dcir.get
     val mco = sources.pmsiMco.get
     val irBen = sources.irBen.get
 
-    val irBenPatients: DataFrame = IrBenPatients.extract(config, irBen).toDF.as("irBen")
-    val mcoPatients: DataFrame = McoPatients.extract(config, mco).toDF.as("mco")
-    val dcirPatients: DataFrame = DcirPatients.extract(config, dcir).toDF.as("dcir")
+    val mcoPatients: DataFrame = McoPatients.extract(mco, config.mcoDeathCode).toDF.as("mco")
+
+    val irBenPatients: DataFrame = IrBenPatients.extract(
+      irBen, config.minYear, config.maxYear
+    ).toDF.as("irBen")
+
+    val dcirPatients: DataFrame = DcirPatients.extract(
+      dcir, config.minGender, config.maxGender, config.minYear, config.maxYear
+    ).toDF.as("dcir")
 
     import dcirPatients.sqlContext.implicits._
 
@@ -62,3 +66,8 @@ object Patients extends PatientsExtractor {
   }
 }
 
+object Patients {
+
+  def validateDeathDate(deathDate: Column, birthDate: Column, maxYear: Int): Column =
+    deathDate.between(birthDate, makeTS(maxYear, 1, 1))
+}

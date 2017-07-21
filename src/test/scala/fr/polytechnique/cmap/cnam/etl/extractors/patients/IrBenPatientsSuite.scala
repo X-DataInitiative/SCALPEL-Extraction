@@ -3,8 +3,6 @@ package fr.polytechnique.cmap.cnam.etl.extractors.patients
 import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class IrBenPatientsSuite extends SharedContext {
 
@@ -120,7 +118,6 @@ class IrBenPatientsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val config = ExtractionConfig.init()
     val irBen: DataFrame = Seq(
       ("Patient_01", 1, 1, 1975, Timestamp.valueOf("2009-03-13 00:00:00")),
       ("Patient_02", 2, 3, 1977, null.asInstanceOf[Timestamp]),
@@ -132,10 +129,8 @@ class IrBenPatientsSuite extends SharedContext {
       ("Patient_02", 2, Timestamp.valueOf("1977-03-01 00:00:00"), null.asInstanceOf[Timestamp])
     ).toDF("patientID", "gender", "birthDate", "deathDate")
 
-    val input = new Sources(irBen = Some(irBen))
-
     // When
-    val result = IrBenPatients.extract(config, irBen)
+    val result = IrBenPatients.extract(irBen, 1900, 2020)
 
     // Then
     assertDFs(result.toDF, expected)
@@ -146,10 +141,7 @@ class IrBenPatientsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val config = ExtractionConfig.init()
     val irBen = sqlCtx.read.load("src/test/resources/expected/IR_BEN_R.parquet")
-    val input = new Sources(irBen = Some(irBen))
-
 
     val expected: DataFrame = Seq(
       ("Patient_01", 2, Timestamp.valueOf("1975-01-01 00:00:00"), null.asInstanceOf[Timestamp]),
@@ -157,12 +149,9 @@ class IrBenPatientsSuite extends SharedContext {
     ).toDF("patientID", "gender", "birthDate", "deathDate")
 
     // When
-    val result = IrBenPatients.extract(config, irBen)
+    val result = IrBenPatients.extract(irBen, 1900, 2020)
 
     // Then
     assertDFs(result.toDF, expected)
-
-
-
   }
 }
