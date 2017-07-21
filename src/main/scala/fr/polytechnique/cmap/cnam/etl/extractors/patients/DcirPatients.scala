@@ -72,18 +72,26 @@ private[patients] object DcirPatients {
     }
   }
 
-  def extract(dcir: DataFrame, minGender: Int, maxGender: Int, minYear: Int, maxYear: Int)
-      : Dataset[Patient] = {
+  def extract(
+      dcir: DataFrame,
+      minGender: Int,
+      maxGender: Int,
+      minYear: Int,
+      maxYear: Int): Dataset[Patient] = {
+
+    val genderCol: Column = when(col("BEN_SEX_COD").between(minGender, maxGender),
+      col("BEN_SEX_COD")).cast(IntegerType)
+
+    val deathDateCol: Column = when(year(col("BEN_DCD_DTE")).between(minYear, maxYear),
+      col("BEN_DCD_DTE")).cast(DateType)
 
     val inputColumns: List[Column] = List(
       col("NUM_ENQ").cast(StringType).as("patientID"),
-      when(col("BEN_SEX_COD").between(minGender, maxGender),
-        col("BEN_SEX_COD")).cast(IntegerType).as("gender"),
+      genderCol.as("gender"),
       col("BEN_AMA_COD").cast(IntegerType).as("age"),
       col("BEN_NAI_ANN").cast(StringType).as("birthYear"),
       col("EXE_SOI_DTD").cast(DateType).as("eventDate"),
-      when(year(col("BEN_DCD_DTE")).between(minYear, maxYear),
-        col("BEN_DCD_DTE")).cast(DateType).as("deathDate")
+      deathDateCol.as("deathDate")
     )
 
     val persistedDcir = dcir.select(inputColumns:_*).persist()

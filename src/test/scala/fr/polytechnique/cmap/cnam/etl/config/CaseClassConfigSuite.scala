@@ -16,7 +16,7 @@ class CaseClassConfigSuite extends FlatSpec {
         |}""".stripMargin
 
     // When
-    val result = input.fieldsToString
+    val result = input.toPrettyString
 
     // Then
     println(result)

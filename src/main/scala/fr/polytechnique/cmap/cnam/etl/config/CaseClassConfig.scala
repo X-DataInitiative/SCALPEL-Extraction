@@ -5,7 +5,7 @@ trait CaseClassConfig {
   /**
     * Returns a string to allow pretty-printing the fields of a case class
     */
-  def fieldsToString: String = {
+  def toPrettyString: String = {
     this.getClass.getDeclaredFields.collect {
       case f if f.getName.head != '$' =>
         f.setAccessible(true)

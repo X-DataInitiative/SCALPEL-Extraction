@@ -37,12 +37,10 @@ case class ExtractionConfig(
     mcoCIM10MedicalActCodes: List[String],
     codesMap: Map[String, List[String]]) {
 
-  // Added getters to support new config strategy (to be uncommented if needed):
+  // Added getters to support new config strategy
   def patients = PatientsConfig(ageReferenceDate, minAge, maxAge, minYear, maxYear, minGender, maxGender, deathCode)
-  // def tracklosses = TracklossesConfig(lastDate, tracklossConfig.emptyMonths, tracklossConfig.tracklossMonthDelay)
   def diagnoses = DiagnosesConfig(imbDiagnosisCodes, mainDiagnosisCodes, linkedDiagnosisCodes, associatedDiagnosisCodes)
   def moleculePurchases = MoleculePurchasesConfig(drugCategories, maxBoxQuantity)
-  // def medicalActs = MedicalActsConfig(dcirMedicalActCodes, mcoCIM10MedicalActCodes, mcoCCAMMedicalActCodes)
 }
 
 /**

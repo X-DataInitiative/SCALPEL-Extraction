@@ -32,9 +32,11 @@ private[molecules] object DcirMoleculePurchases {
   }
 
   def extract(
-      dcir: DataFrame, irPha: DataFrame, dosages: DataFrame,
-      drugClasses: List[String], maxBoxQuantity: Int)
-      : Dataset[Event[Molecule]] = {
+      dcir: DataFrame,
+      irPha: DataFrame,
+      dosages: DataFrame,
+      drugClasses: List[String],
+      maxBoxQuantity: Int): Dataset[Event[Molecule]] = {
 
     val sqlContext = dcir.sqlContext
 
