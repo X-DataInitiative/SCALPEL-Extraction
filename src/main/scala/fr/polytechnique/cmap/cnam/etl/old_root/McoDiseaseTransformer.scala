@@ -12,14 +12,14 @@ object McoDiseaseTransformer extends DiseaseTransformer {
 
   val mcoInputColumns: List[Column] = List(
     col("NUM_ENQ").as("patientID"),
-    col("`MCO_D.ASS_DGN`").as("diseaseAss"),
-    col("`MCO_UM.DGN_PAL`").as("diseasePalUm"),
-    col("`MCO_UM.DGN_REL`").as("diseaseRelUm"),
-    col("`MCO_B.DGN_PAL`").as("diseasePal"),
-    col("`MCO_B.DGN_REL`").as("diseaseRel"),
-    col("`MCO_B.SOR_MOI`").as("stayMonthEndDate"),
-    col("`MCO_B.SOR_ANN`").as("stayYearEndDate"),
-    col("`MCO_B.SEJ_NBJ`").as("stayLength"),
+    col("MCO_D__ASS_DGN").as("diseaseAss"),
+    col("MCO_UM__DGN_PAL").as("diseasePalUm"),
+    col("MCO_UM__DGN_REL").as("diseaseRelUm"),
+    col("MCO_B__DGN_PAL").as("diseasePal"),
+    col("MCO_B__DGN_REL").as("diseaseRel"),
+    col("MCO_B__SOR_MOI").as("stayMonthEndDate"),
+    col("MCO_B__SOR_ANN").as("stayYearEndDate"),
+    col("MCO_B__SEJ_NBJ").as("stayLength"),
     col("`ENT_DAT`").as("stayStartTime").cast("Timestamp"),
     col("`SOR_DAT`").as("stayEndDate").cast("Timestamp")
   )

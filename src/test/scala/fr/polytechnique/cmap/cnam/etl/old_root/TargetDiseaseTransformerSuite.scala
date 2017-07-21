@@ -128,7 +128,7 @@ class TargetDiseaseTransformerSuite extends SharedContext {
       ("Patient2", "...", makeTS(2011, 12, 1)),
       ("Patient3", "Z511", makeTS(2011, 10, 1)),
       ("Patient3", "Z511", makeTS(2011, 6, 1))
-    ).toDF("NUM_ENQ", "ER_CAM_F.CAM_PRS_IDE", "EXE_SOI_DTD")
+    ).toDF("NUM_ENQ", "ER_CAM_F__CAM_PRS_IDE", "EXE_SOI_DTD")
 
     val initialMco = Seq(
       ("Patient1", Some("Z511"), "C67", None: Option[String], Some("JDFA014"), Some(12), Some(2011), 11,
@@ -139,8 +139,8 @@ class TargetDiseaseTransformerSuite extends SharedContext {
         None, Some(makeTS(2011, 12, 12))),
       ("Patient3", Some("..."), "C67", None: Option[String], Some("..."), Some(12), Some(2011), 11,
         None, Some(makeTS(2011, 12, 12)))
-    ).toDF("NUM_ENQ", "MCO_B.DGN_PAL", "MCO_B.DGN_REL", "MCO_D.ASS_DGN", "MCO_A.CDC_ACT",
-      "MCO_B.SOR_MOI", "MCO_B.SOR_ANN", "MCO_B.SEJ_NBJ", "ENT_DAT", "SOR_DAT")
+    ).toDF("NUM_ENQ", "MCO_B__DGN_PAL", "MCO_B__DGN_REL", "MCO_D__ASS_DGN", "MCO_A__CDC_ACT",
+      "MCO_B__SOR_MOI", "MCO_B__SOR_ANN", "MCO_B__SEJ_NBJ", "ENT_DAT", "SOR_DAT")
 
     import fr.polytechnique.cmap.cnam.etl.old_root.McoActTransformer.GHSColumnNames
     val mco = GHSColumnNames.foldLeft(initialMco)(

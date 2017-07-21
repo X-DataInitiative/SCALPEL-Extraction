@@ -55,8 +55,8 @@ class DrugEventsTransformerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val dcir: DataFrame = sqlContext.read.load("src/test/resources/expected/DCIR.parquet")
-    val irPha: DataFrame = sqlContext.read.load("src/test/resources/expected/IR_PHA_R.parquet")
+    val dcir: DataFrame = sqlContext.read.load("src/test/resources/test-input/DCIR.parquet")
+    val irPha: DataFrame = sqlContext.read.load("src/test/resources/test-input/IR_PHA_R.parquet")
     val dosages: DataFrame = sqlContext.read
       .format("csv")
       .option("header", "true")

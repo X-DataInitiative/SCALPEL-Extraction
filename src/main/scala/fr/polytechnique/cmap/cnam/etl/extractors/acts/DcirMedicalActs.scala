@@ -8,7 +8,7 @@ private[acts] object DcirMedicalActs {
 
   final object ColNames {
     final lazy val PatientID = "NUM_ENQ"
-    final lazy val CamCode = "ER_CAM_F.CAM_PRS_IDE"
+    final lazy val CamCode = "ER_CAM_F__CAM_PRS_IDE"
     final lazy val Date = "EXE_SOI_DTD"
     def allCols = List(PatientID, CamCode, Date)
   }

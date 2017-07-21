@@ -176,8 +176,8 @@ class McoActTransformerSuite extends SharedContext {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
-    val columnNameToTest = "MCO_B.GHS_9515_ACT"
-    val columnToTest = col("`MCO_B.GHS_9515_ACT`")
+    val columnNameToTest = "MCO_B__GHS_9515_ACT"
+    val columnToTest = col("MCO_B__GHS_9515_ACT")
 
     // Given
     val initialInput = Seq(
@@ -223,8 +223,8 @@ class McoActTransformerSuite extends SharedContext {
         None, Some(makeTS(2011, 12, 12))),
       ("Patient3", Some("..."), "C67", None: Option[String], Some("..."), Some(12), Some(2011), 11,
         None, Some(makeTS(2011, 12, 12)))
-    ).toDF("NUM_ENQ", "MCO_B.DGN_PAL", "MCO_B.DGN_REL", "MCO_D.ASS_DGN", "MCO_A.CDC_ACT",
-      "MCO_B.SOR_MOI", "MCO_B.SOR_ANN", "MCO_B.SEJ_NBJ", "ENT_DAT", "SOR_DAT")
+    ).toDF("NUM_ENQ", "MCO_B__DGN_PAL", "MCO_B__DGN_REL", "MCO_D__ASS_DGN", "MCO_A__CDC_ACT",
+      "MCO_B__SOR_MOI", "MCO_B__SOR_ANN", "MCO_B__SEJ_NBJ", "ENT_DAT", "SOR_DAT")
 
     val data = GHSColumnNames.foldLeft(initialData)(
       (df, colName) => df.withColumn(colName, lit(null).cast(IntegerType))

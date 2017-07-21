@@ -14,17 +14,17 @@ object McoActTransformer extends Transformer[Event] {
 
   // The two following sets are necessary due to the presence of the dot in their names.
   final val GHSColumns = Set[Column](
-    col("`MCO_B.GHM_24705Z_ACT`"), col("`MCO_B.GHM_24706Z_ACT`"), col("`MCO_B.GHM_24707Z_ACT`"),
-    col("`MCO_B.GHS_6523_ACT`"),
-    col("`MCO_B.GHS_9510_ACT`"), col("`MCO_B.GHS_9511_ACT`"), col("`MCO_B.GHS_9512_ACT`"), col("`MCO_B.GHS_9515_ACT`"), col("`MCO_B.GHS_9524_ACT`"),
-    col("`MCO_B.GHS_9610_ACT`"), col("`MCO_B.GHS_9611_ACT`"), col("`MCO_B.GHS_9612_ACT`"), col("`MCO_B.GHS_9619_ACT`"), col("`MCO_B.GHS_9620_ACT`"), col("`MCO_B.GHS_9621_ACT`")
+    col("MCO_B__GHM_24705Z_ACT"), col("MCO_B__GHM_24706Z_ACT"), col("MCO_B__GHM_24707Z_ACT"),
+    col("MCO_B__GHS_6523_ACT"),
+    col("MCO_B__GHS_9510_ACT"), col("MCO_B__GHS_9511_ACT"), col("MCO_B__GHS_9512_ACT"), col("MCO_B__GHS_9515_ACT"), col("MCO_B__GHS_9524_ACT"),
+    col("MCO_B__GHS_9610_ACT"), col("MCO_B__GHS_9611_ACT"), col("MCO_B__GHS_9612_ACT"), col("MCO_B__GHS_9619_ACT"), col("MCO_B__GHS_9620_ACT"), col("MCO_B__GHS_9621_ACT")
   )
 
   final val GHSColumnNames = Set[String](
-    "MCO_B.GHM_24705Z_ACT", "MCO_B.GHM_24706Z_ACT", "MCO_B.GHM_24707Z_ACT",
-    "MCO_B.GHS_6523_ACT",
-    "MCO_B.GHS_9510_ACT", "MCO_B.GHS_9511_ACT", "MCO_B.GHS_9512_ACT", "MCO_B.GHS_9515_ACT", "MCO_B.GHS_9524_ACT",
-    "MCO_B.GHS_9610_ACT", "MCO_B.GHS_9611_ACT", "MCO_B.GHS_9612_ACT", "MCO_B.GHS_9619_ACT", "MCO_B.GHS_9620_ACT", "MCO_B.GHS_9621_ACT"
+    "MCO_B__GHM_24705Z_ACT", "MCO_B__GHM_24706Z_ACT", "MCO_B__GHM_24707Z_ACT",
+    "MCO_B__GHS_6523_ACT",
+    "MCO_B__GHS_9510_ACT", "MCO_B__GHS_9511_ACT", "MCO_B__GHS_9512_ACT", "MCO_B__GHS_9515_ACT", "MCO_B__GHS_9524_ACT",
+    "MCO_B__GHS_9610_ACT", "MCO_B__GHS_9611_ACT", "MCO_B__GHS_9612_ACT", "MCO_B__GHS_9619_ACT", "MCO_B__GHS_9620_ACT", "MCO_B__GHS_9621_ACT"
   )
 
   // The following list was taken from the following xls file:
@@ -37,13 +37,13 @@ object McoActTransformer extends Transformer[Event] {
 
   val inputColumns = List(
     col("NUM_ENQ").as("patientID"),
-    col("`MCO_B.DGN_PAL`").as("DP"),
-    col("`MCO_B.DGN_REL`").as("DR"),
-    col("`MCO_D.ASS_DGN`").as("DAS"),
-    col("`MCO_A.CDC_ACT`").as("CCAM"),
-    col("`MCO_B.SOR_MOI`").as("stayMonthEndDate"),
-    col("`MCO_B.SOR_ANN`").as("stayYearEndDate"),
-    col("`MCO_B.SEJ_NBJ`").as("stayLength"),
+    col("MCO_B__DGN_PAL").as("DP"),
+    col("MCO_B__DGN_REL").as("DR"),
+    col("MCO_D__ASS_DGN").as("DAS"),
+    col("MCO_A__CDC_ACT").as("CCAM"),
+    col("MCO_B__SOR_MOI").as("stayMonthEndDate"),
+    col("MCO_B__SOR_ANN").as("stayYearEndDate"),
+    col("MCO_B__SEJ_NBJ").as("stayLength"),
     col("`ENT_DAT`").as("stayStartTime").cast("Timestamp"),
     col("`SOR_DAT`").as("stayEndDate").cast("Timestamp")
   )

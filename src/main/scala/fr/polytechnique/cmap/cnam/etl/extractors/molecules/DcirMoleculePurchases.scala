@@ -42,9 +42,9 @@ private[molecules] object DcirMoleculePurchases {
 
     val dcirInputColumns: List[Column] = List(
       col("NUM_ENQ").cast(StringType).as("patientID"),
-      col("`ER_PHA_F.PHA_PRS_IDE`").cast(StringType).as("CIP07"),
-      col("`ER_PHA_F.PHA_PRS_C13`").cast(StringType).as("CIP13"),
-      col("ER_PHA_F_PHA_ACT_QSN").as("nBoxes"), // The DCIR parquet must contain this version of the column
+      col("ER_PHA_F__PHA_PRS_IDE").cast(StringType).as("CIP07"),
+      col("ER_PHA_F__PHA_PRS_C13").cast(StringType).as("CIP13"),
+      col("ER_PHA_F__PHA_ACT_QSN").as("nBoxes"), // The DCIR parquet must contain this version of the column
       col("EXE_SOI_DTD").cast(TimestampType).as("eventDate")
     )
 
