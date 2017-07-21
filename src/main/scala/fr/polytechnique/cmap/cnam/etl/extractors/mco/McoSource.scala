@@ -14,6 +14,7 @@ trait McoSource extends ColumnNames {
     val DR: ColName = "MCO_B__DGN_REL"
     val DA: ColName = "MCO_D__ASS_DGN"
     val CCAM: ColName = "MCO_A__CDC_ACT"
+    val GHM: ColName = "MCO_B__GRG_GHM"
     val EtaNum: ColName = "ETA_NUM"
     val RsaNum: ColName = "RSA_NUM"
     val Year: ColName = "SOR_ANN"
@@ -59,9 +60,13 @@ trait McoSource extends ColumnNames {
         ).cast(LongType) - timeDelta
         ).cast(TimestampType)
 
+      val givenDate: Column = unix_timestamp(
+        ColNames.StayStartDate.toCol,
+        "ddMMyyyy").cast(TimestampType)
+
       df.withColumn(
         NewColumns.EstimatedStayStart,
-        coalesce(ColNames.StayStartDate.toCol, estimate, roughEstimate)
+        coalesce(givenDate, estimate, roughEstimate)
       )
     }
   }

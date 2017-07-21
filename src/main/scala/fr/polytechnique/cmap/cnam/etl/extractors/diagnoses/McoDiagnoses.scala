@@ -18,6 +18,6 @@ private[diagnoses] object McoDiagnoses extends McoEventRowExtractor {
       eventFromRow[Diagnosis](r, MainDiagnosis, ColNames.DP, dpCodes) ++
       eventFromRow[Diagnosis](r, LinkedDiagnosis, ColNames.DR, drCodes) ++
       eventFromRow[Diagnosis](r, AssociatedDiagnosis, ColNames.DA, daCodes)
-    }
+    }.distinct
   }
 }

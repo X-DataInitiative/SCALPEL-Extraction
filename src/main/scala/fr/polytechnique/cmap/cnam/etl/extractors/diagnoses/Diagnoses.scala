@@ -20,6 +20,6 @@ class Diagnoses(config: DiagnosesConfig) {
       config.daCodes
     )
 
-    unionDatasets(imbDiagnoses, mcoDiagnoses)
+    unionDatasets(imbDiagnoses, mcoDiagnoses).distinct()
   }
 }

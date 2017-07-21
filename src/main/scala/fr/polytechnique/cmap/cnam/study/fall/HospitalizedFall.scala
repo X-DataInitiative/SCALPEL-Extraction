@@ -57,16 +57,16 @@ object HospitalizedFall extends OutcomeTransformer with FallStudyCodes {
     ): Dataset[Event[Outcome]] = {
     import diagnoses.sqlContext.implicits._
 
-    val correctCIM10event = diagnoses
+    val correctCIM10Event = diagnoses
       .filter(isMainDiagnosis _)
       .filter(isFractureDiagnosis _)
 
-    val incorrectGHMstays = classifications
+    val incorrectGHMStays = classifications
       .filter(isBadGHM _)
       .map(event => HospitalStay(event.patientID, event.groupID))
       .distinct()
 
-    filterHospitalStay(correctCIM10event, incorrectGHMstays)
+    filterHospitalStay(correctCIM10Event, incorrectGHMStays)
       .map(event => Outcome(event.patientID, outcomeName, event.start))
   }
 

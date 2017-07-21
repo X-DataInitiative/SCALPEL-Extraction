@@ -1,6 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
 import java.sql.Date
+import scala.reflect.runtime.universe.TypeTag
 import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, ImbDiagnosis}
 import fr.polytechnique.cmap.cnam.util.datetime
@@ -39,7 +40,13 @@ private[diagnoses] object ImbDiagnoses {
   }
 
   def extract(imb: DataFrame, codes: Seq[String]): Dataset[Event[Diagnosis]] = {
+
     import imb.sqlContext.implicits._
+
+    if(codes.isEmpty){
+      return imb.sqlContext.sparkSession.emptyDataset[Event[Diagnosis]]
+    }
+
     imb.flatMap(eventFromRow(codes))
   }
 }

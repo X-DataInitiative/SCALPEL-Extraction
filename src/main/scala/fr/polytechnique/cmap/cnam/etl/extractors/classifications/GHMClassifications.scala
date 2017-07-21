@@ -11,9 +11,14 @@ object GHMClassifications extends McoEventRowExtractor{
       ghmCodes: Seq[String]): Dataset[Event[Classification]] = {
 
     import mco.sqlContext.implicits._
+
+    if (ghmCodes.isEmpty) {
+      return mco.sqlContext.sparkSession.emptyDataset[Event[Classification]]
+    }
+
     val df = prepareDF(mco)
     df.flatMap { r =>
       eventFromRow[Classification](r, GHMClassification, ColNames.GHM, ghmCodes)
-    }
+    }.distinct()
   }
 }
