@@ -10,18 +10,18 @@ trait McoSource extends ColumnNames {
 
   final object ColNames {
     val PatientID: ColName = "NUM_ENQ"
-    val DP: ColName = "MCO_B.DGN_PAL"
-    val DR: ColName = "MCO_B.DGN_REL"
-    val DA: ColName = "MCO_D.ASS_DGN"
-    val CCAM: ColName = "MCO_A.CDC_ACT"
+    val DP: ColName = "MCO_B__DGN_PAL"
+    val DR: ColName = "MCO_B__DGN_REL"
+    val DA: ColName = "MCO_D__ASS_DGN"
+    val CCAM: ColName = "MCO_A__CDC_ACT"
     val EtaNum: ColName = "ETA_NUM"
     val RsaNum: ColName = "RSA_NUM"
     val Year: ColName = "SOR_ANN"
-    val StayEndMonth: ColName = "`MCO_B.SOR_MOI`"
-    val StayEndYear: ColName = "`MCO_B.SOR_ANN`"
-    val StayLength: ColName = "`MCO_B.SEJ_NBJ`"
-    val StayStartDate: ColName = "`ENT_DAT`"
-    val StayEndDate: ColName = "`SOR_DAT`"
+    val StayEndMonth: ColName = "MCO_B__SOR_MOI"
+    val StayEndYear: ColName = "MCO_B__SOR_ANN"
+    val StayLength: ColName = "MCO_B__SEJ_NBJ"
+    val StayStartDate: ColName = "ENT_DAT"
+    val StayEndDate: ColName = "SOR_DAT"
   }
 
   object NewColumns {

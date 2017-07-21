@@ -41,7 +41,7 @@ class DcirActTransformerSuite extends SharedContext {
       ("john", "Z511", makeTS(2016, 10, 1)),
       ("george", "toto", makeTS(2016, 10, 1)),
       ("john", null, makeTS(2016, 10, 1))
-    ).toDF("NUM_ENQ", "ER_CAM_F.CAM_PRS_IDE", "EXE_SOI_DTD")
+    ).toDF("NUM_ENQ", "ER_CAM_F__CAM_PRS_IDE", "EXE_SOI_DTD")
 
     val expected = Seq(
       ("john", "act", "radiotherapy", 1.0, makeTS(2016, 10, 1), null.asInstanceOf[Timestamp])

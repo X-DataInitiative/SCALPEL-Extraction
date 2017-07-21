@@ -12,9 +12,9 @@ object DrugEventsTransformer extends Transformer[Event] {
 
   val dcirInputColumns: List[Column] = List(
     col("NUM_ENQ").cast(StringType).as("patientID"),
-    col("`ER_PHA_F.PHA_PRS_IDE`").cast(StringType).as("CIP07"),
-    col("`ER_PHA_F.PHA_PRS_C13`").cast(StringType).as("CIP13"),
-    col("`ER_PHA_F.PHA_ACT_QSN`").as("nBoxes"),
+    col("ER_PHA_F__PHA_PRS_IDE").cast(StringType).as("CIP07"),
+    col("ER_PHA_F__PHA_PRS_C13").cast(StringType).as("CIP13"),
+    col("ER_PHA_F__PHA_ACT_QSN").as("nBoxes"),
     col("EXE_SOI_DTD").as("eventDate")
   )
 

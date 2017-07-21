@@ -89,7 +89,7 @@ class TrackLossTransformerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val dcir: DataFrame = sqlContext.read.load("src/test/resources/expected/DCIR.parquet")
+    val dcir: DataFrame = sqlContext.read.load("src/test/resources/test-input/DCIR.parquet")
     val sources = new Sources(dcir = Some(dcir))
     val expected =  Seq(
       Event("Patient_01", "trackloss", "eventId", 1.0, Timestamp.valueOf("2006-03-30 00:00:00"), None),

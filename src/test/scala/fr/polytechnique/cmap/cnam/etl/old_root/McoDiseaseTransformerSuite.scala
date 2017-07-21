@@ -37,8 +37,8 @@ trait fakeMcoDataFixture extends SharedContext {
       ("MustBeDropped2", null, null, Some("C556"), Some("7"), null,
         Some(1), Some(2010), 31, Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12))
         )
-    ).toDF("NUM_ENQ", "MCO_D.ASS_DGN", "MCO_UM.DGN_PAL", "MCO_UM.DGN_REL", "MCO_B.DGN_PAL",
-      "MCO_B.DGN_REL", "MCO_B.SOR_MOI", "MCO_B.SOR_ANN", "MCO_B.SEJ_NBJ", "ENT_DAT",
+    ).toDF("NUM_ENQ", "MCO_D__ASS_DGN", "MCO_UM__DGN_PAL", "MCO_UM__DGN_REL", "MCO_B__DGN_PAL",
+      "MCO_B__DGN_REL", "MCO_B__SOR_MOI", "MCO_B__SOR_ANN", "MCO_B__SEJ_NBJ", "ENT_DAT",
       "SOR_DAT")
   }
 

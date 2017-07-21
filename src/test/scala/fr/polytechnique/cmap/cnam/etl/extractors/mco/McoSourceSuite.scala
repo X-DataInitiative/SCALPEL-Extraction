@@ -28,8 +28,8 @@ class McoSourceSuite extends SharedContext with McoSource {
         Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12))),
       ("MustBeDropped2", None, Some("7"), None, Some(1), Some(2010), 31,
         Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12)))
-    ).toDF("NUM_ENQ", "MCO_D.ASS_DGN", "MCO_B.DGN_PAL", "MCO_B.DGN_REL", "MCO_B.SOR_MOI",
-      "MCO_B.SOR_ANN", "MCO_B.SEJ_NBJ", "ENT_DAT", "SOR_DAT")
+    ).toDF("NUM_ENQ", "MCO_D__ASS_DGN", "MCO_B__DGN_PAL", "MCO_B__DGN_REL", "MCO_B__SOR_MOI",
+      "MCO_B__SOR_ANN", "MCO_B__SEJ_NBJ", "ENT_DAT", "SOR_DAT")
   }
 
   "estimateStayStartTime" should "estimate a stay starting date using MCO available data" in {

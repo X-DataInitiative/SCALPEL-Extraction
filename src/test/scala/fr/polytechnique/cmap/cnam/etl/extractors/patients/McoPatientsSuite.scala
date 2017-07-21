@@ -64,7 +64,7 @@ class McoPatientsSuite extends SharedContext {
       ("Patient_03", 9, 4, 1980),
       ("Patient_03", 9, 4, 1984),
       ("Patient_04", 3, 5, 1995)
-    ).toDF("NUM_ENQ", "MCO_B.SOR_MOD", "SOR_MOI", "SOR_ANN")
+    ).toDF("NUM_ENQ", "MCO_B__SOR_MOD", "SOR_MOI", "SOR_ANN")
 
     val expected: DataFrame = Seq(
       ("Patient_02", Timestamp.valueOf("1986-03-01 00:00:00")),

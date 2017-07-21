@@ -55,7 +55,7 @@ class PatientsTransformerSuite extends SharedContext {
       ("Patient_02", 9, 3, 1986),
       ("Patient_03", 9, 4, 1980),
       ("Patient_04", 3, 5, 1995)
-    ).toDF("NUM_ENQ", "MCO_B.SOR_MOD", "SOR_MOI", "SOR_ANN")
+    ).toDF("NUM_ENQ", "MCO_B__SOR_MOD", "SOR_MOI", "SOR_ANN")
 
     val irBenDf: DataFrame = Seq(
       ("Patient_01", 1, 1, 1945, None),

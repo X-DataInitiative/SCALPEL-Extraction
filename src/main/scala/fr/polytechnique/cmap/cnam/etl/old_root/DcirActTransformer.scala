@@ -11,7 +11,7 @@ object DcirActTransformer extends Transformer[Event] {
 
   val inputColumns = List(
     col("NUM_ENQ").as("patientID"),
-    col("`ER_CAM_F.CAM_PRS_IDE`").as("actCode"),
+    col("ER_CAM_F__CAM_PRS_IDE").as("actCode"),
     col("EXE_SOI_DTD").as("eventDate")
   )
 

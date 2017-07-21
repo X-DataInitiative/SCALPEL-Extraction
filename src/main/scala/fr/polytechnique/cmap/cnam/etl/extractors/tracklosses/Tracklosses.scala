@@ -33,8 +33,8 @@ object Tracklosses {
   val inputColumns: List[Column] = List(
     col("NUM_ENQ").as("patientID"),
     coalesce(
-      col("`ER_PHA_F.PHA_PRS_IDE`"),
-      col("`ER_PHA_F.PHA_PRS_C13`")
+      col("ER_PHA_F__PHA_PRS_IDE"),
+      col("ER_PHA_F__PHA_PRS_C13")
     ).as("drug"),
     col("EXE_SOI_DTD").as("eventDate")
   )
