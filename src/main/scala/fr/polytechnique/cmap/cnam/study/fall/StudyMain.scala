@@ -16,6 +16,7 @@ object StudyMain extends Main with FractureCodes {
   trait Env {
     val OutRootPath: String = ""
     val McoPath: String
+    val McoCePath: String
     val DcirPath: String
     val IrImbPath: String
     val IrBenPath: String
@@ -24,6 +25,7 @@ object StudyMain extends Main with FractureCodes {
 
   object CmapEnv extends Env {
     val McoPath = "/shared/Observapur/staging/Flattening/flat_table/MCO"
+    val McoCePath = "/shared/Observapur/staging/Flattening/flat_table/MCO_ACE"
     val DcirPath = "/shared/Observapur/staging/Flattening/flat_table/DCIR"
     val IrImbPath = "/shared/Observapur/staging/Flattening/single_table/IR_IMB_R"
     val IrBenPath = "/shared/Observapur/staging/Flattening/single_table/IR_BEN_R"
@@ -32,6 +34,7 @@ object StudyMain extends Main with FractureCodes {
 
   object FallEnv extends Env {
     val McoPath = "/shared/fall/staging/flattening/flat_table/MCO"
+    val McoCePath = "/shared/fall/staging/flattening/flat_table/MCO_ACE"
     val DcirPath = "/shared/fall/staging/flattening/flat_table/DCIR"
     val IrImbPath = "/shared/fall/staging/flattening/single_table/IR_IMB_R"
     val IrBenPath = "/shared/fall/staging/flattening/single_table/IR_BEN_R"
@@ -41,6 +44,7 @@ object StudyMain extends Main with FractureCodes {
   object TestEnv extends Env {
     override val OutRootPath = "target/test/output/"
     val McoPath = "src/test/resources/test-input/MCO.parquet"
+    val McoCePath = ""
     val DcirPath = "src/test/resources/test-input/DCIR.parquet"
     val IrImbPath = "src/test/resources/test-input/IR_IMB_R.parquet"
     val IrBenPath = "src/test/resources/test-input/IR_BEN_R.parquet"
@@ -53,7 +57,8 @@ object StudyMain extends Main with FractureCodes {
       irImbPath = env.IrImbPath,
       irBenPath = env.IrBenPath,
       dcirPath = env.DcirPath,
-      pmsiMcoPath = env.McoPath
+      pmsiMcoPath = env.McoPath,
+      pmsiMcoCEPath = env.McoCePath
     )
   }
 
@@ -85,14 +90,17 @@ object StudyMain extends Main with FractureCodes {
     logger.info("  count: " + classifications.count)
     logger.info("  count distinct: " + classifications.distinct.count)
 
+    val acts = new MedicalActs(
+      MedicalActsConfig(
+        dcirCodes = GenericCCAMCodes,
+        mcoCECodes = GenericCCAMCodes
+      )).extract(source).cache()
 
     logger.info("Outcomes")
     val hospitalizedOutcomes = HospitalizedFall.transform(diagnoses, classifications).cache()
-    val privateOutcomes = {
-      val acts = new MedicalActs(MedicalActsConfig(dcirCodes = NonHospitalizedFracturesCcam)).extract(source)
-      PrivateAmbulatoryFall.transform(acts)
-    }
-    val outcomes = hospitalizedOutcomes.union(privateOutcomes)
+    val privateOutcomes = PrivateAmbulatoryFall.transform(acts)
+    val publicOutcomes = PublicAmbulatoryFall.transform(acts)
+    val outcomes = hospitalizedOutcomes.union(privateOutcomes).union(publicOutcomes)
     logger.info("  count: " + outcomes.count)
     logger.info("  count distinct: " + outcomes.distinct.count)
 

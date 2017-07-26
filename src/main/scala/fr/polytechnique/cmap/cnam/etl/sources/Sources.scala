@@ -6,6 +6,7 @@ import fr.polytechnique.cmap.cnam.study.StudyConfig.InputPaths
 class Sources(
     val dcir: Option[DataFrame] = None,
     val pmsiMco: Option[DataFrame] = None,
+    val pmsiMcoCE: Option[DataFrame] = None,
     val pmsiHad: Option[DataFrame] = None,
     val pmsiSsr: Option[DataFrame] = None,
     val irBen: Option[DataFrame] = None,
@@ -20,6 +21,7 @@ object Sources {
       sqlContext: SQLContext,
       dcirPath: String = null,
       pmsiMcoPath: String = null,
+      pmsiMcoCEPath: String = null,
       pmsiHadPath: String = null,
       pmsiSsrPath: String = null,
       irBenPath: String = null,
@@ -30,6 +32,7 @@ object Sources {
     new Sources(
       dcir = Option(dcirPath).map(Dcir.read(sqlContext, _)),
       pmsiMco = Option(pmsiMcoPath).map(Mco.read(sqlContext, _)),
+      pmsiMcoCE = Option(pmsiMcoCEPath).map(Mco.read(sqlContext, _)),
       irBen = Option(irBenPath).map(IrBen.read(sqlContext, _)),
       irImb = Option(irImbPath).map(IrImb.read(sqlContext, _)),
       irPha = Option(irPhaPath).map(IrPha.read(sqlContext, _)),
