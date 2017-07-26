@@ -36,19 +36,42 @@ object StudyMain extends Main with FallStudyCodes{
     val RefDate = makeTS(2015,1,1)
   }
 
-  override def appName: String = "fall study"
+  object TEST extends Env {
+    val MCO = "src/test/resources/test-input/MCO.parquet"
+    val DCIR = "src/test/resources/test-input/DCIR.parquet"
+    val IMB = "src/test/resources/test-input/IR_IMB_R.parquet"
+    val BEN = "src/test/resources/test-input/IR_BEN_R.parquet"
+    val RefDate = makeTS(2006,1,1)
+  }
 
-  override def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] ={
-
-    val env = if (argsMap.get("env").getOrElse("cmap") == "fall") FALL else CMAP
-
-    val source = Sources(
+  def getSource(sqlContext: SQLContext, env: Env): Sources = {
+    Sources(
       sqlContext = sqlContext,
       irImbPath = env.IMB,
       irBenPath = env.BEN,
       dcirPath = env.DCIR,
       pmsiMcoPath = env.MCO
     )
+  }
+
+  def getEnv(argsMap: Map[String, String]): Env = {
+    val name = argsMap.getOrElse("env", "test")
+    if (name == "fall") {
+      FALL
+    } else if (name == "cmap") {
+      CMAP
+    } else {
+      TEST
+    }
+  }
+
+  override def appName: String = "fall study"
+
+  override def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] ={
+
+    val env = getEnv(argsMap)
+
+    val source = getSource(sqlContext, env)
 
     val patients = new Patients(
       PatientsConfig(
@@ -59,22 +82,22 @@ object StudyMain extends Main with FallStudyCodes{
         DiagnosesConfig(
             dpCodes = GenericCIM10Codes
         )).extract(source).cache()
-    println("diagnoses")
-    println(diagnoses.count)
-    println(diagnoses.distinct.count)
 
     val classifications = GHMClassifications.extract(source.pmsiMco.get, GenericGHMCodes).cache()
-    println("classifications")
-    println(classifications.count)
-    println(classifications.distinct.count)
 
     val outcomes = HospitalizedFall.transform(diagnoses, classifications).cache()
-    println("outcomes")
-    println(outcomes.count)
-    println(outcomes.distinct.count)
 
-    println("patients with outcomes")
-    println(outcomes.select("patientID").distinct.count)
+    logger.info("Diagnoses")
+    logger.info(diagnoses.count)
+    logger.info(diagnoses.distinct.count)
+    logger.info("classifications")
+    logger.info(classifications.count)
+    logger.info(classifications.distinct.count)
+    logger.info("outcomes")
+    logger.info(outcomes.count)
+    logger.info(outcomes.distinct.count)
+    logger.info("patients with outcomes")
+    logger.info(outcomes.select("patientID").distinct.count)
 
     diagnoses.write.mode(SaveMode.Overwrite).parquet("diagnoses")
     classifications.write.mode(SaveMode.Overwrite).parquet("classification")
