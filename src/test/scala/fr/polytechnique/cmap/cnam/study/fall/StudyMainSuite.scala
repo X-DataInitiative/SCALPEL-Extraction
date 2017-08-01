@@ -8,7 +8,7 @@ class StudyMainSuite extends SharedContext {
   "getEnv" should "return correct default environment" in {
     // Given
     val args = Map[String, String]()
-    val expected = StudyMain.TEST
+    val expected = StudyMain.TestEnv
 
     // When
     val result = StudyMain.getEnv(args)
@@ -20,7 +20,7 @@ class StudyMainSuite extends SharedContext {
   it should "return the Fall environment when specified" in {
     // Given
     val args = Map(("env", "fall"))
-    val expected = StudyMain.FALL
+    val expected = StudyMain.FallEnv
 
     // When
     val result = StudyMain.getEnv(args)
@@ -32,7 +32,7 @@ class StudyMainSuite extends SharedContext {
   it should "return the CMAP environment when specified" in {
     // Given
     val args = Map(("env", "cmap"))
-    val expected = StudyMain.CMAP
+    val expected = StudyMain.CmapEnv
 
     // When
     val result = StudyMain.getEnv(args)

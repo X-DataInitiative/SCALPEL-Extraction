@@ -58,7 +58,7 @@ trait McoSource extends ColumnNames {
         unix_timestamp(
           concat_ws("-", ColNames.StayEndYear.toCol, ColNames.StayEndMonth.toCol, lit("01 00:00:00"))
         ).cast(LongType) - timeDelta
-        ).cast(TimestampType)
+      ).cast(TimestampType)
 
       val givenDate: Column = unix_timestamp(
         ColNames.StayStartDate.toCol,

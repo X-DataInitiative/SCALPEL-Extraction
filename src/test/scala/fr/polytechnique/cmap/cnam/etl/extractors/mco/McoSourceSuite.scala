@@ -1,10 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.mco
 
 import java.sql.Timestamp
-
-import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.functions._
-
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
@@ -58,7 +55,6 @@ class McoSourceSuite extends SharedContext with McoSource {
 
   it should "add a correctly typed column when ENT_DAT is a string" in {
     val sqlCtx = sqlContext
-    import sqlCtx.implicits._
 
     // Given
     val input = fakeMcoData.withColumn("ENT_DAT", col("ENT_DAT_STR"))

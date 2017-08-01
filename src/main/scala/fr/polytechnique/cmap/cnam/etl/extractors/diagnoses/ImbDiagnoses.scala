@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
 import java.sql.Date
-import scala.reflect.runtime.universe.TypeTag
 import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, ImbDiagnosis}
 import fr.polytechnique.cmap.cnam.util.datetime

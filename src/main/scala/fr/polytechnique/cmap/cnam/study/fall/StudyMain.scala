@@ -13,55 +13,52 @@ import org.apache.spark.sql.{Dataset, SQLContext, SaveMode}
 object StudyMain extends Main with FallStudyCodes{
 
   trait Env {
-    val MCO: String
-    val DCIR: String
-    val IMB: String
-    val BEN: String
+    val McoPath: String
+    val DcirPath: String
+    val IrImbPath: String
+    val IrBenPath: String
     val RefDate: Timestamp
   }
 
-  object CMAP extends Env {
-    val MCO = "/shared/Observapur/staging/Flattening/flat_table/MCO"
-    val DCIR = "/shared/Observapur/staging/Flattening/flat_table/DCIR"
-    val IMB = "/shared/Observapur/staging/Flattening/single_table/IR_IMB_R"
-    val BEN = "/shared/Observapur/staging/Flattening/single_table/IR_BEN_R"
+  object CmapEnv extends Env {
+    val McoPath = "/shared/Observapur/staging/Flattening/flat_table/MCO"
+    val DcirPath = "/shared/Observapur/staging/Flattening/flat_table/DCIR"
+    val IrImbPath = "/shared/Observapur/staging/Flattening/single_table/IR_IMB_R"
+    val IrBenPath = "/shared/Observapur/staging/Flattening/single_table/IR_BEN_R"
     val RefDate = makeTS(2010,1,1)
   }
 
-  object FALL extends Env {
-    val MCO = "/shared/fall/staging/flattening/flat_table/MCO"
-    val DCIR = "/shared/fall/staging/flattening/flat_table/DCIR"
-    val IMB = "/shared/fall/staging/flattening/single_table/IR_IMB_R"
-    val BEN = "/shared/fall/staging/flattening/single_table/IR_BEN_R"
+  object FallEnv extends Env {
+    val McoPath = "/shared/fall/staging/flattening/flat_table/MCO"
+    val DcirPath = "/shared/fall/staging/flattening/flat_table/DCIR"
+    val IrImbPath = "/shared/fall/staging/flattening/single_table/IR_IMB_R"
+    val IrBenPath = "/shared/fall/staging/flattening/single_table/IR_BEN_R"
     val RefDate = makeTS(2015,1,1)
   }
 
-  object TEST extends Env {
-    val MCO = "src/test/resources/test-input/MCO.parquet"
-    val DCIR = "src/test/resources/test-input/DCIR.parquet"
-    val IMB = "src/test/resources/test-input/IR_IMB_R.parquet"
-    val BEN = "src/test/resources/test-input/IR_BEN_R.parquet"
+  object TestEnv extends Env {
+    val McoPath = "src/test/resources/test-input/MCO.parquet"
+    val DcirPath = "src/test/resources/test-input/DCIR.parquet"
+    val IrImbPath = "src/test/resources/test-input/IR_IMB_R.parquet"
+    val IrBenPath = "src/test/resources/test-input/IR_BEN_R.parquet"
     val RefDate = makeTS(2006,1,1)
   }
 
   def getSource(sqlContext: SQLContext, env: Env): Sources = {
-    Sources(
-      sqlContext = sqlContext,
-      irImbPath = env.IMB,
-      irBenPath = env.BEN,
-      dcirPath = env.DCIR,
-      pmsiMcoPath = env.MCO
+    Sources.read(
+      sqlContext,
+      irImbPath = env.IrImbPath,
+      irBenPath = env.IrBenPath,
+      dcirPath = env.DcirPath,
+      pmsiMcoPath = env.McoPath
     )
   }
 
   def getEnv(argsMap: Map[String, String]): Env = {
-    val name = argsMap.getOrElse("env", "test")
-    if (name == "fall") {
-      FALL
-    } else if (name == "cmap") {
-      CMAP
-    } else {
-      TEST
+    argsMap.getOrElse("env", "test") match {
+      case "fall" => FallEnv
+      case "cmap" => CmapEnv
+      case "test" => TestEnv
     }
   }
 
@@ -73,35 +70,34 @@ object StudyMain extends Main with FallStudyCodes{
 
     val source = getSource(sqlContext, env)
 
-    val patients = new Patients(
-      PatientsConfig(
-        env.RefDate
-      )).extract(source)
-
-    val diagnoses = new Diagnoses(
-        DiagnosesConfig(
-            dpCodes = GenericCIM10Codes
-        )).extract(source).cache()
-
-    val classifications = GHMClassifications.extract(source.pmsiMco.get, GenericGHMCodes).cache()
-
-    val outcomes = HospitalizedFall.transform(diagnoses, classifications).cache()
+    val patients = new Patients(PatientsConfig(env.RefDate)).extract(source).cache()
 
     logger.info("Diagnoses")
-    logger.info(diagnoses.count)
-    logger.info(diagnoses.distinct.count)
-    logger.info("classifications")
-    logger.info(classifications.count)
-    logger.info(classifications.distinct.count)
-    logger.info("outcomes")
-    logger.info(outcomes.count)
-    logger.info(outcomes.distinct.count)
-    logger.info("patients with outcomes")
-    logger.info(outcomes.select("patientID").distinct.count)
+    val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = GenericCIM10Codes)).extract(source).cache()
+    logger.info("  count: " + diagnoses.count)
+    logger.info("  count distinct: " + diagnoses.distinct.count)
 
+    logger.info("Classifications")
+    val classifications = GHMClassifications.extract(source.pmsiMco.get, GenericGHMCodes).cache()
+    logger.info("  count: " + classifications.count)
+    logger.info("  count distinct: " + classifications.distinct.count)
+
+    logger.info("Outcomes")
+    val outcomes = HospitalizedFall.transform(diagnoses, classifications).cache()
+    logger.info("  count: " + outcomes.count)
+    logger.info("  count distinct: " + outcomes.distinct.count)
+
+    logger.info("Patients with outcomes")
+    logger.info("  count: " + outcomes.select("patientID").distinct.count)
+
+    logger.info("Writing")
+    logger.info("  Diagnoses...")
     diagnoses.write.mode(SaveMode.Overwrite).parquet("diagnoses")
+    logger.info("  Classification...")
     classifications.write.mode(SaveMode.Overwrite).parquet("classification")
+    logger.info("  Outcomes...")
     outcomes.write.mode(SaveMode.Overwrite).parquet("outcomes")
+    logger.info("  Patients...")
     patients.write.mode(SaveMode.Overwrite).parquet("patients")
 
     Some(outcomes)
