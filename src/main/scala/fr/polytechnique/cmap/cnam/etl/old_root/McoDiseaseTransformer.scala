@@ -4,6 +4,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{LongType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 
 /**
   * This transformer looks for CIM10 codes containing DiseaseTransformer.DiseaseCode in PMSI expected.MCO.
@@ -20,8 +21,8 @@ object McoDiseaseTransformer extends DiseaseTransformer {
     col("MCO_B__SOR_MOI").as("stayMonthEndDate"),
     col("MCO_B__SOR_ANN").as("stayYearEndDate"),
     col("MCO_B__SEJ_NBJ").as("stayLength"),
-    col("`ENT_DAT`").as("stayStartTime").cast("Timestamp"),
-    col("`SOR_DAT`").as("stayEndDate").cast("Timestamp")
+    parseTimestamp(col("ENT_DAT"), "ddMMyyyy").as("stayStartTime").cast("Timestamp"),
+    parseTimestamp(col("SOR_DAT"), "ddMMyyyy").as("stayEndDate").cast("Timestamp")
   )
 
   val mcoDiseaseColumns: List[Column] = List(

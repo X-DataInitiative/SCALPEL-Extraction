@@ -17,25 +17,25 @@ trait fakeMcoDataFixture extends SharedContext {
 
     Seq(
       ("HasCancer1", Some("C669"), Some("C668"), Some("C651"), Some("C672"), Some("C643"),
-        Some(12), Some(2011), 11, Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12))
+        Some(12), Some(2011), 11, "01122011", "12122011"
         ),
       ("HasCancer2", Some("C669"), Some("C668"), Some("C651"), Some("C672"), Some("C643"),
-        Some(12), Some(2011), 11, null, Some(makeTS(2011, 12, 12))
+        Some(12), Some(2011), 11, null, "12122011"
         ),
       ("HasCancer3", Some("C669"), Some("C668"), Some("C651"), Some("C672"), Some("C643"),
         Some(12), Some(2011), 11, null, null
         ),
       ("HasCancer4", Some("C669"), Some("C668"), Some("C651"), Some("C672"), Some("C643"),
-        null, null, 11, null, Some(makeTS(2011, 12, 12))
+        null, null, 11, null, "12122011"
         ),
       ("HasCancer5", Some("C679"), Some("C678"), Some("C671"), Some("B672"), Some("C673"),
-        Some(1), Some(2010), 31, Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12))
+        Some(1), Some(2010), 31, "01122011", "12122011"
         ),
       ("MustBeDropped1", null, null, null, null, null,
-        Some(1), Some(2010), 31, Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12))
+        Some(1), Some(2010), 31, "01122011", "12122011"
         ),
       ("MustBeDropped2", null, null, Some("C556"), Some("7"), null,
-        Some(1), Some(2010), 31, Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12))
+        Some(1), Some(2010), 31, "01122011", "12122011"
         )
     ).toDF("NUM_ENQ", "MCO_D__ASS_DGN", "MCO_UM__DGN_PAL", "MCO_UM__DGN_REL", "MCO_B__DGN_PAL",
       "MCO_B__DGN_REL", "MCO_B__SOR_MOI", "MCO_B__SOR_ANN", "MCO_B__SEJ_NBJ", "ENT_DAT",
@@ -86,10 +86,10 @@ class McoDiseaseTransformerSuite extends fakeMcoDataFixture {
 
       Seq(
         ("HasCancer1", Some("C669"), Some("C668"), Some("C651"), Some("C672"), Some("C643"),
-          Some(12), Some(2011), Some(11), Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12))
+          Some(12), Some(2011), Some(11), "01122011", "12122011"
           ),
         ("HasCancer2", Some("C669"), Some("C668"), Some("C651"), Some("C672"), Some("C643"),
-          Some(12), Some(2011), null, null, Some(makeTS(2011, 12, 12))
+          Some(12), Some(2011), null, null, "12122011"
           ),
         ("HasCancer3", Some("C669"), Some("C668"), Some("C651"), Some("C672"), Some("C643"),
           Some(12), Some(2011), Some(11), null, null

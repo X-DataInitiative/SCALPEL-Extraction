@@ -13,6 +13,7 @@ import org.apache.spark.sql.{Dataset, SQLContext, SaveMode}
 object StudyMain extends Main with FallStudyCodes{
 
   trait Env {
+    val OutRootPath: String = ""
     val McoPath: String
     val DcirPath: String
     val IrImbPath: String
@@ -37,6 +38,7 @@ object StudyMain extends Main with FallStudyCodes{
   }
 
   object TestEnv extends Env {
+    override val OutRootPath = "target/test/output/"
     val McoPath = "src/test/resources/test-input/MCO.parquet"
     val DcirPath = "src/test/resources/test-input/DCIR.parquet"
     val IrImbPath = "src/test/resources/test-input/IR_IMB_R.parquet"
@@ -92,13 +94,13 @@ object StudyMain extends Main with FallStudyCodes{
 
     logger.info("Writing")
     logger.info("  Diagnoses...")
-    diagnoses.write.mode(SaveMode.Overwrite).parquet("diagnoses")
+    diagnoses.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "diagnoses")
     logger.info("  Classification...")
-    classifications.write.mode(SaveMode.Overwrite).parquet("classification")
+    classifications.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "classification")
     logger.info("  Outcomes...")
-    outcomes.write.mode(SaveMode.Overwrite).parquet("outcomes")
+    outcomes.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "outcomes")
     logger.info("  Patients...")
-    patients.write.mode(SaveMode.Overwrite).parquet("patients")
+    patients.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "patients")
 
     Some(outcomes)
   }

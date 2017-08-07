@@ -8,6 +8,14 @@ import fr.polytechnique.cmap.cnam.util.functions._
 
 object ColumnUtilities {
 
+  def parseTimestamp(column: Column, pattern: String): Column = udf {
+    v: String => functions.parseTimestamp(v, pattern)
+  }.apply(column)
+
+  def parseDate(column: Column, pattern: String): Column = udf {
+    v: String => functions.parseDate(v, pattern)
+  }.apply(column)
+
   def getMeanTimestampColumn(timestamp1: Column, timestamp2: Column): Column = {
     ((timestamp1.cast(DoubleType) + timestamp2.cast(DoubleType)) / 2D).cast(TimestampType)
   }
