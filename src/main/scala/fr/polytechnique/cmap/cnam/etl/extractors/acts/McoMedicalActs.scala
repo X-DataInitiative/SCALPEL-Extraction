@@ -16,6 +16,6 @@ private[acts] object McoMedicalActs extends McoEventRowExtractor {
     df.flatMap { r =>
       eventFromRow[MedicalAct](r, McoCIM10Act, ColNames.DP, cimCodes) ++
       eventFromRow[MedicalAct](r, McoCCAMAct, ColNames.CCAM, ccamCodes)
-    }
+    }.distinct
   }
 }

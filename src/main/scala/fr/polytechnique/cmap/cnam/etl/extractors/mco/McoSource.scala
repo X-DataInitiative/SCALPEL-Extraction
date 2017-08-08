@@ -5,6 +5,7 @@ import org.apache.spark.sql.types.{LongType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
+import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 
 trait McoSource extends ColumnNames {
 
@@ -14,6 +15,7 @@ trait McoSource extends ColumnNames {
     val DR: ColName = "MCO_B__DGN_REL"
     val DA: ColName = "MCO_D__ASS_DGN"
     val CCAM: ColName = "MCO_A__CDC_ACT"
+    val GHM: ColName = "MCO_B__GRG_GHM"
     val EtaNum: ColName = "ETA_NUM"
     val RsaNum: ColName = "RSA_NUM"
     val Year: ColName = "SOR_ANN"
@@ -52,16 +54,21 @@ trait McoSource extends ColumnNames {
     def estimateStayStartTime: DataFrame = {
       val dayInMs = 24L * 60 * 60
       val timeDelta: Column = coalesce(ColNames.StayLength.toCol, lit(0)) * dayInMs
-      val estimate: Column = (ColNames.StayEndDate.toCol.cast(LongType) - timeDelta).cast(TimestampType)
+      val estimate: Column = {
+        val endDate = parseTimestamp(ColNames.StayEndDate.toCol, "ddMMyyyy")
+        (endDate.cast(LongType) - timeDelta).cast(TimestampType)
+      }
       val roughEstimate: Column = (
         unix_timestamp(
           concat_ws("-", ColNames.StayEndYear.toCol, ColNames.StayEndMonth.toCol, lit("01 00:00:00"))
         ).cast(LongType) - timeDelta
-        ).cast(TimestampType)
+      ).cast(TimestampType)
+
+      val givenDate: Column = parseTimestamp(ColNames.StayStartDate.toCol, "ddMMyyyy")
 
       df.withColumn(
         NewColumns.EstimatedStayStart,
-        coalesce(ColNames.StayStartDate.toCol, estimate, roughEstimate)
+        coalesce(givenDate, estimate, roughEstimate)
       )
     }
   }

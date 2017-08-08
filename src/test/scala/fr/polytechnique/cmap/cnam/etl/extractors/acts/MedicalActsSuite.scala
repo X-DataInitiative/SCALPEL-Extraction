@@ -21,7 +21,7 @@ class MedicalActsSuite extends SharedContext {
     val sources = {
       val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
       val dcir = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
-      Sources(pmsiMco = Some(mco), dcir = Some(dcir))
+      new Sources(pmsiMco = Some(mco), dcir = Some(dcir))
     }
     val expected = Seq[Event[MedicalAct]](
       // DcirAct("Patient_01", "dcir", "ABCD123", null), // The dummy data contains a null value

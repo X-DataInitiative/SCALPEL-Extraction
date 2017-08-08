@@ -31,7 +31,7 @@ object MLPPMain extends Main {
     ).distinct
     // todo: test if filter_lost_patients is true
     val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(
-      Sources(dcir=Some(dcirFlat))
+      new Sources(dcir=Some(dcirFlat))
     )
     val tracklossFlatEvents = tracklossEvents
       .as("left")

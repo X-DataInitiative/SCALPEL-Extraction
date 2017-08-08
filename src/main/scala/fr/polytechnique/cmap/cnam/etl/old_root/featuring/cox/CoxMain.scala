@@ -54,7 +54,7 @@ object CoxMain extends Main {
     logger.info("(Lazy) Transforming Follow-up events...")
     val observationFlatEvents = CoxObservationPeriodTransformer.transform(drugFlatEvents).cache()
 
-    val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(Sources(dcir=Some(dcirFlat)))
+    val tracklossEvents: Dataset[Event] = TrackLossTransformer.transform(new Sources(dcir=Some(dcirFlat)))
     val tracklossFlatEvents = tracklossEvents
       .as("left")
       .joinWith(patients.as("right"), col("left.patientID") === col("right.patientID"))

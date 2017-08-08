@@ -132,8 +132,8 @@ class FilteringMainSuite extends SharedContext {
     // Then
     val patients = sqlCtx.read.parquet(patientsPath)
     val flatEvents = sqlCtx.read.parquet(flatEventsPath)
-      assertDFs(patients, expectedPatients)
-     assertDFs(flatEvents, expectedFlatEvents)
+    assertDFs(patients, expectedPatients)
+    assertDFs(flatEvents, expectedFlatEvents)
  }
 
   it should "return a saved flatEventsDataset if reuseFlatEventsPath is defined" in {

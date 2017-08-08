@@ -39,7 +39,13 @@ private[diagnoses] object ImbDiagnoses {
   }
 
   def extract(imb: DataFrame, codes: Seq[String]): Dataset[Event[Diagnosis]] = {
+
     import imb.sqlContext.implicits._
+
+    if(codes.isEmpty){
+      return imb.sqlContext.sparkSession.emptyDataset[Event[Diagnosis]]
+    }
+
     imb.flatMap(eventFromRow(codes))
   }
 }

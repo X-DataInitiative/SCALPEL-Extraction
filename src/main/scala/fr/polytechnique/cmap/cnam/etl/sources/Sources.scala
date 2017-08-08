@@ -15,28 +15,40 @@ class Sources(
 
 object Sources {
 
-  def apply(
-      dcir: Option[DataFrame] = None,
-      pmsiMco: Option[DataFrame] = None,
-      pmsiHad: Option[DataFrame] = None,
-      pmsiSsr: Option[DataFrame] = None,
-      irBen: Option[DataFrame] = None,
-      irImb: Option[DataFrame] = None,
-      irPha: Option[DataFrame] = None,
-      dosages: Option[DataFrame] = None) = {
-    new Sources(dcir, pmsiMco, pmsiHad, pmsiSsr, irBen, irImb, irPha, dosages)
+  // null defaults to fall automatically to None when converted to Option
+  def read(
+      sqlContext: SQLContext,
+      dcirPath: String = null,
+      pmsiMcoPath: String = null,
+      pmsiHadPath: String = null,
+      pmsiSsrPath: String = null,
+      irBenPath: String = null,
+      irImbPath: String = null,
+      irPhaPath: String = null,
+      dosagesPath: String = null): Sources = {
+
+    new Sources(
+      dcir = Option(dcirPath).map(Dcir.read(sqlContext, _)),
+      pmsiMco = Option(pmsiMcoPath).map(Mco.read(sqlContext, _)),
+      irBen = Option(irBenPath).map(IrBen.read(sqlContext, _)),
+      irImb = Option(irImbPath).map(IrImb.read(sqlContext, _)),
+      irPha = Option(irPhaPath).map(IrPha.read(sqlContext, _)),
+      dosages = Option(dosagesPath).map(Dosages.read(sqlContext, _))
+    )
   }
 
+  // for backwards compatibility
   def read(sqlContext: SQLContext, paths: InputPaths): Sources = {
-    Sources(
-      dcir = Some(Dcir.read(sqlContext, paths.dcir)),
-      pmsiMco = Some(Mco.read(sqlContext, paths.pmsiMco)),
-      // pmsiHad = Some(Had(paths.pmsiHad)),
-      // pmsiSsr = Some(Ssr(paths.pmsiSsr)),
-      irBen = Some(IrBen.read(sqlContext, paths.irBen)),
-      irImb = Some(IrImb.read(sqlContext, paths.irImb)),
-      irPha = Some(IrPha.read(sqlContext, paths.irPha)),
-      dosages = Some(Dosages.read(sqlContext, paths.dosages))
+    this.read(
+      sqlContext,
+      paths.dcir,
+      paths.pmsiMco,
+      paths.pmsiHad,
+      paths.pmsiSsr,
+      paths.irBen,
+      paths.irImb,
+      paths.irPha,
+      paths.dosages
     )
   }
 }
