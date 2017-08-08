@@ -80,33 +80,34 @@ object StudyMain extends Main with FallStudyCodes{
     logger.info("  count: " + diagnoses.count)
     logger.info("  count distinct: " + diagnoses.distinct.count)
 
+    logger.info("Classifications")
     val classifications = GHMClassifications.extract(source.pmsiMco.get, GenericGHMCodes).cache()
+    logger.info("  count: " + classifications.count)
+    logger.info("  count distinct: " + classifications.distinct.count)
 
-    val acts = new MedicalActs(
-      MedicalActsConfig(
-        dcirCodes = GenericCCAMCodes
-      )).extract(source)
 
+    logger.info("Outcomes")
     val hospitalizedOutcomes = HospitalizedFall.transform(diagnoses, classifications).cache()
-    val privateOutcomes = PrivateAmbulatoryFall.transform(acts)
+    val privateOutcomes = {
+      val acts = new MedicalActs(MedicalActsConfig(dcirCodes = GenericCCAMCodes)).extract(source)
+      PrivateAmbulatoryFall.transform(acts)
+    }
     val outcomes = hospitalizedOutcomes.union(privateOutcomes)
+    logger.info("  count: " + outcomes.count)
+    logger.info("  count distinct: " + outcomes.distinct.count)
 
-    logger.info("Diagnoses")
-    logger.info(diagnoses.count)
-    logger.info(diagnoses.distinct.count)
-    logger.info("classifications")
-    logger.info(classifications.count)
-    logger.info(classifications.distinct.count)
-    logger.info("outcomes")
-    logger.info(outcomes.count)
-    logger.info(outcomes.distinct.count)
-    logger.info("patients with outcomes")
-    logger.info(outcomes.select("patientID").distinct.count)
+    logger.info("Patients with outcomes")
+    logger.info("  count: " + outcomes.select("patientID").distinct.count)
 
-    diagnoses.write.mode(SaveMode.Overwrite).parquet("diagnoses")
-    classifications.write.mode(SaveMode.Overwrite).parquet("classification")
-    outcomes.write.mode(SaveMode.Overwrite).parquet("outcomes")
-    patients.write.mode(SaveMode.Overwrite).parquet("patients")
+    logger.info("Writing")
+    logger.info("  Diagnoses...")
+    diagnoses.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "diagnoses")
+    logger.info("  Classification...")
+    classifications.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "classification")
+    logger.info("  Outcomes...")
+    outcomes.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "outcomes")
+    logger.info("  Patients...")
+    patients.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "patients")
 
     Some(outcomes)
   }
