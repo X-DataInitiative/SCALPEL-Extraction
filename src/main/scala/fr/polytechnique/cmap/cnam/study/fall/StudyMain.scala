@@ -9,7 +9,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{Diagnoses, Diagnoses
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
-import fr.polytechnique.cmap.cnam.util.functions.makeTS
+import fr.polytechnique.cmap.cnam.util.functions._
 
 object StudyMain extends Main with FractureCodes {
 
@@ -44,7 +44,7 @@ object StudyMain extends Main with FractureCodes {
   object TestEnv extends Env {
     override val OutRootPath = "target/test/output/"
     val McoPath = "src/test/resources/test-input/MCO.parquet"
-    val McoCePath = ""
+    val McoCePath = null
     val DcirPath = "src/test/resources/test-input/DCIR.parquet"
     val IrImbPath = "src/test/resources/test-input/IR_IMB_R.parquet"
     val IrBenPath = "src/test/resources/test-input/IR_BEN_R.parquet"
@@ -92,15 +92,16 @@ object StudyMain extends Main with FractureCodes {
 
     val acts = new MedicalActs(
       MedicalActsConfig(
-        dcirCodes = GenericCCAMCodes,
-        mcoCECodes = GenericCCAMCodes
-      )).extract(source).cache()
+        dcirCodes = NonHospitalizedFracturesCcam,
+        mcoCECodes = NonHospitalizedFracturesCcam
+      )
+    ).extract(source).cache()
 
     logger.info("Outcomes")
     val hospitalizedOutcomes = HospitalizedFall.transform(diagnoses, classifications).cache()
     val privateOutcomes = PrivateAmbulatoryFall.transform(acts)
     val publicOutcomes = PublicAmbulatoryFall.transform(acts)
-    val outcomes = hospitalizedOutcomes.union(privateOutcomes).union(publicOutcomes)
+    val outcomes = unionDatasets(hospitalizedOutcomes, privateOutcomes, publicOutcomes)
     logger.info("  count: " + outcomes.count)
     logger.info("  count distinct: " + outcomes.distinct.count)
 

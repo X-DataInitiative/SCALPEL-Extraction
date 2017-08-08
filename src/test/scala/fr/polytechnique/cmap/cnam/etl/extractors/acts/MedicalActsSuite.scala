@@ -43,4 +43,8 @@ class MedicalActsSuite extends SharedContext {
     sources.dcir.get.show
     assertDSs(result, expected)
   }
+
+  "extract" should "find all medical acts in all sources, including MCO_CE" in {
+    // todo: add fake data for MCO_CE
+  }
 }

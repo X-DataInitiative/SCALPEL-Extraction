@@ -44,14 +44,14 @@ object Sources {
   def read(sqlContext: SQLContext, paths: InputPaths): Sources = {
     this.read(
       sqlContext,
-      paths.dcir,
-      paths.pmsiMco,
-      paths.pmsiHad,
-      paths.pmsiSsr,
-      paths.irBen,
-      paths.irImb,
-      paths.irPha,
-      paths.dosages
+      dcirPath = paths.dcir,
+      pmsiMcoPath = paths.pmsiMco,
+      //pmsiHadPath = paths.pmsiHad,
+      //pmsiSsrPath = paths.pmsiSsr,
+      irBenPath = paths.irBen,
+      irImbPath = paths.irImb,
+      irPhaPath = paths.irPha,
+      dosagesPath = paths.dosages
     )
   }
 }

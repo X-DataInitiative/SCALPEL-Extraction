@@ -14,14 +14,14 @@ object PrivateAmbulatoryFall extends OutcomeTransformer with FractureCodes {
 
   override val outcomeName: String = "private_ambulatory_fall"
 
+  def isPrivateAmbulatory(event: Event[MedicalAct]): Boolean = {
+    event.groupID == DcirAct.groupID.PrivateAmbulatory
+  }
+
   def containsNonHospitalizedCcam(event: Event[MedicalAct]): Boolean = {
     NonHospitalizedFracturesCcam.exists {
       code => event.value.startsWith(code)
     }
-  }
-
-  def isPrivateAmbulatory(event: Event[MedicalAct]): Boolean = {
-    event.groupID == DcirAct.groupID.PrivateAmbulatory
   }
 
   def transform(events: Dataset[Event[MedicalAct]]): Dataset[Event[Outcome]] = {

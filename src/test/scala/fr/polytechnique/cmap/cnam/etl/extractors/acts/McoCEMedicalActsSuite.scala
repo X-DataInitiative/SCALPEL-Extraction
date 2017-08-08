@@ -1,12 +1,11 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import java.sql.Date
-
+import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
+import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.McoCEAct
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
-import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
-import org.apache.spark.sql.types.{DateType, StringType, StructField, StructType}
 
 class McoCEMedicalActsSuite extends SharedContext {
 
@@ -29,7 +28,7 @@ class McoCEMedicalActsSuite extends SharedContext {
     assert(result)
   }
 
-  "extract" should "return correct acts" in {
+  "extract" should "return acts that starts with the given codes" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 

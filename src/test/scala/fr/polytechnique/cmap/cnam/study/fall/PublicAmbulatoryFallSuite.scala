@@ -28,12 +28,12 @@ class PublicAmbulatoryFallSuite extends SharedContext {
     assert(!result)
   }
 
-  "isCorrectCamCode" should "return true for correct events" in {
+  "containsNonHospitalizedCcam" should "return true for correct events" in {
     // Given
     val event = McoCEAct("georgette", "ACE", "MZMP007", makeTS(2010, 2, 6))
 
     // When
-    val result = PublicAmbulatoryFall.isCorrectCamCode(event)
+    val result = PublicAmbulatoryFall.containsNonHospitalizedCcam(event)
 
     // Then
     assert(result)
