@@ -11,7 +11,7 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 import org.apache.spark.sql.{Dataset, SQLContext, SaveMode}
 
-object StudyMain extends Main with FallStudyCodes{
+object StudyMain extends Main with FallStudyCodes {
 
   trait Env {
     val OutRootPath: String = ""
@@ -76,7 +76,7 @@ object StudyMain extends Main with FallStudyCodes{
     val patients = new Patients(PatientsConfig(env.RefDate)).extract(source).cache()
 
     logger.info("Diagnoses")
-    val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = GenericCIM10Codes)).extract(source).cache()
+    val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = HospitalizedFracturesCim10)).extract(source).cache()
     logger.info("  count: " + diagnoses.count)
     logger.info("  count distinct: " + diagnoses.distinct.count)
 
@@ -89,7 +89,7 @@ object StudyMain extends Main with FallStudyCodes{
     logger.info("Outcomes")
     val hospitalizedOutcomes = HospitalizedFall.transform(diagnoses, classifications).cache()
     val privateOutcomes = {
-      val acts = new MedicalActs(MedicalActsConfig(dcirCodes = GenericCCAMCodes)).extract(source)
+      val acts = new MedicalActs(MedicalActsConfig(dcirCodes = NonHospitalizedFracturesCcam)).extract(source)
       PrivateAmbulatoryFall.transform(acts)
     }
     val outcomes = hospitalizedOutcomes.union(privateOutcomes)

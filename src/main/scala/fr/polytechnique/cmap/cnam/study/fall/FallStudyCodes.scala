@@ -7,7 +7,7 @@ package fr.polytechnique.cmap.cnam.study.fall
 
 
 trait FallStudyCodes {
-  val GenericCIM10Codes = List(
+  val HospitalizedFracturesCim10 = List(
     "S02",
     "S12",
     "S22",
@@ -28,7 +28,7 @@ trait FallStudyCodes {
     "M80"
   )
 
-  val GenericCCAMCodes = List(
+  val NonHospitalizedFracturesCcam = List(
     "MZMP007",
     "MZMP013",
     "MZMP004",

@@ -6,16 +6,28 @@ import fr.polytechnique.cmap.cnam.util.functions._
 
 class PrivateAmbulatoryFallSuite extends SharedContext {
 
-  "isCorrectCamCode" should "return true for correct even" in {
+  "containsNonHospitalizedCcam" should "return true if the event value is in the list of codes" in {
     // Given
-    val GHSCode = "NBEP002"
-    val event = DcirAct("george", "stupidcode", GHSCode, makeTS(2007,1,1))
+    val eventCode = "NBEP002"
+    val event = DcirAct("george", "stupidcode", eventCode, makeTS(2007,1,1))
 
     // When
-    val result = PrivateAmbulatoryFall.isCorrectCamCode(event)
+    val result = PrivateAmbulatoryFall.containsNonHospitalizedCcam(event)
 
     // Then
     assert(result)
+  }
+
+  it should "return false otherwise" in {
+    // Given
+    val eventCode = "Weird Code"
+    val event = DcirAct("george", "stupidcode", eventCode, makeTS(2007,1,1))
+
+    // When
+    val result = PrivateAmbulatoryFall.containsNonHospitalizedCcam(event)
+
+    // Then
+    assert(!result)
   }
 
   "isPrivateAmbulatory" should "return true for correct even" in {

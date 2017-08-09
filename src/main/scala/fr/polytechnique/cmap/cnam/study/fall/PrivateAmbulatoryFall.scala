@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
 import org.apache.spark.sql.Dataset
-
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
 
@@ -10,12 +9,14 @@ import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
  * https://datainitiative.atlassian.net/wiki/spaces/CFC/pages/61282101/General+fractures+Fall+study
  */
 
-object PrivateAmbulatoryFall extends OutcomeTransformer with FallStudyCodes{
+object PrivateAmbulatoryFall extends OutcomeTransformer with FallStudyCodes {
 
   override val outcomeName: String = "private_ambulatory_fall"
 
-  def isCorrectCamCode(event: Event[MedicalAct]): Boolean = {
-    GenericCCAMCodes.map(event.value.startsWith).exists(identity)
+  def containsNonHospitalizedCcam(event: Event[MedicalAct]): Boolean = {
+    NonHospitalizedFracturesCcam.exists {
+      code => event.value.startsWith(code)
+    }
   }
 
   def isPrivateAmbulatory(event: Event[MedicalAct]): Boolean = {
@@ -27,9 +28,8 @@ object PrivateAmbulatoryFall extends OutcomeTransformer with FallStudyCodes{
 
     events
       .filter(isPrivateAmbulatory _)
-      .filter(isCorrectCamCode _)
-      .map(event =>
-      Outcome(event.patientID, outcomeName, event.start))
+      .filter(containsNonHospitalizedCcam _)
+      .map(event => Outcome(event.patientID, outcomeName, event.start))
   }
 
 }

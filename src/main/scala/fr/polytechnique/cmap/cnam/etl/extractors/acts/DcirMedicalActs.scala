@@ -25,17 +25,17 @@ private[acts] object DcirMedicalActs {
     r.getAs[Double](ColNames.InstitutionCode)
   }
 
-  def getStatus(r: Row): String = {
+  def getGroupId(r: Row): String = {
     val ghs = getGHS(r)
     val code = getInstitutionCode(r)
-    if (ghs == 0){
-      if (PrivateInstitutionCodes.contains(code)) {
-        DcirAct.groupID.PrivateAmbulatory
-      } else {
-        DcirAct.groupID.PublicAmbulatory
-      }
-    } else {
+    if (ghs != 0) {
       DcirAct.groupID.PrivateHospital
+    }
+    else if (PrivateInstitutionCodes.contains(code)) {
+      DcirAct.groupID.PrivateAmbulatory
+    }
+    else {
+      DcirAct.groupID.PublicAmbulatory
     }
   }
 
@@ -57,7 +57,7 @@ private[acts] object DcirMedicalActs {
       case Some(code) => Some(
         DcirAct(
           patientID = r.getAs[String](ColNames.PatientID),
-          groupID = getStatus(r),
+          groupID = getGroupId(r),
           code = code,
           date = r.getAs[java.util.Date](ColNames.Date).toTimestamp
         )

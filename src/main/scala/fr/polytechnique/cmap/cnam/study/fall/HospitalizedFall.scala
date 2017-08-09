@@ -21,7 +21,7 @@ object HospitalizedFall extends OutcomeTransformer with FallStudyCodes {
   }
 
   def isFractureDiagnosis(event: Event[Diagnosis]): Boolean = {
-    isInCodeList(event, GenericCIM10Codes)
+    isInCodeList(event, HospitalizedFracturesCim10)
   }
 
   def isMainDiagnosis(event: Event[Diagnosis]): Boolean = {

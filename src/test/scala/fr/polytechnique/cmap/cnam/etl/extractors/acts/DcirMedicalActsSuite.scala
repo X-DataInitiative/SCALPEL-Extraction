@@ -88,7 +88,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = DcirAct.groupID.PrivateAmbulatory
 
     // When
-    val result = DcirMedicalActs.getStatus(input)
+    val result = DcirMedicalActs.getGroupId(input)
 
     // Then
     assert(result == expected)
@@ -106,7 +106,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = DcirAct.groupID.PublicAmbulatory
 
     // When
-    val result = DcirMedicalActs.getStatus(input)
+    val result = DcirMedicalActs.getGroupId(input)
 
     // Then
     assert(result == expected)
@@ -124,7 +124,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = DcirAct.groupID.PrivateHospital
 
     // When
-    val result = DcirMedicalActs.getStatus(input)
+    val result = DcirMedicalActs.getGroupId(input)
 
     // Then
     assert(result == expected)
