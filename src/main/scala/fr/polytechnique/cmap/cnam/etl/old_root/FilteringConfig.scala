@@ -70,7 +70,8 @@ object FilteringConfig {
     coxFeatures: String,
     ltsccsFeatures: String,
     mlppFeatures: String,
-    NaiveBladderCancerOutcomes: String
+    CancerOutcomes: String,
+    exposures: String
   )
 
   case class Limits(
@@ -126,7 +127,8 @@ object FilteringConfig {
     coxFeatures = conf.getString("paths.output.cox_features"),
     ltsccsFeatures = conf.getString("paths.output.ltsccs_features"),
     mlppFeatures = conf.getString("paths.output.mlpp_features"),
-    NaiveBladderCancerOutcomes = conf.getString("paths.output.naive_bladder_cancer_outcomes")
+    CancerOutcomes = conf.getString("paths.output.cancer_outcomes"),
+    exposures = conf.getString("paths.output.exposures")
   )
   lazy val limits = Limits(
     minYear = conf.getInt("limits.min_year"),
