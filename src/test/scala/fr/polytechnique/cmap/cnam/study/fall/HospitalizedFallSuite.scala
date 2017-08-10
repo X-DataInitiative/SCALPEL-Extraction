@@ -78,7 +78,7 @@ class HospitalizedFallSuite extends SharedContext{
 
   "isBadGHM" should "return yes for correct GHM code" in {
     // Given
-    val event = GHMClassification("Pierre", "3", "MZMP007", makeTS(2017, 7, 18))
+    val event = GHMClassification("Pierre", "3", "08C14", makeTS(2017, 7, 18))
 
     // When
     val result = HospitalizedFall.isBadGHM(event)
@@ -125,7 +125,7 @@ class HospitalizedFallSuite extends SharedContext{
     ).toDS
 
     val classification = Seq(
-      GHMClassification("Paul", "1", "MZMP007", makeTS(2017, 7, 20))
+      GHMClassification("Paul", "1", "08C14", makeTS(2017, 7, 20))
     ).toDS
 
     val expected = Seq(
