@@ -69,7 +69,6 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
       val window = Window.partitionBy("patientId")
 
       val hadDisease: Column = (col("category") === Outcome.category) &&
-        (col("value") === "targetDisease") &&
         (col("startBucket") < minColumn(col("endBucket"), lit(bucketCount)))
 
       val diseaseBucket: Column = min(when(hadDisease, col("startBucket"))).over(window)
