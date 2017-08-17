@@ -107,7 +107,7 @@ object PioglitazoneMain extends Main {
     logger.info("Extracting Follow-up...")
     val patiensWithObservations = patients.joinWith(observations, patients.col("patientId") === observations.col("patientId"))
 
-    val followups = new FollowUpTransformer(delay = 3, firstTargetDisease =  true, Some("cancer"))
+    val followups = new FollowUpTransformer(configPIO.start_delay, firstTargetDisease =  true, Some("cancer"))
       .transform(patiensWithObservations, drugEvents, outcomes, tracklosses)
       .cache()
 

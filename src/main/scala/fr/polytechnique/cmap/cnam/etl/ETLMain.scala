@@ -8,10 +8,11 @@ import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.Diagnoses
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.Patients
 import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
-import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.study.pioglitazone.NaiveBladderCancer
+import fr.polytechnique.cmap.cnam.study.StudyConfig
+import fr.polytechnique.cmap.cnam.study.pioglitazone.{NaiveBladderCancer, PioglitazoneConfig}
 import fr.polytechnique.cmap.cnam.util.functions._
 
 /**
@@ -44,8 +45,8 @@ object ETLMain extends Main {
       return Some(events)
     }
 
-    val inputPaths: InputPaths = FilteringConfig.inputPaths
-    val outputPaths: OutputPaths = FilteringConfig.outputPaths
+    val inputPaths: InputPaths = StudyConfig.inputPaths
+    val outputPaths: OutputPaths = StudyConfig.outputPaths
     val extractionConfig: ExtractionConfig = ExtractionConfig.init()
 
     logger.info("Input Paths: " + inputPaths.toString)

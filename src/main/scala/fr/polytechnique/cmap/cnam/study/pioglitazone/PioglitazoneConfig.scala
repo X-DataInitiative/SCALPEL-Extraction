@@ -16,7 +16,7 @@ object PioglitazoneConfig {
     val sqlContext = SQLContext.getOrCreate(SparkContext.getOrCreate())
     val configPath: String = sqlContext.getConf("conf", "")
     val environment: String = sqlContext.getConf("env", "test")
-    ConfigFactory.parseResources("config/pio/pioglitazone.conf").resolve().getConfig(environment)
+    ConfigFactory.parseResources("config/pioglitazone/pioglitazone.conf").resolve().getConfig(environment)
   }
 
   case class PioglitazoneParams(
@@ -46,15 +46,15 @@ object PioglitazoneConfig {
     extends CaseClassConfig
 
   lazy val pioglitazoneParameters = PioglitazoneParams(
-    min_purchases = conf.getInt(""),
-    start_delay = conf.getInt(""),
-    purchases_window = conf.getInt(""),
-    only_first = conf.getBoolean(""),
-    filter_never_sick_patients = conf.getBoolean(""),
-    filter_lost_patients = conf.getBoolean(""),
-    filter_diagnosed_patients = conf.getBoolean(""),
-    diagnosed_patients_threshold = conf.getInt(""),
-    filter_delayed_entries = conf.getBoolean(""),
-    delayed_entry_threshold = conf.getInt("")
+    min_purchases = conf.getInt("min_purchases"),
+    start_delay = conf.getInt("start_delay"),
+    purchases_window = conf.getInt("purchases_window"),
+    only_first = conf.getBoolean("only_first"),
+    filter_never_sick_patients = conf.getBoolean("filter_never_sick_patients"),
+    filter_lost_patients = conf.getBoolean("filter_lost_patients"),
+    filter_diagnosed_patients = conf.getBoolean("filter_diagnosed_patients"),
+    diagnosed_patients_threshold = conf.getInt("diagnosed_patients_threshold"),
+    filter_delayed_entries = conf.getBoolean("filter_delayed_entries"),
+    delayed_entry_threshold = conf.getInt("delayed_entry_threshold")
   )
 }
