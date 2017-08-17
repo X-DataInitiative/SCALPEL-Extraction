@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl
 
 import org.apache.spark.sql.{Dataset, SQLContext}
-import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig.InputPaths
+import fr.polytechnique.cmap.cnam.study.StudyConfig.InputPaths
 import fr.polytechnique.cmap.cnam.etl.old_root._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources._
