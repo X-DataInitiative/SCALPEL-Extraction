@@ -28,8 +28,8 @@ object PioglitazoneConfig {
     codesMapDP: List[String] = List("C67", "C77", "C78", "C79"),
     codesMapDR: List[String] = List("C67", "C77", "C78", "C79"),
     codesMapDA: List[String] = List("C67"),
-    imbDiagnosisCodes: List[String] = List("C67"),
-                            )
+    imbDiagnosisCodes: List[String] = List("C67"))
+
   case class MedicalActParams(
     dcirMedicalActCodes: List[String] = List(),
     mcoCIM10MedicalActCodes: List[String] = List(),
@@ -46,7 +46,7 @@ object PioglitazoneConfig {
     min_purchases: Int = 1, // 1 or 2
     start_delay: Int = 0, // can vary from 0 to 3
     purchases_window: Int = 0, // always 0
-    only_first: Boolean = false, /* can be always false and handled in python / C++, but not soon*/)
+    only_first: Boolean = false /* can be always false and handled in python / C++, but not soon*/)
 
   case class PioParams(
     drugs: DrugsParams = DrugsParams(),
