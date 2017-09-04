@@ -51,24 +51,24 @@ object PioglitazoneMain extends Main {
     val sources: Sources = sqlContext.readSources(inputPaths)
 
     logger.info("Extracting patients...")
-    val patientsConfig = PatientsConfig(configPIO.ageReferenceDate)
+    val patientsConfig = PatientsConfig(configPIO.study.ageReferenceDate)
     val patients: Dataset[Patient] = new Patients(patientsConfig).extract(sources).cache()
 
     logger.info("Extracting molecule events...")
-    val moleculesConfig = MoleculePurchasesConfig(drugClasses = configPIO.drugCategories)
+    val moleculesConfig = MoleculePurchasesConfig(drugClasses = configPIO.drugs.drugCategories)
     val drugEvents: Dataset[Event[Molecule]] = new MoleculePurchases(moleculesConfig).extract(sources).cache()
 
     logger.info("Extracting diagnosis events...")
-    val diagnosesConfig = DiagnosesConfig(configPIO.imbDiagnosisCodes,
-      configPIO.codesMapDP,
-      configPIO.codesMapDR,
-      configPIO.codesMapDA)
+    val diagnosesConfig = DiagnosesConfig(configPIO.diagnoses.imbDiagnosisCodes,
+      configPIO.diagnoses.codesMapDP,
+      configPIO.diagnoses.codesMapDR,
+      configPIO.diagnoses.codesMapDA)
 
     logger.info("Extracting medical acts...")
     val medicalActConfig = MedicalActsConfig(
-      configPIO.dcirMedicalActCodes,
-      configPIO.mcoCIM10MedicalActCodes,
-      configPIO.mcoCCAMMedicalActCodes)
+      configPIO.medicalActs.dcirMedicalActCodes,
+      configPIO.medicalActs.mcoCIM10MedicalActCodes,
+      configPIO.medicalActs.mcoCCAMMedicalActCodes)
     val medicalActs = new MedicalActs(medicalActConfig).extract(sources)
 
     val diseaseEvents: Dataset[Event[Diagnosis]] = new Diagnoses(diagnosesConfig).extract(sources).cache()
@@ -80,7 +80,7 @@ object PioglitazoneMain extends Main {
     )
 
     logger.info("Extracting Tracklosses...")
-    val tracklossConfig = TracklossesConfig(studyEnd = configPIO.lastDate)
+    val tracklossConfig = TracklossesConfig(studyEnd = configPIO.study.lastDate)
     val tracklosses = new Tracklosses(tracklossConfig).extract(sources).cache()
 
     logger.info("Writing patients...")
@@ -90,7 +90,7 @@ object PioglitazoneMain extends Main {
     allEvents.toDF.write.parquet(outputPaths.flatEvents)
 
     logger.info("Extracting cancer outcomes...")
-    val outcomes = configPIO.cancerDefinition match {
+    val outcomes = configPIO.study.cancerDefinition match {
       case "broad" => BroadBladderCancer.transform(diseaseEvents)
       case "naive" => NaiveBladderCancer.transform(diseaseEvents)
       case "narrow" => NarrowBladderCancer.transform(diseaseEvents, medicalActs)
@@ -100,14 +100,14 @@ object PioglitazoneMain extends Main {
     outcomes.toDF.write.parquet(outputPaths.CancerOutcomes)
 
     logger.info("Extracting Observations...")
-    val observations = new ObservationPeriodTransformer(configPIO.studyStart, configPIO.studyEnd)
+    val observations = new ObservationPeriodTransformer(configPIO.study.studyStart, configPIO.study.studyEnd)
       .transform(allEvents)
       .cache()
 
     logger.info("Extracting Follow-up...")
     val patiensWithObservations = patients.joinWith(observations, patients.col("patientId") === observations.col("patientId"))
 
-    val followups = new FollowUpTransformer(configPIO.start_delay, firstTargetDisease =  true, Some("cancer"))
+    val followups = new FollowUpTransformer(configPIO.drugs.start_delay, firstTargetDisease =  true, Some("cancer"))
       .transform(patiensWithObservations, drugEvents, outcomes, tracklosses)
       .cache()
 
@@ -115,7 +115,7 @@ object PioglitazoneMain extends Main {
     val patientsWithFollowups = patients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
 
     val exposureDef = ExposureDefinition(
-    studyStart = configPIO.studyStart,
+    studyStart = configPIO.study.studyStart,
     filterDelayedPatients = false,
     diseaseCode = "C67")
     val exposures = new ExposuresTransformer(exposureDef)

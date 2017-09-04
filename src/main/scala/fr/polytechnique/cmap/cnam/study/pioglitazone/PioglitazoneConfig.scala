@@ -46,51 +46,30 @@ object PioglitazoneConfig {
     min_purchases: Int = 1, // 1 or 2
     start_delay: Int = 0, // can vary from 0 to 3
     purchases_window: Int = 0, // always 0
-    only_first: Boolean = false /* can be always false and handled in python / C++, but not soon*/)
+    only_first: Boolean = false /* can be always false and handled in python / C++, but not soon*/,
+    drugCategories: List[String] = List("A10"))
 
-  case class PioParams(
+  case class PioglitazoneParams(
     drugs: DrugsParams = DrugsParams(),
     medicalActs: MedicalActParams = MedicalActParams(),
     diagnoses: DiagnosesParams = DiagnosesParams(),
     study: StudyParams = StudyParams(),
     filters: FiltersParams = FiltersParams())
-
-  case class PioglitazoneParams(
-    dcirMedicalActCodes: List[String] = List(),
-    mcoCIM10MedicalActCodes: List[String] = List(),
-    mcoCCAMMedicalActCodes: List[String] = List(),
-    imbDiagnosisCodes: List[String] = List("C67"),
-    ageReferenceDate: java.sql.Timestamp = makeTS(2006, 12, 31, 23, 59, 59),
-    drugCategories: List[String] = List("A10"),
-    lastDate: java.sql.Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
-    studyStart:  java.sql.Timestamp = makeTS(2006, 1, 1),
-    studyEnd:  java.sql.Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
-    cancerDefinition: String = "broad",
-    codesMapDP: List[String] = List("C67", "C77", "C78", "C79"),
-    codesMapDR: List[String] = List("C67", "C77", "C78", "C79"),
-    codesMapDA: List[String] = List("C67"),
-    min_purchases: Int = 1, // 1 or 2
-    start_delay: Int = 0, // can vary from 0 to 3
-    purchases_window: Int = 0, // always 0
-    only_first: Boolean = false, // can be always false and handled in python / C++, but not soon
-    filter_never_sick_patients: Boolean = false, // always true
-    filter_lost_patients: Boolean = false, //keep it
-    filter_diagnosed_patients: Boolean = true, // keep it
-    diagnosed_patients_threshold: Int = 6, // keep it, maybe remove the previous one and set false when this param is 0
-    filter_delayed_entries: Boolean = true, // keep it
-    delayed_entry_threshold: Int = 12 /* keep it, maybe remove the previous one and set false when this param is 0*/)
     extends CaseClassConfig
 
-  lazy val pioglitazoneParameters = PioglitazoneParams(
-    min_purchases = conf.getInt("min_purchases"),
-    start_delay = conf.getInt("start_delay"),
-    purchases_window = conf.getInt("purchases_window"),
-    only_first = conf.getBoolean("only_first"),
-    filter_never_sick_patients = conf.getBoolean("filter_never_sick_patients"),
-    filter_lost_patients = conf.getBoolean("filter_lost_patients"),
-    filter_diagnosed_patients = conf.getBoolean("filter_diagnosed_patients"),
-    diagnosed_patients_threshold = conf.getInt("diagnosed_patients_threshold"),
-    filter_delayed_entries = conf.getBoolean("filter_delayed_entries"),
-    delayed_entry_threshold = conf.getInt("delayed_entry_threshold")
-  )
+
+    lazy val pioglitazoneParameters = PioglitazoneParams(
+      drugs = DrugsParams(min_purchases = conf.getInt("min_purchases"),
+        start_delay = conf.getInt("start_delay"),
+        only_first = conf.getBoolean("only_first"),
+        purchases_window = conf.getInt("purchases_window")),
+      filters = FiltersParams(
+        filter_never_sick_patients = conf.getBoolean("filter_never_sick_patients"),
+        filter_lost_patients = conf.getBoolean("filter_lost_patients"),
+        filter_diagnosed_patients = conf.getBoolean("filter_diagnosed_patients"),
+        diagnosed_patients_threshold = conf.getInt("diagnosed_patients_threshold"),
+        filter_delayed_entries = conf.getBoolean("filter_delayed_entries")
+       ),
+      study = StudyParams(delayed_entry_threshold = conf.getInt("delayed_entry_threshold")))
+
 }
