@@ -7,9 +7,10 @@ import fr.polytechnique.cmap.cnam.etl._
 import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.Patients
-import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.study.StudyConfig
 import fr.polytechnique.cmap.cnam.util.functions._
 
 object FilteringMain extends Main {
@@ -45,8 +46,8 @@ object FilteringMain extends Main {
       return Some(flatEvents)
     }
 
-    val inputPaths: InputPaths = FilteringConfig.inputPaths
-    val outputPaths: OutputPaths = FilteringConfig.outputPaths
+    val inputPaths: InputPaths = StudyConfig.inputPaths
+    val outputPaths: OutputPaths = StudyConfig.outputPaths
     val cancerDefinition: String = FilteringConfig.cancerDefinition
     val extractionConfig: ExtractionConfig = ExtractionConfig.init()
 

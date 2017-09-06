@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
 import org.apache.spark.sql.{DataFrame, SQLContext}
-import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig.InputPaths
+import fr.polytechnique.cmap.cnam.study.StudyConfig.InputPaths
 
 class Sources(
     val dcir: Option[DataFrame] = None,
