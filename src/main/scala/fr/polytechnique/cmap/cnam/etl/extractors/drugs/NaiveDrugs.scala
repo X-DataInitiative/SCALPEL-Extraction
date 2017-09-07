@@ -5,19 +5,19 @@ import org.apache.spark.sql.types.{StringType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
 
-object NaiveDefinition {
-  def apply(dcir: DataFrame, drugConfig: DrugConfig): NaiveDefinition = {
-    new NaiveDefinition(dcir, drugConfig)
+object NaiveDrugs {
+  def apply(dcir: DataFrame, drugConfig: DrugConfig): NaiveDrugs = {
+    new NaiveDrugs(dcir, drugConfig)
   }
 }
 
-class NaiveDefinition(dcir: DataFrame, drugConfig: DrugConfig) {
+class NaiveDrugs(dcir: DataFrame, drugConfig: DrugConfig) extends DrugPurchases {
+
+  val drugName: String = drugConfig.name
+  val drugCodes: List[String] = drugConfig.cip13Codes
+  val drugDosage: Double = 0.0
 
   def extract: Dataset[Event[Drug]] = {
-
-    val drugName: String = drugConfig.name
-    val drugCodes: List[String] = drugConfig.cip13Codes
-    val drugDosage: Double = 0.0
 
     val neededColumns: List[Column] = List(
       col("NUM_ENQ").cast(StringType).as("patientID"),
@@ -27,9 +27,9 @@ class NaiveDefinition(dcir: DataFrame, drugConfig: DrugConfig) {
 
     val sqlCtx = dcir.sqlContext
     import sqlCtx.implicits._
+
     dcir
       .select(neededColumns: _*)
-//      .where(col("eventDate").isNotNull)
       .na.drop(Seq("eventDate", "CIP13"))
       .where(col("CIP13").isin(drugCodes: _*))
       .withColumn("drugName", lit(drugName))

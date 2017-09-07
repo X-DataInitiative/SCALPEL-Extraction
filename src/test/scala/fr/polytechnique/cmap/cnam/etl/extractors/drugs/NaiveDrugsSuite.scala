@@ -3,11 +3,10 @@ package fr.polytechnique.cmap.cnam.etl.extractors.drugs
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
-import fr.polytechnique.cmap.cnam.study.fall._
 import fr.polytechnique.cmap.cnam.study.fall.codes.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class NaiveDefinitionSuite extends SharedContext {
+class NaiveDrugsSuite extends SharedContext {
 
   "extract" should "work correctly based on the DrugConfig" in {
 
@@ -34,7 +33,7 @@ class NaiveDefinitionSuite extends SharedContext {
     val drugConfig: DrugConfig = Antidepresseurs
 
     // When
-    val result = NaiveDefinition(inputDF, drugConfig).extract
+    val result = NaiveDrugs(inputDF, drugConfig).extract
 
     // Then
     assertDSs(result, expected)
@@ -59,7 +58,7 @@ class NaiveDefinitionSuite extends SharedContext {
     val drugConfig: DrugConfig = Neuroleptiques
 
     // When
-    val result = NaiveDefinition(inputDF, drugConfig).extract
+    val result = NaiveDrugs(inputDF, drugConfig).extract
 
     // Then
     assertDSs(result, expected)
@@ -84,7 +83,7 @@ class NaiveDefinitionSuite extends SharedContext {
     val drugConfig: DrugConfig = Hypnotiques
 
     // When
-    val result = NaiveDefinition(inputDF, drugConfig).extract
+    val result = NaiveDrugs(inputDF, drugConfig).extract
 
     // Then
     assertDSs(result, expected)
@@ -108,7 +107,7 @@ class NaiveDefinitionSuite extends SharedContext {
     val drugConfig: DrugConfig = Antihypertenseurs
 
     // When
-    val result = NaiveDefinition(inputDF, drugConfig).extract
+    val result = NaiveDrugs(inputDF, drugConfig).extract
 
     // Then
     assertDSs(result, expected)

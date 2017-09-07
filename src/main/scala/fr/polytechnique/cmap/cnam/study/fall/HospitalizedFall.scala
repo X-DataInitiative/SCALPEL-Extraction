@@ -4,6 +4,7 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
+import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
 
 /*
  * The rules for this Outcome definition can be found on the following page:
@@ -12,7 +13,7 @@ import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
 
 case class HospitalStay(patientID: String, id: String)
 
-object HospitalizedFall extends OutcomeTransformer with FallStudyCodes {
+object HospitalizedFall extends OutcomeTransformer with FractureCodes {
 
   override val outcomeName: String = "hospitalized_fall"
 
