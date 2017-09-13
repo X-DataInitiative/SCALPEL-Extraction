@@ -1,17 +1,17 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
 import java.sql.Timestamp
-
+import org.apache.spark.sql.{Dataset, SQLContext, SaveMode}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.{MedicalActs, MedicalActsConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GHMClassifications
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{Diagnoses, DiagnosesConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
-import org.apache.spark.sql.{Dataset, SQLContext, SaveMode}
 
-object StudyMain extends Main with FallStudyCodes {
+object StudyMain extends Main with FractureCodes {
 
   trait Env {
     val OutRootPath: String = ""

@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.study.fall
+package fr.polytechnique.cmap.cnam.study.fall.codes
 
 /*
  * The codes needed for this study's outcomes are listed in Confluence.
@@ -6,7 +6,7 @@ package fr.polytechnique.cmap.cnam.study.fall
  */
 
 
-trait FallStudyCodes {
+trait FractureCodes {
   val HospitalizedFracturesCim10 = List(
     "S02",
     "S12",

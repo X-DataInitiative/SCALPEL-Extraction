@@ -1,10 +1,17 @@
 package fr.polytechnique.cmap.cnam.etl.old_root.exposures
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.old_root.FlatEvent
+import fr.polytechnique.cmap.cnam.etl.old_root.{FilteringConfig, FlatEvent}
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class ExposuresTransformerSuite extends SharedContext {
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    val c = FilteringConfig.getClass.getDeclaredConstructor()
+    c.setAccessible(true)
+    c.newInstance()
+  }
 
   "transform" should "return a valid Dataset for a known input" in {
 
