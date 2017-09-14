@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
+import java.sql.Date
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
@@ -45,6 +46,50 @@ class MedicalActsSuite extends SharedContext {
   }
 
   "extract" should "find all medical acts in all sources, including MCO_CE" in {
-    // todo: add fake data for MCO_CE
+
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+
+    val config = MedicalActsConfig(
+      dcirCodes = List("ABCD123"),
+      mcoCIMCodes = List("C670", "C671"),
+      mcoCCAMCodes = List("AAAA123"),
+      mcoCECodes = List("angi")
+    )
+
+    val mcoCE = {
+      val date = new Date(makeTS(2003, 2, 1).getTime)
+      Seq(
+        ("george", "coloscopie", date),
+        ("georgette", "angine", date)
+      ).toDF("NUM_ENQ", "MCO_FMSTC__CCAM_COD", "EXE_SOI_DTD")
+    }
+
+    val sources = {
+      val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
+      val dcir = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
+      new Sources(pmsiMco = Some(mco), pmsiMcoCE = Some(mcoCE), dcir = Some(dcir))
+    }
+
+    val expected = List(
+      McoCIM10Act("Patient_02", "10000123_10000543_2006", "C671", makeTS(2005, 12, 24)),
+      McoCIM10Act("Patient_02", "10000123_10000987_2006", "C670", makeTS(2005, 12, 29)),
+      McoCCAMAct("Patient_02", "10000123_10000987_2006", "AAAA123", makeTS(2005, 12, 29)),
+      McoCIM10Act("Patient_02", "10000123_20000123_2007", "C670", makeTS(2007, 1, 29)),
+      McoCCAMAct("Patient_02", "10000123_20000123_2007", "AAAA123", makeTS(2007, 1, 29)),
+      McoCIM10Act("Patient_02", "10000123_20000345_2007", "C671", makeTS(2007, 1, 29)),
+      McoCIM10Act("Patient_02", "10000123_30000546_2008", "C670", makeTS(2008, 3, 8)),
+      McoCCAMAct("Patient_02", "10000123_30000546_2008", "AAAA123", makeTS(2008, 3, 8)),
+      McoCIM10Act("Patient_02", "10000123_30000852_2008", "C671", makeTS(2008, 3, 15)),
+      McoCEAct("georgette", "ACE", "angine", makeTS(2003, 2, 1))
+    ).toDS
+
+    // When
+    val result = new MedicalActs(config).extract(sources)
+
+    // Then
+    assertDSs(expected, result)
   }
 }
