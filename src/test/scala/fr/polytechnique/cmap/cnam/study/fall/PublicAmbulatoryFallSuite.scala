@@ -44,13 +44,13 @@ class PublicAmbulatoryFallSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val events = List(
+    val events = Seq(
       McoCEAct("georgette", "ACE", "MZMP007", makeTS(2010, 2, 6)),
       McoCEAct("george", "ACE", "whatever", makeTS(2010, 2, 6)),
       DcirAct("john", "ACE", "MZMP007", makeTS(2010, 2, 6))
     ).toDS
 
-    val expected = List(
+    val expected = Seq(
       Outcome("georgette", PublicAmbulatoryFall.outcomeName, makeTS(2010, 2, 6))
     ).toDS
 

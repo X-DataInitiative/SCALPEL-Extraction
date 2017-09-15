@@ -14,7 +14,7 @@ import fr.polytechnique.cmap.cnam.util.functions._
 object StudyMain extends Main with FractureCodes {
 
   trait Env {
-    val OutRootPath: String = ""
+    val FeaturingPath: String
     val McoPath: String
     val McoCePath: String
     val DcirPath: String
@@ -24,6 +24,7 @@ object StudyMain extends Main with FractureCodes {
   }
 
   object CmapEnv extends Env {
+    override val FeaturingPath = "/shared/Observapur/featuring/"
     val McoPath = "/shared/Observapur/staging/Flattening/flat_table/MCO"
     val McoCePath = "/shared/Observapur/staging/Flattening/flat_table/MCO_ACE"
     val DcirPath = "/shared/Observapur/staging/Flattening/flat_table/DCIR"
@@ -33,6 +34,7 @@ object StudyMain extends Main with FractureCodes {
   }
 
   object FallEnv extends Env {
+    override val FeaturingPath = "/shared/fall/featuring/"
     val McoPath = "/shared/fall/staging/flattening/flat_table/MCO"
     val McoCePath = "/shared/fall/staging/flattening/flat_table/MCO_ACE"
     val DcirPath = "/shared/fall/staging/flattening/flat_table/DCIR"
@@ -42,7 +44,7 @@ object StudyMain extends Main with FractureCodes {
   }
 
   object TestEnv extends Env {
-    override val OutRootPath = "target/test/output/"
+    override val FeaturingPath = "target/test/output/"
     val McoPath = "src/test/resources/test-input/MCO.parquet"
     val McoCePath = null
     val DcirPath = "src/test/resources/test-input/DCIR.parquet"
@@ -110,13 +112,13 @@ object StudyMain extends Main with FractureCodes {
 
     logger.info("Writing")
     logger.info("  Diagnoses...")
-    diagnoses.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "diagnoses")
+    diagnoses.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "diagnoses")
     logger.info("  Classification...")
-    classifications.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "classification")
+    classifications.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "classification")
     logger.info("  Outcomes...")
-    outcomes.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "outcomes")
+    outcomes.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "outcomes")
     logger.info("  Patients...")
-    patients.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "patients")
+    patients.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "patients")
 
     Some(outcomes)
   }
