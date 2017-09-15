@@ -9,13 +9,14 @@ import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{Diagnoses, Diagnoses
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
-import fr.polytechnique.cmap.cnam.util.functions.makeTS
+import fr.polytechnique.cmap.cnam.util.functions._
 
 object StudyMain extends Main with FractureCodes {
 
   trait Env {
-    val OutRootPath: String = ""
+    val FeaturingPath: String
     val McoPath: String
+    val McoCePath: String
     val DcirPath: String
     val IrImbPath: String
     val IrBenPath: String
@@ -23,7 +24,9 @@ object StudyMain extends Main with FractureCodes {
   }
 
   object CmapEnv extends Env {
+    override val FeaturingPath = "/shared/Observapur/featuring/"
     val McoPath = "/shared/Observapur/staging/Flattening/flat_table/MCO"
+    val McoCePath = "/shared/Observapur/staging/Flattening/flat_table/MCO_ACE"
     val DcirPath = "/shared/Observapur/staging/Flattening/flat_table/DCIR"
     val IrImbPath = "/shared/Observapur/staging/Flattening/single_table/IR_IMB_R"
     val IrBenPath = "/shared/Observapur/staging/Flattening/single_table/IR_BEN_R"
@@ -31,7 +34,9 @@ object StudyMain extends Main with FractureCodes {
   }
 
   object FallEnv extends Env {
+    override val FeaturingPath = "/shared/fall/featuring/"
     val McoPath = "/shared/fall/staging/flattening/flat_table/MCO"
+    val McoCePath = "/shared/fall/staging/flattening/flat_table/MCO_ACE"
     val DcirPath = "/shared/fall/staging/flattening/flat_table/DCIR"
     val IrImbPath = "/shared/fall/staging/flattening/single_table/IR_IMB_R"
     val IrBenPath = "/shared/fall/staging/flattening/single_table/IR_BEN_R"
@@ -39,8 +44,9 @@ object StudyMain extends Main with FractureCodes {
   }
 
   object TestEnv extends Env {
-    override val OutRootPath = "target/test/output/"
+    override val FeaturingPath = "target/test/output/"
     val McoPath = "src/test/resources/test-input/MCO.parquet"
+    val McoCePath = null
     val DcirPath = "src/test/resources/test-input/DCIR.parquet"
     val IrImbPath = "src/test/resources/test-input/IR_IMB_R.parquet"
     val IrBenPath = "src/test/resources/test-input/IR_BEN_R.parquet"
@@ -53,7 +59,8 @@ object StudyMain extends Main with FractureCodes {
       irImbPath = env.IrImbPath,
       irBenPath = env.IrBenPath,
       dcirPath = env.DcirPath,
-      pmsiMcoPath = env.McoPath
+      pmsiMcoPath = env.McoPath,
+      pmsiMcoCEPath = env.McoCePath
     )
   }
 
@@ -85,14 +92,18 @@ object StudyMain extends Main with FractureCodes {
     logger.info("  count: " + classifications.count)
     logger.info("  count distinct: " + classifications.distinct.count)
 
+    val acts = new MedicalActs(
+      MedicalActsConfig(
+        dcirCodes = NonHospitalizedFracturesCcam,
+        mcoCECodes = NonHospitalizedFracturesCcam
+      )
+    ).extract(source).cache()
 
     logger.info("Outcomes")
     val hospitalizedOutcomes = HospitalizedFall.transform(diagnoses, classifications).cache()
-    val privateOutcomes = {
-      val acts = new MedicalActs(MedicalActsConfig(dcirCodes = NonHospitalizedFracturesCcam)).extract(source)
-      PrivateAmbulatoryFall.transform(acts)
-    }
-    val outcomes = hospitalizedOutcomes.union(privateOutcomes)
+    val privateOutcomes = PrivateAmbulatoryFall.transform(acts)
+    val publicOutcomes = PublicAmbulatoryFall.transform(acts)
+    val outcomes = unionDatasets(hospitalizedOutcomes, privateOutcomes, publicOutcomes)
     logger.info("  count: " + outcomes.count)
     logger.info("  count distinct: " + outcomes.distinct.count)
 
@@ -101,13 +112,13 @@ object StudyMain extends Main with FractureCodes {
 
     logger.info("Writing")
     logger.info("  Diagnoses...")
-    diagnoses.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "diagnoses")
+    diagnoses.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "diagnoses")
     logger.info("  Classification...")
-    classifications.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "classification")
+    classifications.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "classification")
     logger.info("  Outcomes...")
-    outcomes.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "outcomes")
+    outcomes.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "outcomes")
     logger.info("  Patients...")
-    patients.write.mode(SaveMode.Overwrite).parquet(env.OutRootPath + "patients")
+    patients.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "patients")
 
     Some(outcomes)
   }

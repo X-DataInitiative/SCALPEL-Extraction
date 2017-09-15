@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/X-DataInitiative/SNIIRAM-featuring.svg?token=LzAm1iAXuXZzFBCrak5F&branch=master)](https://travis-ci.com/X-DataInitiative/SNIIRAM-featuring)
+[![CircleCI](https://circleci.com/gh/X-DataInitiative/SNIIRAM-featuring.svg?style=shield&circle-token=6dd3a84c5ec9b9d3acac9e1ed156077eeadf9780)](https://circleci.com/gh/X-DataInitiative/SNIIRAM-featuring)
 [![codecov](https://codecov.io/gh/X-DataInitiative/SNIIRAM-featuring/branch/master/graph/badge.svg?token=4a0h501t8P)](https://codecov.io/gh/X-DataInitiative/SNIIRAM-featuring)
 
 This repository contains the ETL (Extract, Transform & Load) and Featuring stages of the processing pipeline for the SNIIRAM pharmacovigilance project in partnership with CNAMTS.

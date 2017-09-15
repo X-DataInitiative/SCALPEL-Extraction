@@ -44,3 +44,7 @@ object McoCCAMAct extends MedicalAct {
 object McoCIM10Act extends MedicalAct {
   val category: EventCategory[MedicalAct] = "mco_cim10_act"
 }
+
+object McoCEAct extends MedicalAct {
+  val category: EventCategory[MedicalAct] = "mco_ce_act"
+}
