@@ -100,20 +100,13 @@ object FallMain extends Main with FractureCodes {
     ).extract(source).cache()
 
     logger.info("Outcomes")
-    val hospitalizationOutcomes = HospitalizedFractures.transform(diagnoses, classifications).cache()
-    val privateAmbulatoryOutcomes = PrivateAmbulatoryFractures.transform(acts)
-    val publicAmbulatoryOutcomes = PublicAmbulatoryFractures.transform(acts)
-    val allOutcomes = unionDatasets(
-      hospitalizationOutcomes,
-      privateAmbulatoryOutcomes,
-      publicAmbulatoryOutcomes
-    )
+    val generalFractures = GeneralFractures.transform(diagnoses, classifications, acts).cache()
 
-    logger.info("  count: " + allOutcomes.count)
-    logger.info("  count distinct: " + allOutcomes.distinct.count)
+    logger.info("  count: " + generalFractures.count)
+    logger.info("  count distinct: " + generalFractures.distinct.count)
 
     logger.info("Patients with outcomes")
-    logger.info("  count: " + allOutcomes.select("patientID").distinct.count)
+    logger.info("  count: " + generalFractures.select("patientID").distinct.count)
 
     logger.info("Writing")
     logger.info("  Diagnoses...")
@@ -121,10 +114,10 @@ object FallMain extends Main with FractureCodes {
     logger.info("  Classification...")
     classifications.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "classification")
     logger.info("  Outcomes...")
-    allOutcomes.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures")
+    generalFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures")
     logger.info("  Patients...")
     patients.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "patients")
 
-    Some(allOutcomes)
+    Some(generalFractures)
   }
 }

@@ -66,8 +66,5 @@ class FallMainSuite extends SharedContext {
 
     // Then
     assertDSs(result, expected)
-
-
   }
-
 }
