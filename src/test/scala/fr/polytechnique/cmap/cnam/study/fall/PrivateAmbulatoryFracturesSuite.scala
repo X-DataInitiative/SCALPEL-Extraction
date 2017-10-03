@@ -4,7 +4,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Outcome}
 import fr.polytechnique.cmap.cnam.util.functions._
 
-class PrivateAmbulatoryFallSuite extends SharedContext {
+class PrivateAmbulatoryFracturesSuite extends SharedContext {
 
   "containsNonHospitalizedCcam" should "return true if the event value is in the list of codes" in {
     // Given
@@ -12,7 +12,7 @@ class PrivateAmbulatoryFallSuite extends SharedContext {
     val event = DcirAct("george", "stupidcode", eventCode, makeTS(2007,1,1))
 
     // When
-    val result = PrivateAmbulatoryFall.containsNonHospitalizedCcam(event)
+    val result = PrivateAmbulatoryFractures.containsNonHospitalizedCcam(event)
 
     // Then
     assert(result)
@@ -24,7 +24,7 @@ class PrivateAmbulatoryFallSuite extends SharedContext {
     val event = DcirAct("george", "stupidcode", eventCode, makeTS(2007,1,1))
 
     // When
-    val result = PrivateAmbulatoryFall.containsNonHospitalizedCcam(event)
+    val result = PrivateAmbulatoryFractures.containsNonHospitalizedCcam(event)
 
     // Then
     assert(!result)
@@ -35,7 +35,7 @@ class PrivateAmbulatoryFallSuite extends SharedContext {
     val event = DcirAct("george", DcirAct.groupID.PrivateAmbulatory, "stupidcode", makeTS(2007,1,1))
 
     // When
-    val result = PrivateAmbulatoryFall.isPrivateAmbulatory(event)
+    val result = PrivateAmbulatoryFractures.isPrivateAmbulatory(event)
 
     // Then
     assert(result)
@@ -52,11 +52,11 @@ class PrivateAmbulatoryFallSuite extends SharedContext {
     ).toDS
 
     val expected = Seq(
-      Outcome("riri", PrivateAmbulatoryFall.outcomeName, makeTS(2007, 1, 1))
+      Outcome("riri", PrivateAmbulatoryFractures.outcomeName, makeTS(2007, 1, 1))
     ).toDS
 
     // When
-    val result = PrivateAmbulatoryFall.transform(input)
+    val result = PrivateAmbulatoryFractures.transform(input)
 
     // Then
     assertDSs(result, expected)

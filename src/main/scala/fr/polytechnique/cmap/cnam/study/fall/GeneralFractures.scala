@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
  * https://datainitiative.atlassian.net/wiki/spaces/CFC/pages/61282101/General+fractures+Fall+study
  */
 
-object GenericFall extends OutcomeTransformer with FractureCodes {
+object GeneralFractures extends OutcomeTransformer with FractureCodes {
 
   override val outcomeName: String = "generic_fall"
 

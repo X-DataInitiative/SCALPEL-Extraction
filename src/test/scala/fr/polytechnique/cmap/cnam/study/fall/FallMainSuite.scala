@@ -3,15 +3,15 @@ package fr.polytechnique.cmap.cnam.study.fall
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Outcome}
 
-class StudyMainSuite extends SharedContext {
+class FallMainSuite extends SharedContext {
 
   "getEnv" should "return correct default environment" in {
     // Given
     val args = Map[String, String]()
-    val expected = StudyMain.TestEnv
+    val expected = FallMain.TestEnv
 
     // When
-    val result = StudyMain.getEnv(args)
+    val result = FallMain.getEnv(args)
 
     // Then
     assert(result == expected)
@@ -20,10 +20,10 @@ class StudyMainSuite extends SharedContext {
   it should "return the Fall environment when specified" in {
     // Given
     val args = Map(("env", "fall"))
-    val expected = StudyMain.FallEnv
+    val expected = FallMain.FallEnv
 
     // When
-    val result = StudyMain.getEnv(args)
+    val result = FallMain.getEnv(args)
 
     // Then
     assert(result == expected)
@@ -32,10 +32,10 @@ class StudyMainSuite extends SharedContext {
   it should "return the CMAP environment when specified" in {
     // Given
     val args = Map(("env", "cmap"))
-    val expected = StudyMain.CmapEnv
+    val expected = FallMain.CmapEnv
 
     // When
-    val result = StudyMain.getEnv(args)
+    val result = FallMain.getEnv(args)
 
     // Then
     assert(result == expected)
@@ -46,7 +46,7 @@ class StudyMainSuite extends SharedContext {
     val expected = "fall study"
 
     // When
-    val result = StudyMain.appName
+    val result = FallMain.appName
 
     // Then
     assert(expected == result)
@@ -60,7 +60,7 @@ class StudyMainSuite extends SharedContext {
     val expected = sqlCtx.sparkSession.emptyDataset[Event[Outcome]]
 
     // When
-    val result = StudyMain
+    val result = FallMain
       .run(sqlCtx, Map(("env", "test"))).get
       .as[Event[Outcome]]
 

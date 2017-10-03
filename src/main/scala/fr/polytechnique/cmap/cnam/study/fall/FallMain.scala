@@ -11,7 +11,7 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
 import fr.polytechnique.cmap.cnam.util.functions._
 
-object StudyMain extends Main with FractureCodes {
+object FallMain extends Main with FractureCodes {
 
   trait Env {
     val FeaturingPath: String
@@ -100,15 +100,20 @@ object StudyMain extends Main with FractureCodes {
     ).extract(source).cache()
 
     logger.info("Outcomes")
-    val hospitalizedOutcomes = HospitalizedFall.transform(diagnoses, classifications).cache()
-    val privateOutcomes = PrivateAmbulatoryFall.transform(acts)
-    val publicOutcomes = PublicAmbulatoryFall.transform(acts)
-    val outcomes = unionDatasets(hospitalizedOutcomes, privateOutcomes, publicOutcomes)
-    logger.info("  count: " + outcomes.count)
-    logger.info("  count distinct: " + outcomes.distinct.count)
+    val hospitalizationOutcomes = HospitalizedFractures.transform(diagnoses, classifications).cache()
+    val privateAmbulatoryOutcomes = PrivateAmbulatoryFractures.transform(acts)
+    val publicAmbulatoryOutcomes = PublicAmbulatoryFractures.transform(acts)
+    val allOutcomes = unionDatasets(
+      hospitalizationOutcomes,
+      privateAmbulatoryOutcomes,
+      publicAmbulatoryOutcomes
+    )
+
+    logger.info("  count: " + allOutcomes.count)
+    logger.info("  count distinct: " + allOutcomes.distinct.count)
 
     logger.info("Patients with outcomes")
-    logger.info("  count: " + outcomes.select("patientID").distinct.count)
+    logger.info("  count: " + allOutcomes.select("patientID").distinct.count)
 
     logger.info("Writing")
     logger.info("  Diagnoses...")
@@ -116,10 +121,10 @@ object StudyMain extends Main with FractureCodes {
     logger.info("  Classification...")
     classifications.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "classification")
     logger.info("  Outcomes...")
-    outcomes.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "outcomes")
+    allOutcomes.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures")
     logger.info("  Patients...")
     patients.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "patients")
 
-    Some(outcomes)
+    Some(allOutcomes)
   }
 }

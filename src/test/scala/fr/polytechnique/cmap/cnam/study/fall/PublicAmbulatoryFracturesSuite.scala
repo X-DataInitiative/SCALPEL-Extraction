@@ -4,14 +4,14 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, McoCEAct, McoCIM10Act, Outcome}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class PublicAmbulatoryFallSuite extends SharedContext {
+class PublicAmbulatoryFracturesSuite extends SharedContext {
 
   "isPublicAmbulatory" should "return true for correct events" in {
     // Given
     val event = McoCEAct("georgette", "ACE", "angine", makeTS(2010, 2, 6))
 
     // When
-    val result = PublicAmbulatoryFall.isPublicAmbulatory(event)
+    val result = PublicAmbulatoryFractures.isPublicAmbulatory(event)
 
     // Then
     assert(result)
@@ -22,7 +22,7 @@ class PublicAmbulatoryFallSuite extends SharedContext {
     val event = McoCIM10Act("georgette", "ACE", "angine", makeTS(2010, 2, 6))
 
     // When
-    val result = PublicAmbulatoryFall.isPublicAmbulatory(event)
+    val result = PublicAmbulatoryFractures.isPublicAmbulatory(event)
 
     // Then
     assert(!result)
@@ -33,7 +33,7 @@ class PublicAmbulatoryFallSuite extends SharedContext {
     val event = McoCEAct("georgette", "ACE", "MZMP007", makeTS(2010, 2, 6))
 
     // When
-    val result = PublicAmbulatoryFall.containsNonHospitalizedCcam(event)
+    val result = PublicAmbulatoryFractures.containsNonHospitalizedCcam(event)
 
     // Then
     assert(result)
@@ -51,11 +51,11 @@ class PublicAmbulatoryFallSuite extends SharedContext {
     ).toDS
 
     val expected = Seq(
-      Outcome("georgette", PublicAmbulatoryFall.outcomeName, makeTS(2010, 2, 6))
+      Outcome("georgette", PublicAmbulatoryFractures.outcomeName, makeTS(2010, 2, 6))
     ).toDS
 
     // When
-    val result = PublicAmbulatoryFall.transform(events)
+    val result = PublicAmbulatoryFractures.transform(events)
 
     // Then
     assertDSs(result, expected)

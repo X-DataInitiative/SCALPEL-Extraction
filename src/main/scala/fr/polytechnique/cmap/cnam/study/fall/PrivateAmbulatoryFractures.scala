@@ -5,12 +5,17 @@ import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
 
-object PublicAmbulatoryFall extends  OutcomeTransformer with FractureCodes {
+/*
+ * The rules for this Outcome definition can be found on the following page:
+ * https://datainitiative.atlassian.net/wiki/spaces/CFC/pages/61282101/General+fractures+Fall+study
+ */
 
-  override val outcomeName: String = "public_ambulatory_fall"
+object PrivateAmbulatoryFractures extends OutcomeTransformer with FractureCodes {
 
-  def isPublicAmbulatory(event: Event[MedicalAct]): Boolean = {
-    event.category == McoCEAct.category
+  override val outcomeName: String = "private_ambulatory_fall"
+
+  def isPrivateAmbulatory(event: Event[MedicalAct]): Boolean = {
+    event.groupID == DcirAct.groupID.PrivateAmbulatory
   }
 
   def containsNonHospitalizedCcam(event: Event[MedicalAct]): Boolean = {
@@ -23,8 +28,9 @@ object PublicAmbulatoryFall extends  OutcomeTransformer with FractureCodes {
     import events.sqlContext.implicits._
 
     events
-      .filter(isPublicAmbulatory _)
+      .filter(isPrivateAmbulatory _)
       .filter(containsNonHospitalizedCcam _)
       .map(event => Outcome(event.patientID, outcomeName, event.start))
   }
+
 }

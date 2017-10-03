@@ -5,7 +5,7 @@ import fr.polytechnique.cmap.cnam.etl.events.{AssociatedDiagnosis, GHMClassifica
 import fr.polytechnique.cmap.cnam.util.functions._
 
 
-class HospitalizedFallSuite extends SharedContext{
+class HospitalizedFracturesSuite extends SharedContext{
 
   "isInCodeList" should "return yes if there is a code with the right start" in {
     // Given
@@ -13,7 +13,7 @@ class HospitalizedFallSuite extends SharedContext{
     val codes = List("jam", "bon", "de", "bayonne")
 
     // When
-    val result = HospitalizedFall.isInCodeList(event, codes)
+    val result = HospitalizedFractures.isInCodeList(event, codes)
 
     // Then
     assert(result)
@@ -25,7 +25,7 @@ class HospitalizedFallSuite extends SharedContext{
     val codes = List("jambe cassée", "bon", "de", "bayonne")
 
     // When
-    val result = HospitalizedFall.isInCodeList(event, codes)
+    val result = HospitalizedFractures.isInCodeList(event, codes)
 
     // Then
     assert(result)
@@ -37,7 +37,7 @@ class HospitalizedFallSuite extends SharedContext{
     val codes = List("avada kedavra", "bon", "de", "bayonne")
 
     // When
-    val result = HospitalizedFall.isInCodeList(event, codes)
+    val result = HospitalizedFractures.isInCodeList(event, codes)
 
     // Then
     assert(!result)
@@ -48,7 +48,7 @@ class HospitalizedFallSuite extends SharedContext{
     val event = MainDiagnosis("Pierre", "3", "S02.35", makeTS(2017, 7, 18))
 
     // When
-    val result = HospitalizedFall.isFractureDiagnosis(event)
+    val result = HospitalizedFractures.isFractureDiagnosis(event)
 
     // Then
     assert(result)
@@ -59,7 +59,7 @@ class HospitalizedFallSuite extends SharedContext{
     val event = MainDiagnosis("Pierre", "3", "whatever", makeTS(2017, 7, 18))
 
     // When
-    val result = HospitalizedFall.isMainDiagnosis(event)
+    val result = HospitalizedFractures.isMainDiagnosis(event)
 
     // Then
     assert(result)
@@ -70,7 +70,7 @@ class HospitalizedFallSuite extends SharedContext{
     val event = AssociatedDiagnosis("Pierre", "3", "whatever", makeTS(2017, 7, 18))
 
     // When
-    val result = HospitalizedFall.isMainDiagnosis(event)
+    val result = HospitalizedFractures.isMainDiagnosis(event)
 
     // Then
     assert(!result)
@@ -81,7 +81,7 @@ class HospitalizedFallSuite extends SharedContext{
     val event = GHMClassification("Pierre", "3", "08C14", makeTS(2017, 7, 18))
 
     // When
-    val result = HospitalizedFall.isBadGHM(event)
+    val result = HospitalizedFractures.isBadGHM(event)
 
     // Then
     assert(result)
@@ -106,7 +106,7 @@ class HospitalizedFallSuite extends SharedContext{
     ).toDS
 
     // When
-    val result = HospitalizedFall.filterHospitalStay(input, badStays)
+    val result = HospitalizedFractures.filterHospitalStay(input, badStays)
 
     // Then
     assertDSs(result, expected)
@@ -133,7 +133,7 @@ class HospitalizedFallSuite extends SharedContext{
     ).toDS
 
     // When
-    val result = HospitalizedFall.transform(diagnoses, classification)
+    val result = HospitalizedFractures.transform(diagnoses, classification)
 
     // Then
     assertDSs(result, expected)
