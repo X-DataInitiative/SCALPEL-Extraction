@@ -6,9 +6,10 @@ import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.{MedicalActs, MedicalActsConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GHMClassifications
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{Diagnoses, DiagnosesConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.NaiveDrugs
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
+import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.util.functions._
 
 object FallMain extends Main with FractureCodes {
@@ -82,6 +83,18 @@ object FallMain extends Main with FractureCodes {
 
     val patients = new Patients(PatientsConfig(env.RefDate)).extract(source).cache()
 
+    val dcir = source.dcir.get.cache()
+
+    logger.info("Drug Purchases")
+    val drugPurchases = unionDatasets(
+      NaiveDrugs(dcir, Antidepresseurs).extract,
+      NaiveDrugs(dcir, Hypnotiques).extract,
+      NaiveDrugs(dcir, Neuroleptiques).extract,
+      NaiveDrugs(dcir, Antihypertenseurs).extract
+    ).cache()
+    logger.info("  count: " + drugPurchases.count)
+    logger.info("  count distinct: " + drugPurchases.distinct.count)
+
     logger.info("Diagnoses")
     val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = HospitalizedFracturesCim10)).extract(source).cache()
     logger.info("  count: " + diagnoses.count)
@@ -109,6 +122,8 @@ object FallMain extends Main with FractureCodes {
     logger.info("  count: " + generalFractures.select("patientID").distinct.count)
 
     logger.info("Writing")
+    logger.info("  Drug Purchases...")
+    drugPurchases.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "drug-purchases")
     logger.info("  Diagnoses...")
     diagnoses.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "diagnoses")
     logger.info("  Classification...")
