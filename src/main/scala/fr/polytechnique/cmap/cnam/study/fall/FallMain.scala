@@ -6,12 +6,13 @@ import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.{MedicalActs, MedicalActsConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GHMClassifications
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{Diagnoses, DiagnosesConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.NaiveDrugs
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
+import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.util.functions._
 
-object StudyMain extends Main with FractureCodes {
+object FallMain extends Main with FractureCodes {
 
   trait Env {
     val FeaturingPath: String
@@ -82,6 +83,18 @@ object StudyMain extends Main with FractureCodes {
 
     val patients = new Patients(PatientsConfig(env.RefDate)).extract(source).cache()
 
+    val dcir = source.dcir.get.cache()
+
+    logger.info("Drug Purchases")
+    val drugPurchases = unionDatasets(
+      NaiveDrugs(dcir, Antidepresseurs).extract,
+      NaiveDrugs(dcir, Hypnotiques).extract,
+      NaiveDrugs(dcir, Neuroleptiques).extract,
+      NaiveDrugs(dcir, Antihypertenseurs).extract
+    ).cache()
+    logger.info("  count: " + drugPurchases.count)
+    logger.info("  count distinct: " + drugPurchases.distinct.count)
+
     logger.info("Diagnoses")
     val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = HospitalizedFracturesCim10)).extract(source).cache()
     logger.info("  count: " + diagnoses.count)
@@ -100,26 +113,26 @@ object StudyMain extends Main with FractureCodes {
     ).extract(source).cache()
 
     logger.info("Outcomes")
-    val hospitalizedOutcomes = HospitalizedFall.transform(diagnoses, classifications).cache()
-    val privateOutcomes = PrivateAmbulatoryFall.transform(acts)
-    val publicOutcomes = PublicAmbulatoryFall.transform(acts)
-    val outcomes = unionDatasets(hospitalizedOutcomes, privateOutcomes, publicOutcomes)
-    logger.info("  count: " + outcomes.count)
-    logger.info("  count distinct: " + outcomes.distinct.count)
+    val generalFractures = GeneralFractures.transform(diagnoses, classifications, acts).cache()
+
+    logger.info("  count: " + generalFractures.count)
+    logger.info("  count distinct: " + generalFractures.distinct.count)
 
     logger.info("Patients with outcomes")
-    logger.info("  count: " + outcomes.select("patientID").distinct.count)
+    logger.info("  count: " + generalFractures.select("patientID").distinct.count)
 
     logger.info("Writing")
+    logger.info("  Drug Purchases...")
+    drugPurchases.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "drug-purchases")
     logger.info("  Diagnoses...")
     diagnoses.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "diagnoses")
     logger.info("  Classification...")
     classifications.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "classification")
     logger.info("  Outcomes...")
-    outcomes.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "outcomes")
+    generalFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures")
     logger.info("  Patients...")
     patients.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "patients")
 
-    Some(outcomes)
+    Some(generalFractures)
   }
 }

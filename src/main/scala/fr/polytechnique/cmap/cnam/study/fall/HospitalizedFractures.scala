@@ -13,7 +13,7 @@ import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
 
 case class HospitalStay(patientID: String, id: String)
 
-object HospitalizedFall extends OutcomeTransformer with FractureCodes {
+object HospitalizedFractures extends OutcomeTransformer with FractureCodes {
 
   override val outcomeName: String = "hospitalized_fall"
 
