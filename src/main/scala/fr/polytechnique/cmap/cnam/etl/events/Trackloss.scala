@@ -5,7 +5,7 @@ import org.apache.spark.sql.Row
 
 trait Trackloss extends AnyEvent
 
-object Trackloss extends Trackloss {
+object Trackloss extends Trackloss with EventBuilder {
 
   val category: EventCategory[Trackloss] = "trackloss"
 

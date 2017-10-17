@@ -1,11 +1,11 @@
-package fr.polytechnique.cmap.cnam.study.pioglitazone
+package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.study.pioglitazone.PioglitazoneConfig._
+import fr.polytechnique.cmap.cnam.study.rosiglitazone.RosiglitazoneConfig._
 
-class PioglitazoneConfigSuite extends SharedContext {
+class RosiglitazoneConfigSuite extends SharedContext {
 
-  "PioglitazoneParameters" should "read the right parameters from the config file" in {
+  "RosiglitazoneParameters" should "read the right parameters from the config file" in {
 
     /*
   The parameters read from conf file :
@@ -21,11 +21,9 @@ class PioglitazoneConfigSuite extends SharedContext {
       delayed_entry_threshold = 12 // keep it, maybe remove the previous one and set false when this param is 0
    */
 
-    val PioParam = PioglitazoneConfig.pioglitazoneParameters
-    val expected = PioglitazoneParams(
+    val rosiParam = RosiglitazoneConfig.rosiglitazoneParameters
+    val expected = RosiglitazoneParams(
       DrugsParams(min_purchases = 1, start_delay = 0, purchases_window = 0, only_first = false),
-      MedicalActParams(),
-      DiagnosesParams(),
       StudyParams(delayed_entry_threshold = 12),
       FiltersParams(
         filter_never_sick_patients = false,
@@ -33,10 +31,8 @@ class PioglitazoneConfigSuite extends SharedContext {
         filter_diagnosed_patients = true,
         diagnosed_patients_threshold = 6,
         filter_delayed_entries = true
-      ))
-    assert(PioParam == expected, true)
+      )
+    )
+    assert(rosiParam == expected)
   }
 }
-
-
-

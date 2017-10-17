@@ -40,5 +40,5 @@ case class ExposureDefinition(
     purchaseIntervals: List[Int] = List(0, 3, 5),
     studyStart: Timestamp, // TODO : remove
     filterDelayedPatients: Boolean, // TODO : remove
-    diseaseCode: String) // TODO : remove
+    diseaseCode: String = "") // TODO : remove
 

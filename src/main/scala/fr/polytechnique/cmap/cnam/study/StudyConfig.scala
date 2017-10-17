@@ -15,26 +15,27 @@ object StudyConfig {
   }
 
   case class InputPaths(
-                         dcir: String,
-                         pmsiMco: String,
-                         pmsiHad: String,
-                         pmsiSsr: String,
-                         irBen: String,
-                         irImb: String,
-                         irPha: String,
-                         dosages: String
-                       )
+    dcir: String,
+    pmsiMco: String,
+    pmsiHad: String,
+    pmsiSsr: String,
+    irBen: String,
+    irImb: String,
+    irPha: String,
+    dosages: String
+  )
 
   case class OutputPaths(
-                          root: String,
-                          patients: String,
-                          flatEvents: String,
-                          coxFeatures: String,
-                          ltsccsFeatures: String,
-                          mlppFeatures: String,
-                          CancerOutcomes: String,
-                          exposures: String
-                        )
+    root: String,
+    patients: String,
+    flatEvents: String,
+    coxFeatures: String,
+    ltsccsFeatures: String,
+    mlppFeatures: String,
+    CancerOutcomes: String, // Dont know if this should change
+    exposures: String
+  )
+
   lazy val inputPaths = InputPaths(
     dcir = conf.getString("paths.input.dcir"),
     pmsiMco = conf.getString("paths.input.pmsi_mco"),
