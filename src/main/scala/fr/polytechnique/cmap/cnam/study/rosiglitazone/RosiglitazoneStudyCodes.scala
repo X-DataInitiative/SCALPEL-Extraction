@@ -7,7 +7,7 @@ package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
 object RosiglitazoneStudyCodes {
 
-  val primaryDiagCodeInfract: List[String] = List(
+  val diagCodeInfract: List[String] = List(
     "I2100", "I21000", "I2110", "I21100", "I2120", // Infarctus
     "I21200", "I2130", "I21300", "I2140", "I21400", // Infarctus
     "I2190", "I21900", "I2200", "I22000", "I2210", // Infarctus

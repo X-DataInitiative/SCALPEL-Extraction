@@ -11,7 +11,7 @@ object Infarctus extends OutcomeTransformer{
   def transform(extracted: Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
     import extracted.sqlContext.implicits._
     extracted
-      .filter(e => RosiglitazoneStudyCodes.primaryDiagCodeInfract.contains(e.value))
+      .filter(e => RosiglitazoneStudyCodes.diagCodeInfract.contains(e.value))
       .dropDuplicates(Event.Columns.PatientID, Event.Columns.GroupID)
       .map(event => Outcome(event.patientID, outcomeName, event.start))
   }
