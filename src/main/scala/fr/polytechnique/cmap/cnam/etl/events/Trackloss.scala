@@ -3,9 +3,9 @@ package fr.polytechnique.cmap.cnam.etl.events
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
 
-trait Trackloss extends AnyEvent
+object Trackloss extends Trackloss
 
-object Trackloss extends Trackloss with EventBuilder {
+trait Trackloss extends AnyEvent with EventBuilder {
 
   val category: EventCategory[Trackloss] = "trackloss"
 

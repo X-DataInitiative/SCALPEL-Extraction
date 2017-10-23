@@ -83,7 +83,7 @@ object ETLMain extends Main {
     val naiveBladderCancerOutcomes = NaiveBladderCancer.transform(diseaseEvents)
 
     logger.info("Writing bladder cancer outcomes...")
-    naiveBladderCancerOutcomes.toDF.write.parquet(outputPaths.CancerOutcomes)
+    naiveBladderCancerOutcomes.toDF.write.parquet(outputPaths.outcomes)
 
     Some(allEvents)
   }

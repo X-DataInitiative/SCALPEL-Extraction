@@ -32,7 +32,7 @@ object StudyConfig {
     coxFeatures: String,
     ltsccsFeatures: String,
     mlppFeatures: String,
-    CancerOutcomes: String, // Dont know if this should change
+    outcomes: String,
     exposures: String
   )
 
@@ -54,7 +54,7 @@ object StudyConfig {
     coxFeatures = conf.getString("paths.output.cox_features"),
     ltsccsFeatures = conf.getString("paths.output.ltsccs_features"),
     mlppFeatures = conf.getString("paths.output.mlpp_features"),
-    CancerOutcomes = conf.getString("paths.output.cancer_outcomes"),
+    outcomes = conf.getString("paths.output.outcomes"),
     exposures = conf.getString("paths.output.exposures")
   )
 }

@@ -97,7 +97,7 @@ object PioglitazoneMain extends Main {
     }
 
     logger.info("Writing cancer outcomes...")
-    outcomes.toDF.write.parquet(outputPaths.CancerOutcomes)
+    outcomes.toDF.write.parquet(outputPaths.outcomes)
 
     logger.info("Extracting Observations...")
     val observations = new ObservationPeriodTransformer(configPIO.study.studyStart, configPIO.study.studyEnd)

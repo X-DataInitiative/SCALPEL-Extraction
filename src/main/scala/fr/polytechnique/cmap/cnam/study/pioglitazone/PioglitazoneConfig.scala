@@ -5,6 +5,7 @@ import fr.polytechnique.cmap.cnam.etl.config.CaseClassConfig
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
+
 object PioglitazoneConfig {
 
 
