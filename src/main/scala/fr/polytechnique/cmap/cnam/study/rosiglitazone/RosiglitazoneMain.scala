@@ -54,9 +54,9 @@ object RosiglitazoneMain extends Main{
     logger.info("Extracting diagnosis events...")
     val diagnosesConfig = DiagnosesConfig(
       List.empty[String],
-      RosiglitazoneStudyCodes.diagCodeInfract,
-      RosiglitazoneStudyCodes.diagCodeInfract,
-      RosiglitazoneStudyCodes.diagCodeInfract
+      RosiglitazoneStudyCodes.diagCodeInfarct,
+      RosiglitazoneStudyCodes.diagCodeInfarct,
+      RosiglitazoneStudyCodes.diagCodeInfarct
     )
 
     val diseaseEvents: Dataset[Event[Diagnosis]] = new Diagnoses(diagnosesConfig).extract(sources).cache()
