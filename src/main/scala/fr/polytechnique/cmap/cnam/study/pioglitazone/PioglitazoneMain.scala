@@ -36,6 +36,7 @@ object PioglitazoneMain extends Main {
     // "get" returns an Option, then we can use foreach to gently ignore when the key was not found.
     argsMap.get("conf").foreach(sqlContext.setConf("conf", _))
     argsMap.get("env").foreach(sqlContext.setConf("env", _))
+    argsMap.get("study").foreach(sqlContext.setConf("study", _))
 
     val inputPaths: InputPaths = StudyConfig.inputPaths
     val outputPaths: OutputPaths = StudyConfig.outputPaths

@@ -64,7 +64,7 @@ class PioglitazoneMainSuite extends SharedContext{
       MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 12, 9, 12, 9, 1.0)
     ).toDF
     // When
-    PioglitazoneMain.run(sqlContext, Map("conf" -> configPath, "env" -> "test", "study" -> "pioglitazone "))
+    PioglitazoneMain.run(sqlContext, Map("conf" -> configPath, "env" -> "test", "study" -> "pioglitazone"))
 
     // Then
     val patients = sqlCtx.read.parquet(patientsPath)
