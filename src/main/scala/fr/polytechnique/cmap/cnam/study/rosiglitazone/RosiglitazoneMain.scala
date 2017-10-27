@@ -114,7 +114,8 @@ object RosiglitazoneMain extends Main{
     exposures.write.parquet(StudyConfig.outputPaths.exposures)
 
     logger.info("Extracting MLPP features...")
-    MLPPLoader().load(outcomes, exposures, patients, StudyConfig.outputPaths.mlppFeatures)
+    val params = MLPPLoader.Params(minTimestamp = configROSI.study.studyStart, maxTimestamp = configROSI.study.studyEnd)
+    MLPPLoader(params).load(outcomes, exposures, patients, StudyConfig.outputPaths.mlppFeatures)
 
     Some(allEvents)
 

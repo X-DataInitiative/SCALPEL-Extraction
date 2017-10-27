@@ -127,6 +127,7 @@ object PioglitazoneMain extends Main {
     exposures.write.parquet(StudyConfig.outputPaths.exposures)
 
     logger.info("Extracting MLPP features...")
+    val params = MLPPLoader.Params(minTimestamp = configPIO.study.studyStart, maxTimestamp = configPIO.study.studyEnd)
     MLPPLoader().load(outcomes, exposures, patients, StudyConfig.outputPaths.mlppFeatures)
 
     Some(allEvents)
