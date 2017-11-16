@@ -5,8 +5,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
 object Antihypertenseurs extends DrugConfig {
 
   val name: String = "Antihypertenseurs"
-
-  val cip13Codes: List[String] = List(
+  val cip13Codes: Set[String] = Set(
     "3400934089190",
     "3400932395170",
     "3400933994686",

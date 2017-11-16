@@ -6,7 +6,7 @@ object Hypnotiques extends DrugConfig {
 
   val name = "Hypnotiques"
 
-  val cip13Codes: List[String] = List(
+  val cip13Codes: Set[String] = Set(
     "3400932572601",
     "3400932531158",
     "3400932531097",

@@ -6,7 +6,7 @@ object Antidepresseurs extends DrugConfig {
 
   val name = "Antidepresseurs"
 
-  val cip13Codes: List[String] = List(
+  val cip13Codes: Set[String] = Set(
     "3400930820629",
     "3400931067627",
     "3400931067795",
@@ -551,4 +551,5 @@ object Antidepresseurs extends DrugConfig {
     "3400927708190",
     "3400927708022"
   )
+
 }

@@ -6,7 +6,7 @@ object Neuroleptiques extends DrugConfig {
 
   val name = "Neuroleptiques"
 
-  val cip13Codes: List[String] = List(
+  val cip13Codes: Set[String] = Set(
     "3400932043705",
     "3400930571477",
     "3400932722426",
@@ -599,5 +599,4 @@ object Neuroleptiques extends DrugConfig {
     "3400941766640",
     "3400941766589"
   )
-
 }

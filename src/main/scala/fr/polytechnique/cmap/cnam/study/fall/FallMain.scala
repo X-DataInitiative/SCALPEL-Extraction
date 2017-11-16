@@ -1,16 +1,17 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
 import java.sql.Timestamp
-import org.apache.spark.sql.{Dataset, SQLContext, SaveMode}
+
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.{MedicalActs, MedicalActsConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GHMClassifications
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{Diagnoses, DiagnosesConfig}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.NaiveDrugs
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.TherapeuticDrugs
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.util.functions._
+import org.apache.spark.sql.{Dataset, SQLContext, SaveMode}
 
 object FallMain extends Main with FractureCodes {
 
@@ -84,14 +85,12 @@ object FallMain extends Main with FractureCodes {
     val patients = new Patients(PatientsConfig(env.RefDate)).extract(source).cache()
 
     val dcir = source.dcir.get.cache()
-
+    val mco = source.pmsiMco.get.cache()
     logger.info("Drug Purchases")
-    val drugPurchases = unionDatasets(
-      NaiveDrugs(dcir, Antidepresseurs).extract,
-      NaiveDrugs(dcir, Hypnotiques).extract,
-      NaiveDrugs(dcir, Neuroleptiques).extract,
-      NaiveDrugs(dcir, Antihypertenseurs).extract
-    ).cache()
+    val drugPurchases =
+      new TherapeuticDrugs(dcir, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
+        .extract
+        .cache()
     logger.info("  count: " + drugPurchases.count)
     logger.info("  count distinct: " + drugPurchases.distinct.count)
 
@@ -101,7 +100,7 @@ object FallMain extends Main with FractureCodes {
     logger.info("  count distinct: " + diagnoses.distinct.count)
 
     logger.info("Classifications")
-    val classifications = GHMClassifications.extract(source.pmsiMco.get, GenericGHMCodes).cache()
+    val classifications = GHMClassifications.extract(mco, GenericGHMCodes).cache()
     logger.info("  count: " + classifications.count)
     logger.info("  count distinct: " + classifications.distinct.count)
 
