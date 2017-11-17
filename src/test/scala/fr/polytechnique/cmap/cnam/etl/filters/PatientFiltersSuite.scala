@@ -1,12 +1,13 @@
-package fr.polytechnique.cmap.cnam.etl.transformers.exposures
+package fr.polytechnique.cmap.cnam.etl.filters
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.Columns._
+import fr.polytechnique.cmap.cnam.etl.events.Outcome
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
+/*
+class PatientFiltersSuite extends SharedContext {
 
-class PatientFiltersImplicitsSuite extends SharedContext {
-
-  "filterEarlyDiagnosedPatients" should "drop patients who had a diagnostic within 6 months after follow-up start" in {
+  "filterEarlyDiagnosedPatients" should "drop patients who had an outcome before follow-up start" in {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -146,4 +147,4 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     // Then
     assertDFs(result, expected)
   }
-}
+}*/
