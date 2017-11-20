@@ -89,7 +89,5 @@ class RichDataFramesSuite extends SharedContext {
 
     // Then
     assertDSs(result, expected)
-
   }
-
 }

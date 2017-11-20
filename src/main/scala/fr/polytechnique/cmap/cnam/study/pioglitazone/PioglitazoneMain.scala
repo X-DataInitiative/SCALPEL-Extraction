@@ -13,11 +13,11 @@ import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.MLPPLoader
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposureDefinition, ExposuresTransformer}
-import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.{FollowUp, FollowUpTransformer}
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
 import fr.polytechnique.cmap.cnam.study.StudyConfig
-import fr.polytechnique.cmap.cnam.util.functions._
 import fr.polytechnique.cmap.cnam.study.StudyConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.util.functions._
 import org.apache.spark.sql.{Dataset, SQLContext}
 
 
@@ -56,16 +56,12 @@ object PioglitazoneMain extends Main {
     val patientsConfig = PatientsConfig(configPIO.study.ageReferenceDate)
     val patients: Dataset[Patient] = new Patients(patientsConfig).extract(sources).cache()
 
+    import PatientFilters._
+
     logger.info("Extracting molecule events...")
     val moleculesConfig = MoleculePurchasesConfig(drugClasses = configPIO.drugs.drugCategories)
-    val drugEvents: Dataset[Event[Molecule]] = {
-      val allEvents = new MoleculePurchases(moleculesConfig).extract(sources).cache()
-      if (configPIO.filters.filter_delayed_entries) {
-        PatientFilters.filterDelayedEntries(allEvents, configPIO.study.studyStart, configPIO.study.delayed_entry_threshold)
-      } else {
-        allEvents
-      }
-    }
+    val drugEvents: Dataset[Event[Molecule]] = new MoleculePurchases(moleculesConfig).extract(sources).cache()
+
 
     logger.info("Extracting diagnosis events...")
     val diagnosesConfig = DiagnosesConfig(configPIO.diagnoses.imbDiagnosisCodes,
@@ -104,40 +100,29 @@ object PioglitazoneMain extends Main {
       .cache()
 
     logger.info("Extracting cancer outcomes...")
-    val allOutcomes = configPIO.study.cancerDefinition match {
-      case "broad" => BroadBladderCancer.transform(diseaseEvents)
-      case "naive" => NaiveBladderCancer.transform(diseaseEvents)
-      case "narrow" => NarrowBladderCancer.transform(diseaseEvents, medicalActs)
+    val (outcomeName, outcomes) = configPIO.study.cancerDefinition match {
+      case "broad" => (BroadBladderCancer.outcomeName, BroadBladderCancer.transform(diseaseEvents))
+      case "naive" => (NaiveBladderCancer.outcomeName, NaiveBladderCancer.transform(diseaseEvents))
+      case "narrow" => (NarrowBladderCancer.outcomeName, NarrowBladderCancer.transform(diseaseEvents, medicalActs))
     }
 
     logger.info("Extracting Follow-up...")
     val patiensWithObservations = patients.joinWith(observations, patients.col("patientId") === observations.col("patientId"))
 
-    val followups = new FollowUpTransformer(configPIO.drugs.start_delay, firstTargetDisease =  true, Some("cancer"))
-      .transform(patiensWithObservations, drugEvents, allOutcomes, tracklosses)
+    val followups = new FollowUpTransformer(configPIO.drugs.start_delay, firstTargetDisease = true, Some("cancer"))
+      .transform(patiensWithObservations, drugEvents, outcomes, tracklosses)
       .cache()
 
-
-    logger.info("Filtering Outcomes")
-    val outcomes = if (configPIO.filters.filter_diagnosed_patients) {
-      val outcomeName = configPIO.study.cancerDefinition match {
-        case "broad" => BroadBladderCancer.outcomeName
-        case "naive" => NaiveBladderCancer.outcomeName
-        case "narrow" => NarrowBladderCancer.outcomeName
-      }
-      val filteredEvents: Dataset[(Event[Outcome], FollowUp)] = PatientFilters.filterEarlyDiagnosedPatients(
-        allOutcomes.joinWith(followups, allOutcomes.col("patientId") === followups.col("patientId")), outcomeName
-      )
-      filteredEvents.map(_._1)
-    } else {
-      allOutcomes
-    }
+    logger.info("FilteringPatients...")
+    val filteredPatients = patients
+      .filterDelayedEntries(drugEvents, configPIO.study.studyStart, configPIO.study.delayed_entry_threshold)
+      .filterEarlyDiagnosedPatients(outcomes, followups, outcomeName)
 
     logger.info("Writing cancer outcomes...")
-    outcomes.toDF.write.parquet(outputPaths.outcomes)
+    outcomes.join(filteredPatients, "patientID").write.parquet(outputPaths.outcomes)
 
     logger.info("Extracting Exposures...")
-    val patientsWithFollowups = patients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
+    val patientsWithFollowups = filteredPatients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
 
     val exposureDef = ExposureDefinition(
     studyStart = configPIO.study.studyStart,
