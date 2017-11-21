@@ -3,12 +3,10 @@ package fr.polytechnique.cmap.cnam.study.pioglitazone
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.loaders.mlpp._
-import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.study.StudyConfig
 import fr.polytechnique.cmap.cnam.util.functions._
 import org.apache.spark.sql._
-
-
 
 class PioglitazoneMainSuite extends SharedContext{
 
@@ -17,12 +15,6 @@ class PioglitazoneMainSuite extends SharedContext{
     import sqlCtx.implicits._
 
     // Given
-    val configPath = "src/test/resources/config/filtering-broad.conf"
-    lazy val patientsPath = FilteringConfig.outputPaths.patients
-    lazy val flatEventsPath = FilteringConfig.outputPaths.flatEvents
-    lazy val mlppFeaturesPath = FilteringConfig.outputPaths.mlppFeatures
-    lazy val exposuresPath = FilteringConfig.outputPaths.exposures
-
     val expectedPatients: DataFrame = Seq[Patient](
       Patient(
         patientID = "Patient_02",
@@ -64,13 +56,15 @@ class PioglitazoneMainSuite extends SharedContext{
       MLPPFeature("Patient_02", 0, "PIOGLITAZONE", 0, 12, 9, 12, 9, 1.0)
     ).toDF
     // When
+    val configPath = "src/test/resources/config/filtering-broad.conf"
     PioglitazoneMain.run(sqlContext, Map("conf" -> configPath, "env" -> "test", "study" -> "pioglitazone"))
+    val outputPaths = StudyConfig.outputPaths
 
     // Then
-    val patients = sqlCtx.read.parquet(patientsPath)
-    val flatEvents = sqlCtx.read.parquet(flatEventsPath)
+    val patients = sqlCtx.read.parquet(outputPaths.patients)
+    val flatEvents = sqlCtx.read.parquet(outputPaths.flatEvents)
 
-    val mlppSparseFeatures = sqlCtx.read.parquet(mlppFeaturesPath + "/parquet/SparseFeatures")
+    val mlppSparseFeatures = sqlCtx.read.parquet(outputPaths.mlppFeatures + "/parquet/SparseFeatures")
 
     assertDFs(patients, expectedPatients)
     assertDFs(flatEvents, expectedFlatEvents)
