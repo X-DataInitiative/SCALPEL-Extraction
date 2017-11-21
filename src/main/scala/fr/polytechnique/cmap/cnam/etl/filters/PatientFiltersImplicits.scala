@@ -8,9 +8,24 @@ import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
-import org.apache.spark.sql.{Column, Dataset}
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
+
+/*
+ * The architectural decisions regarding the patient filters can be found in the following page:
+ * https://datainitiative.atlassian.net/wiki/spaces/CFC/pages/109051905/Architecture+decisions
+ */
 
 private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
+
+  import patients.sparkSession.implicits._
+
+  private def applyContains(patientsToKeep: Set[String]) = {
+    patients.filter {
+      patient => patientsToKeep.contains(patient.patientID)
+    }
+  }
+
+  def idsSet: Set[String] = patients.map(_.patientID).collect.toSet
 
   // Drop patients who got an outcome before the start of the follow up
   def filterEarlyDiagnosedPatients(
@@ -18,7 +33,9 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
       followUpPeriods: Dataset[FollowUp],
       outcomeName: String): Dataset[Patient] = {
 
-    val joined = outcomes.joinWith(followUpPeriods, outcomes.col("patientID") === followUpPeriods.col("patientID"))
+    val joined = outcomes.joinWith(
+      followUpPeriods, outcomes.col("patientID") === followUpPeriods.col("patientID")
+    )
     val patientId = s"Event.${Event.Columns.PatientID}"
     val followUpStart = "FollowUp.start"
     val outcomeDate = s"Event.${Event.Columns.Start}"
@@ -33,14 +50,15 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
       ).otherwise(lit(1))
     ).over(window).cast(BooleanType)
 
-    val patientsToKeep = renameTupleColumns(joined)
+    val patientsToKeep: Set[String] = renameTupleColumns(joined)
       .withColumn("filter", diseaseFilter)
       .where(col("filter"))
       .select(patientId)
       .distinct
+      .as[String]
+      .collect().toSet
 
-    import patients.sparkSession.implicits._
-    patients.join(patientsToKeep, "patientID").as[Patient]
+    applyContains(patientsToKeep)
   }
 
   // Drop patients whose first molecule event is after PeriodStart + 1 year
@@ -51,26 +69,26 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
 
     val window = Window.partitionBy(Event.Columns.PatientID)
 
-    val firstYearObservation = add_months(
+    val firstYearObservation: Column = add_months(
       lit(studyStart),
       delayedEntriesThreshold
     ).cast(TimestampType)
 
-    val drugFilter = max(
+    val drugFilter: Column = max(
       when(
         col(Event.Columns.Start) <= firstYearObservation,
         lit(1)
       ).otherwise(lit(0))
     ).over(window).cast(BooleanType)
 
-    val patientsToKeep = molecules
+    val patientsToKeep: Set[String] = molecules
       .withColumn("filter", drugFilter)
       .where(col("filter"))
-      .drop("filter")
       .select("patientID")
       .distinct
+      .as[String]
+      .collect().toSet
 
-    import patients.sparkSession.implicits._
-    patients.join(patientsToKeep, "patientID").as[Patient]
+    applyContains(patientsToKeep)
   }
 }

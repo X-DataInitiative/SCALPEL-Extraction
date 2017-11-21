@@ -6,7 +6,7 @@ import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 import org.apache.spark.sql.Dataset
-class PatientFilterImplicitsSuite extends SharedContext {
+class PatientFiltersImplicitsSuite extends SharedContext {
 
   "filterEarlyDiagnosedPatients" should "drop patients who had an outcome before follow-up start" in {
 

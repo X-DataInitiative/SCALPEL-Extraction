@@ -8,13 +8,14 @@ import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 object PioglitazoneConfig {
 
-
   private lazy val conf: Config = {
     // This is a little hacky. In the future, it may be nice to find a better way.
     val sqlContext = SQLContext.getOrCreate(SparkContext.getOrCreate())
     val configPath: String = sqlContext.getConf("conf", "")
     val environment: String = sqlContext.getConf("env", "test")
-    ConfigFactory.parseResources("config/pioglitazone/pioglitazone.conf").resolve().getConfig(environment)
+    val defaultConfig = ConfigFactory.parseResources("config/pioglitazone/pioglitazone.conf").resolve().getConfig(environment)
+    val newConfig = ConfigFactory.parseFile(new java.io.File(configPath)).resolve()
+    newConfig.withFallback(defaultConfig).resolve()
   }
 
   case class StudyParams(

@@ -62,7 +62,6 @@ object PioglitazoneMain extends Main {
     val moleculesConfig = MoleculePurchasesConfig(drugClasses = configPIO.drugs.drugCategories)
     val drugEvents: Dataset[Event[Molecule]] = new MoleculePurchases(moleculesConfig).extract(sources).cache()
 
-
     logger.info("Extracting diagnosis events...")
     val diagnosesConfig = DiagnosesConfig(configPIO.diagnoses.imbDiagnosisCodes,
       configPIO.diagnoses.codesMapDP,
@@ -113,13 +112,24 @@ object PioglitazoneMain extends Main {
       .transform(patiensWithObservations, drugEvents, outcomes, tracklosses)
       .cache()
 
-    logger.info("FilteringPatients...")
-    val filteredPatients = patients
-      .filterDelayedEntries(drugEvents, configPIO.study.studyStart, configPIO.study.delayed_entry_threshold)
-      .filterEarlyDiagnosedPatients(outcomes, followups, outcomeName)
+    logger.info("Filtering Patients...")
+    val filteredPatients = {
+      val firstFilterResult = if (configPIO.filters.filter_delayed_entries)
+        patients.filterDelayedEntries(drugEvents, configPIO.study.studyStart, configPIO.study.delayed_entry_threshold)
+      else
+        patients
+
+      if (configPIO.filters.filter_diagnosed_patients)
+        firstFilterResult.filterEarlyDiagnosedPatients(outcomes, followups, outcomeName)
+      else
+        patients
+    }
 
     logger.info("Writing cancer outcomes...")
-    outcomes.join(filteredPatients, "patientID").write.parquet(outputPaths.outcomes)
+    val idsSet = filteredPatients.idsSet
+    outcomes.filter { outcome =>
+      idsSet.contains(outcome.patientID)
+    }.write.parquet(outputPaths.outcomes)
 
     logger.info("Extracting Exposures...")
     val patientsWithFollowups = filteredPatients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
