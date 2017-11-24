@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
+/*
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.loaders.mlpp._
@@ -73,3 +74,4 @@ class PioglitazoneMainSuite extends SharedContext{
   }
 
 }
+*/

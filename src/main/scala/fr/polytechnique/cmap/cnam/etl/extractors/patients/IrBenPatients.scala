@@ -29,7 +29,7 @@ private[patients] object IrBenPatients {
       val result = data
         .select(
           col("patientID"),
-          col("BEN_SEX_COD").as("gender")
+          col("BEN_SEX_COD").cast("int").as("gender")
         ).distinct
 
       val patients = result.select(col("patientID")).distinct()

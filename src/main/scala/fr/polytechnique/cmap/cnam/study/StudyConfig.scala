@@ -11,7 +11,9 @@ object StudyConfig {
     val configPath: String = sqlContext.getConf("conf", "")
     val environment: String = sqlContext.getConf("env", "test")
     val study: String = sqlContext.getConf("study", "pioglitazone")
-    ConfigFactory.parseResources("config/" + study + "/"+ study + ".conf").resolve().getConfig(environment)
+    val defaultConfig =  ConfigFactory.parseResources("config/" + study + "/"+ study + ".conf").resolve().getConfig(environment)
+    val newConfig = ConfigFactory.parseFile(new java.io.File(configPath)).resolve()
+    newConfig.withFallback(defaultConfig).resolve()
   }
 
   case class InputPaths(

@@ -48,8 +48,8 @@ object RichDataFrames {
 
   def renameTupleColumns[A: TypeTag, B: TypeTag](input: Dataset[(A, B)]): Dataset[(A, B)] = {
     import input.sqlContext.implicits._
-    val aName = typeOf[A].toString().split('.').last
-    val bName = typeOf[B].toString().split('.').last
-    input.withColumnRenamed("_1", aName).withColumnRenamed("_2", bName).as[(A,B)]
+    val aName = typeOf[A].typeSymbol.name.toString
+    val bName = typeOf[B].typeSymbol.name.toString
+    input.withColumnRenamed("_1", aName).withColumnRenamed("_2", bName).as[(A, B)]
   }
 }

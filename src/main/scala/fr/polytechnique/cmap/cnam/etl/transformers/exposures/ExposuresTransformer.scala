@@ -8,9 +8,8 @@ import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 
-
 class ExposuresTransformer(config: ExposureDefinition)
-  extends ExposurePeriodAdder with WeightAggregator with PatientFilters {
+  extends ExposurePeriodAdder with WeightAggregator {
 
   import Columns._
 
@@ -47,7 +46,6 @@ class ExposuresTransformer(config: ExposureDefinition)
     import input.sqlContext.implicits._
 
     input.toDF
-      .filterPatients(studyStart, diseaseCode, filterDelayedPatients) // TODO: remove
       .where(col(Category) === Molecule.category)
       .withStartEnd(minPurchases, startDelay, purchasesWindow)
       .where(col(ExposureStart) =!= col(ExposureEnd)) // This also removes rows where exposureStart = null

@@ -46,7 +46,8 @@ class ExposuresTransformerSuite extends SharedContext {
     val expected = Seq(
       Exposure("Patient_A", "PIOGLITAZONE", 1.0, makeTS(2007, 5, 1), makeTS(2009, 7, 11)),
       Exposure("Patient_A", "SULFONYLUREA", 1.0, makeTS(2008, 8, 1), makeTS(2009, 7, 11)),
-      Exposure("Patient_B", "PIOGLITAZONE", 1.0, makeTS(2006, 8, 1), makeTS(2008, 9, 1))
+      Exposure("Patient_B", "PIOGLITAZONE", 1.0, makeTS(2006, 8, 1), makeTS(2008, 9, 1)),
+      Exposure("Patient_B.1", "PIOGLITAZONE", 1.0, makeTS(2007, 11, 1), makeTS(2008, 9, 1))
     ).toDS
 
     val exposure = ExposureDefinition(
