@@ -8,6 +8,8 @@ import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GHMClassificati
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{Diagnoses, DiagnosesConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.TherapeuticDrugs
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
+import fr.polytechnique.cmap.cnam.etl.filters.{EventFilters, PatientFilters}
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.util.functions._
@@ -76,31 +78,47 @@ object FallMain extends Main with FractureCodes {
 
   override def appName: String = "fall study"
 
-  override def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] ={
+  override def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
+
+    import EventFilters._
+    import PatientFilters._
 
     val env = getEnv(argsMap)
-
     val source = getSource(sqlContext, env)
-
-    val patients = new Patients(PatientsConfig(env.RefDate)).extract(source).cache()
-
     val dcir = source.dcir.get.cache()
     val mco = source.pmsiMco.get.cache()
+    val patients = new Patients(PatientsConfig(env.RefDate)).extract(source).cache()
+
     logger.info("Drug Purchases")
-    val drugPurchases =
+    val drugPurchases = {
       new TherapeuticDrugs(dcir, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
         .extract
         .cache()
+    }
     logger.info("  count: " + drugPurchases.count)
     logger.info("  count distinct: " + drugPurchases.distinct.count)
 
+
+    logger.info("Filtering Patients")
+    logger.info("  count before: " + patients.count)
+    val filteredPatients: Dataset[Patient] = patients.filterDelayedPatients(drugPurchases, env.RefDate)
+    logger.info("  count after: " + filteredPatients.count)
+
     logger.info("Diagnoses")
-    val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = HospitalizedFracturesCim10)).extract(source).cache()
+    val diagnoses = {
+      new Diagnoses(DiagnosesConfig(dpCodes = HospitalizedFracturesCim10))
+        .extract(source)
+        .filterPatients(filteredPatients)
+        .cache()
+    }
     logger.info("  count: " + diagnoses.count)
     logger.info("  count distinct: " + diagnoses.distinct.count)
 
     logger.info("Classifications")
-    val classifications = GHMClassifications.extract(mco, GenericGHMCodes).cache()
+    val classifications = GHMClassifications
+      .extract(mco, GenericGHMCodes)
+      .filterPatients(filteredPatients)
+      .cache()
     logger.info("  count: " + classifications.count)
     logger.info("  count distinct: " + classifications.distinct.count)
 
@@ -109,7 +127,7 @@ object FallMain extends Main with FractureCodes {
         dcirCodes = NonHospitalizedFracturesCcam,
         mcoCECodes = NonHospitalizedFracturesCcam
       )
-    ).extract(source).cache()
+    ).extract(source).filterPatients(filteredPatients).cache()
 
     logger.info("Outcomes")
     val generalFractures = GeneralFractures.transform(diagnoses, classifications, acts).cache()
@@ -120,9 +138,10 @@ object FallMain extends Main with FractureCodes {
     logger.info("Patients with outcomes")
     logger.info("  count: " + generalFractures.select("patientID").distinct.count)
 
+
     logger.info("Writing")
     logger.info("  Drug Purchases...")
-    drugPurchases.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "drug-purchases")
+    drugPurchases.filterPatients(patients).write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "drug-purchases")
     logger.info("  Diagnoses...")
     diagnoses.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "diagnoses")
     logger.info("  Classification...")
@@ -130,7 +149,7 @@ object FallMain extends Main with FractureCodes {
     logger.info("  Outcomes...")
     generalFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures")
     logger.info("  Patients...")
-    patients.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "patients")
+    filteredPatients.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "patients")
 
     Some(generalFractures)
   }

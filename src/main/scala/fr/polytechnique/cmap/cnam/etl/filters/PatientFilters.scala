@@ -8,7 +8,7 @@ import org.apache.spark.sql.Dataset
  * https://datainitiative.atlassian.net/wiki/spaces/CFC/pages/109051905/Architecture+decisions
  */
 object PatientFilters {
-  implicit def addImplicits(patients: Dataset[Patient]): PatientFiltersImplicits = {
+  implicit def addPatientsImplicits(patients: Dataset[Patient]): PatientFiltersImplicits = {
     new PatientFiltersImplicits(patients)
   }
 }

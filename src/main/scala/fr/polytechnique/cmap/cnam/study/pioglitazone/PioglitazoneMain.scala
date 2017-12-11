@@ -7,7 +7,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{Diagnoses, Diagnoses
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.{MoleculePurchases, MoleculePurchasesConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.tracklosses.{Tracklosses, TracklossesConfig}
-import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
+import fr.polytechnique.cmap.cnam.etl.filters.{EventFilters, PatientFilters}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.MLPPLoader
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
@@ -32,6 +32,8 @@ object PioglitazoneMain extends Main {
     */
   def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[Event[AnyEvent]]] = {
 
+    import EventFilters._
+    import PatientFilters._
     import sqlContext.implicits._
 
     // "get" returns an Option, then we can use foreach to gently ignore when the key was not found.
@@ -55,8 +57,6 @@ object PioglitazoneMain extends Main {
     logger.info("Extracting patients...")
     val patientsConfig = PatientsConfig(configPIO.study.ageReferenceDate)
     val patients: Dataset[Patient] = new Patients(patientsConfig).extract(sources).cache()
-
-    import PatientFilters._
 
     logger.info("Extracting molecule events...")
     val moleculesConfig = MoleculePurchasesConfig(drugClasses = configPIO.drugs.drugCategories)
@@ -115,7 +115,7 @@ object PioglitazoneMain extends Main {
     logger.info("Filtering Patients...")
     val filteredPatients = {
       val firstFilterResult = if (configPIO.filters.filter_delayed_entries)
-        patients.filterDelayedEntries(drugEvents, configPIO.study.studyStart, configPIO.study.delayed_entry_threshold)
+        patients.filterDelayedPatients(drugEvents, configPIO.study.studyStart, configPIO.study.delayed_entry_threshold)
       else
         patients
 
@@ -126,10 +126,7 @@ object PioglitazoneMain extends Main {
     }
 
     logger.info("Writing cancer outcomes...")
-    val idsSet = filteredPatients.idsSet
-    outcomes.filter { outcome =>
-      idsSet.contains(outcome.patientID)
-    }.write.parquet(outputPaths.outcomes)
+    outcomes.filterPatients(filteredPatients)
 
     logger.info("Extracting Exposures...")
     val patientsWithFollowups = filteredPatients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
@@ -147,7 +144,7 @@ object PioglitazoneMain extends Main {
 
     logger.info("Extracting MLPP features...")
     val params = MLPPLoader.Params(minTimestamp = configPIO.study.studyStart, maxTimestamp = configPIO.study.studyEnd)
-    MLPPLoader().load(outcomes, exposures, patients, StudyConfig.outputPaths.mlppFeatures)
+    MLPPLoader(params).load(outcomes, exposures, patients, StudyConfig.outputPaths.mlppFeatures)
 
     Some(allEvents)
   }

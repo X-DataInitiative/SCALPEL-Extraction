@@ -1,14 +1,15 @@
 package fr.polytechnique.cmap.cnam.etl.filters
 
 import java.sql.Timestamp
-import fr.polytechnique.cmap.cnam.etl.events.{Event, Molecule, Outcome}
+
+import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import org.apache.spark.sql.{Column, Dataset}
 
 /*
  * The architectural decisions regarding the patient filters can be found in the following page:
@@ -62,16 +63,16 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
   }
 
   // Drop patients whose first molecule event is after PeriodStart + 1 year
-  def filterDelayedEntries(
-      molecules: Dataset[Event[Molecule]],
+  def filterDelayedPatients[T <: AnyEvent](
+      events: Dataset[Event[T]],
       studyStart: Timestamp,
-      delayedEntriesThreshold: Int = 12): Dataset[Patient] = {
+      thresholdMonths: Int = 12): Dataset[Patient] = {
 
     val window = Window.partitionBy(Event.Columns.PatientID)
 
     val firstYearObservation: Column = add_months(
       lit(studyStart),
-      delayedEntriesThreshold
+      thresholdMonths
     ).cast(TimestampType)
 
     val drugFilter: Column = max(
@@ -81,13 +82,14 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
       ).otherwise(lit(0))
     ).over(window).cast(BooleanType)
 
-    val patientsToKeep: Set[String] = molecules
+    val patientsToKeep: Set[String] = events
       .withColumn("filter", drugFilter)
       .where(col("filter"))
       .select("patientID")
       .distinct
       .as[String]
-      .collect().toSet
+      .collect()
+      .toSet
 
     applyContains(patientsToKeep)
   }

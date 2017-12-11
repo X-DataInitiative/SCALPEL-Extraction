@@ -77,7 +77,7 @@ class PatientFiltersImplicitsSuite extends SharedContext {
 
     // When
     val instance = new PatientFiltersImplicits(patients)
-    val result = instance.filterDelayedEntries(moleculeEvents, studyStart)
+    val result = instance.filterDelayedPatients(moleculeEvents, studyStart)
 
     // Then
     assertDSs(result, expected, true)
