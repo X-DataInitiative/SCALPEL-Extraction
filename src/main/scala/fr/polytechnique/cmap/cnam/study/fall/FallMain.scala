@@ -141,6 +141,7 @@ object FallMain extends Main with FractureCodes {
 
     logger.info("Writing")
     logger.info("  Drug Purchases...")
+    // todo: we still need a better way to apply the filters.
     drugPurchases.filterPatients(patients).write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "drug-purchases")
     logger.info("  Diagnoses...")
     diagnoses.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "diagnoses")
