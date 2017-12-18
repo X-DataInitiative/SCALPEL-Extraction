@@ -101,8 +101,8 @@ object FallMain extends Main with FractureCodes {
 
     logger.info("Filtering Patients")
     logger.info("  count before: " + patients.count)
-    val filteredPatients: Dataset[Patient] = patients.filterDelayedPatients(drugPurchases, env.RefDate).cache()
-//    val patientIds: Set[String] = filteredPatients.idsSet
+    // todo: the number of months should be a runtime parameter!
+    val filteredPatients: Dataset[Patient] = patients.filterDelayedPatients(drugPurchases, env.RefDate, 2).cache()
     logger.info("  count after: " + filteredPatients.count)
 
     logger.info("Diagnoses")
