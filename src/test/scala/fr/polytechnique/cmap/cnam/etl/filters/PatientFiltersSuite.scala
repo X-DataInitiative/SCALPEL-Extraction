@@ -8,7 +8,7 @@ import org.scalatest.FlatSpec
 class PatientFiltersSuite extends FlatSpec {
 
       "addFiltersImplicits" should "return the correct implementation filtering strategy" in {
-        val instance = PatientFilters.addImplicits(mock(classOf[Dataset[Patient]]))
+        val instance = PatientFilters.addPatientsImplicits(mock(classOf[Dataset[Patient]]))
         assert(instance.isInstanceOf[PatientFiltersImplicits])
       }
   }
