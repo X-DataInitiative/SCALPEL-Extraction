@@ -126,7 +126,7 @@ object PioglitazoneMain extends Main {
     }
 
     logger.info("Writing cancer outcomes...")
-    outcomes.filterPatients(filteredPatients)
+    outcomes.filterPatients(filteredPatients.idsSet)
 
     logger.info("Extracting Exposures...")
     val patientsWithFollowups = filteredPatients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))

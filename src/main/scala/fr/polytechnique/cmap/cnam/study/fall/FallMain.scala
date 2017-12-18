@@ -80,7 +80,7 @@ object FallMain extends Main with FractureCodes {
 
   override def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
 
-    import EventFilters._
+//    import EventFilters._
     import PatientFilters._
 
     val env = getEnv(argsMap)
@@ -101,24 +101,17 @@ object FallMain extends Main with FractureCodes {
 
     logger.info("Filtering Patients")
     logger.info("  count before: " + patients.count)
-    val filteredPatients: Dataset[Patient] = patients.filterDelayedPatients(drugPurchases, env.RefDate)
+    val filteredPatients: Dataset[Patient] = patients.filterDelayedPatients(drugPurchases, env.RefDate).cache()
+//    val patientIds: Set[String] = filteredPatients.idsSet
     logger.info("  count after: " + filteredPatients.count)
 
     logger.info("Diagnoses")
-    val diagnoses = {
-      new Diagnoses(DiagnosesConfig(dpCodes = HospitalizedFracturesCim10))
-        .extract(source)
-        .filterPatients(filteredPatients)
-        .cache()
-    }
+    val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = HospitalizedFracturesCim10)).extract(source).cache()
     logger.info("  count: " + diagnoses.count)
     logger.info("  count distinct: " + diagnoses.distinct.count)
 
     logger.info("Classifications")
-    val classifications = GHMClassifications
-      .extract(mco, GenericGHMCodes)
-      .filterPatients(filteredPatients)
-      .cache()
+    val classifications = GHMClassifications.extract(mco, GenericGHMCodes).cache()
     logger.info("  count: " + classifications.count)
     logger.info("  count distinct: " + classifications.distinct.count)
 
@@ -127,7 +120,7 @@ object FallMain extends Main with FractureCodes {
         dcirCodes = NonHospitalizedFracturesCcam,
         mcoCECodes = NonHospitalizedFracturesCcam
       )
-    ).extract(source).filterPatients(filteredPatients).cache()
+    ).extract(source).cache()
 
     logger.info("Outcomes")
     val generalFractures = GeneralFractures.transform(diagnoses, classifications, acts).cache()
@@ -141,8 +134,7 @@ object FallMain extends Main with FractureCodes {
 
     logger.info("Writing")
     logger.info("  Drug Purchases...")
-    // todo: we still need a better way to apply the filters.
-    drugPurchases.filterPatients(patients).write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "drug-purchases")
+    drugPurchases.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "drug-purchases")
     logger.info("  Diagnoses...")
     diagnoses.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "diagnoses")
     logger.info("  Classification...")
@@ -150,7 +142,8 @@ object FallMain extends Main with FractureCodes {
     logger.info("  Outcomes...")
     generalFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures")
     logger.info("  Patients...")
-    filteredPatients.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "patients")
+    patients.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "patients-total")
+    filteredPatients.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "patients-filtered")
 
     Some(generalFractures)
   }
