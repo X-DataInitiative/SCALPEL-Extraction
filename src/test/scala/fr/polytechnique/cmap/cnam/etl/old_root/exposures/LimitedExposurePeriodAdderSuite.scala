@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.old_root.exposures
 
-import org.apache.spark.sql.DataFrame
-import org.mockito.Mockito.mock
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
+import org.apache.spark.sql.DataFrame
+import org.mockito.Mockito.mock
 
 class LimitedExposurePeriodAdderSuite extends SharedContext {
 
@@ -320,6 +320,6 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
     val result = instance.withStartEnd()
 
     // Then
-    assertDFs(result, expected)
+    assertDFs(result, expected, true)
   }
 }

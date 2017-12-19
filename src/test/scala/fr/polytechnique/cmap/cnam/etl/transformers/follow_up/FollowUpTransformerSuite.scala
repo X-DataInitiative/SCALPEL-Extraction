@@ -1,12 +1,12 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
 
-import org.apache.spark.sql.functions.lit
-import org.apache.spark.sql.types.TimestampType
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriod
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
+import org.apache.spark.sql.functions.lit
+import org.apache.spark.sql.types.TimestampType
 
 
 
@@ -212,7 +212,7 @@ class FollowUpTransformerSuite extends SharedContext {
 
     // Then
 
-    assertDSs(result, expected, true)
+    assertDSs(result, expected)
   }
 
   "transform" should "return a Dataset[FollowUp] with the follow-up events of each patient with Tick model" in {
@@ -255,7 +255,7 @@ class FollowUpTransformerSuite extends SharedContext {
 
     // Then
 
-    assertDSs(result, expected, true)
+    assertDSs(result, expected)
   }
 
   "transform" should "return a Dataset[FollowUp] with the follow-up events of each patient with LCSCCS model" in {
@@ -293,6 +293,6 @@ class FollowUpTransformerSuite extends SharedContext {
 
     // Then
 
-    assertDSs(result, expected, true)
+    assertDSs(result, expected)
   }
 }

@@ -301,7 +301,7 @@ class ExposuresTransformerSuite extends SharedContext {
     val result = ExposuresTransformer(config).transform(input).toDF
 
     // Then
-    assertDFs(result, expected)
+    assertDFs(result, expected, true)
   }
 }
 

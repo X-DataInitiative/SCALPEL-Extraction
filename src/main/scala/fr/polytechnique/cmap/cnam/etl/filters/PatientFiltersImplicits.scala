@@ -73,13 +73,13 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
 
   /** Removes all patients who haven't got an event within N months after the study start.
     *
-    * @param events The events to look at. Ideally, it should contain only molecule or drug events
+    * @param dispensations The events to look at. Ideally, it should contain only molecule or drug events
     * @param studyStart The date of start of the study
     * @param thresholdMonths The number of months of the initial period
     * @return a Dataset of patients with the unwanted patients removed
     */
-  def filterDelayedPatients[T <: AnyEvent](
-      events: Dataset[Event[T]],
+  def filterDelayedPatients[Disp <: Dispensation](
+      dispensations: Dataset[Event[Disp]],
       studyStart: Timestamp,
       thresholdMonths: Int = 12): Dataset[Patient] = {
 
@@ -97,7 +97,7 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
       ).otherwise(lit(0))
     ).over(window).cast(BooleanType)
 
-    val patientsToKeep: Set[String] = events
+    val patientsToKeep: Set[String] = dispensations
       .withColumn("filter", drugFilter)
       .where(col("filter"))
       .select("patientID")

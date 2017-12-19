@@ -30,9 +30,11 @@ import java.sql.Timestamp
 case class ExposureDefinition(
     periodStrategy: ExposurePeriodStrategy = ExposurePeriodStrategy.Unlimited,
     startDelay: Int = 3,
+    endDelay: Int = 0,
     minPurchases: Int = 2,
     purchasesWindow: Int = 6,
     weightAggStrategy: WeightAggStrategy = WeightAggStrategy.NonCumulative,
+    tracklossThreshold: Int = 4,
     cumulativeExposureWindow: Int = 1,
     cumulativeStartThreshold: Int = 6,
     cumulativeEndThreshold: Int = 4,

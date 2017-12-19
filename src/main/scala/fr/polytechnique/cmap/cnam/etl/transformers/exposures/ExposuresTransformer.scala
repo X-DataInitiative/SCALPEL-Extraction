@@ -1,12 +1,13 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
 import java.sql.Timestamp
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.functions._
-import fr.polytechnique.cmap.cnam.etl.events.{Event, Exposure, Molecule}
+
+import fr.polytechnique.cmap.cnam.etl.events.{Dispensation, Event, Exposure}
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import fr.polytechnique.cmap.cnam.util.RichDataFrames._
+import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.functions._
 
 class ExposuresTransformer(config: ExposureDefinition)
   extends ExposurePeriodAdder with WeightAggregator {
@@ -20,16 +21,18 @@ class ExposuresTransformer(config: ExposureDefinition)
   val filterDelayedPatients: Boolean = config.filterDelayedPatients
   val minPurchases: Int = config.minPurchases
   val startDelay: Int = config.startDelay
+  val endDelay: Int = config.endDelay
   val purchasesWindow: Int = config.purchasesWindow
+  val tracklossThreshold: Int = config.tracklossThreshold
   val cumulativeExposureWindow: Int = config.cumulativeExposureWindow
   val cumulativeStartThreshold: Int = config.cumulativeStartThreshold
   val cumulativeEndThreshold: Int = config.cumulativeEndThreshold
   val dosageLevelIntervals: List[Int] = config.dosageLevelIntervals
   val purchaseIntervals: List[Int] = config.purchaseIntervals
 
-  def transform(
+  def transform[Disp <: Dispensation](
       patients: Dataset[(Patient, FollowUp)],
-      dispensations: Dataset[Event[Molecule]])
+      dispensations: Dataset[Event[Disp]])
     : Dataset[Event[Exposure]] = {
 
     val inputCols = Seq(
@@ -46,8 +49,7 @@ class ExposuresTransformer(config: ExposureDefinition)
     import input.sqlContext.implicits._
 
     input.toDF
-      .where(col(Category) === Molecule.category)
-      .withStartEnd(minPurchases, startDelay, purchasesWindow)
+      .withStartEnd(minPurchases, startDelay, endDelay, purchasesWindow, tracklossThreshold)
       .where(col(ExposureStart) =!= col(ExposureEnd)) // This also removes rows where exposureStart = null
       .aggregateWeight(
         Some(studyStart),
