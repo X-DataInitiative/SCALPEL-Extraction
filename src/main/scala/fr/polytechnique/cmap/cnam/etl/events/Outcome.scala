@@ -12,6 +12,9 @@ trait Outcome extends AnyEvent with EventBuilder {
   def apply(patientID: String, name: String, date: Timestamp): Event[Outcome] =
     Event(patientID, category, groupID = "NA", name, 0.0, date, None)
 
+  def apply(patientID: String, groupId: String, name: String, date: Timestamp): Event[Outcome] =
+    Event(patientID, category, groupID = groupId, name, 0.0, date, None)
+
   def fromRow(
       r: Row,
       patientIDCol: String = "patientID",

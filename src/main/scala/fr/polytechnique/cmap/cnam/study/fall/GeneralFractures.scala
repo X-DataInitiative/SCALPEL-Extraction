@@ -17,12 +17,12 @@ object GeneralFractures extends OutcomeTransformer with FractureCodes {
 
   def transform(
       diagnoses: Dataset[Event[Diagnosis]],
-      classifications: Dataset[Event[Classification]],
-      medicalActs: Dataset[Event[MedicalAct]]): Dataset[Event[Outcome]] = {
+      HospitalMedicalActs: Dataset[Event[MedicalAct]],
+      medicalActs: Dataset[Event[MedicalAct]], ghmSites: List[Site]): Dataset[Event[Outcome]] = {
 
     import diagnoses.sqlContext.implicits._
     unionDatasets(
-      HospitalizedFractures.transform(diagnoses, classifications),
+      HospitalizedFractures.transform(diagnoses, HospitalMedicalActs, ghmSites),
       PrivateAmbulatoryFractures.transform(medicalActs),
       PublicAmbulatoryFractures.transform(medicalActs)
     ).map(_.copy(value = outcomeName))

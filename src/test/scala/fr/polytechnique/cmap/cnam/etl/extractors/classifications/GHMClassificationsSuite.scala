@@ -21,7 +21,7 @@ class GHMClassificationsSuite extends SharedContext{
     ).toDS
 
     // When
-    val result = GHMClassifications.extract(input, ghmCodes)
+    val result = GHMClassifications.extract(input, ghmCodes.toSet)
 
     // Then
     assertDSs(result, expected)
@@ -39,7 +39,7 @@ class GHMClassificationsSuite extends SharedContext{
     val expected = sqlContext.sparkSession.emptyDataset[Event[Classification]]
 
     // When
-    val result = GHMClassifications.extract(input, ghmCodes)
+    val result = GHMClassifications.extract(input, ghmCodes.toSet)
 
     // Then
     assertDSs(result, expected)
