@@ -45,12 +45,13 @@ object HospitalizedFractures extends OutcomeTransformer with FractureCodes {
 
     val spark: SparkSession = events.sparkSession
     import spark.implicits._
-    val fracturesDiagnoses = events.rdd
-      .groupBy(_.groupID)
-      .flatMap {
-        case (_, diagnoses) if (diagnoses.toList.exists (_.category == MainDiagnosis.category) ) => diagnoses
-        case _ => Seq.empty
-    }.toDF()
+    val fracturesDiagnoses = events
+      .groupByKey(_.groupID)
+      .flatMapGroups { case (_, diagnoses) =>
+        val diagnosisStream = diagnoses.toStream
+        if (diagnosisStream.exists(_.category == MainDiagnosis.category)) diagnosisStream
+        else Seq.empty
+      }.toDF()
 
 
     val patientsToFilter = incorrectGHMStays.select("patientID")
@@ -61,10 +62,10 @@ object HospitalizedFractures extends OutcomeTransformer with FractureCodes {
 
   def transform(
       diagnoses: Dataset[Event[Diagnosis]],
-      acts: Dataset[Event[MedicalAct]], ghmSites: List[Site]): Dataset[Event[Outcome]] = {
+      acts: Dataset[Event[MedicalAct]], ghmSites: List[BodySite]): Dataset[Event[Outcome]] = {
 
     import diagnoses.sqlContext.implicits._
-    val ghmCodes = Site.extractCodesFromSites(ghmSites)
+    val ghmCodes = BodySite.extractCodesFromSites(ghmSites)
     val correctCIM10Event = diagnoses
       .filter(isMainOrDASDiagnosis _)
       .filter(diagnosis => isFractureDiagnosis(diagnosis, ghmCodes))
@@ -75,7 +76,7 @@ object HospitalizedFractures extends OutcomeTransformer with FractureCodes {
       .distinct()
 
     filterHospitalStay(correctCIM10Event, incorrectGHMStays)
-      .map(event => Outcome(event.patientID, Site.getSiteFromCode(event.value, ghmSites), outcomeName, event.start))
+      .map(event => Outcome(event.patientID, BodySite.getSiteFromCode(event.value, ghmSites), outcomeName, event.start))
 
   }
 

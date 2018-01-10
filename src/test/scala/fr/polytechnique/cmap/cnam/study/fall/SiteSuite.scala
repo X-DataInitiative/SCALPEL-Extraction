@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.study.fall
 
 import fr.polytechnique.cmap.cnam.SharedContext
 
-class SiteSuite extends SharedContext {
+class BodySiteSuite extends SharedContext {
 
   "extractCodeSites" should "extract the right codes given a list of sites" in {
 
@@ -10,7 +10,7 @@ class SiteSuite extends SharedContext {
     val input = List(Clavicule, MembreInferieurDistal)
 
     //When
-    val result = Site.extractCodesFromSites(input)
+    val result = BodySite.extractCodesFromSites(input)
 
     val expected = List("S420", "S827", "S829", "M80.-7", "S920", "S921", "S922", "S923", "S924", "S925", "S927", "S929",
        "M80.-6", "S825", "S826", "S828", "S823", "S820", "S821", "S822", "S824")
@@ -25,7 +25,7 @@ class SiteSuite extends SharedContext {
     val input = List(BodySites)
 
     //When
-    val result = Site.extractCodesFromSites(input)
+    val result = BodySite.extractCodesFromSites(input)
     val expected = List("S420", "S422", "S423", "M80.-2", "S427", "M80.-1", "S421", "S429", "S428", "S424", "S520", "S521", "S522", "S523", "S524",
       "S525", "S526", "S620", "S621", "S622", "S623", "S624", "S625", "S626", "S627", "S527", "S529", "M80.-3", "M80.-4", "S628", "S528", "S720",
       "S721", "S723", "S724", "S728", "S727", "S729", "S722", "S820", "S821", "S822", "S824", "M80.-6", "S825", "S826", "S828", "S823", "S920",
@@ -43,7 +43,7 @@ class SiteSuite extends SharedContext {
     //Given
     val input = "S420"
     //When
-    val result = Site.siteContainsCode(input, Clavicule)
+    val result = BodySite.siteContainsCode(input, Clavicule)
     //Then
     assert(result)
   }
@@ -53,7 +53,7 @@ class SiteSuite extends SharedContext {
     //Given
     val input = "S420"
     //When
-    val result = Site.siteContainsCode(input, BodySites)
+    val result = BodySite.siteContainsCode(input, BodySites)
     //Then
     assert(!result)
   }
@@ -63,7 +63,7 @@ class SiteSuite extends SharedContext {
     //Given
     val input = "S420"
     //When
-    val result = Site.getSiteFromCode(input, List(BodySites))
+    val result = BodySite.getSiteFromCode(input, List(BodySites))
     val expected = "clavicule"
 
     //Then

@@ -18,7 +18,7 @@ object GeneralFractures extends OutcomeTransformer with FractureCodes {
   def transform(
       diagnoses: Dataset[Event[Diagnosis]],
       HospitalMedicalActs: Dataset[Event[MedicalAct]],
-      medicalActs: Dataset[Event[MedicalAct]], ghmSites: List[Site]): Dataset[Event[Outcome]] = {
+      medicalActs: Dataset[Event[MedicalAct]], ghmSites: List[BodySite]): Dataset[Event[Outcome]] = {
 
     import diagnoses.sqlContext.implicits._
     unionDatasets(

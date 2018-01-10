@@ -1,15 +1,15 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
 
-trait Site {
+trait BodySite {
   val ghm: String
   val codes: List[String]
 }
 
-object Site{
+object BodySite{
 
   val allSites = List(BodySites, AllSites)
-  def extractCodesFromSites(sites: List[Site]): List[String] = {
+  def extractCodesFromSites(sites: List[BodySite]): List[String] = {
     sites.flatMap(
       site =>
         site match {
@@ -18,9 +18,9 @@ object Site{
         }
     )
   }
-  def siteContainsCode(code: String, site: Site): Boolean = site.codes.exists(code.startsWith(_))
+  def siteContainsCode(code: String, site: BodySite): Boolean = site.codes.exists(code.startsWith(_))
 
-  def getSiteFromCode(code: String, sites: List[Site]): String ={
+  def getSiteFromCode(code: String, sites: List[BodySite]): String ={
 
     val ghmSite = sites.find(s => siteContainsCode(code, s))
     if(ghmSite.nonEmpty) return ghmSite.get.ghm
@@ -28,21 +28,21 @@ object Site{
     val sitesnodes = sites.flatMap(s =>
       s match {
         case s: ForkSite => s.sites
-        case s: LeafSite => List.empty[Site]
+        case s: LeafSite => List.empty[BodySite]
       })
     getSiteFromCode(code, sitesnodes)
 
   }
 }
 
-trait LeafSite extends Site with Serializable{
+trait LeafSite extends BodySite with Serializable{
   val ghm: String
   val codes:  List[String]
 }
 
-trait ForkSite extends Site with Serializable{
+trait ForkSite extends BodySite with Serializable{
   val ghm:String
-  val sites: List[Site]
+  val sites: List[BodySite]
   val codes: List[String]
 }
 
@@ -82,7 +82,7 @@ object Pied extends LeafSite {
 
 object MembreInferieurDistal extends ForkSite {
   override val ghm: String = "MembreInferieurDistal"
-  override val sites: List[Site] = List(Pied, Jambe, Cheville)
+  override val sites: List[BodySite] = List(Pied, Jambe, Cheville)
   override val codes: List[String] = List("S827", "S829", "M80.-7")
 }
 
@@ -103,7 +103,7 @@ object CoudeAvantbras extends LeafSite {
 
 object MembreSuperieurDistal extends ForkSite {
   override val ghm: String = "MembreSuperieurDistal"
-  override val sites: List[Site] = List(CoudeAvantbras, Poignet, Doigt)
+  override val sites: List[BodySite] = List(CoudeAvantbras, Poignet, Doigt)
   override val codes: List[String] = List("S527", "S529", "M80.-3", "M80.-4", "S628", "S528")
 }
 
@@ -144,7 +144,7 @@ object FemurExclusionCol extends LeafSite {
 object BassinRachis extends ForkSite {
   override val ghm: String = "BassinRachis"
   override val codes: List[String] = List("S327", "S328", "S128", "S129")
-  override val sites: List[Site] = List(Rachis, Bassin)
+  override val sites: List[BodySite] = List(Rachis, Bassin)
 }
 
 object Ribs extends LeafSite {
@@ -165,7 +165,7 @@ object Bassin extends LeafSite {
 object CraneFace extends ForkSite {
   override val ghm: String = "CraneFace"
   override val codes: List[String] = List("S027", "S028", "S029")
-  override val sites: List[Site] = List(Crane, Dent, Face)
+  override val sites: List[BodySite] = List(Crane, Dent, Face)
 }
 
 object Crane extends LeafSite {
@@ -190,6 +190,6 @@ object RestOfBody extends LeafSite{
 
 object BodySites extends ForkSite{
   override val ghm: String = "BodySites"
-  override val sites: List[Site] = List(Ribs, MembreInferieurDistal, MembreSuperieurProximal, MembreSuperieurDistal, CraneFace, RestOfBody, ColDuFemur, FemurExclusionCol, BassinRachis, Clavicule)
+  override val sites: List[BodySite] = List(Ribs, MembreInferieurDistal, MembreSuperieurProximal, MembreSuperieurDistal, CraneFace, RestOfBody, ColDuFemur, FemurExclusionCol, BassinRachis, Clavicule)
   override val codes: List[String] = List.empty
 }

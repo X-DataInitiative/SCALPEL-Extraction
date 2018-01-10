@@ -105,7 +105,7 @@ object FallMain extends Main with FractureCodes {
     logger.info("  count after: " + filteredPatients.count)
 
     logger.info("Diagnoses")
-    val fracturesCodes = Site.extractCodesFromSites(List(BodySites))
+    val fracturesCodes = BodySite.extractCodesFromSites(List(BodySites))
     val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = fracturesCodes, daCodes = fracturesCodes)).extract(source).cache()
     logger.info("  count: " + diagnoses.count)
     logger.info("  count distinct: " + diagnoses.distinct.count)
@@ -114,17 +114,17 @@ object FallMain extends Main with FractureCodes {
     diagnoses.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "diagnosesSites")
 
     logger.info("MedicalActs MCO")
-    val hospitaldMedicalActs = new MedicalActs(
+    val hospitalMedicalActs = new MedicalActs(
       MedicalActsConfig(
         mcoCCAMCodes = CCAMExceptions.toList
       )
     ).extract(source).cache()
 
-    logger.info("  count: " + hospitaldMedicalActs.count)
-    logger.info("  count distinct: " + hospitaldMedicalActs.distinct.count)
+    logger.info("  count: " + hospitalMedicalActs.count)
+    logger.info("  count distinct: " + hospitalMedicalActs.distinct.count)
 
     logger.info("  hospitMedicalActs...")
-    hospitaldMedicalActs.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "hospitMedicalActs")
+    hospitalMedicalActs.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "hospitMedicalActs")
 
     val acts = new MedicalActs(
       MedicalActsConfig(
@@ -135,7 +135,7 @@ object FallMain extends Main with FractureCodes {
 
     logger.info("Outcomes")
     logger.info("hospitFractures")
-    val hospitalizedFractures = HospitalizedFractures.transform(diagnoses, hospitaldMedicalActs, List(BodySites)).cache()
+    val hospitalizedFractures = HospitalizedFractures.transform(diagnoses, hospitalMedicalActs, List(BodySites)).cache()
     logger.info("  count: " + hospitalizedFractures.count)
     logger.info("  count distinct: " + hospitalizedFractures.distinct.count)
 
