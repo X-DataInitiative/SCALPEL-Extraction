@@ -8,21 +8,21 @@ trait Site {
 
 object Site{
 
-  val allSites = List(BodySites, AllOfBody)
-  def extractCodeSites(sites: List[Site]): List[String] = {
+  val allSites = List(BodySites, AllSites)
+  def extractCodesFromSites(sites: List[Site]): List[String] = {
     sites.flatMap(
       site =>
         site match {
           case s: LeafSite => s.codes
-          case s: ForkSite => s.codes ++ extractCodeSites(s.sites)
+          case s: ForkSite => s.codes ++ extractCodesFromSites(s.sites)
         }
     )
   }
-  def doesSiteContainsCode(code: String, site: Site): Boolean = site.codes.exists(code.startsWith(_))
+  def siteContainsCode(code: String, site: Site): Boolean = site.codes.exists(code.startsWith(_))
 
   def getSiteFromCode(code: String, sites: List[Site]): String ={
 
-    val ghmSite = sites.find(s => doesSiteContainsCode(code, s))
+    val ghmSite = sites.find(s => siteContainsCode(code, s))
     if(ghmSite.nonEmpty) return ghmSite.get.ghm
 
     val sitesnodes = sites.flatMap(s =>
@@ -65,24 +65,24 @@ object MembreSuperieurProximal extends LeafSite {
   )
 }
 
-object jambe extends LeafSite {
-  override val ghm: String = "jambe"
+object Jambe extends LeafSite {
+  override val ghm: String = "Jambe"
   override val codes =  List("S820", "S821", "S822", "S824", "M80.-6")
 }
 
-object cheville extends LeafSite {
-  override val ghm: String = "cheville"
+object Cheville extends LeafSite {
+  override val ghm: String = "Cheville"
   override val codes =  List("S825", "S826", "S828", "S823")
 }
 
-object pied extends LeafSite {
-  override val ghm: String = "pied"
+object Pied extends LeafSite {
+  override val ghm: String = "Pied"
   override val codes =  List("S920", "S921", "S922", "S923", "S924", "S925", "S927", "S929")
 }
 
 object MembreInferieurDistal extends ForkSite {
   override val ghm: String = "MembreInferieurDistal"
-  override val sites: List[Site] = List(pied, jambe, cheville)
+  override val sites: List[Site] = List(Pied, Jambe, Cheville)
   override val codes: List[String] = List("S827", "S829", "M80.-7")
 }
 
@@ -107,8 +107,8 @@ object MembreSuperieurDistal extends ForkSite {
   override val codes: List[String] = List("S527", "S529", "M80.-3", "M80.-4", "S628", "S528")
 }
 
-object AllOfBody extends LeafSite{
-  override val ghm: String = "AllOfBody"
+object AllSites extends LeafSite{
+  override val ghm: String = "AllSites"
   override val codes: List[String] = List(
     "S02",
     "S12",

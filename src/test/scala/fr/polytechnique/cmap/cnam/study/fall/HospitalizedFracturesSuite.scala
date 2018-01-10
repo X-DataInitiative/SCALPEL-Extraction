@@ -48,7 +48,7 @@ class HospitalizedFracturesSuite extends SharedContext{
     val event = MainDiagnosis("Pierre", "3", "S02.35", makeTS(2017, 7, 18))
 
     // When
-    val result = HospitalizedFractures.isFractureDiagnosis(event, AllOfBody.codes)
+    val result = HospitalizedFractures.isFractureDiagnosis(event, AllSites.codes)
 
     // Then
     assert(result)
@@ -129,11 +129,11 @@ class HospitalizedFracturesSuite extends SharedContext{
     ).toDS
 
     val expected = Seq(
-      Outcome("Pierre", "AllOfBody", "hospitalized_fall", makeTS(2017, 7, 18))
+      Outcome("Pierre", "AllSites", "hospitalized_fall", makeTS(2017, 7, 18))
     ).toDS
 
     // When
-    val result = HospitalizedFractures.transform(diagnoses, medicalActs, List(AllOfBody))
+    val result = HospitalizedFractures.transform(diagnoses, medicalActs, List(AllSites))
     result.show()
     // Then
     assertDSs(result, expected)

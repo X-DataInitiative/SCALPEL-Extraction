@@ -1,12 +1,10 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
-import org.apache.spark.sql.{Dataset, SparkSession}
-import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
-
-import scala.collection.immutable.Stream.Empty
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{Dataset, SparkSession}
 
 /*
  * The rules for this Outcome definition can be found on the following page:
@@ -24,7 +22,7 @@ object HospitalizedFractures extends OutcomeTransformer with FractureCodes {
   }
 
   def isFractureDiagnosis(event: Event[Diagnosis], ghmSites: List[String]): Boolean = {
-     isInCodeList(event, ghmSites.toSet)
+    isInCodeList(event, ghmSites.toSet)
   }
 
   def isMainOrDASDiagnosis(event: Event[Diagnosis]): Boolean = {
@@ -36,22 +34,26 @@ object HospitalizedFractures extends OutcomeTransformer with FractureCodes {
   }
 
 
-
+  /**
+    * filters diagnosis that do not have a DP in the same hospital stay
+    * and the diagnosis that relates to an incorrectGHMStay
+    */
   def filterHospitalStay(
       events: Dataset[Event[Diagnosis]],
-      stays: Dataset[HospitalStay])
+      incorrectGHMStays: Dataset[HospitalStay])
     : Dataset[Event[Diagnosis]] = {
 
     val spark: SparkSession = events.sparkSession
     import spark.implicits._
-    val fracturesDiagnoses = events
-      .rdd.groupBy(_.groupID)
-      .flatMap{
-      //.flatMapGroups{
-        case(_, diagnoses) if (diagnoses.exists(_.category == MainDiagnosis.category)) => diagnoses
-        case _ => Seq.empty}.toDF()
+    val fracturesDiagnoses = events.rdd
+      .groupBy(_.groupID)
+      .flatMap {
+        case (_, diagnosis) if (diagnosis.toList.exists (_.category == MainDiagnosis.category) ) => diagnosis
+        case _ => Seq.empty
+    }.toDF()
 
-    val patientsToFilter = stays.select("patientID")
+
+    val patientsToFilter = incorrectGHMStays.select("patientID")
     fracturesDiagnoses
       .join(broadcast(patientsToFilter), Seq("patientID"), "left_anti")
       .as[Event[Diagnosis]]
@@ -62,7 +64,7 @@ object HospitalizedFractures extends OutcomeTransformer with FractureCodes {
       acts: Dataset[Event[MedicalAct]], ghmSites: List[Site]): Dataset[Event[Outcome]] = {
 
     import diagnoses.sqlContext.implicits._
-    val ghmCodes = Site.extractCodeSites(ghmSites)
+    val ghmCodes = Site.extractCodesFromSites(ghmSites)
     val correctCIM10Event = diagnoses
       .filter(isMainOrDASDiagnosis _)
       .filter(diagnosis => isFractureDiagnosis(diagnosis, ghmCodes))

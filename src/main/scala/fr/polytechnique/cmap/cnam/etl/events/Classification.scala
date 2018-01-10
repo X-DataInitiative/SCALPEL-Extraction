@@ -33,7 +33,6 @@ trait Classification extends AnyEvent with EventBuilder {
   }
 }
 
-
 object GHMClassification extends Classification {
   override val category: EventCategory[Classification] = "ghm"
 }
