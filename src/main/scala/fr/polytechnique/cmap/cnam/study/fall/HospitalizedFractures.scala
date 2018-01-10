@@ -48,7 +48,7 @@ object HospitalizedFractures extends OutcomeTransformer with FractureCodes {
     val fracturesDiagnoses = events.rdd
       .groupBy(_.groupID)
       .flatMap {
-        case (_, diagnosis) if (diagnosis.toList.exists (_.category == MainDiagnosis.category) ) => diagnosis
+        case (_, diagnoses) if (diagnoses.toList.exists (_.category == MainDiagnosis.category) ) => diagnoses
         case _ => Seq.empty
     }.toDF()
 
