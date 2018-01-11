@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
-import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
+import org.apache.spark.sql.Dataset
 
 /*
  * The rules for this Outcome definition can be found on the following page:

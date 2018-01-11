@@ -1,15 +1,12 @@
 package fr.polytechnique.cmap.cnam.etl.events
 
 import java.sql.Timestamp
+
 import org.apache.spark.sql.Row
 
 trait MedicalAct extends AnyEvent with EventBuilder {
 
   val category: EventCategory[MedicalAct]
-
-  def apply(patientID: String, groupID: String, code: String, date: Timestamp): Event[MedicalAct] = {
-    Event(patientID, category, groupID, code, 0.0, date, None)
-  }
 
   def fromRow(
       r: Row,
@@ -17,13 +14,16 @@ trait MedicalAct extends AnyEvent with EventBuilder {
       groupIDCol: String = "groupID",
       codeCol: String = "code",
       dateCol: String = "eventDate"): Event[MedicalAct] = {
-
     apply(
       r.getAs[String](patientIDCol),
       r.getAs[String](groupIDCol),
       r.getAs[String](codeCol),
       r.getAs[Timestamp](dateCol)
     )
+  }
+
+  def apply(patientID: String, groupID: String, code: String, date: Timestamp): Event[MedicalAct] = {
+    Event(patientID, category, groupID, code, 0.0, date, None)
   }
 }
 
@@ -34,7 +34,9 @@ object DcirAct extends MedicalAct {
     val PrivateAmbulatory = "private_ambulatory"
     val PublicAmbulatory = "public_ambulatory"
     val PrivateHospital = "private_hospital"
+    val Liberal = "liberal"
   }
+
 }
 
 object McoCCAMAct extends MedicalAct {
