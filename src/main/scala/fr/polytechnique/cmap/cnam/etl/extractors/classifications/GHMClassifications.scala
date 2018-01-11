@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoEventRowExtractor
 object GHMClassifications extends McoEventRowExtractor{
   def extract(
       mco: DataFrame,
-      ghmCodes: Seq[String]): Dataset[Event[Classification]] = {
+      ghmCodes: Set[String]): Dataset[Event[Classification]] = {
 
     import mco.sqlContext.implicits._
 
@@ -18,7 +18,7 @@ object GHMClassifications extends McoEventRowExtractor{
 
     val df = prepareDF(mco)
     df.flatMap { r =>
-      eventFromRow[Classification](r, GHMClassification, ColNames.GHM, ghmCodes)
+      eventFromRow[Classification](r, GHMClassification, ColNames.GHM, ghmCodes.toSeq)
     }.distinct()
   }
 }

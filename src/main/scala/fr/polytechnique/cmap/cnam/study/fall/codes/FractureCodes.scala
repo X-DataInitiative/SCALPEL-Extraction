@@ -6,8 +6,9 @@ package fr.polytechnique.cmap.cnam.study.fall.codes
  */
 
 
+
 trait FractureCodes {
-  val HospitalizedFracturesCim10 = List(
+  val HospitalizedFracturesCim10 = Set(
     "S02",
     "S12",
     "S22",
@@ -28,16 +29,15 @@ trait FractureCodes {
     "M80"
   )
 
-  val NonHospitalizedFracturesCcam = List(
+  val NonHospitalizedFracturesCcam = Set(
+    "ZMP002",
     "MZMP007",
     "MZMP013",
     "MZMP004",
-    "MZMP002",
     "NZMP008",
     "NZMP006",
     "NZMP014",
-    "HBED011",
-    "HBED016",
+    "MADP001",
     "HBED009",
     "HBED015",
     "LAEA008",
@@ -57,11 +57,10 @@ trait FractureCodes {
     "LBED006",
     "LBED003",
     "MAEP001",
-    "MADP001",
     "MBEP001",
     "MBEP002",
     "MBEP003",
-    "MBEB001",
+    "MBEB001,",
     "MCEP002",
     "MCEP001",
     "MGEP002",
@@ -77,11 +76,17 @@ trait FractureCodes {
     "NDEP001"
   )
 
-  val GenericGHMCodes = List(
+  val GenericGHMCodes = Set(
     "08C13",
     "08C14",
     "08M33",
     "08M18"
   )
 
+  val CCAMExceptions = Set(
+    "LAGA002", "LAGA003", "LAGA004", "LAGA005", "LDGA001", "LDGA002", "LEGA001", "LEGA002", "LFGA001", "LHGA004",
+    "LHGA006", "LHGA007", "LJGA001", "LJGA002", "MAGA001", "MDGA002", "MDGB001", "NAGA001", "NBGA007", "NDGA003",
+    "PAGA008", "PAGA009", "PAGA010", "PAGA011", "PAGB001", "PAGB002", "PAGB003", "PAGB004", "PAGH001", "PAKB001", "PAMP001"
+  )
 }
+
