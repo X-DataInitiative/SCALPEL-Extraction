@@ -71,11 +71,11 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
     applyContains(patientsToKeep)
   }
 
-  /** Removes all patients who got an event within N months after the study start.
+  /** Removes all patients who haven't got an event within N months after the study start.
     *
     * @param events The events to look at. Ideally, it should contain only molecule or drug events
     * @param studyStart The date of start of the study
-    * @param thresholdMonths The number o months of the initial period
+    * @param thresholdMonths The number of months of the initial period
     * @return a Dataset of patients with the unwanted patients removed
     */
   def filterDelayedPatients[T <: AnyEvent](
@@ -105,6 +105,44 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
       .as[String]
       .collect()
       .toSet
+
+    applyContains(patientsToKeep)
+  }
+
+  /** Removes all patients who have got an event within N months after the study start.
+    *
+    * @param events The events to look at. Ideally, it should contain only molecule or drug events
+    * @param studyStart The date of start of the study
+    * @param thresholdMonths The number of months of the initial period
+    * @return a Dataset of patients with the unwanted patients removed
+    */
+  def filterNoStartGap[T <: AnyEvent](
+      events: Dataset[Event[T]],
+      studyStart: Timestamp,
+      thresholdMonths: Int = 2): Dataset[Patient] = {
+
+    val window = Window.partitionBy(Event.Columns.PatientID)
+
+    val gapLimitDate: Column = add_months(
+      lit(studyStart),
+      thresholdMonths
+    ).cast(TimestampType)
+
+    val drugFilter: Column = min(
+      when(
+        col(Event.Columns.Start) <= gapLimitDate,
+        lit(0)
+      ).otherwise(lit(1))
+    ).over(window).cast(BooleanType)
+
+    val patientsToKeep: Set[String] = events
+        .withColumn("filter", drugFilter)
+        .where(col("filter"))
+        .select("patientID")
+        .distinct
+        .as[String]
+        .collect()
+        .toSet
 
     applyContains(patientsToKeep)
   }
