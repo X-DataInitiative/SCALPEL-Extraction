@@ -6,6 +6,7 @@ import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 import org.apache.spark.sql.Dataset
+
 class PatientFiltersImplicitsSuite extends SharedContext {
 
   "filterEarlyDiagnosedPatients" should "drop patients who had an outcome before follow-up start" in {
@@ -45,7 +46,7 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     val result = instance.filterEarlyDiagnosedPatients(outcomes, followUpPeriods, "outcome_a")
 
     // Then
-    assertDSs(result, expected, true)
+    assertDSs(result, expected)
   }
 
   "filterDelayedEntries" should "drop patients not exposed during the first N months of study" in {
@@ -61,13 +62,13 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     ).toDS
 
     val moleculeEvents: Dataset[Event[Molecule]] = Seq(
-      Molecule("Patient_A", "outcome_a", 0.0, makeTS(2006, 5, 1)),
-      Molecule("Patient_B", "outcome_a", 0.0, makeTS(2006, 6, 1)),
-      Molecule("Patient_B", "outcome_a", 0.0, makeTS(2006, 7, 1)),
-      Molecule("Patient_B", "outcome_b", 0.0, makeTS(2006, 8, 1)),
-      Molecule("Patient_C", "outcome_b", 0.0, makeTS(2007, 2, 1)),
-      Molecule("Patient_C", "outcome_a", 0.0, makeTS(2007, 9, 1)),
-      Molecule("Patient_C", "outcome_b", 0.0, makeTS(2007, 10, 1))
+      Molecule("Patient_A", "molecule_a", 0.0, makeTS(2006, 5, 1)),
+      Molecule("Patient_B", "molecule_a", 0.0, makeTS(2006, 6, 1)),
+      Molecule("Patient_B", "molecule_a", 0.0, makeTS(2006, 7, 1)),
+      Molecule("Patient_B", "molecule_b", 0.0, makeTS(2006, 8, 1)),
+      Molecule("Patient_C", "molecule_b", 0.0, makeTS(2007, 2, 1)),
+      Molecule("Patient_C", "molecule_a", 0.0, makeTS(2007, 9, 1)),
+      Molecule("Patient_C", "molecule_b", 0.0, makeTS(2007, 10, 1))
     ).toDS
 
     val expected = Seq(
@@ -78,6 +79,45 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     // When
     val instance = new PatientFiltersImplicits(patients)
     val result = instance.filterDelayedPatients(moleculeEvents, studyStart)
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+
+  "filterNoStartGap" should "drop patients who were exposed during the first N months of study" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val studyStart = makeTS(2006, 1, 1)
+    val patients: Dataset[Patient] = Seq(
+      Patient("Patient_A", 0, makeTS(1950, 1, 1), None),
+      Patient("Patient_B", 0, makeTS(1940, 1, 1), Some(makeTS(2007, 1, 1))),
+      Patient("Patient_C", 0, makeTS(1945, 1, 1), None),
+      Patient("Patient_D", 0, makeTS(1955, 1, 1), None)
+    ).toDS
+
+    val moleculeEvents: Dataset[Event[Molecule]] = Seq(
+      Molecule("Patient_A", "molecule_a", 0.0, makeTS(2006, 1, 15)),
+      Molecule("Patient_A", "molecule_a", 0.0, makeTS(2006, 2, 15)),
+      Molecule("Patient_B", "molecule_a", 0.0, makeTS(2006, 3, 15)),
+      Molecule("Patient_B", "molecule_b", 0.0, makeTS(2006, 5, 15)),
+      Molecule("Patient_C", "molecule_b", 0.0, makeTS(2006, 2, 15)),
+      Molecule("Patient_C", "molecule_b", 0.0, makeTS(2006, 3, 15)),
+      Molecule("Patient_D", "molecule_b", 0.0, makeTS(2006, 4, 15)),
+      Molecule("Patient_D", "molecule_a", 0.0, makeTS(2006, 5, 15)),
+      Molecule("Patient_D", "molecule_b", 0.0, makeTS(2006, 6, 15))
+    ).toDS
+
+    val expected = Seq(
+      Patient("Patient_B", 0, makeTS(1940, 1, 1), Some(makeTS(2007, 1, 1))),
+      Patient("Patient_D", 0, makeTS(1955, 1, 1), None)
+    ).toDS
+
+    // When
+    val instance = new PatientFiltersImplicits(patients)
+    val result = instance.filterNoStartGap(moleculeEvents, studyStart)
 
     // Then
     assertDSs(result, expected, true)
