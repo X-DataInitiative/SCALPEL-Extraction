@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
-import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, MedicalAct}
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 
 private[acts] object DcirMedicalActs {
 
@@ -12,31 +12,15 @@ private[acts] object DcirMedicalActs {
     final lazy val GHSCode = "ER_ETE_F__ETE_GHS_NUM"
     final lazy val InstitutionCode = "ER_ETE_F__ETE_TYP_COD"
     final lazy val Date = "EXE_SOI_DTD"
+
     def allCols = List(PatientID, CamCode, GHSCode, InstitutionCode, Date)
   }
 
-  final val PrivateInstitutionCodes = List(4,5,6,7)
+  final val PrivateInstitutionCodes = List(4, 5, 6, 7)
 
-  def getGHS(r: Row): Double = {
-    r.getAs[Double](ColNames.GHSCode)
-  }
-
-  def getInstitutionCode(r: Row): Double = {
-    r.getAs[Double](ColNames.InstitutionCode)
-  }
-
-  def getGroupId(r: Row): String = {
-    val ghs = getGHS(r)
-    val code = getInstitutionCode(r)
-    if (ghs != 0) {
-      DcirAct.groupID.PrivateHospital
-    }
-    else if (PrivateInstitutionCodes.contains(code)) {
-      DcirAct.groupID.PrivateAmbulatory
-    }
-    else {
-      DcirAct.groupID.PublicAmbulatory
-    }
+  def extract(dcir: DataFrame, ccamCodes: Seq[String]): Dataset[Event[MedicalAct]] = {
+    import dcir.sqlContext.implicits._
+    dcir.flatMap(medicalActFromRow(ccamCodes))
   }
 
   def medicalActFromRow(ccamCodes: Seq[String])(r: Row): Option[Event[MedicalAct]] = {
@@ -49,24 +33,51 @@ private[acts] object DcirMedicalActs {
 
     val foundCode: Option[String] = ccamCodes.find {
       val idx = r.fieldIndex(ColNames.CamCode)
-      noNulls && r.getString(idx).startsWith(_)
+      !r.isNullAt(r.fieldIndex(ColNames.CamCode)) && r.getString(idx).startsWith(_)
     }
 
     foundCode match {
       case None => None
-      case Some(code) => Some(
-        DcirAct(
-          patientID = r.getAs[String](ColNames.PatientID),
-          groupID = getGroupId(r),
-          code = code,
-          date = r.getAs[java.util.Date](ColNames.Date).toTimestamp
+      case Some(code) =>
+        lazy val groupID = getGroupId(r)
+        lazy val act = Some(
+          DcirAct(
+            patientID = r.getAs[String](ColNames.PatientID),
+            groupID = groupID,
+            code = code,
+            date = r.getAs[java.util.Date](ColNames.Date).toTimestamp)
         )
-      )
+        groupID match {
+          case DcirAct.groupID.Liberal => act
+          case  _ if noNulls  => act
+          case _ => None
+        }
     }
   }
 
-  def extract(dcir: DataFrame, ccamCodes: Seq[String]): Dataset[Event[MedicalAct]] = {
-    import dcir.sqlContext.implicits._
-    dcir.flatMap(medicalActFromRow(ccamCodes))
+  def getGroupId(r: Row): String = {
+    if(r.isNullAt(r.fieldIndex(ColNames.GHSCode)))
+      DcirAct.groupID.Liberal
+    else {
+      val ghs = getGHS(r)
+      val code = getInstitutionCode(r)
+      if (ghs != 0) {
+        DcirAct.groupID.PrivateHospital
+      }
+      else if (PrivateInstitutionCodes.contains(code)) {
+        DcirAct.groupID.PrivateAmbulatory
+      }
+      else {
+        DcirAct.groupID.PublicAmbulatory
+      }
+    }
+  }
+
+  def getGHS(r: Row): Double = {
+    r.getAs[Double](ColNames.GHSCode)
+  }
+
+  def getInstitutionCode(r: Row): Double = {
+    r.getAs[Double](ColNames.InstitutionCode)
   }
 }

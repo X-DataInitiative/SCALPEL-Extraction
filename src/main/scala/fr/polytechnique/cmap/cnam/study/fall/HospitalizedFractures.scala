@@ -3,8 +3,8 @@ package fr.polytechnique.cmap.cnam.study.fall
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
-import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.functions._
 
 /*
  * The rules for this Outcome definition can be found on the following page:

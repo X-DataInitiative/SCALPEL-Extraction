@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
-import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events.{Event, MedicalAct}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
+import org.apache.spark.sql.{Column, DataFrame, Dataset, functions}
 
 class MedicalActs(config: MedicalActsConfig) {
 
