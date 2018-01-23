@@ -71,9 +71,9 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
     applyContains(patientsToKeep)
   }
 
-  /** Removes all patients who haven't got an event within N months after the study start.
+  /** Removes all patients who haven't got a dispensation event within N months after the study start.
     *
-    * @param dispensations The events to look at. Ideally, it should contain only molecule or drug events
+    * @param dispensations The dispensation events to look at. It must contain only sub-types of dispensations
     * @param studyStart The date of start of the study
     * @param thresholdMonths The number of months of the initial period
     * @return a Dataset of patients with the unwanted patients removed

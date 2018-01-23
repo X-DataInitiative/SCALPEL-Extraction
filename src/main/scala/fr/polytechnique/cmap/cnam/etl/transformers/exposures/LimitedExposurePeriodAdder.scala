@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions.{min, _}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame}
 
@@ -78,7 +78,6 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       .withDelta
       .persist()
 
-    // todo: get endThreshold as parameter
     val tracklosses = eventsWithDelta.getTracklosses(endThreshold)
 
     val result = eventsWithDelta
