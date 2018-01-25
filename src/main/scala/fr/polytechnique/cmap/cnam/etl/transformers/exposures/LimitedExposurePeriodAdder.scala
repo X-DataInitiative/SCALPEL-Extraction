@@ -1,7 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions.{min, _}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame}
 
 
@@ -31,7 +32,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
         .where(col(TracklossDate).isNotNull)
     }
 
-    def withExposureEnd(tracklosses: DataFrame): DataFrame = {
+    def withExposureEnd(tracklosses: DataFrame, endDelay: Int = 0): DataFrame = {
 
       // I needed this redefinition of names because I was getting some very weird errors when using
       //   the .as() function and .select("table.*")
@@ -55,6 +56,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       innerData
         .join(adjustedTracklosses, joinConditions, "left_outer")
         .withColumnRenamed(TracklossDate, ExposureEnd)
+        .withColumn(ExposureEnd, add_months(col(ExposureEnd), endDelay).cast(TimestampType))
     }
 
     def withExposureStart(purchasesWindow: Int = 6): DataFrame = {
@@ -67,7 +69,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
     }
   }
 
-  def withStartEnd(minPurchases: Int = 2, startDelay: Int = 3, purchasesWindow: Int = 6): DataFrame = {
+  def withStartEnd(minPurchases: Int = 2, startDelay: Int = 3, endDelay: Int = 0, purchasesWindow: Int = 6, endThreshold: Int = 4): DataFrame = {
 
     val outputColumns = (data.columns.toList ++ List(ExposureStart, ExposureEnd)).map(col)
 
@@ -76,11 +78,10 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       .withDelta
       .persist()
 
-    // todo: get endThreshold as parameter
-    val tracklosses = eventsWithDelta.getTracklosses()
+    val tracklosses = eventsWithDelta.getTracklosses(endThreshold)
 
     val result = eventsWithDelta
-      .withExposureEnd(tracklosses)
+      .withExposureEnd(tracklosses, endDelay)
       .withExposureStart(purchasesWindow)
 
     eventsWithDelta.unpersist()

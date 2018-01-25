@@ -16,5 +16,5 @@ trait ExposurePeriodAdder {
 }
 
 abstract class ExposurePeriodAdderImpl(data: DataFrame) {
-  def withStartEnd(minPurchases: Int, startDelay: Int, purchasesWindow: Int): DataFrame
+  def withStartEnd(minPurchases: Int, startDelay: Int, endDelay: Int, purchasesWindow: Int, endThreshold: Int = 4): DataFrame
 }

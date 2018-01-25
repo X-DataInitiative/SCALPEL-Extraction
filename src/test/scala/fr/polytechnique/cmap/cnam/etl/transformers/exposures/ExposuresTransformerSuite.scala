@@ -59,7 +59,7 @@ class ExposuresTransformerSuite extends SharedContext {
     val result = new ExposuresTransformer(exposure).transform(patients, prescriptions)
 
     // Then
-    assertDSs(result, expected, true)
+    assertDSs(result, expected)
  }
 
   it should "return a valid Dataset for a known input when filterDelayedPatients is false" in {

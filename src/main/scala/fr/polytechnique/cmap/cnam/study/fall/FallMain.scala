@@ -11,7 +11,10 @@ import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsCon
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
+import fr.polytechnique.cmap.cnam.study.fall.exposures.FallStudyExposures
+import fr.polytechnique.cmap.cnam.study.fall.follow_up.FallStudyFollowUps
 import fr.polytechnique.cmap.cnam.util.functions._
 import org.apache.spark.sql.{Dataset, SQLContext, SaveMode}
 
@@ -24,7 +27,8 @@ object FallMain extends Main with FractureCodes {
     val DcirPath: String
     val IrImbPath: String
     val IrBenPath: String
-    val RefDate: Timestamp
+    val StudyStart: Timestamp
+    val StudyEnd: Timestamp
   }
 
   object CmapEnv extends Env {
@@ -34,7 +38,8 @@ object FallMain extends Main with FractureCodes {
     val DcirPath = "/shared/Observapur/staging/Flattening/flat_table/DCIR"
     val IrImbPath = "/shared/Observapur/staging/Flattening/single_table/IR_IMB_R"
     val IrBenPath = "/shared/Observapur/staging/Flattening/single_table/IR_BEN_R"
-    val RefDate = makeTS(2010,1,1)
+    val StudyStart: Timestamp = makeTS(2010,1,1)
+    val StudyEnd: Timestamp = makeTS(2011,1,1)
   }
 
   object FallEnv extends Env {
@@ -44,7 +49,8 @@ object FallMain extends Main with FractureCodes {
     val DcirPath = "/shared/fall/staging/flattening/flat_table/DCIR"
     val IrImbPath = "/shared/fall/staging/flattening/single_table/IR_IMB_R"
     val IrBenPath = "/shared/fall/staging/flattening/single_table/IR_BEN_R"
-    val RefDate = makeTS(2015,1,1)
+    val StudyStart: Timestamp = makeTS(2015,1,1)
+    val StudyEnd: Timestamp = makeTS(2016,1,1)
   }
 
   object TestEnv extends Env {
@@ -54,7 +60,8 @@ object FallMain extends Main with FractureCodes {
     val DcirPath = "src/test/resources/test-input/DCIR.parquet"
     val IrImbPath = "src/test/resources/test-input/IR_IMB_R.parquet"
     val IrBenPath = "src/test/resources/test-input/IR_BEN_R.parquet"
-    val RefDate = makeTS(2006,1,1)
+    val StudyStart: Timestamp = makeTS(2006,1,1)
+    val StudyEnd: Timestamp = makeTS(2010,1,1)
   }
 
   def getSource(sqlContext: SQLContext, env: Env): Sources = {
@@ -86,9 +93,9 @@ object FallMain extends Main with FractureCodes {
     val source = getSource(sqlContext, env)
     val dcir = source.dcir.get.cache()
     val mco = source.pmsiMco.get.cache()
-    val patients = new Patients(PatientsConfig(env.RefDate)).extract(source).cache()
+    val patients = new Patients(PatientsConfig(env.StudyStart)).extract(source).cache()
 
-    logger.info("acts")
+    logger.info("Drug Purchases")
     val drugPurchases = {
       new TherapeuticDrugs(dcir, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
         .extract
@@ -97,10 +104,19 @@ object FallMain extends Main with FractureCodes {
     logger.info("  count: " + drugPurchases.count)
     logger.info("  count distinct: " + drugPurchases.distinct.count)
 
+    logger.info("Exposures")
+    val exposures = {
+      val definition = FallStudyExposures.fallMainExposuresDefinition(env.StudyStart)
+      val patientsWithFollowUp = FallStudyFollowUps.transform(patients, env.StudyStart, env.StudyEnd, 2)
+      new ExposuresTransformer(definition).transform(patientsWithFollowUp, drugPurchases)
+    }
+    logger.info("  count: " + exposures.count)
+    logger.info("  count distinct: " + exposures.distinct.count)
+
     logger.info("Filtering Patients")
     logger.info("  count before: " + patients.count)
     // todo: the number of months should be a runtime parameter!
-    val filteredPatients: Dataset[Patient] = patients.filterNoStartGap(drugPurchases, env.RefDate, 2).cache()
+    val filteredPatients: Dataset[Patient] = patients.filterNoStartGap(drugPurchases, env.StudyStart, 2).cache()
     logger.info("  count after: " + filteredPatients.count)
 
     logger.info("Diagnoses")
@@ -161,9 +177,13 @@ object FallMain extends Main with FractureCodes {
     publicAmbulatoryFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures/publicAmbulatoryFractures")
     privateAmbualtoryFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures/privateAmbulatoryFractures")
 
+    logger.info("  acts...")
     liberalActs.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "acts/liberalActs")
     acts.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "acts/acts")
-    logger.info("  acts...")
+
+    logger.info("  Exposures...")
+    exposures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "exposures")
+
     logger.info("  Patients...")
     patients.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "patients-total")
     filteredPatients.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "patients-filtered")

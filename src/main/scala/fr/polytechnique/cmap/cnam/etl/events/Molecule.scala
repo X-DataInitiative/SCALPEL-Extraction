@@ -1,11 +1,12 @@
 package fr.polytechnique.cmap.cnam.etl.events
 
 import java.sql.Timestamp
+
 import org.apache.spark.sql.Row
 
 object Molecule extends Molecule
 
-trait Molecule extends AnyEvent with EventBuilder {
+trait Molecule extends Dispensation with EventBuilder {
 
   override val category: EventCategory[Molecule] = "molecule"
 
