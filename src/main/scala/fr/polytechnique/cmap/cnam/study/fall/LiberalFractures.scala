@@ -1,11 +1,10 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
-import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, MedicalAct, Outcome}
+import fr.polytechnique.cmap.cnam.etl.events.{Event, MedicalAct, Outcome}
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
-import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
 import org.apache.spark.sql.Dataset
 
-object LiberalFractures  extends OutcomeTransformer with FractureCodes{
+object LiberalFractures extends OutcomeTransformer {
 
   override val outcomeName = "Liberal"
 
@@ -13,7 +12,9 @@ object LiberalFractures  extends OutcomeTransformer with FractureCodes{
     import events.sqlContext.implicits._
 
     events
-      .map(event => Outcome(event.patientID, outcomeName, event.start))
+      .map(event => {
+        val fractureSite = BodySite.getSiteFromCode(event.value, BodySites.sites, CodeType.CCAM)
+        Outcome(event.patientID, fractureSite, outcomeName, event.start)})
   }
 
 }

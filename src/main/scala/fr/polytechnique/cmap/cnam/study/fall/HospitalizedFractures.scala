@@ -65,7 +65,7 @@ object HospitalizedFractures extends OutcomeTransformer with FractureCodes {
       acts: Dataset[Event[MedicalAct]], ghmSites: List[BodySite]): Dataset[Event[Outcome]] = {
 
     import diagnoses.sqlContext.implicits._
-    val ghmCodes = BodySite.extractCodesFromSites(ghmSites)
+    val ghmCodes = BodySite.extractCIM10CodesFromSites(ghmSites)
     val correctCIM10Event = diagnoses
       .filter(isMainOrDASDiagnosis _)
       .filter(diagnosis => isFractureDiagnosis(diagnosis, ghmCodes))
@@ -76,7 +76,7 @@ object HospitalizedFractures extends OutcomeTransformer with FractureCodes {
       .distinct()
 
     filterHospitalStay(correctCIM10Event, incorrectGHMStays)
-      .map(event => Outcome(event.patientID, BodySite.getSiteFromCode(event.value, ghmSites), outcomeName, event.start))
+      .map(event => Outcome(event.patientID, BodySite.getSiteFromCode(event.value, ghmSites, CodeType.CIM10), outcomeName, event.start))
 
   }
 

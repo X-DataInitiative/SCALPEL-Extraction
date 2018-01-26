@@ -96,7 +96,7 @@ object FallMain extends Main with FractureCodes {
     val patients = new Patients(PatientsConfig(env.StudyStart)).extract(source).cache()
 
     logger.info("Diagnoses")
-    val fracturesCodes = BodySite.extractCodesFromSites(List(BodySites))
+    val fracturesCodes = BodySite.extractCIM10CodesFromSites(List(BodySites))
     val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = fracturesCodes, daCodes = fracturesCodes)).extract(source).cache()
     logger.info("  count: " + diagnoses.count)
     logger.info("  count distinct: " + diagnoses.distinct.count)

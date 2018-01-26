@@ -52,7 +52,7 @@ class PrivateAmbulatoryFracturesSuite extends SharedContext {
     ).toDS
 
     val expected = Seq(
-      Outcome("riri", PrivateAmbulatoryFractures.outcomeName, makeTS(2007, 1, 1))
+      Outcome("riri", "FemurExclusionCol", PrivateAmbulatoryFractures.outcomeName, makeTS(2007, 1, 1))
     ).toDS
 
     // When
