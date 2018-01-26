@@ -45,7 +45,7 @@ object FallMain extends Main with FractureCodes {
   object FallEnv extends Env {
     override val FeaturingPath = "/shared/fall/staging/featuring/"
     val McoPath = "/shared/fall/staging/flattening/flat_table/MCO"
-    val McoCePath = "/shared/fall/staging/flattening/flat_table/MCO_ACE"
+    val McoCePath = "/shared/fall/staging/flattening/flat_table/MCO_CE"
     val DcirPath = "/shared/fall/staging/flattening/flat_table/DCIR"
     val IrImbPath = "/shared/fall/staging/flattening/single_table/IR_IMB_R"
     val IrBenPath = "/shared/fall/staging/flattening/single_table/IR_BEN_R"
@@ -95,30 +95,6 @@ object FallMain extends Main with FractureCodes {
     val mco = source.pmsiMco.get.cache()
     val patients = new Patients(PatientsConfig(env.StudyStart)).extract(source).cache()
 
-    logger.info("Drug Purchases")
-    val drugPurchases = {
-      new TherapeuticDrugs(dcir, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
-        .extract
-        .cache()
-    }
-    logger.info("  count: " + drugPurchases.count)
-    logger.info("  count distinct: " + drugPurchases.distinct.count)
-
-    logger.info("Exposures")
-    val exposures = {
-      val definition = FallStudyExposures.fallMainExposuresDefinition(env.StudyStart)
-      val patientsWithFollowUp = FallStudyFollowUps.transform(patients, env.StudyStart, env.StudyEnd, 2)
-      new ExposuresTransformer(definition).transform(patientsWithFollowUp, drugPurchases)
-    }
-    logger.info("  count: " + exposures.count)
-    logger.info("  count distinct: " + exposures.distinct.count)
-
-    logger.info("Filtering Patients")
-    logger.info("  count before: " + patients.count)
-    // todo: the number of months should be a runtime parameter!
-    val filteredPatients: Dataset[Patient] = patients.filterNoStartGap(drugPurchases, env.StudyStart, 2).cache()
-    logger.info("  count after: " + filteredPatients.count)
-
     logger.info("Diagnoses")
     val fracturesCodes = BodySite.extractCodesFromSites(List(BodySites))
     val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = fracturesCodes, daCodes = fracturesCodes)).extract(source).cache()
@@ -143,43 +119,67 @@ object FallMain extends Main with FractureCodes {
     logger.info("  count distinct: " + acts.distinct.count)
 
     logger.info("Outcomes")
-    logger.info("hospitFractures")
+    logger.info("hospitalized Fractures")
     val hospitalizedFractures = HospitalizedFractures.transform(diagnoses, acts, List(BodySites)).cache()
     logger.info("  count: " + hospitalizedFractures.count)
     logger.info("  count distinct: " + hospitalizedFractures.distinct.count)
+    hospitalizedFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures/hospitalizedFractures")
 
-    logger.info("privateAmbualtoryFractures")
-    val privateAmbualtoryFractures =  PrivateAmbulatoryFractures.transform(acts)
-    logger.info("  count: " + privateAmbualtoryFractures.count)
-    logger.info("  count distinct: " + privateAmbualtoryFractures.distinct.count)
-    logger.info("liberalFractures")
+    logger.info("liberal Fractures")
     val liberalFractures = LiberalFractures.transform(liberalActs).cache()
     logger.info("  count: " + liberalFractures.count)
     logger.info("  count distinct: " + liberalFractures.distinct.count)
+    liberalFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures/liberalFractures")
+    liberalFractures.unpersist()
+    liberalActs.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "acts/liberalActs")
+    liberalActs.unpersist()
 
-    logger.info("publicAmbulatoryFractures")
+    logger.info("public Ambulatory Fractures")
     val publicAmbulatoryFractures = PublicAmbulatoryFractures.transform(acts)
     logger.info("  count: " + publicAmbulatoryFractures.count)
     logger.info("  count distinct: " + publicAmbulatoryFractures.distinct.count)
+    publicAmbulatoryFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures/publicAmbulatoryFractures")
+    publicAmbulatoryFractures.unpersist()
 
-    logger.info("privateAmbulatoryFractures")
+    logger.info("private Ambulatory Fractures")
     val privateAmbulatoryFractures =  PrivateAmbulatoryFractures.transform(acts)
     logger.info("  count: " + privateAmbulatoryFractures.count)
     logger.info("  count distinct: " + privateAmbulatoryFractures.distinct.count)
+    privateAmbulatoryFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures/privateAmbulatoryFractures")
+    privateAmbulatoryFractures.unpersist()
+
+    logger.info("writing acts")
+    acts.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "acts/acts")
+    acts.unpersist()
+
+    logger.info("Drug Purchases")
+    val drugPurchases = {
+      new TherapeuticDrugs(dcir, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
+        .extract
+        .cache()
+    }
+    logger.info("  count: " + drugPurchases.count)
+    logger.info("  count distinct: " + drugPurchases.distinct.count)
+
+    logger.info("Filtering Patients")
+    logger.info("  count before: " + patients.count)
+    // todo: the number of months should be a runtime parameter!
+    val filteredPatients: Dataset[Patient] = patients.filterNoStartGap(drugPurchases, env.StudyStart, 2).cache()
+    logger.info("  count after: " + filteredPatients.count)
+
+    logger.info("Exposures")
+    val exposures = {
+      val definition = FallStudyExposures.fallMainExposuresDefinition(env.StudyStart)
+      val patientsWithFollowUp = FallStudyFollowUps.transform(patients, env.StudyStart, env.StudyEnd, 2)
+      new ExposuresTransformer(definition).transform(patientsWithFollowUp, drugPurchases)
+    }
+    logger.info("  count: " + exposures.count)
+    logger.info("  count distinct: " + exposures.distinct.count)
 
     logger.info("Writing")
 
     logger.info("  Drug Purchases...")
     drugPurchases.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "drug-purchases")
-
-    logger.info("  Outcomes...")
-    hospitalizedFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures/hospitalizedFractures")
-    publicAmbulatoryFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures/publicAmbulatoryFractures")
-    privateAmbualtoryFractures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "fractures/privateAmbulatoryFractures")
-
-    logger.info("  acts...")
-    liberalActs.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "acts/liberalActs")
-    acts.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "acts/acts")
 
     logger.info("  Exposures...")
     exposures.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "exposures")
