@@ -342,7 +342,7 @@ object MLPPLoader {
 
   case class Params(
       bucketSize: Int = 30,
-      lagCount: Int = 10,
+      lagCount: Int = 1,
       minTimestamp: Timestamp = makeTS(2006, 1, 1),
       maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
       includeCensoredBucket: Boolean = false,
