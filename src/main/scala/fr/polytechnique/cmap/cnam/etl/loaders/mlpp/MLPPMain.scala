@@ -25,9 +25,9 @@ object MLPPMain extends Main {
 
   object CmapEnv extends Env {
     override val featuringPath = "/shared/fall/featuring/"
-    val patientsPath = "/shared/fall/staging/flattening/flat_table/MCO"
-    val outcomesPath = "/shared/fall/staging/flattening/flat_table/MCO_ACE"
-    val exposuresPath = ""
+    val patientsPath = "/shared/Observapur/featuring/patients-filtered"
+    val outcomesPath = "/shared/Observapur/featuring/fractures/*"
+    val exposuresPath = "/shared/Observapur/featuring/exposures"
     val studyStart = makeTS(2010, 1, 1)
     val studyEnd = makeTS(2011, 1, 1)
     val includeCensoredBucket = true
@@ -36,7 +36,7 @@ object MLPPMain extends Main {
 
   object FallEnv extends Env {
     override val featuringPath = "/shared/fall/staging/All/featuring/"
-    val patientsPath = "/shared/fall/staging/All/featuring/patients-total"
+    val patientsPath = "/shared/fall/staging/All/featuring/patients-filtered"
     val outcomesPath = "/shared/fall/staging/All/featuring/fractures/*"
     val exposuresPath = "/shared/fall/staging/All/featuring/exposures"
     val studyStart = makeTS(2015, 1, 1)
@@ -45,7 +45,7 @@ object MLPPMain extends Main {
   }
 
   object TestEnv extends Env {
-    override val featuringPath = "target/test/featuring/"
+    override val featuringPath = "target/test/output/featuring/"
     val patientsPath = "src/test/resources/MLPP/patient"
     val outcomesPath = "src/test/resources/MLPP/outcome"
     val exposuresPath = "src/test/resources/MLPP/exposure"
