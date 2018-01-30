@@ -48,7 +48,7 @@ class HospitalizedFracturesSuite extends SharedContext{
     val event = MainDiagnosis("Pierre", "3", "S02.35", makeTS(2017, 7, 18))
 
     // When
-    val result = HospitalizedFractures.isFractureDiagnosis(event, AllSites.codes)
+    val result = HospitalizedFractures.isFractureDiagnosis(event, AllSites.codesCIM10)
 
     // Then
     assert(result)

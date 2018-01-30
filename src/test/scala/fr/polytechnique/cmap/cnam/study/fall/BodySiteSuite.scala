@@ -4,13 +4,13 @@ import fr.polytechnique.cmap.cnam.SharedContext
 
 class BodySiteSuite extends SharedContext {
 
-  "extractCodeSites" should "extract the right codes given a list of sites" in {
+  "extractCodeFromSites" should "extract the right codes given a list of sites" in {
 
     //Given
     val input = List(Clavicule, MembreInferieurDistal)
 
     //When
-    val result = BodySite.extractCodesFromSites(input)
+    val result = BodySite.extractCIM10CodesFromSites(input)
 
     val expected = List("S420", "S827", "S829", "M80.-7", "S920", "S921", "S922", "S923", "S924", "S925", "S927", "S929",
        "M80.-6", "S825", "S826", "S828", "S823", "S820", "S821", "S822", "S824")
@@ -19,13 +19,13 @@ class BodySiteSuite extends SharedContext {
     assert(result.sorted == expected.sorted)
   }
 
-  "extractCodeSites" should "extract the right codes given the root site" in {
+  "extractCodesFromSites" should "extract the right codes given the root site" in {
 
     //Given
     val input = List(BodySites)
 
     //When
-    val result = BodySite.extractCodesFromSites(input)
+    val result = BodySite.extractCIM10CodesFromSites(input)
     val expected = List("S420", "S422", "S423", "M80.-2", "S427", "M80.-1", "S421", "S429", "S428", "S424", "S520", "S521", "S522", "S523", "S524",
       "S525", "S526", "S620", "S621", "S622", "S623", "S624", "S625", "S626", "S627", "S527", "S529", "M80.-3", "M80.-4", "S628", "S528", "S720",
       "S721", "S723", "S724", "S728", "S727", "S729", "S722", "S820", "S821", "S822", "S824", "M80.-6", "S825", "S826", "S828", "S823", "S920",
@@ -38,33 +38,48 @@ class BodySiteSuite extends SharedContext {
     assert(result.sorted == expected.sorted)
   }
 
-  "doesSiteContainsCode" should "return true if the site contains the code" in {
+  "getSiteFrom" should "get the correct site given the code CIM10" in {
 
     //Given
-    val input = "S420"
+    val input1 = "S420"
+    val input2 = "noone"
     //When
-    val result = BodySite.siteContainsCode(input, Clavicule)
+    val result1 = BodySite.getSiteFromCode(input1, List(BodySites), CodeType.CIM10)
+    val expected1 = "clavicule"
+
+    val result2 = BodySite.getSiteFromCode(input2, List(BodySites), CodeType.CIM10)
+    val expected2 = ""
+
     //Then
-    assert(result)
+    assert(result1 == expected1)
+    assert(result2 == expected2)
   }
 
-  "doesSiteContainsCode" should "return false if the site doesn't contains the code" in {
+  "getSiteFromCode" should "get the correct site given the code CCAM" in {
 
     //Given
-    val input = "S420"
+    val input1 = "MZMP002"
+    val input2 = "12345sd"
     //When
-    val result = BodySite.siteContainsCode(input, BodySites)
+    val result1 = BodySite.getSiteFromCode(input1, List(BodySites), CodeType.CCAM)
+    val expected1 = "MembreSuperieurProximal"
+
+    val result2 = BodySite.getSiteFromCode(input2, List(BodySites), CodeType.CCAM)
+    val expected2 = ""
+
     //Then
-    assert(!result)
+    assert(result1 == expected1)
+    assert(result2 == expected2)
   }
 
-  "getSiteFromCode" should "get the correct site given the code" in {
+  "getSiteFromCode" should "return None if no site is found" in {
 
     //Given
-    val input = "S420"
+    val input1 = "MZMP002"
+
     //When
-    val result = BodySite.getSiteFromCode(input, List(BodySites))
-    val expected = "clavicule"
+    val result = BodySite.getSiteFromCode(input1, List(), CodeType.CCAM)
+    val expected = ""
 
     //Then
     assert(result == expected)

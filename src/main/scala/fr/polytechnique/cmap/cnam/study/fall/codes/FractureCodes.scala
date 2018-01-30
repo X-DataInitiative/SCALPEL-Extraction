@@ -1,5 +1,7 @@
 package fr.polytechnique.cmap.cnam.study.fall.codes
 
+import fr.polytechnique.cmap.cnam.study.fall._
+
 /*
  * The codes needed for this study's outcomes are listed in Confluence.
  * Link: https://datainitiative.atlassian.net/wiki/display/CFC/Outcomes

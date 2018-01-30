@@ -30,7 +30,9 @@ object PrivateAmbulatoryFractures extends OutcomeTransformer with FractureCodes 
     events
       .filter(isPrivateAmbulatory _)
       .filter(containsNonHospitalizedCcam _)
-      .map(event => Outcome(event.patientID, outcomeName, event.start))
+      .map(event => {
+        val fractureSite = BodySite.getSiteFromCode(event.value, BodySites.sites, CodeType.CCAM)
+        Outcome(event.patientID, fractureSite, outcomeName, event.start)})
   }
 
 }

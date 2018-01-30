@@ -51,7 +51,7 @@ class PublicAmbulatoryFracturesSuite extends SharedContext {
     ).toDS
 
     val expected = Seq(
-      Outcome("georgette", PublicAmbulatoryFractures.outcomeName, makeTS(2010, 2, 6))
+      Outcome("georgette", "MembreSuperieurDistal", PublicAmbulatoryFractures.outcomeName, makeTS(2010, 2, 6))
     ).toDS
 
     // When
