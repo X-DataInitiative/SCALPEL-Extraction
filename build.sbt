@@ -9,14 +9,22 @@ logLevel in compile := Level.Warn
 parallelExecution in Test := false
 test in assembly := {}
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
-libraryDependencies += "org.mockito" % "mockito-core" % "2.3.0" % "test"
+val sparkDependencies = List(
+  "org.apache.spark" %% "spark-core" % sparkVersion % "provided",
+  "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
+)
 
-libraryDependencies += "org.apache.spark" %% "spark-core" % sparkVersion % "provided"
-libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
-libraryDependencies += "org.apache.spark" %% "spark-hive" % sparkVersion % "provided"
+val testDependencies = List(
+  "org.scalatest" %% "scalatest" % "2.2.6" % "test",  // Main scala library for testing
+  "org.mockito" % "mockito-core" % "2.3.0" % "test"   // Java library for mocking
+)
 
-libraryDependencies += "com.typesafe" % "config" % "1.3.1"
+val additionalDependencies = List(
+  "com.typesafe" % "config" % "1.3.1"        // Java library for HOCON configuration files
+  //, "com.github.pureconfig" %% "pureconfig" % "0.9.0" // Will be used in a near future
+)
+
+libraryDependencies ++= sparkDependencies ++ testDependencies ++ additionalDependencies
 
 assemblyMergeStrategy in assembly := {
   case PathList("org", "apache", xs @ _*) => MergeStrategy.last

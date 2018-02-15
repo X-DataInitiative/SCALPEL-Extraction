@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.{Event, Outcome}
 
 class FallMainSuite extends SharedContext {
 
@@ -52,19 +51,13 @@ class FallMainSuite extends SharedContext {
     assert(expected == result)
   }
 
-  "run" should "return correct result" in {
+  "run" should "return None" in {
     val sqlCtx = sqlContext
-    import sqlCtx.implicits._
-
-    // Given
-    val expected = sqlCtx.sparkSession.emptyDataset[Event[Outcome]]
 
     // When
-    val result = FallMain
-      .run(sqlCtx, Map(("env", "test"))).get
-      .as[Event[Outcome]]
+    val result = FallMain.run(sqlCtx, Map(("env", "test")))
 
     // Then
-    assertDSs(result, expected)
+    assert(result.isEmpty)
   }
 }

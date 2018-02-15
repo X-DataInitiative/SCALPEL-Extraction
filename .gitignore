@@ -86,3 +86,5 @@ fabric.properties
 
 ### PDF generated stats ###
 scripts/*.pdf
+
+metadata.json
