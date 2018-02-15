@@ -32,7 +32,7 @@ trait FractureCodes {
   )
 
   val NonHospitalizedFracturesCcam = Set(
-    "ZMP002",
+    "MZMP002",
     "MZMP007",
     "MZMP013",
     "MZMP004",

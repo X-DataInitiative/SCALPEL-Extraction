@@ -105,15 +105,17 @@ object FallMain extends Main with FractureCodes {
     diagnoses.write.mode(SaveMode.Overwrite).parquet(env.FeaturingPath + "diagnosesSites")
 
     logger.info("Acts")
+    val codesCCAM = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList
     val acts = new MedicalActs(
        MedicalActsConfig(
-        dcirCodes = NonHospitalizedFracturesCcam.toList,
-        mcoCECodes = NonHospitalizedFracturesCcam.toList
+        dcirCodes = codesCCAM,
+        mcoCECodes = codesCCAM
        )
     ).extract(source).cache()
 
     logger.info("Liberal Acts")
-    val liberalActs = acts.filter(_.groupID == DcirAct.groupID.Liberal)
+    val liberalActs = acts.filter(act =>
+      act.groupID == DcirAct.groupID.Liberal && !CCAMExceptions.contains(act.value))
 
     logger.info("  count: " + acts.count)
     logger.info("  count distinct: " + acts.distinct.count)
