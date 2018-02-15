@@ -20,8 +20,8 @@ val testDependencies = List(
 )
 
 val additionalDependencies = List(
-  "org.json4s" %% "json4s-native" % "3.5.3", // Scala library for JSON parsing and serialization
   "com.typesafe" % "config" % "1.3.1"        // Java library for HOCON configuration files
+  //, "com.github.pureconfig" %% "pureconfig" % "0.9.0" // Will be used in a near future
 )
 
 libraryDependencies ++= sparkDependencies ++ testDependencies ++ additionalDependencies

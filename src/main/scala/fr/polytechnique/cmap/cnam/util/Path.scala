@@ -11,7 +11,7 @@ package fr.polytechnique.cmap.cnam.util
 object Path {
 
   // We re-tag the path type for local readability
-  type HDFSPath = Path
+  private type HDFSPath = Path
 
   // The following 5 signatures are only proxies for the Hadoop Path constructor, to remove the need for the "new" keyword.
   def apply(stringPath: String): HDFSPath = new HDFSPath(stringPath)

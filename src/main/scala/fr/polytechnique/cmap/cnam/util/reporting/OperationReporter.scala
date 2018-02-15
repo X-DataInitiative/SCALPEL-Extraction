@@ -1,9 +1,8 @@
 package fr.polytechnique.cmap.cnam.util.reporting
 
-import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.util.Path
 import org.apache.log4j.Logger
-import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
+import org.apache.spark.sql.{DataFrame, SaveMode}
 
 /**
   * Singleton responsible for reporting an operation execution.
@@ -31,56 +30,49 @@ object OperationReporter {
     * The main method for generating the report for the given operation
     * @param operationName The unique name (ex: "diagnoses")
     * @param operationInputs The unique names of the previous operations on which this one depends
+    * @param outputType The type of the operation output
     * @param data The output data (ex: diagnoses)
     * @param basePath The base path where the data and patients will be written
-    * @param patientsLookup (Optional, default=None) A full Dataset of patients for lookup of age and gender
     * @param patientIdColName (default="patientID") The column name of the patientID in the output data
     * @return an instance of OperationMetadata
     */
   def report(
       operationName: String,
       operationInputs: List[String],
+      outputType: OperationType,
       data: DataFrame,
       basePath: Path,
-      patientsLookup: Option[Dataset[Patient]] = None,
       patientIdColName: String = "patientID"): OperationMetadata = {
 
-    val operationPath: Path = Path(basePath, operationName)
+    logger.info(s"""=> Reporting operation "$operationName" of output type "$outputType"""")
 
-    // write data and compute count
-    logger.info(s"=> Reporting operation $operationName")
-    logger.info(s"     Persisting and counting data...")
-    data.persist()
-    val dataCount = data.count
-    logger.info(s"     Count: $dataCount")
-    val dataPath = Path(operationPath, "data")
-    logger.info(s"     Writing data to path ${dataPath.toString}")
-    writeParquet(data, dataPath)
+    val dataPath: Path = Path(basePath, operationName, "data")
+    val patientsPath: Path = Path(basePath, operationName, "patients")
 
-    patientsLookup match {
-      // When we have a patientsLookup dataset, we get the distinct patients and write the population
-      case Some(lookup) => {
-        logger.info(s"  Persisting and counting patients for operation $operationName...")
-        val patients = data.select(data(patientIdColName).as("patientID")).join(lookup, "patientID").distinct()
-        patients.persist()
-        val patientsCount = patients.count.toInt
-        logger.info(s"  Count: $patientsCount")
-        val patientsPath = Path(operationPath, "patients")
-        logger.info(s"     Writing data to path ${patientsPath.toString}")
-        writeParquet(patients, patientsPath)
-        OperationMetadata(
-          operationName, operationInputs,
-          dataPath.toString, dataCount,
-          Some(patientsPath.toString), Some(patientsCount)
+    val baseMetadata = OperationMetadata(operationName, operationInputs, outputType, None, None)
+
+    outputType match {
+      case OperationTypes.Patients =>
+        writeParquet(data, dataPath)
+        baseMetadata.copy(
+          outputPath = Some(dataPath.toString)
         )
-      }
 
-      // Otherwise, we don't need to compute the patients and write them
-      case None => OperationMetadata(
-        operationName, operationInputs,
-        dataPath.toString, dataCount,
-        None, None
-      )
+      case OperationTypes.Sources =>
+        val patients = data.select(patientIdColName).distinct
+        writeParquet(patients, patientsPath)
+        baseMetadata.copy(
+          populationPath = Some(patientsPath.toString)
+        )
+
+      case _ =>
+        writeParquet(data, dataPath)
+        val patients = data.select(patientIdColName).distinct
+        writeParquet(patients, patientsPath)
+        baseMetadata.copy(
+          outputPath = Some(dataPath.toString),
+          populationPath = Some(patientsPath.toString)
+        )
     }
   }
 }

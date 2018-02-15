@@ -8,9 +8,8 @@ package fr.polytechnique.cmap.cnam.util.reporting
 case class OperationMetadata(
     name: String,
     inputs: List[String],
-    outputPath: String,
-    outputCount: Long,
-    patientsPath: Option[String],
-    patientsCount: Option[Int])
+    outputType: OperationType,
+    outputPath: Option[String],
+    populationPath: Option[String])
   extends JsonSerializable
 
