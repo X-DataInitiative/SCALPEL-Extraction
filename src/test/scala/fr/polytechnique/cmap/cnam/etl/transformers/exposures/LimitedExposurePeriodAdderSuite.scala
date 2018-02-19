@@ -137,7 +137,6 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
     assertDFs(result, expected)
   }
 
-
   "withExposureEnd" should "add a column with the end of the exposures" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._

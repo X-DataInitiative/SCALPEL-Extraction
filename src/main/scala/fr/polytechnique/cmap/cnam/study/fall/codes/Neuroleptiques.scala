@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.study.fall.codes
 
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugConfig, PharmacologicalClassConfig}
 
 object Neuroleptiques extends DrugConfig {
 
@@ -599,4 +599,23 @@ object Neuroleptiques extends DrugConfig {
     "3400941766640",
     "3400941766589"
   )
+
+  val atypiques = new PharmacologicalClassConfig(
+    name = "Neuroleptiques : Neuroleptiques Atypiques",
+    ATCCodes = List("N05A*"),
+    ATCExceptions = List("N05AL06", "N05AN01", "N05AA", "N05AH02", "N05AH03", "N05AL05", "N05AX08", "N05AX12", "N05AA07")
+  )
+
+  val autres = new PharmacologicalClassConfig(
+    name = "Neuroleptiques : Autre neuroleptique",
+    ATCCodes = List("N05AA", "N05AH02", "N05AH03", "N05AL05", "N05AX08", "N05AX12")
+  )
+
+  val all = new PharmacologicalClassConfig(
+    name = "Neuroleptiques : All by rule",
+    ATCCodes = List("N05A*"),
+    ATCExceptions = List("N05AL06", "N05AN01", "N05AA07")
+  )
+
+  val pharmacologicalClasses: List[PharmacologicalClassConfig] = List(atypiques, autres)
 }

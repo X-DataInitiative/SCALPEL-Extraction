@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.DcirAct
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.{MedicalActs, MedicalActsConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{Diagnoses, DiagnosesConfig}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.TherapeuticDrugs
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassificationLevel, DrugsExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
@@ -30,7 +30,7 @@ object FallMain extends Main with FractureCodes {
     val McoCePath: Path
     val DcirPath: Path
     val IrImbPath: Path
-    val IrBenPath: Path
+    val IrPhaPath: String
     val StudyStart: Timestamp
     val StudyEnd: Timestamp
   }
@@ -44,6 +44,7 @@ object FallMain extends Main with FractureCodes {
     override val IrBenPath = Path("/shared/Observapur/staging/Flattening/single_table/IR_BEN_R")
     override val StudyStart: Timestamp = makeTS(2010,1,1)
     override val StudyEnd: Timestamp = makeTS(2011,1,1)
+    val IrPhaPath = "/shared/Observapur/staging/Flattening/single_table/IR_PHA_R"
   }
 
   object CmapTestEnv extends Env {
@@ -66,6 +67,7 @@ object FallMain extends Main with FractureCodes {
     override val IrBenPath = Path("/shared/fall/staging/flattening/single_table/IR_BEN_R")
     override val StudyStart: Timestamp = makeTS(2015,1,1)
     override val StudyEnd: Timestamp = makeTS(2016,1,1)
+    val IrPhaPath = "/shared/fall/staging/flattening/single_table/IR_PHA_R"
   }
 
   object TestEnv extends Env {
@@ -77,6 +79,7 @@ object FallMain extends Main with FractureCodes {
     override val IrBenPath = Path("src/test/resources/test-input/IR_BEN_R.parquet")
     override val StudyStart: Timestamp = makeTS(2006,1,1)
     override val StudyEnd: Timestamp = makeTS(2010,1,1)
+    val IrPhaPath = "src/test/resources/test-input/IR_PHA_R.parquet"
   }
 
   def getSource(sqlContext: SQLContext, env: Env): Sources = {
@@ -87,6 +90,7 @@ object FallMain extends Main with FractureCodes {
       dcirPath = Option(env.DcirPath).map(_.toString),
       pmsiMcoPath = Option(env.McoPath).map(_.toString),
       pmsiMcoCEPath = Option(env.McoCePath).map(_.toString)
+      irPhaPath = env.IrPhaPath
     )
   }
 
@@ -110,6 +114,7 @@ object FallMain extends Main with FractureCodes {
     val source = getSource(sqlContext, env)
     val dcir = source.dcir.get.persist()
     val mco = source.pmsiMco.get.persist()
+    val irPhaR = source.irPha.get.cache()
 
     val fracturesCodes = BodySite.extractCIM10CodesFromSites(List(BodySites))
     val fracturesPath = Path(env.FeaturingPath, "fractures")
@@ -206,6 +211,13 @@ object FallMain extends Main with FractureCodes {
     // Write Metadata
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
     val metadataJson: String = metadata.toJsonString()
+    logger.info("Drug Purchases")
+    val drugPurchases = DrugsExtractor
+      .extract(DrugClassificationLevel.Therapeutic, source, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
+      .cache()
+
+    logger.info("  count: " + drugPurchases.count)
+    logger.info("  count distinct: " + drugPurchases.distinct.count)
 
     new PrintWriter("metadata.json") {
       write(metadataJson)
