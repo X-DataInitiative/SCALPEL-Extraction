@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.DcirAct
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.{MedicalActs, MedicalActsConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{Diagnoses, DiagnosesConfig}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.TherapeuticDrugs
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassificationLevel, DrugsExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
@@ -31,6 +31,7 @@ object FallMain extends Main with FractureCodes {
     val DcirPath: Path
     val IrImbPath: Path
     val IrBenPath: Path
+    val IrPhaPath: Path
     val StudyStart: Timestamp
     val StudyEnd: Timestamp
   }
@@ -44,6 +45,7 @@ object FallMain extends Main with FractureCodes {
     override val IrBenPath = Path("/shared/Observapur/staging/Flattening/single_table/IR_BEN_R")
     override val StudyStart: Timestamp = makeTS(2010,1,1)
     override val StudyEnd: Timestamp = makeTS(2011,1,1)
+    override val IrPhaPath = Path("/shared/Observapur/staging/Flattening/single_table/IR_PHA_R")
   }
 
   object CmapTestEnv extends Env {
@@ -51,8 +53,9 @@ object FallMain extends Main with FractureCodes {
     override val McoPath = Path("/shared/Observapur/testing/MCO")
     override val McoCePath = Path("/shared/Observapur/testing/MCO_ACE")
     override val DcirPath = Path("/shared/Observapur/testing/DCIR")
-    override val IrImbPath = CmapEnv.IrImbPath
-    override val IrBenPath = CmapEnv.IrBenPath
+    override val IrImbPath = Path(CmapEnv.IrImbPath)
+    override val IrBenPath = Path(CmapEnv.IrBenPath)
+    override val IrPhaPath = Path(CmapEnv.IrPhaPath)
     override val StudyStart: Timestamp = makeTS(2010,1,1)
     override val StudyEnd: Timestamp = makeTS(2011,1,1)
   }
@@ -66,6 +69,7 @@ object FallMain extends Main with FractureCodes {
     override val IrBenPath = Path("/shared/fall/staging/flattening/single_table/IR_BEN_R")
     override val StudyStart: Timestamp = makeTS(2015,1,1)
     override val StudyEnd: Timestamp = makeTS(2016,1,1)
+    override val IrPhaPath = Path("/shared/fall/staging/flattening/single_table/IR_PHA_R")
   }
 
   object TestEnv extends Env {
@@ -77,6 +81,7 @@ object FallMain extends Main with FractureCodes {
     override val IrBenPath = Path("src/test/resources/test-input/IR_BEN_R.parquet")
     override val StudyStart: Timestamp = makeTS(2006,1,1)
     override val StudyEnd: Timestamp = makeTS(2010,1,1)
+    override val IrPhaPath = Path("src/test/resources/test-input/IR_PHA_R.parquet")
   }
 
   def getSource(sqlContext: SQLContext, env: Env): Sources = {
@@ -86,7 +91,8 @@ object FallMain extends Main with FractureCodes {
       irBenPath = Option(env.IrBenPath).map(_.toString),
       dcirPath = Option(env.DcirPath).map(_.toString),
       pmsiMcoPath = Option(env.McoPath).map(_.toString),
-      pmsiMcoCEPath = Option(env.McoCePath).map(_.toString)
+      pmsiMcoCEPath = Option(env.McoCePath).map(_.toString),
+      irPhaPath = Option(env.IrPhaPath).map(_.toString)
     )
   }
 
@@ -110,6 +116,7 @@ object FallMain extends Main with FractureCodes {
     val source = getSource(sqlContext, env)
     val dcir = source.dcir.get.persist()
     val mco = source.pmsiMco.get.persist()
+    val irPhaR = source.irPha.get.cache()
 
     val fracturesCodes = BodySite.extractCIM10CodesFromSites(List(BodySites))
     val fracturesPath = Path(env.FeaturingPath, "fractures")
@@ -122,14 +129,15 @@ object FallMain extends Main with FractureCodes {
       OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R"), OperationTypes.Patients, patients.toDF, env.FeaturingPath)
     }
 
-    // Drug Purchases
-    val drugPurchases = {
-      new TherapeuticDrugs(dcir, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
-        .extract.persist()
-    }
-    operationsMetadata += {
-      OperationReporter.report("drug_purchases", List("DCIR"), OperationTypes.Dispensations, drugPurchases.toDF, env.FeaturingPath)
-    }
+    // Extract Drug purchases
+    logger.info("Drug Purchases")
+    val drugPurchases = DrugsExtractor
+      .extract(DrugClassificationLevel.Therapeutic, source, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
+      .cache()
+
+    logger.info("  count: " + drugPurchases.count)
+    logger.info("  count distinct: " + drugPurchases.distinct.count)
+
 
     // Medical Acts
     val codesCCAM = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList

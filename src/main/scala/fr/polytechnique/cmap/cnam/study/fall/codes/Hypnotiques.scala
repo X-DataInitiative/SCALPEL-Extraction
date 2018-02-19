@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.study.fall.codes
 
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugConfig, PharmacologicalClassConfig}
 
 object Hypnotiques extends DrugConfig {
 
@@ -285,6 +285,41 @@ object Hypnotiques extends DrugConfig {
     "3400930165911",
     "3400931415862",
     "3400931507284"
+  )
+
+  val benzodiazepineAnxiolytiques = new PharmacologicalClassConfig(
+    name = "Hypnotiques : Benzodiazepine anxiolytique",
+    ATCCodes = List("N05BA*")
+  )
+
+  val autresAnxiolytiques = new PharmacologicalClassConfig(
+    name = "Hypnotiques : Autre anxiolytique",
+    ATCCodes = List("N05BB*", "N05BC*", "N05BE*", "N05BX*"),
+    ATCExceptions = List("N05BC51")
+  )
+
+  val benzodiazepineHypnotiques = new PharmacologicalClassConfig(
+    name = "Hypnotiques : Benzodiazepine hypnotique",
+    ATCCodes = List("N05CD*"),
+    ATCExceptions = List("N05CD08")
+  )
+
+  val autresHypnotiques = new PharmacologicalClassConfig(
+    name = "Hypnotiques : Autre hypnotique",
+    ATCCodes = List("N05CF*", "N05BC51", "N05CM11", "N05CM16", "N05CX")
+  )
+
+  val all = new PharmacologicalClassConfig(
+    name = "Hypnotiques : All by rule",
+    ATCCodes = List("N05B*", "N05CD*", "N05CF*", "N05CM11", "N05CM16", "N05CX"),
+    ATCExceptions = List("N05CD08")
+  )
+
+  val pharmacologicalClasses = List(
+    benzodiazepineAnxiolytiques,
+    autresAnxiolytiques,
+    benzodiazepineHypnotiques,
+    autresHypnotiques
   )
 
 }
