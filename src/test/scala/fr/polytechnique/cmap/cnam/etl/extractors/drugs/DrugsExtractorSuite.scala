@@ -6,6 +6,7 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.fall.codes.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.functions.lit
 
 class DrugsExtractorSuite extends SharedContext{
 
@@ -30,6 +31,7 @@ class DrugsExtractorSuite extends SharedContext{
       (Some("3400935418487"), "toto"),
       (Some("3400936889651"), "toto")
     ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      .withColumn("PHA_NOM_PA", lit(""))
     ), dcir = Some(inputDF))
 
     val expected: Dataset[Purchase] = Seq(
@@ -101,6 +103,7 @@ class DrugsExtractorSuite extends SharedContext{
       (Some("3400935418487"), "toto"),
       (Some("3400936889651"), "toto")
     ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      .withColumn("PHA_NOM_PA", lit(""))
     ), dcir = Some(inputDF))
 
     val drugConfig: DrugConfig = Antidepresseurs
@@ -133,6 +136,7 @@ class DrugsExtractorSuite extends SharedContext{
       (Some("3400935183644"), "toto"),
       (Some("3400930023648"), "toto")
     ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      .withColumn("PHA_NOM_PA", lit(""))
     ), dcir = Some(inputDF))
 
     val drugConfig: DrugConfig = Neuroleptiques
@@ -164,6 +168,7 @@ class DrugsExtractorSuite extends SharedContext{
       (Some("3400930081143"), "toto"),
       (Some("3400936099777"), "toto")
     ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      .withColumn("PHA_NOM_PA", lit(""))
     ), dcir = Some(inputDF))
 
     val drugConfig: DrugConfig = Hypnotiques
@@ -195,6 +200,7 @@ class DrugsExtractorSuite extends SharedContext{
       (Some("3400937354004"), "toto"),
       (Some("3400936099777"), "toto")
     ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      .withColumn("PHA_NOM_PA", lit(""))
     ), dcir = Some(inputDF))
 
     val drugConfig: DrugConfig = Antihypertenseurs
@@ -238,6 +244,7 @@ class DrugsExtractorSuite extends SharedContext{
       (Some("3400936889651"), "N06AB03"),
       (Some("3400930023648"), "N05AX12")
     ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      .withColumn("PHA_NOM_PA", lit(""))
     ), dcir = Some(inputDF))
 
     val drugConfigAntidepresseurs: DrugConfig = Antidepresseurs
@@ -281,12 +288,58 @@ class DrugsExtractorSuite extends SharedContext{
       (Some("3400936889651"), "N06AB03"),
       (Some("3400930023648"), "N05AX12")
     ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+        .withColumn("PHA_NOM_PA", lit(""))
     ), dcir = Some(inputDF))
 
     val drugConfigAntidepresseurs: DrugConfig = Antidepresseurs
     val drugConfigNeuroleptiques: DrugConfig = Neuroleptiques
     // When
     val result = DrugsExtractor.extract(DrugClassificationLevel.Pharmacological, source, List(drugConfigAntidepresseurs, drugConfigNeuroleptiques))
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "extract" should "return expected drug purchases with Molecule level" in {
+
+    // Given
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    val inputDF = Seq(
+      ("patient1", Some("9111111111111"), Some(makeTS(2014, 5, 1))),
+      ("patient2", Some("3400935183644"), Some(makeTS(2014, 6, 1))),
+      ("patient3", Some("3400935418487"), Some(makeTS(2014, 7, 1))),
+      ("patient4", Some("3400935183644"), Some(makeTS(2014, 8, 1))),
+      ("patient5", Some("3400936889651"), None),
+      ("patient6", None, Some(makeTS(2014, 9, 1))),
+      ("patient8", Some("3400936889651"), Some(makeTS(2014, 9, 1))),
+      ("patient1", Some("9111111111111"), Some(makeTS(2014, 5, 1))),
+      ("patient2", Some("3400930023648"), Some(makeTS(2014, 6, 1)))
+    ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
+
+    val expected: Dataset[Event[Drug]] = Seq(
+      Drug("patient2", "", 0.0, makeTS(2014, 6, 1)),
+      Drug("patient4", "", 0.0, makeTS(2014, 8, 1)),
+      Drug("patient8", "DEXTROPROPOXYPHENE", 0.0, makeTS(2014, 9, 1)),
+      Drug("patient8", "PARACETAMOL", 0.0, makeTS(2014, 9, 1)),
+      Drug("patient8", "CAFEINE", 0.0, makeTS(2014, 9, 1)),
+      Drug("patient2", "INSULINE LISPRO (PROTAMINE)", 0.0, makeTS(2014, 6, 1))
+    ).toDS
+
+    val source = new Sources(irPha = Some(Seq(
+      (Some("9111111111111"), "toto", ""),
+      (Some("3400935183644"), "N06AA04", ""),
+      (Some("3400935418487"), "A10BB09", ""),
+      (Some("3400936889651"), "N06AB03", "DEXTROPROPOXYPHENE + PARACETAMOL + CAFEINE"),
+      (Some("3400930023648"), "N05AX12", "INSULINE LISPRO (PROTAMINE)")
+    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_NOM_PA")
+    ), dcir = Some(inputDF))
+
+    val drugConfigAntidepresseurs: DrugConfig = Antidepresseurs
+    val drugConfigNeuroleptiques: DrugConfig = Neuroleptiques
+    // When
+    val result = DrugsExtractor.extract(DrugClassificationLevel.Molecule, source, List(drugConfigAntidepresseurs, drugConfigNeuroleptiques))
 
     // Then
     assertDSs(result, expected)
