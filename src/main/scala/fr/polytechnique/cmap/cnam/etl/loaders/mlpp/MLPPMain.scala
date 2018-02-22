@@ -36,9 +36,9 @@ object MLPPMain extends Main {
 
   object FallEnv extends Env {
     override val featuringPath = "/shared/fall/staging/All/featuring/"
-    val patientsPath = "/shared/fall/staging/All/featuring/patients-filtered"
-    val outcomesPath = "/shared/fall/staging/All/featuring/fractures/*"
-    val exposuresPath = "/shared/fall/staging/All/featuring/exposures"
+    val patientsPath = "/shared/fall/staging/2018-02-20/featuringPharamacoClasses/filter_patients/data"
+    val outcomesPath = "/shared/fall/staging/2018-02-20/featuringPharamacoClasses/fractures/*_fractures/data"
+    val exposuresPath = "/shared/fall/staging/2018-02-20/featuringPharamacoClasses/exposures/data"
     val studyStart = makeTS(2015, 1, 1)
     val studyEnd = makeTS(2016, 1, 1)
     val includeCensoredBucket = false

@@ -288,29 +288,29 @@ object Hypnotiques extends DrugConfig {
   )
 
   val benzodiazepineAnxiolytiques = new PharmacologicalClassConfig(
-    name = "Hypnotiques : Benzodiazepine anxiolytique",
+    name = "Hypnotiques_Benzodiazepine_anxiolytique",
     ATCCodes = List("N05BA*")
   )
 
   val autresAnxiolytiques = new PharmacologicalClassConfig(
-    name = "Hypnotiques : Autre anxiolytique",
+    name = "Hypnotiques_Autre_anxiolytique",
     ATCCodes = List("N05BB*", "N05BC*", "N05BE*", "N05BX*"),
     ATCExceptions = List("N05BC51")
   )
 
   val benzodiazepineHypnotiques = new PharmacologicalClassConfig(
-    name = "Hypnotiques : Benzodiazepine hypnotique",
+    name = "Hypnotiques_Benzodiazepine_hypnotique",
     ATCCodes = List("N05CD*"),
     ATCExceptions = List("N05CD08")
   )
 
   val autresHypnotiques = new PharmacologicalClassConfig(
-    name = "Hypnotiques : Autre hypnotique",
+    name = "Hypnotiques_Autre hypnotique",
     ATCCodes = List("N05CF*", "N05BC51", "N05CM11", "N05CM16", "N05CX")
   )
 
   val all = new PharmacologicalClassConfig(
-    name = "Hypnotiques : All by rule",
+    name = "Hypnotiques_All_by_rule",
     ATCCodes = List("N05B*", "N05CD*", "N05CF*", "N05CM11", "N05CM16", "N05CX"),
     ATCExceptions = List("N05CD08")
   )

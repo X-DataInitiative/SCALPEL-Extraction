@@ -341,7 +341,7 @@ object MLPPLoader {
   final val AgeReferenceDate = FilteringConfig.dates.ageReference
 
   case class Params(
-      bucketSize: Int = 30,
+      bucketSize: Int = 1,
       lagCount: Int = 1,
       minTimestamp: Timestamp = makeTS(2006, 1, 1),
       maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59),

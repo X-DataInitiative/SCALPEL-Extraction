@@ -1,22 +1,27 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
 import java.sql.Timestamp
+import me.danielpes.spark.datetime.Period
+import me.danielpes.spark.datetime.implicits._
 
 /**
   * A class to represent the exposure we want to generate from the data
   *
   * @param periodStrategy Period stratgy. Possible values: "unlimited" | "limited"
   *                       (multiple exposures with start and end)
-  * @param startDelay Number of months after which a patient will be considered exposed
+  * @param startDelay Number of periods after which a patient will be considered exposed
   *                   after the min purchases, window.
+  * @param endDelay Number of periods that we add to the exposure end to delay it (lag)
+  *
   * @param minPurchases Minimum number of purchases that have to be made in order
   *                     to be considered exposed.
-  * @param purchasesWindow Purchase window, within which the min number of purchases
+  * @param purchasesWindow Purchase window, period within which the min number of purchases
   *                        have to be made.
   * @param weightAggStrategy Weight Aggregation strategy.
   *                          Possible values: "non-cumulative" |  "purchase-based" |
   *                          "dosage-based" | "time-based"
   * @param cumulativeExposureWindow Number of months to quantile.
+  *
   * @param cumulativeStartThreshold Number of months within which more than
   *                                 one purchases have to made
   * @param cumulativeEndThreshold Number of months during which no purchases of
@@ -29,12 +34,12 @@ import java.sql.Timestamp
 
 case class ExposureDefinition(
     periodStrategy: ExposurePeriodStrategy = ExposurePeriodStrategy.Unlimited,
-    startDelay: Int = 3,
-    endDelay: Int = 0,
+    startDelay: Period = 3.months,
+    endDelay: Period = 0.months,
     minPurchases: Int = 2,
-    purchasesWindow: Int = 6,
+    purchasesWindow: Period = 6.months,
     weightAggStrategy: WeightAggStrategy = WeightAggStrategy.NonCumulative,
-    tracklossThreshold: Int = 4,
+    tracklossThreshold: Period = 4.months,
     cumulativeExposureWindow: Int = 1,
     cumulativeStartThreshold: Int = 6,
     cumulativeEndThreshold: Int = 4,

@@ -5,6 +5,8 @@ import fr.polytechnique.cmap.cnam.etl.events.{Exposure, Molecule}
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import fr.polytechnique.cmap.cnam.util.functions._
+import me.danielpes.spark.datetime.Period
+import me.danielpes.spark.datetime.implicits._
 
 class ExposuresTransformerSuite extends SharedContext {
 
@@ -234,15 +236,15 @@ class ExposuresTransformerSuite extends SharedContext {
     val config = ExposureDefinition(
       periodStrategy = ExposurePeriodStrategy.Limited,
       minPurchases = 2,
-      purchasesWindow = 3,
-      startDelay = 4,
+      purchasesWindow = 3.months,
+      startDelay = 4.months,
       weightAggStrategy = WeightAggStrategy.NonCumulative,
       cumulativeExposureWindow = 5,
       cumulativeStartThreshold = 6,
       cumulativeEndThreshold = 7,
       dosageLevelIntervals = List(8),
       purchaseIntervals = List(9, 10),
-        studyStart = makeTS(2006, 1, 1),
+      studyStart = makeTS(2006, 1, 1),
       filterDelayedPatients = true,
       diseaseCode = "FootCancer"
     )
@@ -255,8 +257,8 @@ class ExposuresTransformerSuite extends SharedContext {
     assert(result.diseaseCode == "FootCancer")
     assert(result.exposurePeriodStrategy == ExposurePeriodStrategy.Limited)
     assert(result.minPurchases == 2)
-    assert(result.purchasesWindow ==  3)
-    assert(result.startDelay == 4)
+    assert(result.purchasesWindow ==  3.months)
+    assert(result.startDelay == 4.months)
     assert(result.weightAggStrategy == WeightAggStrategy.NonCumulative)
     assert(result.filterDelayedPatients)
     assert(result.cumulativeExposureWindow == 5)

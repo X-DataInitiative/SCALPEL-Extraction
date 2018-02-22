@@ -4439,32 +4439,32 @@ object Antihypertenseurs extends DrugConfig {
   )
 
   val sartans = new PharmacologicalClassConfig(
-    name = "Antihypertenseurs : SARTANS",
+    name = "Antihypertenseurs_SARTANS",
     ATCCodes = List("C09C*", "C09D*")
   )
 
   val iec = new PharmacologicalClassConfig(
-    name = "Antihypertenseurs : IEC",
+    name = "Antihypertenseurs_IEC",
     ATCCodes = List("C09A*", "C09B*")
   )
 
   val diuretiques = new PharmacologicalClassConfig(
-    name = "Antihypertenseurs : Diurétiques",
+    name = "Antihypertenseurs_Diuretiques",
     ATCCodes = List("C03*")
   )
 
   val betabloquants = new PharmacologicalClassConfig(
-    name = "Antihypertenseurs : Bêtabloquants",
+    name = "Antihypertenseurs_Betabloquants",
     ATCCodes = List("C07*")
   )
 
   val inhibiteursCalciques = new PharmacologicalClassConfig(
-    name = "Antihypertenseurs : Inhibiteurs calciques",
+    name = "Antihypertenseurs_Inhibiteurs_calciques",
     ATCCodes = List("C08*")
   )
 
   val autres = new PharmacologicalClassConfig(
-    name = "Antihypertenseurs : Autres",
+    name = "Antihypertenseurs_Autres",
     ATCCodes = List("C02*", "C09XA*", "C10BX03")
   )
 

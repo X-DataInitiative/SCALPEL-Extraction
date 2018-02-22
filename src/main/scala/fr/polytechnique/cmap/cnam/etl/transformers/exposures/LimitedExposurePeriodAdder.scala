@@ -1,8 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
+import me.danielpes.spark.datetime.Period
+import me.danielpes.spark.datetime.implicits._
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame}
 
 
@@ -17,22 +18,24 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
 
     def withNextDate: DataFrame = innerData.withColumn("nextDate", lead(col(Start), 1).over(orderedWindow))
 
-    def withDelta: DataFrame = innerData.withColumn("delta", months_between(col("nextDate"), col(Start)))
-
-    def getTracklosses(endThreshold: Int = 4): DataFrame = {
+    def getTracklosses(endThreshold: Period = 4.months): DataFrame = {
       innerData
         .withColumn("rank", row_number().over(orderedWindow)) // This is used to find the first line of the window
+        //.withColumn("previousDate", lag(col(Start), 1).over(orderedWindow))
         .where(
-          col("nextDate").isNull ||   // The last line of the ordered window (lead(col("start")) == null)
-            (col("rank") === 1) ||      // The first line of the ordered window
-            (col("delta") > endThreshold)  // All the lines that represent a trackloss
-        )
+        (col("nextDate").isNull || // The last line of the ordered window (lead(col("start")) == null)
+          (col("rank") === 1) || // The first line of the ordered window
+          ((col(Start).addPeriod(endThreshold) < col("nextDate")))
+          )
+      )
+
+        .withColumn(Start, when(col("rank") === 1, col(Start).subPeriod(1.day)).otherwise(col(Start)))
         .select(col(PatientID), col(Value), col(Start))
         .withColumn(TracklossDate, lead(col(Start), 1).over(orderedWindow))
         .where(col(TracklossDate).isNotNull)
     }
 
-    def withExposureEnd(tracklosses: DataFrame, endDelay: Int = 0): DataFrame = {
+    def withExposureEnd(tracklosses: DataFrame, endDelay: Period = 0.months): DataFrame = {
 
       // I needed this redefinition of names because I was getting some very weird errors when using
       //   the .as() function and .select("table.*")
@@ -48,41 +51,50 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       //   the exposureEnd date for every purchase that happened between the previous trackloss and
       //   the current one.
       val joinConditions =
-      (col(PatientID) === col("t_patientID")) &&
-        (col(Value) === col("t_moleculeName")) &&
-        (col(Start) >= col("t_eventDate")) &&
-        (col(Start) < col(TracklossDate))
+      col(PatientID) === col("t_patientID") &&
+        col(Value) === col("t_moleculeName") &&
+        col(Start) > col("t_eventDate") &&
+        col(Start) < col(TracklossDate)
 
       innerData
-        .join(adjustedTracklosses, joinConditions, "left_outer")
+        .join(adjustedTracklosses, joinConditions, "inner")
         .withColumnRenamed(TracklossDate, ExposureEnd)
-        .withColumn(ExposureEnd, add_months(col(ExposureEnd), endDelay).cast(TimestampType))
+        .withColumn(ExposureEnd, col(ExposureEnd).addPeriod(endDelay))
     }
 
-    def withExposureStart(purchasesWindow: Int = 6): DataFrame = {
+    def withExposureStart(purchasesWindow: Period = 6.months, minPurchases: Int = 2): DataFrame = {
       val window = Window.partitionBy(PatientID, Value, ExposureEnd)
 
       // We take the first pair of purchases that happened within the threshold and set the
       //   the exposureStart date as the date of the second purchase of the pair.
-      val adjustedNextDate: Column = when(col("delta") <= purchasesWindow, col("nextDate"))
+      val adjustedNextDate: Column =
+      if (minPurchases == 1)
+        col(Start)
+      else
+        when(col(Start).addPeriod(purchasesWindow) >= col("nextDate"), col("nextDate"))
       innerData.withColumn(ExposureStart, min(adjustedNextDate).over(window))
     }
   }
 
-  def withStartEnd(minPurchases: Int = 2, startDelay: Int = 3, endDelay: Int = 0, purchasesWindow: Int = 6, endThreshold: Int = 4): DataFrame = {
+  def withStartEnd(
+      minPurchases: Int = 2,
+      startDelay: Period = 3.months,
+      endDelay: Period = 0.months,
+      purchasesWindow: Period = 4.months,
+      endThreshold: Period = 4.months)
+    : DataFrame = {
 
     val outputColumns = (data.columns.toList ++ List(ExposureStart, ExposureEnd)).map(col)
 
     val eventsWithDelta = data
       .withNextDate
-      .withDelta
       .persist()
 
     val tracklosses = eventsWithDelta.getTracklosses(endThreshold)
 
     val result = eventsWithDelta
       .withExposureEnd(tracklosses, endDelay)
-      .withExposureStart(purchasesWindow)
+      .withExposureStart(purchasesWindow, minPurchases)
 
     eventsWithDelta.unpersist()
     result.select(outputColumns: _*)
