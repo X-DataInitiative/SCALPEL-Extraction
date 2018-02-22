@@ -4,20 +4,27 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame}
-
+import me.danielpes.spark.datetime.Period
+import me.danielpes.spark.datetime.implicits._
 
 private class UnlimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriodAdderImpl(data) {
 
   import Columns._
 
   // todo: add first-only parameter, similar to mlpp
-  def withStartEnd(minPurchases: Int = 2, startDelay: Int = 3, endDelay: Int = 0, purchasesWindow: Int = 6, tracklossThreshold: Int = 4): DataFrame = {
+  def withStartEnd(
+      minPurchases: Int = 2,
+      startDelay: Period = 3.months,
+      endDelay: Period = 0.months,
+      purchasesWindow: Period = 6.months,
+      tracklossThreshold: Period = 4.months)
+    : DataFrame = {
 
     val window = Window.partitionBy(PatientID, Value)
 
     val exposureStartRule: Column = when(
-      months_between(col(Start), col("previousStartDate")) <= purchasesWindow,
-      add_months(col(Start), startDelay).cast(TimestampType)
+      (col("previousStartDate").addPeriod(purchasesWindow) >= col(Start)) ,
+      (col(Start).addPeriod(startDelay)).cast(TimestampType)
     )
 
     val potentialExposureStart: Column = if(minPurchases == 1)

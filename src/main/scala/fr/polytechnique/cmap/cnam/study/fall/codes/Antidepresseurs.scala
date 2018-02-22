@@ -553,38 +553,38 @@ object Antidepresseurs extends DrugConfig {
   )
 
   val trycicliques = new PharmacologicalClassConfig(
-    name = "Antidépresseurs : Tricycliques",
+    name = "Antidepresseurs_Tricycliques",
     ATCCodes = List("N06AA*"),
     ATCExceptions = List("N06AA06")
   )
 
   val isrs = new PharmacologicalClassConfig(
-    name = "Antidépresseurs : ISRS",
+    name = "Antidepresseurs_ISRS",
     ATCCodes = List("N06AB*")
   )
 
   val isrsN = new PharmacologicalClassConfig(
-    name = "Antidépresseurs : ISRSN",
+    name = "Antidepresseurs : ISRSN",
     ATCCodes = List("N06AX11", "N06AX16", "N06AX17", "N06AX21", "N06AX26")
   )
 
   val imaoAB = new PharmacologicalClassConfig(
-    name = "Antidépresseurs : IMAO-AB",
+    name = "Antidepresseurs_IMAO AB",
     ATCCodes = List("N06AF*")
   )
 
   val imaoA = new PharmacologicalClassConfig(
-    name = "Antidépresseurs : IMAO-A",
+    name = "Antidepresseurs_IMAO A",
     ATCCodes = List("N06AG*")
   )
 
   val autres = new PharmacologicalClassConfig(
-    name = "Antidépresseurs : autres",
+    name = "Antidepresseurs : autres",
     ATCCodes = List("N06AX03", "N06AX09", "N06AX14", "N06AX22", "N06AA06")
   )
 
   val all = new PharmacologicalClassConfig(
-    name = "Antidépresseurs : all by rule",
+    name = "Antidepresseurs : all by rule",
     ATCCodes = List("N06A*"),
     ATCExceptions = List("N06AX01")
   )

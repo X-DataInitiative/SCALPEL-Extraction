@@ -26,6 +26,9 @@ val additionalDependencies = List(
 
 libraryDependencies ++= sparkDependencies ++ testDependencies ++ additionalDependencies
 
+resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
+libraryDependencies += "danielpes" % "spark-datetime-lite" % "0.2.0-s_2.11"
+
 assemblyMergeStrategy in assembly := {
   case PathList("org", "apache", xs @ _*) => MergeStrategy.last
   case x =>

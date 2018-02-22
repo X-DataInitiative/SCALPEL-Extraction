@@ -62,14 +62,14 @@ object FallMain extends Main with FractureCodes {
 
   object FallEnv extends Env {
     override val FeaturingPath = Path("/shared/fall/staging/featuring/")
-    override val McoPath = Path("/shared/fall/staging/flattening/flat_table/MCO")
-    override val McoCePath = Path("/shared/fall/staging/flattening/flat_table/MCO_CE")
-    override val DcirPath = Path("/shared/fall/staging/flattening/flat_table/DCIR")
-    override val IrImbPath = Path("/shared/fall/staging/flattening/single_table/IR_IMB_R")
-    override val IrBenPath = Path("/shared/fall/staging/flattening/single_table/IR_BEN_R")
+    override val McoPath = Path("/shared/fall/All/flattening/flat_table/MCO")
+    override val McoCePath = Path("/shared/fall/All/flattening/flat_table/MCO_CE")
+    override val DcirPath = Path("/shared/fall/All/flattening/flat_table/DCIR")
+    override val IrImbPath = Path("/shared/fall/All/flattening/single_table/IR_IMB_R")
+    override val IrBenPath = Path("/shared/fall/All/flattening/single_table/IR_BEN_R")
     override val StudyStart: Timestamp = makeTS(2015,1,1)
     override val StudyEnd: Timestamp = makeTS(2016,1,1)
-    override val IrPhaPath = Path("/shared/fall/staging/flattening/single_table/IR_PHA_R")
+    override val IrPhaPath = Path("/shared/fall/All/flattening/single_table/IR_PHA_R")
   }
 
   object TestEnv extends Env {
@@ -195,7 +195,7 @@ object FallMain extends Main with FractureCodes {
     // Hospitalized Fractures
     val hospitalizedFractures = HospitalizedFractures.transform(diagnoses, acts, List(BodySites))
     operationsMetadata += {
-      OperationReporter.report("hospitalized_fractures", List("diagnoses", "acts"), OperationTypes.Outcomes, hospitalizedFractures.toDF, env.FeaturingPath)
+      OperationReporter.report("hospitalized_fractures", List("diagnoses", "acts"), OperationTypes.Outcomes, hospitalizedFractures.toDF, fracturesPath)
     }
 
     // Public Ambulatory Fractures

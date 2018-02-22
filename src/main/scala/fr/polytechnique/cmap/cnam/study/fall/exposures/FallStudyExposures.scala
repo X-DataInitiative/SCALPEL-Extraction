@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.study.fall.exposures
 import java.sql.Timestamp
 
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposureDefinition, ExposurePeriodStrategy, WeightAggStrategy}
+import me.danielpes.spark.datetime.implicits._
 
 object FallStudyExposures {
 
@@ -10,12 +11,12 @@ object FallStudyExposures {
 
     ExposureDefinition(
       periodStrategy = ExposurePeriodStrategy.Limited,
-      startDelay = 0,
-      endDelay = 1,
+      startDelay = 0.months,
+      endDelay = 30.days,
       minPurchases = 1,
-      purchasesWindow = 0,
+      purchasesWindow = 0.months,
       weightAggStrategy = WeightAggStrategy.NonCumulative,
-      tracklossThreshold = 2,
+      tracklossThreshold = 60.days,
       cumulativeExposureWindow = 0,
       cumulativeStartThreshold = 0,
       cumulativeEndThreshold = 0,

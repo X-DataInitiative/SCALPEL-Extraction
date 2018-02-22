@@ -49,14 +49,14 @@ class MLPPMainSuite extends SharedContext{
     // Given
     val expectedFeatures = Seq(
       // Patient A
-      MLPPFeature("PA", 0, "Mol1", 0, 0, 0, 0,  0, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0, 2, 0, 2,  0, 1.0),
-      MLPPFeature("PA", 0, "Mol1", 0, 3, 0, 3,  0, 1.0),
-      MLPPFeature("PA", 0, "Mol2", 1, 2, 0, 2,  1, 1.0),
-      MLPPFeature("PA", 0, "Mol3", 2, 3, 0, 3,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 14, 0, 14,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 73, 0, 73,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 104, 0, 104,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 73, 0, 73,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 104, 0, 104,  2, 1.0),
       // Patient B
-      MLPPFeature("PB", 1, "Mol1", 0, 0, 0,  7,  0, 1.0),
-      MLPPFeature("PB", 1, "Mol1", 0, 2, 0,  9,  0, 1.0)
+      MLPPFeature("PB", 1, "Mol1", 0, 14, 0,  226,  0, 1.0),
+      MLPPFeature("PB", 1, "Mol1", 0, 73, 0,  285,  0, 1.0)
     ).toDF("patientID", "patientIndex", "moleculeName", "moleculeIndex", "bucketIndex", "lagIndex", "rowIndex", "colIndex", "value")
 
     // When

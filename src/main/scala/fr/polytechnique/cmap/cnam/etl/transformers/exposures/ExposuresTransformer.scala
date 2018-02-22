@@ -8,6 +8,8 @@ import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
+import me.danielpes.spark.datetime.Period
+import me.danielpes.spark.datetime.implicits._
 
 class ExposuresTransformer(config: ExposureDefinition)
   extends ExposurePeriodAdder with WeightAggregator {
@@ -20,10 +22,10 @@ class ExposuresTransformer(config: ExposureDefinition)
   val diseaseCode: String = config.diseaseCode
   val filterDelayedPatients: Boolean = config.filterDelayedPatients
   val minPurchases: Int = config.minPurchases
-  val startDelay: Int = config.startDelay
-  val endDelay: Int = config.endDelay
-  val purchasesWindow: Int = config.purchasesWindow
-  val tracklossThreshold: Int = config.tracklossThreshold
+  val startDelay: Period = config.startDelay
+  val endDelay: Period = config.endDelay
+  val purchasesWindow: Period = config.purchasesWindow
+  val tracklossThreshold: Period = config.tracklossThreshold
   val cumulativeExposureWindow: Int = config.cumulativeExposureWindow
   val cumulativeStartThreshold: Int = config.cumulativeStartThreshold
   val cumulativeEndThreshold: Int = config.cumulativeEndThreshold

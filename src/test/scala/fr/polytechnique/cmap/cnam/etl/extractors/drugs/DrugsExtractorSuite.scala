@@ -268,10 +268,10 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient2", "Antidépresseurs : Tricycliques", 0.0, makeTS(2014, 6, 1)),
-      Drug("patient4", "Antidépresseurs : Tricycliques", 0.0, makeTS(2014, 8, 1)),
-      Drug("patient8", "Antidépresseurs : ISRS", 0.0, makeTS(2014, 9, 1)),
-      Drug("patient2", "Neuroleptiques : Autre neuroleptique", 0.0, makeTS(2014, 6, 1))
+      Drug("patient2", "Antidepresseurs_Tricycliques", 0.0, makeTS(2014, 6, 1)),
+      Drug("patient4", "Antidepresseurs_Tricycliques", 0.0, makeTS(2014, 8, 1)),
+      Drug("patient8", "Antidepresseurs_ISRS", 0.0, makeTS(2014, 9, 1)),
+      Drug("patient2", "Neuroleptiques_Autre_neuroleptique", 0.0, makeTS(2014, 6, 1))
     ).toDS
 
     val source = new Sources(irPha = Some(Seq(
