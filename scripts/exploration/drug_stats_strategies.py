@@ -3,7 +3,7 @@ from typing import List
 from .drug_stats import DrugsStatsStrategy
 
 
-class PharmaDrugsStrategy(DrugsStatsStrategy):
+class TheraputicDrugsStrategy(DrugsStatsStrategy):
 
     def count_box_to_bucket(self, number_boxes):
         return number_boxes // 6
@@ -63,30 +63,30 @@ class PharmaDrugsStrategy(DrugsStatsStrategy):
             return 3
 
 
-class Antihypertenseurs(PharmaDrugsStrategy):
+class Antihypertenseurs(TheraputicDrugsStrategy):
 
     @property
     def drug_name(self) -> str:
         return "Antihypertenseurs"
 
 
-class Antidepresseurs(PharmaDrugsStrategy):
+class Antidepresseurs(TheraputicDrugsStrategy):
     @property
     def drug_name(self) -> str:
         return "Antidepresseurs"
 
 
-class Hypnotiques(PharmaDrugsStrategy):
+class Hypnotiques(TheraputicDrugsStrategy):
     @property
     def drug_name(self) -> str:
         return "Hypnotiques"
 
 
-class Neuroleptiques(PharmaDrugsStrategy):
+class Neuroleptiques(TheraputicDrugsStrategy):
     @property
     def drug_name(self) -> str:
         return "Neuroleptiques"
 
 
-def get_pharma_strategies() -> List[PharmaDrugsStrategy]:
+def get_pharma_strategies() -> List[TheraputicDrugsStrategy]:
     return [Antidepresseurs(), Antihypertenseurs(), Hypnotiques(), Neuroleptiques()]

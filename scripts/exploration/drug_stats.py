@@ -206,10 +206,10 @@ class DrugPurchaseStatsPlotter(object):
                 self.drugs_stats.stats
                     .groupby([by])[box_column]
                     .value_counts(normalize=True)
-                    .rename('percentage')
                     .mul(100)
                     .reset_index()
                     .sort_values(by)
+                    .rename(columns={0: 'percentage'})
             )
             ax = sns.barplot(x=by, y="percentage", hue=box_column,
                              data=patient_counts,
