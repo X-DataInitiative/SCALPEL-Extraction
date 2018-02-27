@@ -339,7 +339,8 @@ class DrugsExtractorSuite extends SharedContext{
     val drugConfigAntidepresseurs: DrugConfig = Antidepresseurs
     val drugConfigNeuroleptiques: DrugConfig = Neuroleptiques
     // When
-    val result = DrugsExtractor.extract(DrugClassificationLevel.Molecule, source, List(drugConfigAntidepresseurs, drugConfigNeuroleptiques))
+    val result = DrugsExtractor
+      .extract(DrugClassificationLevel.Molecule, source, List(drugConfigAntidepresseurs, drugConfigNeuroleptiques))
 
     // Then
     assertDSs(result, expected)
