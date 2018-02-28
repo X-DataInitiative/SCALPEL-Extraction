@@ -9,7 +9,12 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StringType, TimestampType}
 import org.apache.spark.sql._
 
-case class Purchase(patientID: String, CIP13: String, ATC5: String = "", eventDate: Timestamp)
+case class Purchase(
+          patientID: String,
+          CIP13: String,
+          ATC5: String = "",
+          eventDate: Timestamp,
+          molecules: String = "")
 
 
 object DrugsExtractor extends java.io.Serializable{
@@ -20,7 +25,8 @@ object DrugsExtractor extends java.io.Serializable{
       col("NUM_ENQ").cast(StringType).as("patientID"),
       col("ER_PHA_F__PHA_PRS_C13").cast(StringType).as("CIP13"),
       col("PHA_ATC_C07").cast(StringType).as("ATC5"),
-      col("EXE_SOI_DTD").cast(TimestampType).as("eventDate")
+      col("EXE_SOI_DTD").cast(TimestampType).as("eventDate"),
+      col("PHA_NOM_PA").cast(StringType).as("molecules")
     )
 
     lazy val irPhaR = sources.irPha.get
@@ -55,6 +61,12 @@ object DrugsExtractor extends java.io.Serializable{
             drugFamilies.flatMap(_.pharmacologicalClasses)
               .filter(family => family.isCorrect(row.ATC5, ""))
               .map(_.name)
+          case DrugClassificationLevel.Molecule =>
+            val isDrugCorrect: Boolean =  drugFamilies
+              .exists(family => family.cip13Codes.contains(row.CIP13))
+            if(isDrugCorrect)
+              row.molecules.split('+').map(molecule => molecule.trim).toList
+            else List.empty
         }
 
         buildDrugEvent(row.patientID, families, row.eventDate)
