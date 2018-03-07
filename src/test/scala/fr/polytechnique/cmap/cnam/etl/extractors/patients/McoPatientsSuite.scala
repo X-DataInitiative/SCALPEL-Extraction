@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
 import java.sql.Timestamp
+
+import fr.polytechnique.cmap.cnam.SharedContext
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
-import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.config.ExtractionConfig
 
 class McoPatientsSuite extends SharedContext {
 
@@ -57,7 +57,6 @@ class McoPatientsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val config = ExtractionConfig.init()
     val mco: DataFrame = Seq(
       ("Patient_01", 1, 2, 1985),
       ("Patient_02", 9, 3, 1986),

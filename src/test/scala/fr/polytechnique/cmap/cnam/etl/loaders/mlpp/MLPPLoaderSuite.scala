@@ -39,7 +39,7 @@ class MLPPLoaderSuite extends SharedContext {
     // When
     val writer = MLPPLoader()
     import writer.MLPPDataFrame
-    val result = input.withAge()
+    val result = input.withAge
 
     // Then
     assertDFs(result, expected)
