@@ -134,9 +134,9 @@ object FallMain extends Main with FractureCodes {
     val drugPurchases = DrugsExtractor
       .extract(DrugClassificationLevel.Therapeutic, source, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
       .cache()
-
-    logger.info("  count: " + drugPurchases.count)
-    logger.info("  count distinct: " + drugPurchases.distinct.count)
+    operationsMetadata += {
+      OperationReporter.report("drug_purchases", List("DCIR"), OperationTypes.Dispensations, drugPurchases.toDF, env.FeaturingPath)
+      }
 
 
     // Medical Acts
