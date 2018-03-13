@@ -2,32 +2,25 @@ package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
 import java.sql.Timestamp
 
+import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
+import fr.polytechnique.cmap.cnam.util.functions._
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 
-import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
-import fr.polytechnique.cmap.cnam.util.functions._
-
-// TODO : remove this
-import fr.polytechnique.cmap.cnam.etl.old_root.FilteringConfig
-
-
 class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
 
-  import MLPPLoader._
-
-  val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
+  private val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
 
   implicit class MLPPDataFrame(data: DataFrame) {
 
     import data.sparkSession.implicits._
 
-    def withAge(referenceDate: Timestamp = AgeReferenceDate): DataFrame = {
-      val age: Column = year(lit(referenceDate)) - year(col("birthDate"))
+    def withAge: DataFrame = {
+      val age: Column = year(lit(params.minTimestamp)) - year(col("birthDate"))
       data.withColumn("age", age)
     }
 
@@ -281,7 +274,7 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
     val input = patient.join(outcome.toDF.union(exposure.toDF), "patientID")
 
     val initialExposures: Dataset[LaggedExposure] = input
-      .withAge(AgeReferenceDate)
+      .withAge
       .withStartBucket
       .withDeathBucket
       .withTracklossBucket
@@ -337,8 +330,6 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
 
 
 object MLPPLoader {
-
-  final val AgeReferenceDate = FilteringConfig.dates.ageReference
 
   case class Params(
       bucketSize: Int = 1,
