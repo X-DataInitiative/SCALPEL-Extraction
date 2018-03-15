@@ -601,13 +601,13 @@ object Neuroleptiques extends DrugConfig {
   )
 
   val atypiques = new PharmacologicalClassConfig(
-    name = "Neuroleptiques_Neuroleptiques_Atypiques",
+    name = "Neuroleptiques_Neuroleptiques_atypiques",
     ATCCodes = List("N05A*"),
     ATCExceptions = List("N05AL06", "N05AN01", "N05AA", "N05AH02", "N05AH03", "N05AL05", "N05AX08", "N05AX12", "N05AA07")
   )
 
   val autres = new PharmacologicalClassConfig(
-    name = "Neuroleptiques_Autre_neuroleptique",
+    name = "Neuroleptiques_Autres_neuroleptiques",
     ATCCodes = List("N05AA", "N05AH02", "N05AH03", "N05AL05", "N05AX08", "N05AX12")
   )
 

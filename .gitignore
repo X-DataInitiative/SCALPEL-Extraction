@@ -88,3 +88,7 @@ fabric.properties
 scripts/*.pdf
 
 metadata.json
+
+scripts/notebooks/\.ipynb_checkpoints/
+
+scripts/notebooks/fall_study/\.ipynb_checkpoints/
