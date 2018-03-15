@@ -278,7 +278,7 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient2", "Antidepresseurs_Tricycliques", 0.0, makeTS(2014, 6, 1)),
       Drug("patient4", "Antidepresseurs_Tricycliques", 0.0, makeTS(2014, 8, 1)),
       Drug("patient8", "Antidepresseurs_ISRS", 0.0, makeTS(2014, 9, 1)),
-      Drug("patient2", "Neuroleptiques_Autre_neuroleptique", 0.0, makeTS(2014, 6, 1))
+      Drug("patient2", "Neuroleptiques_Autres_neuroleptiques", 0.0, makeTS(2014, 6, 1))
     ).toDS
 
     val source = new Sources(irPha = Some(Seq(
