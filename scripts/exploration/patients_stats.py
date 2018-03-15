@@ -2,11 +2,14 @@ from datetime import datetime
 from os import path
 
 import matplotlib.pyplot as plt
+from matplotlib import ticker
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import seaborn as sns
 from IPython.display import display
-from pyspark.sql import functions as fn
+import pyspark.functions as fn
+
+from exploration.utils import millify
 
 
 class MyPatientsDF(object):
@@ -17,8 +20,22 @@ class MyPatientsDF(object):
         self.cohort_name = cohort_name
         self.reference_date = reference_date
         self.bucket_mapping = self._get_string_maps(max_age)
+        self.color_age_bucket_mapping = self._get_color_maps(max_age)
 
-    def _get_string_maps(self, max_age):
+    @staticmethod
+    def _get_color_maps(max_age):
+        age_lists = range(0, max_age, 5)
+        size = len(age_lists)
+        buckets = zip(age_lists[:-1], age_lists[1:])
+        palette = sns.color_palette("Paired", n_colors=size)
+        return {"[{}, {}[".format(bucket[0], bucket[1]): palette[i] for (
+            i, bucket) in enumerate(buckets)}
+
+    def get_age_bucket_colors(self, buckets):
+        return [self.color_age_bucket_mapping[bucket] for bucket in buckets]
+
+    @staticmethod
+    def _get_string_maps(max_age):
         age_lists = range(0, max_age, 5)
         buckets = zip(age_lists[:-1], age_lists[1:])
         string_maps = {i: "[{}, {}[".format(bucket[0], bucket[1]) for (
@@ -103,16 +120,58 @@ class PatientStatsPlotter(object):
                     '{:1.2f}%'.format(nh),
                     ha="center", fontdict=font)
 
+    def _patch_axe(self, ax, y_limit=100):
+        # Make twin axis
+        ax2 = ax.twinx()
+
+        # Switch so count axis is on right, frequency on left
+        ax2.yaxis.tick_left()
+        ax.yaxis.tick_right()
+
+        # Also switch the labels over
+        ax.yaxis.set_label_position('right')
+        ax2.yaxis.set_label_position('left')
+
+        ax2.set_ylabel('Pourcentage sur Population total [%]')
+
+        #for p in ax.patches:
+            #x = p.get_bbox().get_points()[:, 0]
+            #y = p.get_bbox().get_points()[1, 1]
+            #ax.annotate('{:.0f}'.format(y), (x.mean(), y),
+            #            ha='center', va='bottom', rotation=90)
+
+        # Use a LinearLocator to ensure the correct number of ticks
+        ax.yaxis.set_major_locator(ticker.LinearLocator(11))
+
+        # Fix the frequency range to 0-100
+        ax2.set_ylim(0, y_limit)
+        ax.set_ylim(0, (y_limit / 100) * self.total)
+        ax.yaxis.set_major_formatter(millify)
+        # And use a MultipleLocator to ensure a tick spacing of 10
+        ax2.yaxis.set_major_locator(ticker.MultipleLocator(10))
+
+        ax2.grid(None)
+
+        ax.text(0.15, 0.85, 'Population Total : {:,}'.format(self.total),
+                verticalalignment='top', horizontalalignment='left',
+                transform=plt.gcf().transFigure,
+                bbox={'alpha': 0.1, 'pad': 10})
+
+        plt.tight_layout()
+
     def distribution_by_age_bucket(self, ax):
         df = self.stats.get_distribution_by_age_bucket()
-        ax = sns.barplot(x="ageBucket", data=df, y="count", ax=ax, )
+        colors = self.stats.patients_df.get_age_bucket_colors(df.ageBucket.values.tolist())
+        ax = sns.barplot(x="ageBucket", data=df, y="count", ax=ax, palette=colors)
+
         ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
         ax.set_ylabel("Nombre de patients")
         ax.set_xlabel("Tranche d'age")
         ax.set_title("Distribution des {}\nsuivant la tranche d'age".format(
             self.stats.patients_df.cohort_name))
         if self.total:
-            self._plot_proportion(ax)
+            self._patch_axe(ax, y_limit=25)
+
         return ax
 
     def distribution_by_gender(self, ax):
@@ -124,7 +183,8 @@ class PatientStatsPlotter(object):
         ax.set_title("Distribution des {}\nsuivant le genre".format(
             self.stats.patients_df.cohort_name))
         if self.total:
-            self._plot_proportion(ax)
+            self._patch_axe(ax)
+
         return ax
 
     def distribution_by_gender_age_bucket(self, ax):
@@ -143,7 +203,7 @@ class PatientStatsPlotter(object):
         [label.set_text(gender_mapping[int(label.get_text())])
          for label in legend.get_texts()]
         if self.total:
-            self._plot_proportion(ax)
+            self._patch_axe(ax, y_limit=25)
         return ax
 
 

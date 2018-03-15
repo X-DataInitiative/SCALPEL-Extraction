@@ -215,14 +215,16 @@ def report_counts(steps: Dict[str, Cohort], root_directory: str) -> None:
     count_df.to_csv(output_path)
 
 
-def on_demand_flowchart(metadata_json: str, flowchart_json: str, root_directory: str):
+def on_demand_flowchart(metadata_json: str, flowchart_json: str, root_directory: str,
+                        plot_percentage=False):
     metadata = parse_metadata(metadata_json)
     cohorts = map_metadata_to_cohorts(metadata)
     steps = flowchart_file_parser(flowchart_json, cohorts)
 
     for (i, cohort) in steps.items():
+        total = cohort.patients.count() if plot_percentage else None
         save_patients_stats(cohort.patients, "Population apres l'etape {}".format(i),
-                            None, root_directory)
+                            total, root_directory)
 
     report_counts(steps, root_directory)
 
