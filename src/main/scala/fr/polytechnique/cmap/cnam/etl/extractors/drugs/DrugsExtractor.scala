@@ -57,10 +57,12 @@ object DrugsExtractor extends java.io.Serializable{
           case DrugClassificationLevel.Therapeutic =>
             drugFamilies.filter(family => family.cip13Codes.contains(row.CIP13))
               .map(_.name)
+
           case DrugClassificationLevel.Pharmacological =>
             drugFamilies.flatMap(_.pharmacologicalClasses)
               .filter(family => family.isCorrect(row.ATC5, ""))
               .map(_.name)
+
           case DrugClassificationLevel.Molecule =>
             val isDrugCorrect: Boolean =  drugFamilies
               .exists(family => family.cip13Codes.contains(row.CIP13))

@@ -1,6 +1,5 @@
 from datetime import datetime
 from os import path
-import math
 
 import matplotlib.pyplot as plt
 from matplotlib import ticker
@@ -8,21 +7,9 @@ from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import seaborn as sns
 from IPython.display import display
-from pyspark.sql import functions as fn
+import pyspark.functions as fn
 
-millnames = ['', ' K', ' M', ' Mi', ' Tr']
-
-
-@ticker.FuncFormatter
-def millify(x, pos):
-    x = float(x)
-    millidx = max(0, min(len(millnames) - 1,
-                         int(math.floor(0 if x == 0 else math.log10(abs(x)) / 3))))
-
-    if millidx > 1:
-        return '{:.1f}{}'.format(x / 10 ** (3 * millidx), millnames[millidx])
-    else:
-        return '{:.0f}{}'.format(x / 10 ** (3 * millidx), millnames[millidx])
+from exploration.utils import millify
 
 
 class MyPatientsDF(object):
