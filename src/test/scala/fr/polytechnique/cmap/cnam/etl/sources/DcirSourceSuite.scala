@@ -4,7 +4,7 @@ import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{AnalysisException, DataFrame}
 import fr.polytechnique.cmap.cnam.SharedContext
 
-class DcirSuite extends SharedContext {
+class DcirSourceSuite extends SharedContext {
 
   "read" should "return a DataFrame with the correct schema" in {
     // Given
@@ -12,7 +12,7 @@ class DcirSuite extends SharedContext {
     val expected: DataFrame = sqlContext.read.parquet(path)
 
     // When
-    val result = Dcir.read(sqlContext, path)
+    val result = DcirSource.readAndSanitize(sqlContext, path)
 
     // Then
     assert(result.schema == expected.schema)
@@ -25,7 +25,7 @@ class DcirSuite extends SharedContext {
     val path: String = "src/test/resources/expected/DCIR.parquet"
 
     // When
-    val result = Dcir.read(sqlContext, path)
+    val result = DcirSource.readAndSanitize(sqlContext, path)
 
     // Then
     assert(result.filter(column === value).count == 0L)
@@ -37,7 +37,7 @@ class DcirSuite extends SharedContext {
 
     // Then
     intercept[AnalysisException] {
-      Dcir.read(sqlContext, path).count
+      DcirSource.readAndSanitize(sqlContext, path).count
     }
   }
 }

@@ -19,7 +19,7 @@ class ImbSuite extends SharedContext {
       .toDF("NUM_ENQ","BEN_RNG_GEM","IMB_ALD_DTD","IMB_ALD_DTF","IMB_ALD_NUM","IMB_ETM_NAT","IMB_MLP_BTR","IMB_MLP_TAB","IMB_SDR_LOP","INS_DTE","MED_MTF_COD","MED_NCL_IDT","UPD_DTE")
 
     // When
-    val result = IrImb.read(sqlCtx, path)
+    val result = IrImbSource.readAndSanitize(sqlCtx, path)
 
     // Then
     assertDFs(result, expected)

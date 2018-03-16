@@ -12,7 +12,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassificationLevel,
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.etl.sources.OldSources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.exposures.FallStudyExposures
@@ -84,8 +84,8 @@ object FallMain extends Main with FractureCodes {
     override val IrPhaPath = Path("src/test/resources/test-input/IR_PHA_R.parquet")
   }
 
-  def getSource(sqlContext: SQLContext, env: Env): Sources = {
-    Sources.read(
+  def getSource(sqlContext: SQLContext, env: Env): OldSources = {
+    OldSources.read(
       sqlContext,
       irImbPath = Option(env.IrImbPath).map(_.toString),
       irBenPath = Option(env.IrBenPath).map(_.toString),

@@ -5,7 +5,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 
 class SourceReaderSuite extends SharedContext {
 
-  object TestSourceReader extends SourceReader
+  object TestSourceReader extends SourceManager
 
   "read" should "return the right dataframe" in {
 

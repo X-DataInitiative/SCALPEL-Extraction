@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.molecules
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.etl.sources.OldSources
 
 class MoleculePurchasesSuite extends SharedContext {
 
@@ -22,7 +22,7 @@ class MoleculePurchasesSuite extends SharedContext {
         col("MOLECULE_NAME"),
         col("TOTAL_MG_PER_UNIT")
       )
-    val sources = new Sources(
+    val sources = new OldSources(
       dcir = Some(dcir),
       irPha = Some(irPha),
       dosages = Some(dosages)

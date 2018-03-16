@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.sources
 import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.SharedContext
 
-class DosagesSuite extends SharedContext {
+class DosagesSourceSuite extends SharedContext {
 
   "read" should "return the correct DataFrame" in {
     // Given
@@ -12,7 +12,7 @@ class DosagesSuite extends SharedContext {
     val expectedLine = "[2200789,METFORMINE,60000]"
 
     // When
-    val result = Dosages.read(sqlContext, path)
+    val result = DosagesSource.readAndSanitize(sqlContext, path)
 
     // Then
     assert(result.count() == expectedCount)
@@ -25,7 +25,7 @@ class DosagesSuite extends SharedContext {
     val expectedCount = 0
 
     // When
-    val result = Dosages.read(sqlContext, path).where(col("MOLECULE_NAME") === "BENFLUOREX")
+    val result = DosagesSource.readAndSanitize(sqlContext, path).where(col("MOLECULE_NAME") === "BENFLUOREX")
 
     // Then
     assert(result.count() == expectedCount)

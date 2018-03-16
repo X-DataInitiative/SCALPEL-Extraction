@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
 import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.etl.sources.OldSources
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class PatientsSuite extends SharedContext {
@@ -63,7 +63,7 @@ class PatientsSuite extends SharedContext {
       ("Patient_04", 2, 4, 1895, Some(makeTS(2020, 3, 13)))
     ).toDF("NUM_ENQ", "BEN_SEX_COD", "BEN_NAI_MOI", "BEN_NAI_ANN", "BEN_DCD_DTE")
 
-    val sources = new Sources(dcir = Some(dcirDf), pmsiMco = Some(mcoDf), irBen = Some(irBenDf))
+    val sources = new OldSources(dcir = Some(dcirDf), pmsiMco = Some(mcoDf), irBen = Some(irBenDf))
 
     // When
     val result = new Patients(config).extract(sources).toDF

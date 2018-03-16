@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.sources
 
 import fr.polytechnique.cmap.cnam.SharedContext
 
-class McoSuite extends SharedContext {
+class McoSourceSuite extends SharedContext {
 
   "read" should "remove irrelevant lines" in {
     // Given
@@ -14,7 +14,7 @@ class McoSuite extends SharedContext {
     val expected = Seq(("paris", "42")).toDF("ETA_NUM", "SEQ_NUM")
 
     // When
-    val result = Mco.read(sqlCtx, path)
+    val result = McoSource.readAndSanitize(sqlCtx, path)
 
     // Then
     assertDFs(result, expected)

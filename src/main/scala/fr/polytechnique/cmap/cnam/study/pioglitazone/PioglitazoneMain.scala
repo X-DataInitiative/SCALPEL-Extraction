@@ -11,7 +11,7 @@ import fr.polytechnique.cmap.cnam.etl.filters.{EventFilters, PatientFilters}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.MLPPLoader
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.etl.sources.OldSources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposureDefinition, ExposuresTransformer}
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
@@ -52,7 +52,7 @@ object PioglitazoneMain extends Main {
 
     logger.info("Reading sources")
     import implicits.SourceReader
-    val sources: Sources = sqlContext.readSources(inputPaths)
+    val sources: OldSources = sqlContext.readSources(inputPaths)
 
     logger.info("Extracting patients...")
     val patientsConfig = PatientsConfig(configPIO.study.ageReferenceDate)
