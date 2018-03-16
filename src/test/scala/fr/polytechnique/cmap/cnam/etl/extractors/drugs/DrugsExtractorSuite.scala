@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.drugs
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
-import fr.polytechnique.cmap.cnam.etl.sources.OldSources
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.fall.codes.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 import org.apache.spark.sql.Dataset
@@ -25,7 +25,7 @@ class DrugsExtractorSuite extends SharedContext{
       ("patient8", Some("3400936889651"), Some(makeTS(2014, 9, 1)))
     ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
 
-    val source = new OldSources(irPha = Some(Seq(
+    val source = new Sources(irPha = Some(Seq(
       (Some("9111111111111"), "toto"),
       (Some("3400935183644"), "toto"),
       (Some("3400935418487"), "toto"),
@@ -97,7 +97,7 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient8", "Antidepresseurs", 0.0, makeTS(2014, 9, 1))
     ).toDS
 
-    val source = new OldSources(irPha = Some(Seq(
+    val source = new Sources(irPha = Some(Seq(
       (Some("9111111111111"), "toto"),
       (Some("3400935183644"), "toto"),
       (Some("3400935418487"), "toto"),
@@ -131,7 +131,7 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient2", "Neuroleptiques", 0.0, makeTS(2014, 6, 1))
     ).toDS
 
-    val source = new OldSources(irPha = Some(Seq(
+    val source = new Sources(irPha = Some(Seq(
       (Some("9111111111111"), "toto"),
       (Some("3400935183644"), "toto"),
       (Some("3400930023648"), "toto")
@@ -164,7 +164,7 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient2", "Hypnotiques", 0.0, makeTS(2014, 7, 1))
     ).toDS
 
-    val source = new OldSources(irPha = Some(Seq(
+    val source = new Sources(irPha = Some(Seq(
       (Some("3400930081143"), "toto"),
       (Some("3400936099777"), "toto")
     ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
@@ -196,7 +196,7 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDS
 
 
-    val source = new OldSources(irPha = Some(Seq(
+    val source = new Sources(irPha = Some(Seq(
       (Some("3400937354004"), "toto"),
       (Some("3400936099777"), "toto")
     ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
@@ -237,7 +237,7 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient2", "Neuroleptiques", 0.0, makeTS(2014, 6, 1))
     ).toDS
 
-    val source = new OldSources(irPha = Some(Seq(
+    val source = new Sources(irPha = Some(Seq(
       (Some("9111111111111"), "toto"),
       (Some("3400935183644"), "N06AA04"),
       (Some("3400935418487"), "A10BB09"),
@@ -281,7 +281,7 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient2", "Neuroleptiques_Autres_neuroleptiques", 0.0, makeTS(2014, 6, 1))
     ).toDS
 
-    val source = new OldSources(irPha = Some(Seq(
+    val source = new Sources(irPha = Some(Seq(
       (Some("9111111111111"), "toto"),
       (Some("3400935183644"), "N06AA04"),
       (Some("3400935418487"), "A10BB09"),
@@ -327,7 +327,7 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient2", "INSULINE LISPRO (PROTAMINE)", 0.0, makeTS(2014, 6, 1))
     ).toDS
 
-    val source = new OldSources(irPha = Some(Seq(
+    val source = new Sources(irPha = Some(Seq(
       (Some("9111111111111"), "toto", ""),
       (Some("3400935183644"), "N06AA04", ""),
       (Some("3400935418487"), "A10BB09", ""),

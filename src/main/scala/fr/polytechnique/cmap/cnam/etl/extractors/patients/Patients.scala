@@ -1,19 +1,19 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
+import fr.polytechnique.cmap.cnam.etl.patients._
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.util.functions.makeTS
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.etl.patients._
-import fr.polytechnique.cmap.cnam.etl.sources.OldSources
-import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class Patients(config: PatientsConfig) {
 
   import Patients.validateDeathDate
 
-  def extract(sources: OldSources): Dataset[Patient] = {
+  def extract(sources: Sources): Dataset[Patient] = {
 
     val dcir = sources.dcir.get
-    val mco = sources.pmsiMco.get
+    val mco = sources.mco.get
     val irBen = sources.irBen.get
 
     val mcoPatients: DataFrame = McoPatients.extract(mco, config.mcoDeathCode).toDF.as("mco")

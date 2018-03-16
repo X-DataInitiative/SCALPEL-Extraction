@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
+import fr.polytechnique.cmap.cnam.study.StudyConfig.InputPaths
 import org.apache.spark.sql.{DataFrame, SQLContext}
 
 class Sources(
@@ -70,4 +71,19 @@ object Sources {
     )
   }
 
+  /**
+    * @deprecated For backwards compatibility only!
+    */
+  // for backwards compatibility
+  def read(sqlContext: SQLContext, paths: InputPaths): Sources = {
+    this.read(
+      sqlContext,
+      dcirPath = Option(paths.dcir),
+      mcoPath = Option(paths.pmsiMco),
+      irBenPath = Option(paths.irBen),
+      irImbPath = Option(paths.irImb),
+      irPhaPath = Option(paths.irPha),
+      dosagesPath = Option(paths.dosages)
+    )
+  }
 }

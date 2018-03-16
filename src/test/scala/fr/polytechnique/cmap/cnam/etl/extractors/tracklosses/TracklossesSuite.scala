@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.tracklosses
 
-import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.Trackloss
-import fr.polytechnique.cmap.cnam.etl.sources.OldSources
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
+import org.apache.spark.sql.DataFrame
 
 class TracklossesSuite extends SharedContext {
 
@@ -87,7 +87,7 @@ class TracklossesSuite extends SharedContext {
     // Given
     val config = TracklossesConfig(makeTS(2006, 12, 31))
     val dcir: DataFrame = sqlContext.read.load("src/test/resources/test-input/DCIR.parquet")
-    val sources = new OldSources(dcir = Some(dcir))
+    val sources = new Sources(dcir = Some(dcir))
     val expected: DataFrame = Seq(
       Trackloss("Patient_01", makeTS(2006, 3, 30)),
       Trackloss("Patient_02", makeTS(2006, 3, 30))

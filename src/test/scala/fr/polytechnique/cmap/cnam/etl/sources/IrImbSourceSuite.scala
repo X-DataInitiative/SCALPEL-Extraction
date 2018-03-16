@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.sources
 
 import fr.polytechnique.cmap.cnam.SharedContext
 
-class ImbSuite extends SharedContext {
+class IrImbSourceSuite extends SharedContext {
 
   "read" should "filter null event dates column IMB_ALD_DTD" in {
 

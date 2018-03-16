@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.study.fall
 import java.io.PrintWriter
 import java.sql.Timestamp
 
-import scala.collection.mutable
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.DcirAct
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.{MedicalActs, MedicalActsConfig}
@@ -12,7 +11,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassificationLevel,
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.sources.OldSources
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.exposures.FallStudyExposures
@@ -21,6 +20,8 @@ import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.functions._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
 import org.apache.spark.sql.{Dataset, SQLContext}
+
+import scala.collection.mutable
 
 object FallMain extends Main with FractureCodes {
 
@@ -84,14 +85,14 @@ object FallMain extends Main with FractureCodes {
     override val IrPhaPath = Path("src/test/resources/test-input/IR_PHA_R.parquet")
   }
 
-  def getSource(sqlContext: SQLContext, env: Env): OldSources = {
-    OldSources.read(
+  def readSources(sqlContext: SQLContext, env: Env): Sources = {
+    Sources.read(
       sqlContext,
       irImbPath = Option(env.IrImbPath).map(_.toString),
       irBenPath = Option(env.IrBenPath).map(_.toString),
       dcirPath = Option(env.DcirPath).map(_.toString),
-      pmsiMcoPath = Option(env.McoPath).map(_.toString),
-      pmsiMcoCEPath = Option(env.McoCePath).map(_.toString),
+      mcoPath = Option(env.McoPath).map(_.toString),
+      mcoCePath = Option(env.McoCePath).map(_.toString),
       irPhaPath = Option(env.IrPhaPath).map(_.toString)
     )
   }
@@ -113,10 +114,9 @@ object FallMain extends Main with FractureCodes {
 
     val env = getEnv(argsMap)
 
-    val source = getSource(sqlContext, env)
-    val dcir = source.dcir.get.persist()
-    val mco = source.pmsiMco.get.persist()
-    val irPhaR = source.irPha.get.cache()
+    val sources = Sources.sanitize(readSources(sqlContext, env))
+    val dcir = sources.dcir.get.persist()
+    val mco = sources.mco.get.persist()
 
     val fracturesCodes = BodySite.extractCIM10CodesFromSites(List(BodySites))
     val fracturesPath = Path(env.FeaturingPath, "fractures")
@@ -124,7 +124,7 @@ object FallMain extends Main with FractureCodes {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
     // Extract Patients
-    val patients = new Patients(PatientsConfig(env.StudyStart)).extract(source).cache()
+    val patients = new Patients(PatientsConfig(env.StudyStart)).extract(sources).cache()
     operationsMetadata += {
       OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R"), OperationTypes.Patients, patients.toDF, env.FeaturingPath)
     }
@@ -132,7 +132,7 @@ object FallMain extends Main with FractureCodes {
     // Extract Drug purchases
     logger.info("Drug Purchases")
     val drugPurchases = DrugsExtractor
-      .extract(DrugClassificationLevel.Therapeutic, source, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
+      .extract(DrugClassificationLevel.Therapeutic, sources, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
       .cache()
     operationsMetadata += {
       OperationReporter.report("drug_purchases", List("DCIR"), OperationTypes.Dispensations, drugPurchases.toDF, env.FeaturingPath)
@@ -146,14 +146,14 @@ object FallMain extends Main with FractureCodes {
          dcirCodes = codesCCAM,
          mcoCECodes = codesCCAM
        )
-    ).extract(source).persist()
+    ).extract(sources).persist()
     operationsMetadata += {
       OperationReporter.report("acts", List("DCIR", "MCO", "MCO_CE"), OperationTypes.MedicalActs, acts.toDF, env.FeaturingPath)
     }
     dcir.unpersist()
 
     // Diagnoses
-    val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = fracturesCodes, daCodes = fracturesCodes)).extract(source).persist()
+    val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = fracturesCodes, daCodes = fracturesCodes)).extract(sources).persist()
     operationsMetadata += {
       OperationReporter.report("diagnoses", List("MCO", "IR_IMB_R"), OperationTypes.Diagnosis, diagnoses.toDF, env.FeaturingPath)
     }

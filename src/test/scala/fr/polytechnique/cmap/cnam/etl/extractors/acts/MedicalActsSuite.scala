@@ -4,7 +4,7 @@ import java.sql.Date
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.sources.OldSources
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 import org.apache.spark.sql.functions._
 
@@ -24,7 +24,7 @@ class MedicalActsSuite extends SharedContext {
     val sources = {
       val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
       val dcir = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
-      new OldSources(pmsiMco = Some(mco), dcir = Some(dcir))
+      new Sources(mco = Some(mco), dcir = Some(dcir))
     }
     val expected = Seq[Event[MedicalAct]](
       // DcirAct("Patient_01", "dcir", "ABCD123", null), // The dummy data contains a null value
@@ -72,7 +72,7 @@ class MedicalActsSuite extends SharedContext {
     val sources = {
       val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
       val dcir = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
-      new OldSources(pmsiMco = Some(mco), pmsiMcoCE = Some(mcoCE), dcir = Some(dcir))
+      new Sources(mco = Some(mco), mcoCe = Some(mcoCE), dcir = Some(dcir))
     }
 
     val expected = List(
@@ -120,7 +120,7 @@ class MedicalActsSuite extends SharedContext {
     val sources = {
       val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
       val dcir = df
-      new OldSources(pmsiMco = Some(mco), pmsiMcoCE = Some(mcoCE), dcir = Some(dcir))
+      new Sources(mco = Some(mco), mcoCe = Some(mcoCE), dcir = Some(dcir))
     }
     val expected = List(
       DcirAct("Patient_01", "liberal", "ABCD123", makeTS(2006, 1, 15) ),
