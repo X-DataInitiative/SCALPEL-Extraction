@@ -5,9 +5,9 @@ import java.sql.Timestamp
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugClassificationLevel._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StringType, TimestampType}
-import org.apache.spark.sql._
 
 case class Purchase(
           patientID: String,
@@ -80,5 +80,4 @@ object DrugsExtractor extends java.io.Serializable{
     val drugPurchases = formatSource(sources)
     getCorrectDrugCodes(level, drugPurchases, drugFamilies)
   }
-
 }

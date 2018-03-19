@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
-import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
+import org.apache.spark.sql.Dataset
 
 class Diagnoses(config: DiagnosesConfig) {
 
@@ -14,7 +14,7 @@ class Diagnoses(config: DiagnosesConfig) {
       config.imbCodes
     )
     val mcoDiagnoses = McoDiagnoses.extract(
-      sources.pmsiMco.get,
+      sources.mco.get,
       config.dpCodes,
       config.drCodes,
       config.daCodes

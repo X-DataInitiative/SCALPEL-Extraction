@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.tracklosses
 
-import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.Trackloss
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
+import org.apache.spark.sql.DataFrame
 
 class TracklossesSuite extends SharedContext {
 

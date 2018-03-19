@@ -2,9 +2,11 @@ package fr.polytechnique.cmap.cnam.etl.sources
 
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types.IntegerType
-import org.apache.spark.sql.{DataFrame, SQLContext}
+import org.apache.spark.sql.{Column, DataFrame, SQLContext}
 
-private[sources] object Dosages extends SourceReader() {
+object DosagesSource extends SourceManager {
+
+  val MoleculeName: Column = col("MOLECULE_NAME")
 
   override def read(sqlContext: SQLContext, path: String): DataFrame = {
     sqlContext.read
@@ -16,6 +18,9 @@ private[sources] object Dosages extends SourceReader() {
         col("MOLECULE_NAME"),
         col("TOTAL_MG_PER_UNIT").cast(IntegerType)
       )
-      .where(col("MOLECULE_NAME") =!= "BENFLUOREX")
+  }
+
+  override def sanitize(dosages: DataFrame): DataFrame = {
+    dosages.where(DosagesSource.MoleculeName =!= "BENFLUOREX")
   }
 }

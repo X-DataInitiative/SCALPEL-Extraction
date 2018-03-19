@@ -42,7 +42,7 @@ object RosiglitazoneMain extends Main{
 
     logger.info("Reading sources")
     import implicits.SourceReader
-    val sources: Sources = sqlContext.readSources(inputPaths)
+    val sources: Sources = Sources.sanitize(sqlContext.readSources(inputPaths))
 
     logger.info("Extracting patients...")
     val patientsConfig = PatientsConfig(configROSI.study.ageReferenceDate)

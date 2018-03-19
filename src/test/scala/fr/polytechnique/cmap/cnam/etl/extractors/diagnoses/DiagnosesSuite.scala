@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
-import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
+import org.apache.spark.sql.DataFrame
 
 class DiagnosesSuite extends SharedContext {
 
@@ -19,7 +19,7 @@ class DiagnosesSuite extends SharedContext {
     val mco: DataFrame = sqlContext.read.load("src/test/resources/test-input/MCO.parquet")
     val irImb: DataFrame = sqlContext.read.load("src/test/resources/test-input/IR_IMB_R.parquet")
     val sources = new Sources(
-      pmsiMco = Some(mco),
+      mco = Some(mco),
       irImb = Some(irImb)
     )
     val expectedMco = McoDiagnoses.extract(
