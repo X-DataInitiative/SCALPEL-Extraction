@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.sources
 
 import fr.polytechnique.cmap.cnam.SharedContext
 
-class McoSourceSuite extends SharedContext {
+class McoCeSourceSuite extends SharedContext {
 
   "sanitize" should "remove lines containing any of the specific hospital codes" in {
     val sqlCtx = sqlContext
@@ -16,7 +16,7 @@ class McoSourceSuite extends SharedContext {
     val expected = Seq("1", "2", "42").toDF(colName)
 
     // When
-    val result = McoSource.sanitize(input)
+    val result = McoCeSource.sanitize(input)
 
     // Then
     assertDFs(result, expected)

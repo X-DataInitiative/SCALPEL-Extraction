@@ -4,7 +4,7 @@ import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types.IntegerType
 import org.apache.spark.sql.{Column, DataFrame, SQLContext}
 
-private[sources] object DosagesSource extends SourceManager {
+object DosagesSource extends SourceManager {
 
   val MoleculeName: Column = col("MOLECULE_NAME")
 

@@ -8,7 +8,7 @@ import org.apache.spark.sql.{Column, DataFrame}
   * This filtering is explained here
   * https://datainitiative.atlassian.net/wiki/pages/viewpage.action?pageId=40304642
   */
-private[sources] object McoSource extends SourceManager {
+object McoSource extends SourceManager {
 
   val specialHospitalCodes = List(
     "130780521", "130783236", "130783293", "130784234", "130804297", "600100101", "690783154",

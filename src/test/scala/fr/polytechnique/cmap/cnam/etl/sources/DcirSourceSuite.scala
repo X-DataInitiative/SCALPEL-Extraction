@@ -1,43 +1,22 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.{AnalysisException, DataFrame}
 import fr.polytechnique.cmap.cnam.SharedContext
+import org.apache.spark.sql.DataFrame
 
 class DcirSourceSuite extends SharedContext {
 
-  "read" should "return a DataFrame with the correct schema" in {
+  "sanitize" should "return a DataFrame without lines where the value for the column BSE_PRS_NAT is 0" in {
     // Given
-    val path: String = "src/test/resources/expected/DCIR.parquet"
-    val expected: DataFrame = sqlContext.read.parquet(path)
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    val input = Seq(("A", 1), ("B", 0), ("C", 10), ("D", 0)).toDF("NUM_ENQ", "BSE_PRS_NAT")
+    val expected = Seq(("A", 1), ("C", 10)).toDF("NUM_ENQ", "BSE_PRS_NAT")
 
     // When
-    val result = DcirSource.readAndSanitize(sqlContext, path)
+    val result = DcirSource.sanitize(input)
 
     // Then
-    assert(result.schema == expected.schema)
-  }
-
-  it should "return a DataFrame without lines where the value for the column BSE_PRS_NAT is 0" in {
-    // Given
-    val value = 0L
-    val column = col("BSE_PRS_NAT")
-    val path: String = "src/test/resources/expected/DCIR.parquet"
-
-    // When
-    val result = DcirSource.readAndSanitize(sqlContext, path)
-
-    // Then
-    assert(result.filter(column === value).count == 0L)
+    assertDFs(result, expected)
  }
-
-  it should "fail if the path is invalid" in {
-    // Given
-    val path: String = "src/test/resources/expected/invalid_path.parquet"
-
-    // Then
-    intercept[AnalysisException] {
-      DcirSource.readAndSanitize(sqlContext, path).count
-    }
-  }
 }

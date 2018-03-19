@@ -48,30 +48,6 @@ object Sources {
   }
 
   /**
-    * @deprecated To be remove soon.
-    */
-  def readAndSanitize(
-    sqlContext: SQLContext,
-    dcirPath: Option[String] = None,
-    mcoPath: Option[String] = None,
-    mcoCePath: Option[String] = None,
-    irBenPath: Option[String] = None,
-    irImbPath: Option[String] = None,
-    irPhaPath: Option[String] = None,
-    dosagesPath: Option[String] = None): Sources = {
-
-    new Sources(
-      dcir = dcirPath.map(DcirSource.readAndSanitize(sqlContext, _)),
-      mco = mcoPath.map(McoSource.readAndSanitize(sqlContext, _)),
-      mcoCe = mcoCePath.map(McoSource.readAndSanitize(sqlContext, _)),
-      irBen = irBenPath.map(IrBenSource.readAndSanitize(sqlContext, _)),
-      irImb = irImbPath.map(IrImbSource.readAndSanitize(sqlContext, _)),
-      irPha = irPhaPath.map(IrPhaSource.readAndSanitize(sqlContext, _)),
-      dosages = dosagesPath.map(DosagesSource.readAndSanitize(sqlContext, _))
-    )
-  }
-
-  /**
     * @deprecated For backwards compatibility only!
     */
   // for backwards compatibility
