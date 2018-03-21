@@ -1,7 +1,6 @@
-package fr.polytechnique.cmap.cnam.etl.sources
+package fr.polytechnique.cmap.cnam.etl.sources.data
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import org.apache.spark.sql.DataFrame
 
 class DcirSourceSuite extends SharedContext {
 
@@ -18,5 +17,5 @@ class DcirSourceSuite extends SharedContext {
 
     // Then
     assertDFs(result, expected)
- }
+  }
 }

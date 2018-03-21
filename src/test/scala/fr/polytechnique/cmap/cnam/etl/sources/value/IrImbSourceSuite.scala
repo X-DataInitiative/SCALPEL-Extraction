@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.sources
+package fr.polytechnique.cmap.cnam.etl.sources.value
 
 import fr.polytechnique.cmap.cnam.SharedContext
 
