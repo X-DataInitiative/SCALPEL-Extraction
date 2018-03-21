@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
+import org.apache.spark.sql.{DataFrame, SQLContext}
 import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource}
 import fr.polytechnique.cmap.cnam.etl.sources.value.{DosagesSource, IrBenSource, IrImbSource, IrPhaSource}
-import fr.polytechnique.cmap.cnam.study.StudyConfig.InputPaths
-import org.apache.spark.sql.{DataFrame, SQLContext}
+import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.InputPaths
 
 class Sources(
   val dcir: Option[DataFrame] = None,
@@ -49,10 +49,6 @@ object Sources {
     )
   }
 
-  /**
-    * @deprecated For backwards compatibility only!
-    */
-  // for backwards compatibility
   def read(sqlContext: SQLContext, paths: InputPaths): Sources = {
     this.read(
       sqlContext,

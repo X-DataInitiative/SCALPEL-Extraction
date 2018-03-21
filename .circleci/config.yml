@@ -25,7 +25,9 @@ jobs:
       - checkout
 
       # run tests!
-      - run: cat /dev/null | sbt clean coverage test coverageReport
+      - run:
+          command: cat /dev/null | sbt clean coverage test:test coverageReport
+          no_output_timeout: 1800
 
       # Upload coverage
       - run: cat /dev/null | bash <(curl -s https://codecov.io/bash) -t 539de246-c311-47f8-a400-e2204b9d1f5d

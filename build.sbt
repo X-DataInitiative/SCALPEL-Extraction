@@ -2,12 +2,23 @@ name := "SNIIRAM-featuring"
 
 version := "1.0"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.12"
 val sparkVersion = "2.1.0"
 
 logLevel in compile := Level.Warn
 parallelExecution in Test := false
 test in assembly := {}
+
+// Necessary for using pureconfig with Spark 2.1.0. Can be removed after upgrading Spark version.
+// Source: https://pureconfig.github.io/docs/faq.html
+assemblyShadeRules in assembly := Seq(ShadeRule.rename("shapeless.**" -> "new_shapeless.@1").inAll)
+
+assemblyMergeStrategy in assembly := {
+  case PathList("org", "apache", xs @ _*) => MergeStrategy.last
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
 
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 
@@ -22,16 +33,9 @@ val testDependencies = List(
 )
 
 val additionalDependencies = List(
-  "com.typesafe" % "config" % "1.3.1",        // Java library for HOCON configuration files
-  "danielpes" % "spark-datetime-lite" % "0.2.0-s_2.11"
-  //, "com.github.pureconfig" %% "pureconfig" % "0.9.0" // Will be used in a near future
+  "danielpes" % "spark-datetime-lite" % "0.2.0-s_2.11",
+  "com.github.pureconfig" %% "pureconfig" % "0.9.0"
 )
 
 libraryDependencies ++= sparkDependencies ++ testDependencies ++ additionalDependencies
 
-assemblyMergeStrategy in assembly := {
-  case PathList("org", "apache", xs @ _*) => MergeStrategy.last
-  case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
-    oldStrategy(x)
-}
