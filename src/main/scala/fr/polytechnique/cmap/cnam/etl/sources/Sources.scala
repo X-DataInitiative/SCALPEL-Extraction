@@ -29,7 +29,7 @@ object Sources {
     new Sources(
       dcir = dcirPath.map(DcirSource.read(sqlContext, _)),
       mco = mcoPath.map(McoSource.read(sqlContext, _)),
-      mcoCe = mcoCePath.map(McoSource.read(sqlContext, _)),
+      mcoCe = mcoCePath.map(McoCeSource.read(sqlContext, _)),
       irBen = irBenPath.map(IrBenSource.read(sqlContext, _)),
       irImb = irImbPath.map(IrImbSource.read(sqlContext, _)),
       irPha = irPhaPath.map(IrPhaSource.read(sqlContext, _)),

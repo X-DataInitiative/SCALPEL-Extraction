@@ -2,21 +2,21 @@ package fr.polytechnique.cmap.cnam.etl.sources.data
 
 import fr.polytechnique.cmap.cnam.SharedContext
 
-class McoSourceSanitizerSuite extends SharedContext {
+class McoFiltersSuite extends SharedContext {
 
   "filterSpecialHospitals" should "remove lines containing any of the specific hospital codes" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val colName = McoSourceImplicits.ETA_NUM.toString
+    val colName = McoFilters.ETA_NUM.toString
 
     val input = Seq("1", "2", "42", "690784178", "910100023").toDF(colName)
 
     val expected = Seq("1", "2", "42").toDF(colName)
 
     // When
-    val instance = new McoSourceImplicits(input)
+    val instance = new McoFilters(input)
     val result = instance.filterSpecialHospitals
 
     // Then
@@ -28,14 +28,14 @@ class McoSourceSanitizerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val colName = McoSourceImplicits.GHS_NUM.toString
+    val colName = McoSource.GHS_NUM.toString
 
     val input = Seq("1111", "9999", "4222", "4444", "9999").toDF(colName)
 
     val expected = Seq("1111", "4222", "4444").toDF(colName)
 
     // When
-    val instance = new McoSourceImplicits(input)
+    val instance = new McoFilters(input)
     val result = instance.filterNonReimbursedStays
 
     // Then
@@ -48,8 +48,8 @@ class McoSourceSanitizerSuite extends SharedContext {
 
     // Given
     val colNames = List(
-      McoSourceImplicits.SEJ_TYP,
-      McoSourceImplicits.GRG_GHM
+      McoSource.SEJ_TYP,
+      McoSource.GRG_GHM
     ).map(col => col.toString)
 
     val input = Seq(
@@ -72,7 +72,7 @@ class McoSourceSanitizerSuite extends SharedContext {
     ).toDF(colNames: _*)
 
     // When
-    val instance = new McoSourceImplicits(input)
+    val instance = new McoFilters(input)
     val result = instance.filterSharedHospitalStays
 
     // Then
@@ -84,14 +84,14 @@ class McoSourceSanitizerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val colName = McoSourceImplicits.GRG_GHM.toString
+    val colName = McoSource.GRG_GHM.toString
 
     val input = Seq("14Z08Z", "12ZZZZ", "18Z08Z").toDF(colName)
 
     val expected = Seq("12ZZZZ", "18Z08Z").toDF(colName)
 
     // When
-    val instance = new McoSourceImplicits(input)
+    val instance = new McoFilters(input)
     val result = instance.filterIVG
 
     // Then
@@ -104,12 +104,12 @@ class McoSourceSanitizerSuite extends SharedContext {
 
     // Given
     val colNames = List(
-      McoSourceImplicits.GRG_GHM,
-      McoSourceImplicits.NIR_RET,
-      McoSourceImplicits.SEJ_RET,
-      McoSourceImplicits.FHO_RET,
-      McoSourceImplicits.PMS_RET,
-      McoSourceImplicits.DAT_RET
+      McoSource.GRG_GHM,
+      McoFilters.NIR_RET,
+      McoSource.SEJ_RET,
+      McoSource.FHO_RET,
+      McoSource.PMS_RET,
+      McoSource.DAT_RET
     ).map(col => col.toString)
 
     val input = Seq(
@@ -125,7 +125,7 @@ class McoSourceSanitizerSuite extends SharedContext {
     ).toDF(colNames: _*)
 
     // When
-    val instance = new McoSourceImplicits(input)
+    val instance = new McoFilters(input)
     val result = instance.filterMcoCorruptedHospitalStays
 
     // Then
@@ -138,11 +138,11 @@ class McoSourceSanitizerSuite extends SharedContext {
 
     // Given
     val colNames = List(
-      McoSourceImplicits.NIR_RET,
-      McoSourceImplicits.NAI_RET,
-      McoSourceImplicits.SEX_RET,
-      McoSourceImplicits.IAS_RET,
-      McoSourceImplicits.ENT_DAT_RET
+      McoFilters.NIR_RET,
+      McoFilters.NAI_RET,
+      McoFilters.SEX_RET,
+      McoCeSource.IAS_RET,
+      McoCeSource.ENT_DAT_RET
     ).map(col => col.toString)
 
     val input = Seq(
@@ -157,11 +157,10 @@ class McoSourceSanitizerSuite extends SharedContext {
     ).toDF(colNames: _*)
 
     // When
-    val instance = new McoSourceImplicits(input)
+    val instance = new McoFilters(input)
     val result = instance.filterMcoCeCorruptedHospitalStays
 
     // Then
     assertDFs(result, expected)
   }
-
 }

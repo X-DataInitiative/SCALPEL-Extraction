@@ -9,15 +9,15 @@ class McoSourceSuite extends SharedContext {
 
     // Given
     val colNames = List(
-      McoSourceImplicits.GRG_GHM,
-      McoSourceImplicits.NIR_RET,
-      McoSourceImplicits.SEJ_RET,
-      McoSourceImplicits.FHO_RET,
-      McoSourceImplicits.PMS_RET,
-      McoSourceImplicits.DAT_RET,
-      McoSourceImplicits.ETA_NUM,
-      McoSourceImplicits.GHS_NUM,
-      McoSourceImplicits.SEJ_TYP
+      McoSource.GRG_GHM,
+      McoFilters.NIR_RET,
+      McoSource.SEJ_RET,
+      McoSource.FHO_RET,
+      McoSource.PMS_RET,
+      McoSource.DAT_RET,
+      McoFilters.ETA_NUM,
+      McoSource.GHS_NUM,
+      McoSource.SEJ_TYP
     ).map(col => col.toString)
 
     val input = Seq(

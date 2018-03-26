@@ -7,13 +7,12 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row}
 private[acts] object DcirMedicalActs {
 
   final object ColNames {
-    final lazy val PatientID = "NUM_ENQ"
-    final lazy val CamCode = "ER_CAM_F__CAM_PRS_IDE"
-    final lazy val GHSCode = "ER_ETE_F__ETE_GHS_NUM"
-    final lazy val InstitutionCode = "ER_ETE_F__ETE_TYP_COD"
-    final lazy val Date = "EXE_SOI_DTD"
-
-    def allCols = List(PatientID, CamCode, GHSCode, InstitutionCode, Date)
+    lazy val PatientID: String = "NUM_ENQ"
+    lazy val CamCode: String = "ER_CAM_F__CAM_PRS_IDE"
+    lazy val GHSCode: String = "ER_ETE_F__ETE_GHS_NUM"
+    lazy val InstitutionCode: String = "ER_ETE_F__ETE_TYP_COD"
+    lazy val Sector: String = "ER_ETE_F__PRS_PPU_SEC"
+    lazy val Date: String = "EXE_SOI_DTD"
   }
 
   final val PrivateInstitutionCodes = List(4, 5, 6, 7)
@@ -25,12 +24,6 @@ private[acts] object DcirMedicalActs {
 
   def medicalActFromRow(ccamCodes: Seq[String])(r: Row): Option[Event[MedicalAct]] = {
 
-    def noNulls: Boolean = {
-      ColNames.allCols.forall { colName =>
-        !r.isNullAt(r.fieldIndex(colName))
-      }
-    }
-
     val foundCode: Option[String] = ccamCodes.find {
       val idx = r.fieldIndex(ColNames.CamCode)
       !r.isNullAt(r.fieldIndex(ColNames.CamCode)) && r.getString(idx).startsWith(_)
@@ -39,36 +32,37 @@ private[acts] object DcirMedicalActs {
     foundCode match {
       case None => None
       case Some(code) =>
-        lazy val groupID = getGroupId(r)
-        lazy val act = Some(
+        val groupID = getGroupId(r)
+        groupID.map { groupIDValue =>
           DcirAct(
             patientID = r.getAs[String](ColNames.PatientID),
-            groupID = groupID,
+            groupID = groupIDValue,
             code = code,
-            date = r.getAs[java.util.Date](ColNames.Date).toTimestamp)
-        )
-        groupID match {
-          case DcirAct.groupID.Liberal => act
-          case  _ if noNulls  => act
-          case _ => None
+            date = r.getAs[java.util.Date](ColNames.Date).toTimestamp
+          )
         }
     }
   }
 
-  def getGroupId(r: Row): String = {
-    if(r.isNullAt(r.fieldIndex(ColNames.GHSCode)))
-      DcirAct.groupID.Liberal
+  def getGroupId(r: Row): Option[String] = {
+
+    // First delete Public stuff
+    if (!r.isNullAt(r.fieldIndex(ColNames.Sector)) && getSector(r) != 2) {
+      None
+    }
     else {
-      val ghs = getGHS(r)
-      val code = getInstitutionCode(r)
-      if (ghs != 0) {
-        DcirAct.groupID.PrivateHospital
-      }
-      else if (PrivateInstitutionCodes.contains(code)) {
-        DcirAct.groupID.PrivateAmbulatory
-      }
+      // If the value is at null, then it is liberal
+      if(r.isNullAt(r.fieldIndex(ColNames.GHSCode)))
+        Some(DcirAct.groupID.Liberal)
       else {
-        DcirAct.groupID.PublicAmbulatory
+        // Value is not at null, it is not liberal
+        val ghs = getGHS(r)
+        val code = getInstitutionCode(r)
+        // Check if it is a private ambulatory
+        if (ghs == 0 && PrivateInstitutionCodes.contains(code)) {
+          Some(DcirAct.groupID.PrivateAmbulatory)
+        }
+        else None // Non-liberal, non-Private ambulatory and non-public
       }
     }
   }
@@ -79,5 +73,9 @@ private[acts] object DcirMedicalActs {
 
   def getInstitutionCode(r: Row): Double = {
     r.getAs[Double](ColNames.InstitutionCode)
+  }
+
+  def getSector(r: Row): Double = {
+    r.getAs[Double](ColNames.Sector)
   }
 }
