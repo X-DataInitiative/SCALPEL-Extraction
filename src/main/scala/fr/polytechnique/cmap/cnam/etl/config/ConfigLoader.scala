@@ -18,9 +18,12 @@ trait ConfigLoader {
   // For reading snake_case config items
   implicit def hint[T]: ProductHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, SnakeCase))
 
-  /**
-    * Internal method for loading and merging the user config file + the default config
-    */
+  /*
+   * Internal method for loading and merging the user config file + the default config
+   * Explanation for the type parameter: https://github.com/pureconfig/pureconfig/issues/358
+   *   It could be added to the trait itself, but the type is only needed by this method, so for
+   *   now I think we can leave it here.
+   */
   protected def loadConfigWithDefaults[T <: StudyConfig : ClassTag : ConfigReader](
       configPath: String,
       defaultsPath: String,

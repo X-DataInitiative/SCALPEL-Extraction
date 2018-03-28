@@ -9,14 +9,12 @@ import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.{InputPaths, OutputPath
 class PioglitazoneConfigSuite extends FlatSpec {
 
   val inputPaths = InputPaths(
-    dcir = "src/test/resources/test-input/DCIR.parquet",
-    pmsiMco = "src/test/resources/test-input/MCO.parquet",
-    pmsiHad = "src/test/resources/test-input/HAD.parquet",
-    pmsiSsr = "src/test/resources/test-input/SSR.parquet",
-    irBen = "src/test/resources/test-input/IR_BEN_R.parquet",
-    irImb = "src/test/resources/test-input/IR_IMB_R.parquet",
-    irPha = "src/test/resources/test-input/IR_PHA_R.parquet",
-    dosages = "src/test/resources/test-input/DOSE_PER_MOLECULE.CSV"
+    dcir = Some("src/test/resources/test-input/DCIR.parquet"),
+    mco = Some("src/test/resources/test-input/MCO.parquet"),
+    irBen = Some("src/test/resources/test-input/IR_BEN_R.parquet"),
+    irImb = Some("src/test/resources/test-input/IR_IMB_R.parquet"),
+    irPha = Some("src/test/resources/test-input/IR_PHA_R.parquet"),
+    dosages = Some("src/test/resources/test-input/DOSE_PER_MOLECULE.CSV")
   )
 
   val outputPaths = OutputPaths(
@@ -44,13 +42,13 @@ class PioglitazoneConfigSuite extends FlatSpec {
     val default = PioglitazoneConfig(inputPaths, outputPaths)
     val tempPath = "target/test/test.conf"
     val configContent = """
-        | input_paths {
+        | input {
         |   dcir: "new/in/path"
         | }
-        | output_paths {
-        |   root: new/out/path
+        | output {
+        |   root: "new/out/path"
         | }
-        | drugs {
+        | exposures {
         |   min_purchases: 2
         |   purchases_window: 6
         | }
@@ -61,13 +59,13 @@ class PioglitazoneConfigSuite extends FlatSpec {
     pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(configContent), Paths.get(tempPath))
 
     val expected = default.copy(
-      inputPaths = default.inputPaths.copy(
-        dcir = "new/in/path"
+      input = default.input.copy(
+        dcir = Some("new/in/path")
       ),
-      outputPaths = default.outputPaths.copy(
+      output = default.output.copy(
         root = "new/out/path"
       ),
-      drugs = default.drugs.copy(
+      exposures = default.exposures.copy(
         minPurchases = 2,
         purchasesWindow = 6
       ),

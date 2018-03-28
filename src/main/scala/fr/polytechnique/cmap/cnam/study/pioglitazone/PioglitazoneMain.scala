@@ -36,8 +36,8 @@ object PioglitazoneMain extends Main {
     import PatientFilters._
 
     val conf = PioglitazoneConfig.load(argsMap("conf"), argsMap("env"))
-    val inputPaths = conf.inputPaths
-    val outputPaths = conf.outputPaths
+    val inputPaths = conf.input
+    val outputPaths = conf.output
     logger.info("Input Paths: " + inputPaths.toString)
     logger.info("Output Paths: " + outputPaths.toString)
     logger.info("study config....")
@@ -77,7 +77,7 @@ object PioglitazoneMain extends Main {
     )
 
     logger.info("Extracting Tracklosses...")
-    val tracklossConfig = TracklossesConfig(studyEnd = conf.base.lastDate)
+    val tracklossConfig = TracklossesConfig(studyEnd = conf.base.studyEnd)
     val tracklosses = new Tracklosses(tracklossConfig).extract(sources).cache()
 
     logger.info("Writing patients...")
@@ -101,14 +101,14 @@ object PioglitazoneMain extends Main {
     logger.info("Extracting Follow-up...")
     val patiensWithObservations = patients.joinWith(observations, patients.col("patientId") === observations.col("patientId"))
 
-    val followups = new FollowUpTransformer(conf.drugs.startDelay, firstTargetDisease = true, Some("cancer"))
+    val followups = new FollowUpTransformer(conf.exposures.startDelay, firstTargetDisease = true, Some("cancer"))
       .transform(patiensWithObservations, drugEvents, outcomes, tracklosses)
       .cache()
 
     logger.info("Filtering Patients...")
     val filteredPatients = {
       val firstFilterResult = if (conf.filters.filterDelayedEntries)
-        patients.filterDelayedPatients(drugEvents, conf.base.studyStart, conf.base.delayed_entry_threshold)
+        patients.filterDelayedPatients(drugEvents, conf.base.studyStart, conf.filters.delayedEntryThreshold)
       else
         patients
 

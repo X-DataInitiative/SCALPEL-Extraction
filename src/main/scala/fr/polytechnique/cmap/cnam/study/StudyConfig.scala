@@ -22,14 +22,14 @@ object StudyConfig {
   }
 
   lazy val inputPaths = InputPaths(
-    dcir = conf.getString("paths.input.dcir"),
-    pmsiMco = conf.getString("paths.input.pmsi_mco"),
-    pmsiHad = conf.getString("paths.input.pmsi_had"),
-    pmsiSsr = conf.getString("paths.input.pmsi_ssr"),
-    irBen = conf.getString("paths.input.ir_ben"),
-    irImb = conf.getString("paths.input.ir_imb"),
-    irPha = conf.getString("paths.input.ir_pha"),
-    dosages = conf.getString("paths.input.dosages")
+    dcir = Some(conf.getString("paths.input.dcir")),
+    mco = Some(conf.getString("paths.input.pmsi_mco")),
+    had = Some(conf.getString("paths.input.pmsi_had")),
+    ssr = Some(conf.getString("paths.input.pmsi_ssr")),
+    irBen = Some(conf.getString("paths.input.ir_ben")),
+    irImb = Some(conf.getString("paths.input.ir_imb")),
+    irPha = Some(conf.getString("paths.input.ir_pha")),
+    dosages = Some(conf.getString("paths.input.dosages"))
   )
 
   lazy val outputPaths = OutputPaths(
