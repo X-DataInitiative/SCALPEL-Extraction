@@ -3,8 +3,6 @@ import math
 from matplotlib import ticker
 from pyspark.sql import DataFrame, SQLContext, SparkSession
 
-from exploration.patients_stats import millnames
-
 
 def read_data_frame(filepath: str) -> DataFrame:
     return (SQLContext
@@ -25,3 +23,9 @@ def millify(x, pos):
         return '{:.1f}{}'.format(x / 10 ** (3 * millidx), millnames[millidx])
     else:
         return '{:.0f}{}'.format(x / 10 ** (3 * millidx), millnames[millidx])
+
+
+def add_information_to_axe(ax, title, xlabel, ylabel):
+    ax.set_ylabel(title)
+    ax.set_xlabel(xlabel)
+    ax.set_title(ylabel)

@@ -7,7 +7,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import seaborn as sns
 from IPython.display import display
-import pyspark.functions as fn
+from pyspark.sql import functions as fn
 
 from exploration.utils import millify
 
