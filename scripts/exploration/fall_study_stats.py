@@ -147,11 +147,10 @@ class FracturesStats(OutcomeStats):
         return ax
 
 
-def save_fractures_stats(root_path: str, fractures) -> None:
+def save_fractures_stats(path: str, fractures) -> None:
     fractures_stats = FracturesStats(fractures)
 
-    file_path = path.join(root_path, 'stats_de_fractures.pdf')
-    with PdfPages(file_path) as pdf:
+    with PdfPages(path) as pdf:
         fig = plt.figure()
         ax = plt.gca()
         fractures_stats.plot_outcomes_per_day_as_bars(ax)
