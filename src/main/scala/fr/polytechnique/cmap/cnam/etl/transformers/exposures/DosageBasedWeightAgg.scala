@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
-import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
@@ -25,7 +24,6 @@ class DosageBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
   }
 
   def aggregateWeight(
-      studyStart: Option[Timestamp] = None,
       cumWindow: Option[Int] = None,
       cumStartThreshold: Option[Int] = None,
       cumEndThreshold: Option[Int] = None,

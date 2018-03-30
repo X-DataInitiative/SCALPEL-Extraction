@@ -4,6 +4,8 @@ import java.nio.file.{Files, Paths}
 import com.typesafe.config.ConfigFactory
 import org.scalatest.FlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes.CancerDefinition
+import me.danielpes.spark.datetime.implicits._
 
 class PioglitazoneConfigSuite extends FlatSpec {
 
@@ -55,7 +57,7 @@ class PioglitazoneConfigSuite extends FlatSpec {
         |   cancer_definition: "narrow"
         | }
       """.trim.stripMargin
-    pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(configContent), Paths.get(tempPath))
+    pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(configContent), Paths.get(tempPath), true)
 
     val expected = default.copy(
       input = default.input.copy(
@@ -66,10 +68,10 @@ class PioglitazoneConfigSuite extends FlatSpec {
       ),
       exposures = default.exposures.copy(
         minPurchases = 2,
-        purchasesWindow = 6
+        purchasesWindow = 6.months
       ),
       outcomes = default.outcomes.copy(
-        cancerDefinition = "narrow"
+        cancerDefinition = CancerDefinition.Narrow
       )
     )
 

@@ -21,8 +21,8 @@ abstract class ExposurePeriodAdderImpl(data: DataFrame) {
   def withStartEnd(
       minPurchases: Int,
       startDelay: Period,
-      endDelay: Period,
       purchasesWindow: Period,
-      endThreshold: Period = 4.months)
+      endThreshold: Option[Period],
+      endDelay: Option[Period])
     : DataFrame
 }

@@ -1,10 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
-import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
-
 
 class PurchaseBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
 
@@ -27,7 +25,6 @@ class PurchaseBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data)
   }
 
   def aggregateWeight(
-    studyStart: Option[Timestamp],
     cumWindow: Option[Int],
     cumStartThreshold: Option[Int] = None,
     cumEndThreshold: Option[Int] = None,

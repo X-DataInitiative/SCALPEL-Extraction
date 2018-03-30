@@ -480,6 +480,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1))
     ).toDF(PatientID, Value, Start)
 
+    
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(makeTS(2008,  5, 1))),
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  2, 1)), Some(makeTS(2008,  5, 1))),
@@ -543,7 +544,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // When
     val instance = new LimitedExposurePeriodAdder(input)
-    val result = instance.withStartEnd(startDelay = 90.days, purchasesWindow = 120.days, endThreshold = 120.days)
+    val result = instance.withStartEnd(startDelay = 90.days, purchasesWindow = 120.days, endThreshold = Some(120.days))
 
     // Then
     assertDFs(result, expected)
@@ -576,7 +577,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // When
     val instance = new LimitedExposurePeriodAdder(input)
-    val result = instance.withStartEnd(purchasesWindow = 50.days, endThreshold = 50.days)
+    val result = instance.withStartEnd(purchasesWindow = 50.days, endThreshold = Some(50.days))
 
     // Then
     assertDFs(result, expected)
@@ -602,7 +603,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // When
     val instance = new LimitedExposurePeriodAdder(input)
-    val result = instance.withStartEnd(purchasesWindow = 100.days, endThreshold = 100.days, minPurchases = 1)
+    val result = instance.withStartEnd(purchasesWindow = 100.days, minPurchases = 1, endThreshold = Some(100.days))
 
     // Then
     assertDFs(result, expected)

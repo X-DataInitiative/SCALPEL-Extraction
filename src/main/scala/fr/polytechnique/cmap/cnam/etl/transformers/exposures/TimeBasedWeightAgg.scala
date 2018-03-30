@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
-import java.sql.Timestamp
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
@@ -11,7 +10,6 @@ class TimeBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
   import Columns._
 
   def aggregateWeight(
-      studyStart: Option[Timestamp],
       cumWindow: Option[Int],
       cumStartThreshold: Option[Int],
       cumEndThreshold: Option[Int],
@@ -26,5 +24,5 @@ class TimeBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
       .withColumn(ExposureEnd, col(FollowUpEnd))
   }
 
-  def aggregateWeight: DataFrame = aggregateWeight(None, None, None, None, None, None)
+  def aggregateWeight: DataFrame = aggregateWeight(None, None, None, None, None)
 }

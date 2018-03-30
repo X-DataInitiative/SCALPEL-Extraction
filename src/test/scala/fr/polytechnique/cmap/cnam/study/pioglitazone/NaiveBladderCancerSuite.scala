@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes.NaiveBladderCancer
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class NaiveBladderCancerSuite extends SharedContext {

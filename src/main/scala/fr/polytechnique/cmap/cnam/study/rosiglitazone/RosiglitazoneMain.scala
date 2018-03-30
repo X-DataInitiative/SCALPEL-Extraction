@@ -11,7 +11,7 @@ import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.MLPPLoader
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposureDefinition, ExposuresTransformer}
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposuresTransformerConfig, ExposuresTransformer}
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
@@ -44,13 +44,7 @@ object RosiglitazoneMain extends Main{
     val drugEvents: Dataset[Event[Molecule]] = new MoleculePurchases(moleculesConfig).extract(sources).cache()
 
     logger.info("Extracting diagnosis events...")
-    val diagnosesConfig = DiagnosesConfig(
-      conf.diagnoses.imbDiagnosisCodes,
-      conf.diagnoses.codesMapDP,
-      conf.diagnoses.codesMapDR,
-      conf.diagnoses.codesMapDA
-    )
-
+    val diagnosesConfig = DiagnosesConfig(conf.diagnoses.codesMapDP, conf.diagnoses.codesMapDR, conf.diagnoses.codesMapDA, conf.diagnoses.imbDiagnosisCodes)
     val diseaseEvents: Dataset[Event[Diagnosis]] = new Diagnoses(diagnosesConfig).extract(sources).cache()
 
     logger.info("Merging all events...")
@@ -92,10 +86,7 @@ object RosiglitazoneMain extends Main{
     logger.info("Extracting Exposures...")
     val patientsWithFollowups = patients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
 
-    val exposureDef = ExposureDefinition(
-      studyStart = conf.base.studyStart,
-      filterDelayedPatients = false
-    )
+    val exposureDef = ExposuresTransformerConfig()
 
     val exposures = new ExposuresTransformer(exposureDef)
       .transform(patientsWithFollowups, drugEvents)

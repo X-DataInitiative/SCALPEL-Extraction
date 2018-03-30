@@ -17,7 +17,11 @@ trait ConfigLoader {
     localDateTimeConfigConvert(DateTimeFormatter.ISO_DATE_TIME)
   }
   // For reading snake_case config items
-  implicit def hint[T]: ProductHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, SnakeCase))
+  implicit def productHint[T]: ProductHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, SnakeCase))
+
+  // For reading enums
+  implicit def coproductHint[T]: CoproductHint[T] = new EnumCoproductHint[T]
+
 
   /*
    * Internal method for loading and merging the user config file + the default config
