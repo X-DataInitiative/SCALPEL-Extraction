@@ -1,12 +1,11 @@
 package fr.polytechnique.cmap.cnam.etl.sources.data
 
 import org.apache.spark.sql.{Column, DataFrame}
-import org.apache.spark.sql.functions.col
 
 private[data] class McoFilters(rawMco: DataFrame) {
 
   def filterSpecialHospitals: DataFrame = {
-    rawMco.where(!McoFilters.ETA_NUM.isin(McoFilters.specialHospitalCodes: _*))
+    rawMco.where(!McoSource.ETA_NUM.isin(McoFilters.specialHospitalCodes: _*))
   }
 
   def filterSharedHospitalStays: DataFrame = {
@@ -25,7 +24,7 @@ private[data] class McoFilters(rawMco: DataFrame) {
   }
 
   def filterMcoCorruptedHospitalStays: DataFrame = {
-    val fictionalAndFalseHospitalStaysFilter: Column = !McoSource.GRG_GHM.like("90%") and McoFilters
+    val fictionalAndFalseHospitalStaysFilter: Column = !McoSource.GRG_GHM.like("90%") and McoSource
       .NIR_RET === "0" and McoSource.SEJ_RET === "0" and McoSource
       .FHO_RET === "0" and McoSource.PMS_RET === "0" and McoSource.DAT_RET === "0"
 
@@ -33,8 +32,8 @@ private[data] class McoFilters(rawMco: DataFrame) {
   }
 
   def filterMcoCeCorruptedHospitalStays: DataFrame = {
-    val fictionalAndFalseHospitalStaysFilter: Column = McoFilters.NIR_RET === "0" and McoFilters
-      .NAI_RET === "0" and McoFilters.SEX_RET === "0" and McoCeSource
+    val fictionalAndFalseHospitalStaysFilter: Column = McoCeSource.NIR_RET === "0" and McoCeSource
+      .NAI_RET === "0" and McoCeSource.SEX_RET === "0" and McoCeSource
       .IAS_RET === "0" and McoCeSource.ENT_DAT_RET === "0"
 
     rawMco.filter(fictionalAndFalseHospitalStaysFilter)
@@ -55,9 +54,4 @@ private[data] object McoFilters {
   // radiotherapie & dialyse exceptions
   val GRG_GHMExceptions = List("28Z14Z","28Z15Z","28Z16Z")
 
-  // MCO & MCO_CE shared columns
-  val ETA_NUM: Column = col("ETA_NUM")
-  val NIR_RET: Column = col("NIR_RET")
-  val NAI_RET: Column = col("NAI_RET")
-  val SEX_RET: Column = col("SEX_RET")
 }

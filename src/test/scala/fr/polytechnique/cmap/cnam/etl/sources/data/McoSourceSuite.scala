@@ -10,12 +10,12 @@ class McoSourceSuite extends SharedContext {
     // Given
     val colNames = List(
       McoSource.GRG_GHM,
-      McoFilters.NIR_RET,
+      McoSource.NIR_RET,
       McoSource.SEJ_RET,
       McoSource.FHO_RET,
       McoSource.PMS_RET,
       McoSource.DAT_RET,
-      McoFilters.ETA_NUM,
+      McoSource.ETA_NUM,
       McoSource.GHS_NUM,
       McoSource.SEJ_TYP
     ).map(col => col.toString)

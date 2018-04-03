@@ -10,7 +10,13 @@ import org.apache.spark.sql.functions.col
   * https://datainitiative.atlassian.net/wiki/pages/viewpage.action?pageId=40304642
   */
 object McoSource extends SourceManager with McoSourceSanitizer{
+  // MCO & MCO_CE shared columns
+  val ETA_NUM: Column = col("ETA_NUM")
+  val NIR_RET: Column = col("NIR_RET")
+  val NAI_RET: Column = col("NAI_RET")
+  val SEX_RET: Column = col("SEX_RET")
 
+  // Exclusive columns
   val SEJ_TYP: Column = col("MCO_B__SEJ_TYP")
   val GRG_GHM: Column = col("MCO_B__GRG_GHM")
   val GHS_NUM: Column = col("MCO_B__GHS_NUM")

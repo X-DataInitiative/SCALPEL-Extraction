@@ -9,7 +9,7 @@ class McoFiltersSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val colName = McoFilters.ETA_NUM.toString
+    val colName = McoSource.ETA_NUM.toString
 
     val input = Seq("1", "2", "42", "690784178", "910100023").toDF(colName)
 
@@ -105,7 +105,7 @@ class McoFiltersSuite extends SharedContext {
     // Given
     val colNames = List(
       McoSource.GRG_GHM,
-      McoFilters.NIR_RET,
+      McoSource.NIR_RET,
       McoSource.SEJ_RET,
       McoSource.FHO_RET,
       McoSource.PMS_RET,
@@ -138,9 +138,9 @@ class McoFiltersSuite extends SharedContext {
 
     // Given
     val colNames = List(
-      McoFilters.NIR_RET,
-      McoFilters.NAI_RET,
-      McoFilters.SEX_RET,
+      McoCeSource.NIR_RET,
+      McoCeSource.NAI_RET,
+      McoCeSource.SEX_RET,
       McoCeSource.IAS_RET,
       McoCeSource.ENT_DAT_RET
     ).map(col => col.toString)
