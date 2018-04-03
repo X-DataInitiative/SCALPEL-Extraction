@@ -95,10 +95,10 @@ class MoleculeStats(object):
                    for therapeutic_class, pharma_class in
                    t[["therapeutic", "pharmaceutic_family"]].drop_duplicates().values]
 
-        ax = sns.barplot(data=t, y="PHA_ATC_C07", x="count", orient="h", palette=palette,
+        ax = sns.barplot(data=t, y="molecule", x="count", orient="h", palette=palette,
                          saturation=1.0)
 
-        ax.set_yticklabels(t.value.values)
+        #ax.set_yticklabels(t.value.values)
         # Loop over the bars
         for text, thisbar in zip(ax.get_yticklabels(), ax.patches):
             # Set a different hatch for each bar
@@ -108,13 +108,12 @@ class MoleculeStats(object):
         ax.set_ylabel("Molecules")
         ax.set_xlabel("Nombre de {}".format(self.event_type))
         ax.xaxis.set_major_formatter(millify)
-        plt.legend(handles=patches)
-
+        plt.legend(handles=patches, loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.tight_layout()
         return ax
 
     def plot_overall_top_molecules(self, top=20):
-        t = self.stats.sort_values("count")[-top:].sort_values(
-            ["pharmaceutic_family", "value"])
+        t = self.stats.sort_values("count")[-top:]
         ax = self._plot(t)
         ax.set_title("Top molecules selon {}".format(self.event_type))
         return ax
@@ -122,6 +121,7 @@ class MoleculeStats(object):
     def plot_top_of_therapeutic_classes(self, top=5):
         t = self.stats.groupby("therapeutic", as_index=False).apply(
             lambda x: x.sort_values("count", ascending=False)[:top])
+        
         ax = self._plot(t)
         ax.set_title(
             "Top molécules chaque classe Thérapeutique selon {}".format(self.event_type))
