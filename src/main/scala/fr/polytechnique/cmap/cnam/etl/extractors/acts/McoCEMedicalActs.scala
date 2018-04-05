@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
-import fr.polytechnique.cmap.cnam.etl.events._
-import org.apache.spark.sql.{DataFrame, Dataset, Row}
-import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.TimestampType
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
+import fr.polytechnique.cmap.cnam.etl.events._
 
 private[acts] object McoCEMedicalActs {
 

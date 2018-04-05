@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, MedicalAct}
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
-import org.apache.spark.sql.{DataFrame, Dataset, Row}
 
 private[acts] object DcirMedicalActs {
 
