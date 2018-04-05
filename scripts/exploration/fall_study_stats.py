@@ -18,8 +18,9 @@ class TherapeuticStats(object):
 
     def plot(self):
         palette = self.stats.sort_values("value").value.map(lambda x: self.colors_dict[x])
-        ax = sns.barplot(data=self.stats.sort_values("value"), x="value", y="count",
-                         palette=palette)
+        ax = plt.gca()
+        sns.barplot(data=self.stats.sort_values("value"), x="value", y="count",
+                         palette=palette, ax=ax)
         ax.set_title("Distribution de {} au niveau thérapeutique".format(self.event_type))
         ax.set_xlabel("Classes thérapeutiques")
         ax.set_ylabel("Nombre de {}".format(self.event_type))
@@ -48,9 +49,9 @@ class PharmaStats(object):
         patches = [mpatches.Patch(color=self.colors_dict[therapeutic_class],
                                   label=therapeutic_class)
                    for therapeutic_class in t["therapeutic"].drop_duplicates().values]
-
-        ax = sns.barplot(data=t, y="value", x="count",
-                         orient="h", palette=palette, saturation=1.0)
+        ax = plt.gca()
+        sns.barplot(data=t, y="value", x="count",
+                         orient="h", palette=palette, saturation=1.0, ax=ax)
 
         ax.set_xticklabels(t.value.values)
 
@@ -94,9 +95,9 @@ class MoleculeStats(object):
                                   hatch=self.pharma_dict[pharma_class])
                    for therapeutic_class, pharma_class in
                    t[["therapeutic", "pharmaceutic_family"]].drop_duplicates().values]
-
-        ax = sns.barplot(data=t, y="molecule", x="count", orient="h", palette=palette,
-                         saturation=1.0)
+        ax = plt.gca()
+        sns.barplot(data=t, y="molecule", x="count", orient="h", palette=palette,
+                         saturation=1.0, ax=ax)
 
         #ax.set_yticklabels(t.value.values)
         # Loop over the bars
@@ -108,8 +109,8 @@ class MoleculeStats(object):
         ax.set_ylabel("Molecules")
         ax.set_xlabel("Nombre de {}".format(self.event_type))
         ax.xaxis.set_major_formatter(millify)
-        plt.legend(handles=patches, loc='center left', bbox_to_anchor=(1, 0.5))
-        plt.tight_layout()
+        plt.legend(handles=patches)
+        
         return ax
 
     def plot_overall_top_molecules(self, top=20):
