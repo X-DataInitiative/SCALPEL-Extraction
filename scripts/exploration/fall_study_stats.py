@@ -1,5 +1,3 @@
-from os import path
-
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -8,7 +6,7 @@ from matplotlib.axes import Axes
 from matplotlib.backends.backend_pdf import PdfPages
 
 from exploration.outcomes_stats import OutcomeStats
-from exploration.utils import millify
+from exploration.utils import add_information_to_axe, millify, patch_dates_axes
 
 
 class TherapeuticStats(object):
@@ -146,6 +144,37 @@ class FracturesStats(OutcomeStats):
 
         return ax
 
+    def plot_fractures_per_admission(self, ax: Axes) -> Axes:
+        data = self.outcomes.groupBy(["patientID", "start"]).count().toPandas().sort_values(
+            "start")
+        sns.countplot(x="count", data=data, ax=ax)
+        ax.grid(True, which="major", axis="y")
+        add_information_to_axe(ax, "Distribution de nombre de fractures par admission",
+                               "Nombre de fractures", "Nombre d'admission")
+        return ax
+
+    def plot_fracture_admission_number_per_patient(self, ax: Axes) -> Axes:
+        data = self.outcomes.groupBy(["patientID", "start"]).count().toPandas().sort_values(
+            "start").groupby("patientID").count()
+        sns.countplot(data=data, x="start", ax=ax)
+        ax.grid(True, which="major", axis="y")
+        add_information_to_axe(ax, "Distribution de nombre d'admission pour fracture",
+                               "Nombre d'admission pour fracture", "Nombre de patients")
+        return ax
+
+    def plot_admission_per_day(self, ax: Axes) -> Axes:
+        data = self.outcomes.groupBy(["patientID", "start"]).count().toPandas().sort_values(
+            "start").groupby("start")["patientID"].count().reset_index().set_index("start")
+
+        idx = pd.date_range(data.index.min(), data.index.max())
+        data.index = pd.DatetimeIndex(data.index)
+        data = data.reindex(idx, fill_value=0)
+        ax.bar(data.index, data["patientID"], color=sns.xkcd_rgb["pumpkin orange"])
+        patch_dates_axes(ax)
+        add_information_to_axe(ax, "Distribution de nombre d'admission pour fracture par jour",
+                               "Date", "Nombre d'admission pour fracture")
+        return ax
+
 
 def save_fractures_stats(path: str, fractures) -> None:
     fractures_stats = FracturesStats(fractures)
@@ -166,5 +195,23 @@ def save_fractures_stats(path: str, fractures) -> None:
         fig = plt.figure()
         ax = plt.gca()
         fractures_stats.plot_fractures_by_site_distribution(ax)
+        plt.tight_layout()
+        pdf.savefig(fig)
+
+        fig = plt.figure()
+        ax = plt.gca()
+        fractures_stats.plot_fractures_per_admission(ax)
+        plt.tight_layout()
+        pdf.savefig(fig)
+
+        fig = plt.figure()
+        ax = plt.gca()
+        fractures_stats.plot_fracture_admission_number_per_patient(ax)
+        plt.tight_layout()
+        pdf.savefig(fig)
+
+        fig = plt.figure()
+        ax = plt.gca()
+        fractures_stats.plot_admission_per_day(ax)
         plt.tight_layout()
         pdf.savefig(fig)

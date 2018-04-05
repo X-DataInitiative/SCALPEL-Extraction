@@ -2,11 +2,11 @@ from datetime import datetime
 from os import path
 
 import matplotlib.pyplot as plt
-from matplotlib import ticker
-from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import seaborn as sns
 from IPython.display import display
+from matplotlib import ticker
+from matplotlib.backends.backend_pdf import PdfPages
 from pyspark.sql import functions as fn
 
 from exploration.utils import millify

@@ -1,6 +1,9 @@
 import math
 
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 from matplotlib import ticker
+from matplotlib.axes import Axes
 from pyspark.sql import DataFrame, SQLContext, SparkSession
 
 
@@ -26,6 +29,25 @@ def millify(x, pos):
 
 
 def add_information_to_axe(ax, title, xlabel, ylabel):
-    ax.set_ylabel(title)
+    ax.set_title(title)
     ax.set_xlabel(xlabel)
-    ax.set_title(ylabel)
+    ax.set_ylabel(ylabel)
+
+
+def patch_dates_axes(ax: Axes) -> Axes:
+    major = mdates.MonthLocator()  # every year
+    minor = mdates.MonthLocator()  # every week-debut
+    date_format = mdates.DateFormatter('%b')
+
+    # format the ticks
+    ax.xaxis.set_major_locator(major)
+    ax.xaxis.set_major_formatter(date_format)
+    ax.xaxis.set_minor_locator(minor)
+
+    ax.grid(True, which="major", axis="y")
+    ax.grid(True, which="minor", axis="x", linestyle='--')
+    # rotates and right aligns the x labels, and moves the bottom of the
+    # axes up to make room for them
+    plt.gcf().autofmt_xdate()
+
+    return ax
