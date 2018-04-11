@@ -13,8 +13,9 @@ class DcirMedicalActsSuite extends SharedContext {
   val schema = StructType(
     StructField(ColNames.PatientID, StringType) ::
     StructField(ColNames.CamCode, StringType) ::
-    StructField(ColNames.InstitutionCode, StringType) ::
-    StructField(ColNames.GHSCode, StringType) ::
+    StructField(ColNames.InstitutionCode, DoubleType) ::
+    StructField(ColNames.GHSCode, DoubleType) ::
+    StructField(ColNames.Sector, DoubleType) ::
     StructField(ColNames.Date, DateType) :: Nil
   )
 
@@ -22,9 +23,9 @@ class DcirMedicalActsSuite extends SharedContext {
 
     // Given
     val codes = List("AAAA", "BBBB")
-    val inputArray = Array[Any]("Patient_A", "AAAA", 1D, 0D, makeTS(2010, 1, 1))
+    val inputArray = Array[Any]("Patient_A", "AAAA", null, null, null, makeTS(2010, 1, 1))
     val inputRow = new GenericRowWithSchema(inputArray, schema)
-    val expected = Some(DcirAct("Patient_A", DcirAct.groupID.PublicAmbulatory, "AAAA", makeTS(2010, 1, 1)))
+    val expected = Some(DcirAct("Patient_A", DcirAct.groupID.Liberal, "AAAA", makeTS(2010, 1, 1)))
 
     // When
     val result = DcirMedicalActs.medicalActFromRow(codes)(inputRow)
@@ -37,7 +38,7 @@ class DcirMedicalActsSuite extends SharedContext {
 
     // Given
     val codes = List("AAAA", "BBBB")
-    val inputArray = Array[Any]("Patient_A", "CCCC", 1D, 0D, makeTS(2010, 1, 1))
+    val inputArray = Array[Any]("Patient_A", "CCCC", 1D, 0D, 1D, makeTS(2010, 1, 1))
     val inputRow = new GenericRowWithSchema(inputArray, schema)
 
     // When
@@ -59,7 +60,20 @@ class DcirMedicalActsSuite extends SharedContext {
 
     // Then
     assert(result == expected)
+  }
 
+  "getSector" should "return the expected value" in {
+    // Given
+    val schema = StructType(StructField(ColNames.Sector, DoubleType)::Nil)
+    val inputArray = Array[Any](3D)
+    val input = new GenericRowWithSchema(inputArray, schema)
+    val expected = 3D
+
+    // When
+    val result = DcirMedicalActs.getSector(input)
+
+    // Then
+    assert(result == expected)
   }
 
   "getInstitutionCode" should "return the value in the correct column" in {
@@ -77,15 +91,16 @@ class DcirMedicalActsSuite extends SharedContext {
 
   }
 
-  "getStatus" should "return correct status of private ambulatory" in {
+  "getGroupID" should "return correct status of private ambulatory" in {
     // Given
     val schema = StructType(
-      StructField(ColNames.GHSCode, DoubleType)::
-        StructField(ColNames.InstitutionCode, DoubleType)::Nil
+      StructField(ColNames.GHSCode, DoubleType) ::
+      StructField(ColNames.Sector, StringType) ::
+      StructField(ColNames.InstitutionCode, DoubleType) :: Nil
     )
-    val array = Array[Any](0D, 6D)
+    val array = Array[Any](0D, 2D, 6D)
     val input = new GenericRowWithSchema(array, schema)
-    val expected = DcirAct.groupID.PrivateAmbulatory
+    val expected = Some(DcirAct.groupID.PrivateAmbulatory)
 
     // When
     val result = DcirMedicalActs.getGroupId(input)
@@ -95,40 +110,18 @@ class DcirMedicalActsSuite extends SharedContext {
 
   }
 
-  it should "return correct status of public ambulatory" in {
+  it should "return None if it is public related" in {
     // Given
-    val schema = StructType(
-      StructField(ColNames.GHSCode, DoubleType)::
-        StructField(ColNames.InstitutionCode, DoubleType)::Nil
-    )
-    val array = Array[Any](0D, 0D)
+    val schema = StructType(StructField(ColNames.Sector, StringType) :: Nil)
+    val array = Array[Any](1D)
     val input = new GenericRowWithSchema(array, schema)
-    val expected = DcirAct.groupID.PublicAmbulatory
+    val expected = None
 
     // When
     val result = DcirMedicalActs.getGroupId(input)
 
     // Then
     assert(result == expected)
-
-  }
-
-  it should "return correct status of private hospitalization" in {
-    // Given
-    val schema = StructType(
-      StructField(ColNames.GHSCode, DoubleType)::
-        StructField(ColNames.InstitutionCode, DoubleType)::Nil
-    )
-    val array = Array[Any](12D, 6D)
-    val input = new GenericRowWithSchema(array, schema)
-    val expected = DcirAct.groupID.PrivateHospital
-
-    // When
-    val result = DcirMedicalActs.getGroupId(input)
-
-    // Then
-    assert(result == expected)
-
   }
 
   "extract" should "return a Dataset of Medical Acts" in {
@@ -140,18 +133,18 @@ class DcirMedicalActsSuite extends SharedContext {
     val codes = List("AAAA", "CCCC")
 
     val input = Seq(
-      ("Patient_A", "AAAA", makeTS(2010, 1, 1), 1D, 0D),
-      ("Patient_A", "BBBB", makeTS(2010, 2, 1), 1D, 0D),
-      ("Patient_B", "CCCC", makeTS(2010, 3, 1), 1D, 0D),
-      ("Patient_B", "CCCC", makeTS(2010, 4, 1), 1D, 0D),
-      ("Patient_C", "BBBB", makeTS(2010, 5, 1), 1D, 0D)
+      ("Patient_A", "AAAA", makeTS(2010, 1, 1), None, None, None),
+      ("Patient_A", "BBBB", makeTS(2010, 2, 1), Some(1D), Some(0D), Some(1D)),
+      ("Patient_B", "CCCC", makeTS(2010, 3, 1), None, None, None),
+      ("Patient_B", "CCCC", makeTS(2010, 4, 1), Some(7D), Some(0D), Some(2D)),
+      ("Patient_C", "BBBB", makeTS(2010, 5, 1), Some(1D), Some(0D), Some(2D))
     ).toDF(ColNames.PatientID, ColNames.CamCode, ColNames.Date,
-      ColNames.InstitutionCode, ColNames.GHSCode)
+      ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector)
 
     val expected = Seq[Event[MedicalAct]](
-      DcirAct("Patient_A", DcirAct.groupID.PublicAmbulatory, "AAAA", makeTS(2010, 1, 1)),
-      DcirAct("Patient_B", DcirAct.groupID.PublicAmbulatory, "CCCC", makeTS(2010, 3, 1)),
-      DcirAct("Patient_B", DcirAct.groupID.PublicAmbulatory, "CCCC", makeTS(2010, 4, 1))
+      DcirAct("Patient_A", DcirAct.groupID.Liberal, "AAAA", makeTS(2010, 1, 1)),
+      DcirAct("Patient_B", DcirAct.groupID.Liberal, "CCCC", makeTS(2010, 3, 1)),
+      DcirAct("Patient_B", DcirAct.groupID.PrivateAmbulatory, "CCCC", makeTS(2010, 4, 1))
     ).toDS
 
     // When

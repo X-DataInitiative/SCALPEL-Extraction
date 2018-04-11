@@ -113,13 +113,12 @@ class MedicalActsSuite extends SharedContext {
       ).toDF("NUM_ENQ", "MCO_FMSTC__CCAM_COD", "EXE_SOI_DTD")
     }
 
-    val dcir = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
-    val df = dcir.select("NUM_ENQ", "ER_CAM_F__CAM_PRS_IDE", "ER_ETE_F__ETE_GHS_NUM", "ER_ETE_F__ETE_TYP_COD", "EXE_SOI_DTD", "ER_ETE_F__ETE_NAT_FSJ")
-      .withColumn("ER_CAM_F__CAM_PRS_IDE", when($"ER_CAM_F__CAM_PRS_IDE".isNull, "ABCD123").otherwise($"ER_CAM_F__CAM_PRS_IDE"))
-
     val sources = {
       val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
-      val dcir = df
+      val dcir = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
+        .withColumn(
+          "ER_CAM_F__CAM_PRS_IDE", when($"ER_CAM_F__CAM_PRS_IDE".isNull, "ABCD123").otherwise($"ER_CAM_F__CAM_PRS_IDE")
+        )
       new Sources(mco = Some(mco), mcoCe = Some(mcoCE), dcir = Some(dcir))
     }
     val expected = List(
@@ -129,12 +128,10 @@ class MedicalActsSuite extends SharedContext {
       DcirAct("Patient_02", "liberal", "ABCD123", makeTS(2006, 1, 15)),
       DcirAct("Patient_02", "liberal", "ABCD123", makeTS(2006, 1, 30)),
       DcirAct("Patient_02", "liberal", "ABCD123", makeTS(2006, 1, 30))
-
     ).toDS
 
     // When
     val result = new MedicalActs(config).extract(sources)
-    result.show()
     // Then
     assertDSs(result, expected)
   }

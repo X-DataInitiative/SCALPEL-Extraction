@@ -1,7 +1,8 @@
-package fr.polytechnique.cmap.cnam.etl.sources
+package fr.polytechnique.cmap.cnam.etl.sources.data
 
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{Column, DataFrame}
+import fr.polytechnique.cmap.cnam.etl.sources.SourceManager
 
 object DcirSource extends SourceManager {
 

@@ -1,5 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
+import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource}
+import fr.polytechnique.cmap.cnam.etl.sources.value.{DosagesSource, IrBenSource, IrImbSource, IrPhaSource}
 import fr.polytechnique.cmap.cnam.study.StudyConfig.InputPaths
 import org.apache.spark.sql.{DataFrame, SQLContext}
 
@@ -27,7 +29,7 @@ object Sources {
     new Sources(
       dcir = dcirPath.map(DcirSource.read(sqlContext, _)),
       mco = mcoPath.map(McoSource.read(sqlContext, _)),
-      mcoCe = mcoCePath.map(McoSource.read(sqlContext, _)),
+      mcoCe = mcoCePath.map(McoCeSource.read(sqlContext, _)),
       irBen = irBenPath.map(IrBenSource.read(sqlContext, _)),
       irImb = irImbPath.map(IrImbSource.read(sqlContext, _)),
       irPha = irPhaPath.map(IrPhaSource.read(sqlContext, _)),
@@ -39,7 +41,7 @@ object Sources {
     new Sources(
       dcir = sources.dcir.map(DcirSource.sanitize),
       mco = sources.mco.map(McoSource.sanitize),
-      mcoCe = sources.mcoCe.map(McoSource.sanitize),
+      mcoCe = sources.mcoCe.map(McoCeSource.sanitize),
       irBen = sources.irBen.map(IrBenSource.sanitize),
       irImb = sources.irImb.map(IrImbSource.sanitize),
       irPha = sources.irPha.map(IrPhaSource.sanitize),
