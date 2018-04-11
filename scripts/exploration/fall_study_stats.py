@@ -1,9 +1,12 @@
+import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+from matplotlib.axes import Axes
+from matplotlib.backends.backend_pdf import PdfPages
 
-from exploration.utils import millify
+from exploration.outcomes_stats import OutcomeStats
+from exploration.utils import add_information_to_axe, millify, patch_dates_axes
 
 
 class TherapeuticStats(object):
@@ -76,7 +79,8 @@ class MoleculeStats(object):
         hatches = ['*', '|||', '+', 'x', "\\", '$']
         for (key, value) in self.colors_dict.items():
             s = (molecule_mapping[molecule_mapping.therapeutic == key]
-                 .sort_values("pharmaceutic_family")[["therapeutic", "pharmaceutic_family"]]
+                 .sort_values("pharmaceutic_family")[
+                     ["therapeutic", "pharmaceutic_family"]]
                  .drop_duplicates()
                  )
             self.pharma_dict.update({pharma_class: hatches[i] for i, pharma_class in
@@ -109,7 +113,8 @@ class MoleculeStats(object):
         return ax
 
     def plot_overall_top_molecules(self, top=20):
-        t = self.stats.sort_values("count")[-top:].sort_values(["pharmaceutic_family", "value"])
+        t = self.stats.sort_values("count")[-top:].sort_values(
+            ["pharmaceutic_family", "value"])
         ax = self._plot(t)
         ax.set_title("Top molecules selon {}".format(self.event_type))
         return ax
@@ -118,7 +123,95 @@ class MoleculeStats(object):
         t = self.stats.groupby("therapeutic", as_index=False).apply(
             lambda x: x.sort_values("count", ascending=False)[:top])
         ax = self._plot(t)
-        ax.set_title("Top molécules chaque classe Thérapeutique selon {}".format(self.event_type))
+        ax.set_title(
+            "Top molécules chaque classe Thérapeutique selon {}".format(self.event_type))
         return ax
 
 
+class FracturesStats(OutcomeStats):
+
+    def __init__(self, fractures):
+        OutcomeStats.__init__(self, fractures, "fractures")
+
+    def plot_fractures_by_site_distribution(self, ax: Axes) -> Axes:
+        fractures_site = self.outcomes.groupBy("groupID").count().toPandas()
+        sns.barplot(data=fractures_site.sort_values("count", ascending=False),
+                    y="groupID", x="count", color=sns.xkcd_rgb["pumpkin orange"], ax=ax)
+        ax.grid(True, which="major", axis="x")
+        ax.set_xlabel("Nombre de fractures")
+        ax.set_ylabel("Partie du corps")
+        ax.set_title("Distribution des fractures selon le site")
+
+        return ax
+
+    def plot_fractures_per_admission(self, ax: Axes) -> Axes:
+        data = self.outcomes.groupBy(["patientID", "start"]).count().toPandas().sort_values(
+            "start")
+        sns.countplot(x="count", data=data, ax=ax)
+        ax.grid(True, which="major", axis="y")
+        add_information_to_axe(ax, "Distribution de nombre de fractures par admission",
+                               "Nombre de fractures", "Nombre d'admission")
+        return ax
+
+    def plot_fracture_admission_number_per_patient(self, ax: Axes) -> Axes:
+        data = self.outcomes.groupBy(["patientID", "start"]).count().toPandas().sort_values(
+            "start").groupby("patientID").count()
+        sns.countplot(data=data, x="start", ax=ax)
+        ax.grid(True, which="major", axis="y")
+        add_information_to_axe(ax, "Distribution de nombre d'admission pour fracture",
+                               "Nombre d'admission pour fracture", "Nombre de patients")
+        return ax
+
+    def plot_admission_per_day(self, ax: Axes) -> Axes:
+        data = self.outcomes.groupBy(["patientID", "start"]).count().toPandas().sort_values(
+            "start").groupby("start")["patientID"].count().reset_index().set_index("start")
+
+        idx = pd.date_range(data.index.min(), data.index.max())
+        data.index = pd.DatetimeIndex(data.index)
+        data = data.reindex(idx, fill_value=0)
+        ax.bar(data.index, data["patientID"], color=sns.xkcd_rgb["pumpkin orange"])
+        patch_dates_axes(ax)
+        add_information_to_axe(ax, "Distribution de nombre d'admission pour fracture par jour",
+                               "Date", "Nombre d'admission pour fracture")
+        return ax
+
+
+def save_fractures_stats(path: str, fractures) -> None:
+    fractures_stats = FracturesStats(fractures)
+
+    with PdfPages(path) as pdf:
+        fig = plt.figure()
+        ax = plt.gca()
+        fractures_stats.plot_outcomes_per_day_as_bars(ax)
+        plt.tight_layout()
+        pdf.savefig(fig)
+
+        fig = plt.figure()
+        ax = plt.gca()
+        fractures_stats.plot_outcomes_per_day_time_series(ax)
+        plt.tight_layout()
+        pdf.savefig(fig)
+
+        fig = plt.figure()
+        ax = plt.gca()
+        fractures_stats.plot_fractures_by_site_distribution(ax)
+        plt.tight_layout()
+        pdf.savefig(fig)
+
+        fig = plt.figure()
+        ax = plt.gca()
+        fractures_stats.plot_fractures_per_admission(ax)
+        plt.tight_layout()
+        pdf.savefig(fig)
+
+        fig = plt.figure()
+        ax = plt.gca()
+        fractures_stats.plot_fracture_admission_number_per_patient(ax)
+        plt.tight_layout()
+        pdf.savefig(fig)
+
+        fig = plt.figure()
+        ax = plt.gca()
+        fractures_stats.plot_admission_per_day(ax)
+        plt.tight_layout()
+        pdf.savefig(fig)
