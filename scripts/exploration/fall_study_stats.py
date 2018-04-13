@@ -1,13 +1,14 @@
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import pandas as pd
+import pyspark.sql.functions as fn
 import seaborn as sns
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_pdf import PdfPages
-import pyspark.sql.functions as fn
 
 from exploration.outcomes_stats import OutcomeStats
-from exploration.utils import millify, add_information_to_axe, add_percentage_axe, add_x_percentage_axe
+from exploration.utils import add_information_to_axe, add_percentage_axe, \
+    add_x_percentage_axe, millify, patch_dates_axes
 
 
 class TherapeuticStats(object):
