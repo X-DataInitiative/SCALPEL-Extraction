@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
 import org.apache.spark.sql.{DataFrame, SQLContext}
+import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.InputPaths
 import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource}
 import fr.polytechnique.cmap.cnam.etl.sources.value.{DosagesSource, IrBenSource, IrImbSource, IrPhaSource}
-import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.InputPaths
 
 case class Sources(
   dcir: Option[DataFrame] = None,

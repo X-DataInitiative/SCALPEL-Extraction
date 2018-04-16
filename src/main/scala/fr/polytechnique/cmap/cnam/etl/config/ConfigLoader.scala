@@ -8,6 +8,7 @@ import pureconfig._
 import pureconfig.configurable.{localDateConfigConvert, localDateTimeConfigConvert}
 
 trait ConfigLoader {
+
   // For reading yyyy-MM-dd dates
   implicit val localDate: ConfigConvert[LocalDate] = {
     localDateConfigConvert(DateTimeFormatter.ISO_DATE)
@@ -24,13 +25,13 @@ trait ConfigLoader {
    *   It could be added to the trait itself, but the type is only needed by this method, so for
    *   now I think we can leave it here.
    */
-  protected def loadConfigWithDefaults[T <: StudyConfig : ClassTag : ConfigReader](
+  protected[etl] def loadConfigWithDefaults[C <: StudyConfig : ClassTag : ConfigReader](
       configPath: String,
       defaultsPath: String,
-      env: String): T = {
+      env: String): C = {
 
     val defaultConfig = ConfigFactory.parseResources(defaultsPath).resolve.getConfig(env)
     val config = ConfigFactory.parseFile(new java.io.File(configPath)).resolve.withFallback(defaultConfig).resolve
-    pureconfig.loadConfigOrThrow[T](config)
+    pureconfig.loadConfigOrThrow[C](config)
   }
 }

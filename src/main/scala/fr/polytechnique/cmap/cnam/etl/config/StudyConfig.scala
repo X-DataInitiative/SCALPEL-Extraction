@@ -23,7 +23,4 @@ object StudyConfig {
     exposures: String)
 }
 
-trait StudyConfig {
-  val input: StudyConfig.InputPaths
-  val output: StudyConfig.OutputPaths
-}
+trait StudyConfig

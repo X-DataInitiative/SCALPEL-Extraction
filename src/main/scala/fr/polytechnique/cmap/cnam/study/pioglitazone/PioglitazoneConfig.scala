@@ -18,7 +18,7 @@ case class PioglitazoneConfig(
   val diagnoses = PioglitazoneConfig.DiagnosesConfig
 }
 
-object PioglitazoneConfig extends ConfigLoader {
+object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
 
   /** Base fixed parameters for this study. */
   final object BaseConfig {
@@ -34,17 +34,17 @@ object PioglitazoneConfig extends ConfigLoader {
 
   /** Fixed parameters needed for the Diagnoses extractors. */
   final object DiagnosesConfig {
-    val codesMapDP: List[String] = List("C67", "C77", "C78", "C79")
-    val codesMapDR: List[String] = List("C67", "C77", "C78", "C79")
-    val codesMapDA: List[String] = List("C67")
-    val imbDiagnosisCodes: List[String] = List("C67")
+    val codesMapDP: List[String] = primaryDiagCode :: secondaryDiagCodes
+    val codesMapDR: List[String] = primaryDiagCode :: secondaryDiagCodes
+    val codesMapDA: List[String] = List(primaryDiagCode)
+    val imbDiagnosisCodes: List[String] = List(primaryDiagCode)
   }
 
   /** Fixed parameters needed for the Medical Acts extractors. */
   final object MedicalActsConfig {
-    val dcirMedicalActCodes: List[String] = List()
-    val mcoCIM10MedicalActCodes: List[String] = List()
-    val mcoCCAMMedicalActCodes: List[String] = List()
+    val dcirMedicalActCodes: List[String] = dcirCCAMActCodes
+    val mcoCIM10MedicalActCodes: List[String] = mcoCIM10ActCodes
+    val mcoCCAMMedicalActCodes: List[String] = mcoCCAMActCodes
   }
 
   /** Parameters needed for the Exposures transformer. */

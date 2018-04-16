@@ -56,10 +56,12 @@ object PioglitazoneMain extends Main {
     val drugEvents: Dataset[Event[Molecule]] = new MoleculePurchases(moleculesConfig).extract(sources).cache()
 
     logger.info("Extracting diagnosis events...")
-    val diagnosesConfig = DiagnosesConfig(conf.diagnoses.imbDiagnosisCodes,
+    val diagnosesConfig = DiagnosesConfig(
+      conf.diagnoses.imbDiagnosisCodes,
       conf.diagnoses.codesMapDP,
       conf.diagnoses.codesMapDR,
       conf.diagnoses.codesMapDA)
+    val diseaseEvents: Dataset[Event[Diagnosis]] = new Diagnoses(diagnosesConfig).extract(sources).cache()
 
     logger.info("Extracting medical acts...")
     val medicalActConfig = MedicalActsConfig(
@@ -67,8 +69,6 @@ object PioglitazoneMain extends Main {
       conf.medicalActs.mcoCIM10MedicalActCodes,
       conf.medicalActs.mcoCCAMMedicalActCodes)
     val medicalActs = new MedicalActs(medicalActConfig).extract(sources)
-
-    val diseaseEvents: Dataset[Event[Diagnosis]] = new Diagnoses(diagnosesConfig).extract(sources).cache()
 
     logger.info("Merging all events...")
     val allEvents: Dataset[Event[AnyEvent]] = unionDatasets(
