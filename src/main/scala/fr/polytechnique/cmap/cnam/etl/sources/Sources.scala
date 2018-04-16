@@ -1,18 +1,18 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
+import org.apache.spark.sql.{DataFrame, SQLContext}
+import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.InputPaths
 import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource}
 import fr.polytechnique.cmap.cnam.etl.sources.value.{DosagesSource, IrBenSource, IrImbSource, IrPhaSource}
-import fr.polytechnique.cmap.cnam.study.StudyConfig.InputPaths
-import org.apache.spark.sql.{DataFrame, SQLContext}
 
-class Sources(
-  val dcir: Option[DataFrame] = None,
-  val mco: Option[DataFrame] = None,
-  val mcoCe: Option[DataFrame] = None,
-  val irBen: Option[DataFrame] = None,
-  val irImb: Option[DataFrame] = None,
-  val irPha: Option[DataFrame] = None,
-  val dosages: Option[DataFrame] = None)
+case class Sources(
+  dcir: Option[DataFrame] = None,
+  mco: Option[DataFrame] = None,
+  mcoCe: Option[DataFrame] = None,
+  irBen: Option[DataFrame] = None,
+  irImb: Option[DataFrame] = None,
+  irPha: Option[DataFrame] = None,
+  dosages: Option[DataFrame] = None)
 
 object Sources {
 
@@ -21,12 +21,14 @@ object Sources {
     dcirPath: Option[String] = None,
     mcoPath: Option[String] = None,
     mcoCePath: Option[String] = None,
+    hadPath: Option[String] = None,
+    ssrPath: Option[String] = None,
     irBenPath: Option[String] = None,
     irImbPath: Option[String] = None,
     irPhaPath: Option[String] = None,
     dosagesPath: Option[String] = None): Sources = {
 
-    new Sources(
+    Sources(
       dcir = dcirPath.map(DcirSource.read(sqlContext, _)),
       mco = mcoPath.map(McoSource.read(sqlContext, _)),
       mcoCe = mcoCePath.map(McoCeSource.read(sqlContext, _)),
@@ -38,7 +40,7 @@ object Sources {
   }
 
   def sanitize(sources: Sources): Sources = {
-    new Sources(
+    sources.copy(
       dcir = sources.dcir.map(DcirSource.sanitize),
       mco = sources.mco.map(McoSource.sanitize),
       mcoCe = sources.mcoCe.map(McoCeSource.sanitize),
@@ -49,19 +51,18 @@ object Sources {
     )
   }
 
-  /**
-    * @deprecated For backwards compatibility only!
-    */
-  // for backwards compatibility
   def read(sqlContext: SQLContext, paths: InputPaths): Sources = {
     this.read(
       sqlContext,
-      dcirPath = Option(paths.dcir),
-      mcoPath = Option(paths.pmsiMco),
-      irBenPath = Option(paths.irBen),
-      irImbPath = Option(paths.irImb),
-      irPhaPath = Option(paths.irPha),
-      dosagesPath = Option(paths.dosages)
+      dcirPath = paths.dcir,
+      mcoPath = paths.mco,
+      mcoCePath = paths.mco,
+      hadPath = paths.had,
+      ssrPath = paths.ssr,
+      irBenPath = paths.irBen,
+      irImbPath = paths.irImb,
+      irPhaPath = paths.irPha,
+      dosagesPath = paths.dosages
     )
   }
 }

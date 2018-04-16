@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
+import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.{MedicalActs, MedicalActsConfig}
@@ -15,10 +16,8 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposureDefinition, ExposuresTransformer}
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
-import fr.polytechnique.cmap.cnam.study.StudyConfig
-import fr.polytechnique.cmap.cnam.study.StudyConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.functions._
-import org.apache.spark.sql.{Dataset, SQLContext}
 
 
 object PioglitazoneMain extends Main {
@@ -27,27 +26,21 @@ object PioglitazoneMain extends Main {
 
   /**
     * Arguments expected:
-    *   "conf" -> "path/to/file.conf" (default: "$resources/filtering-default.conf")
+    *   "conf" -> "path/to/file.conf" (default: "$resources/config/pioglitazone/default.conf")
     *   "env" -> "cnam" | "cmap" | "test" (default: "test")
     */
   def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[Event[AnyEvent]]] = {
 
+    import sqlContext.implicits._
     import EventFilters._
     import PatientFilters._
-    import sqlContext.implicits._
 
-    // "get" returns an Option, then we can use foreach to gently ignore when the key was not found.
-    argsMap.get("conf").foreach(sqlContext.setConf("conf", _))
-    argsMap.get("env").foreach(sqlContext.setConf("env", _))
-    argsMap.get("study").foreach(sqlContext.setConf("study", _))
-
-    val inputPaths: InputPaths = StudyConfig.inputPaths
-    val outputPaths: OutputPaths = StudyConfig.outputPaths
-
+    val conf = PioglitazoneConfig.load(argsMap("conf"), argsMap("env"))
+    val inputPaths = conf.input
+    val outputPaths = conf.output
     logger.info("Input Paths: " + inputPaths.toString)
     logger.info("Output Paths: " + outputPaths.toString)
     logger.info("study config....")
-    val configPIO = PioglitazoneConfig.pioglitazoneParameters
     logger.info("===================================")
 
     logger.info("Reading sources")
@@ -55,27 +48,27 @@ object PioglitazoneMain extends Main {
     val sources: Sources = Sources.sanitize(sqlContext.readSources(inputPaths))
 
     logger.info("Extracting patients...")
-    val patientsConfig = PatientsConfig(configPIO.study.ageReferenceDate)
+    val patientsConfig = PatientsConfig(conf.base.ageReferenceDate)
     val patients: Dataset[Patient] = new Patients(patientsConfig).extract(sources).cache()
 
     logger.info("Extracting molecule events...")
-    val moleculesConfig = MoleculePurchasesConfig(drugClasses = configPIO.drugs.drugCategories)
+    val moleculesConfig = MoleculePurchasesConfig(drugClasses = conf.drugs.drugCategories)
     val drugEvents: Dataset[Event[Molecule]] = new MoleculePurchases(moleculesConfig).extract(sources).cache()
 
     logger.info("Extracting diagnosis events...")
-    val diagnosesConfig = DiagnosesConfig(configPIO.diagnoses.imbDiagnosisCodes,
-      configPIO.diagnoses.codesMapDP,
-      configPIO.diagnoses.codesMapDR,
-      configPIO.diagnoses.codesMapDA)
+    val diagnosesConfig = DiagnosesConfig(
+      conf.diagnoses.imbDiagnosisCodes,
+      conf.diagnoses.codesMapDP,
+      conf.diagnoses.codesMapDR,
+      conf.diagnoses.codesMapDA)
+    val diseaseEvents: Dataset[Event[Diagnosis]] = new Diagnoses(diagnosesConfig).extract(sources).cache()
 
     logger.info("Extracting medical acts...")
     val medicalActConfig = MedicalActsConfig(
-      configPIO.medicalActs.dcirMedicalActCodes,
-      configPIO.medicalActs.mcoCIM10MedicalActCodes,
-      configPIO.medicalActs.mcoCCAMMedicalActCodes)
+      conf.medicalActs.dcirMedicalActCodes,
+      conf.medicalActs.mcoCIM10MedicalActCodes,
+      conf.medicalActs.mcoCCAMMedicalActCodes)
     val medicalActs = new MedicalActs(medicalActConfig).extract(sources)
-
-    val diseaseEvents: Dataset[Event[Diagnosis]] = new Diagnoses(diagnosesConfig).extract(sources).cache()
 
     logger.info("Merging all events...")
     val allEvents: Dataset[Event[AnyEvent]] = unionDatasets(
@@ -84,7 +77,7 @@ object PioglitazoneMain extends Main {
     )
 
     logger.info("Extracting Tracklosses...")
-    val tracklossConfig = TracklossesConfig(studyEnd = configPIO.study.lastDate)
+    val tracklossConfig = TracklossesConfig(studyEnd = conf.base.studyEnd)
     val tracklosses = new Tracklosses(tracklossConfig).extract(sources).cache()
 
     logger.info("Writing patients...")
@@ -94,12 +87,12 @@ object PioglitazoneMain extends Main {
     allEvents.toDF.write.parquet(outputPaths.flatEvents)
 
     logger.info("Extracting Observations...")
-    val observations = new ObservationPeriodTransformer(configPIO.study.studyStart, configPIO.study.studyEnd)
+    val observations = new ObservationPeriodTransformer(conf.base.studyStart, conf.base.studyEnd)
       .transform(allEvents)
       .cache()
 
     logger.info("Extracting cancer outcomes...")
-    val (outcomeName, outcomes) = configPIO.study.cancerDefinition match {
+    val (outcomeName, outcomes) = conf.outcomes.cancerDefinition match {
       case "broad" => (BroadBladderCancer.outcomeName, BroadBladderCancer.transform(diseaseEvents))
       case "naive" => (NaiveBladderCancer.outcomeName, NaiveBladderCancer.transform(diseaseEvents))
       case "narrow" => (NarrowBladderCancer.outcomeName, NarrowBladderCancer.transform(diseaseEvents, medicalActs))
@@ -108,18 +101,18 @@ object PioglitazoneMain extends Main {
     logger.info("Extracting Follow-up...")
     val patiensWithObservations = patients.joinWith(observations, patients.col("patientId") === observations.col("patientId"))
 
-    val followups = new FollowUpTransformer(configPIO.drugs.start_delay, firstTargetDisease = true, Some("cancer"))
+    val followups = new FollowUpTransformer(conf.exposures.startDelay, firstTargetDisease = true, Some("cancer"))
       .transform(patiensWithObservations, drugEvents, outcomes, tracklosses)
       .cache()
 
     logger.info("Filtering Patients...")
     val filteredPatients = {
-      val firstFilterResult = if (configPIO.filters.filter_delayed_entries)
-        patients.filterDelayedPatients(drugEvents, configPIO.study.studyStart, configPIO.study.delayed_entry_threshold)
+      val firstFilterResult = if (conf.filters.filterDelayedEntries)
+        patients.filterDelayedPatients(drugEvents, conf.base.studyStart, conf.filters.delayedEntryThreshold)
       else
         patients
 
-      if (configPIO.filters.filter_diagnosed_patients)
+      if (conf.filters.filterDiagnosedPatients)
         firstFilterResult.filterEarlyDiagnosedPatients(outcomes, followups, outcomeName)
       else
         patients
@@ -132,7 +125,7 @@ object PioglitazoneMain extends Main {
     val patientsWithFollowups = filteredPatients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
 
     val exposureDef = ExposureDefinition(
-    studyStart = configPIO.study.studyStart,
+    studyStart = conf.base.studyStart,
     filterDelayedPatients = false,
     diseaseCode = "C67")
     val exposures = new ExposuresTransformer(exposureDef)
@@ -140,11 +133,11 @@ object PioglitazoneMain extends Main {
       .cache()
 
     logger.info("Writing Exposures...")
-    exposures.write.parquet(StudyConfig.outputPaths.exposures)
+    exposures.write.parquet(outputPaths.exposures)
 
     logger.info("Extracting MLPP features...")
-    val params = MLPPLoader.Params(minTimestamp = configPIO.study.studyStart, maxTimestamp = configPIO.study.studyEnd)
-    MLPPLoader(params).load(outcomes, exposures, patients, StudyConfig.outputPaths.mlppFeatures)
+    val params = MLPPLoader.Params(minTimestamp = conf.base.studyStart, maxTimestamp = conf.base.studyEnd)
+    MLPPLoader(params).load(outcomes, exposures, patients, outputPaths.mlppFeatures)
 
     Some(allEvents)
   }

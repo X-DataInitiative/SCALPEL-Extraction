@@ -1,0 +1,2 @@
+ignore:
+  - "**/*Main.scala"

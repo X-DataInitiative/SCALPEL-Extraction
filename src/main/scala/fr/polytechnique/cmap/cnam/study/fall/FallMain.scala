@@ -136,7 +136,7 @@ object FallMain extends Main with FractureCodes {
       .cache()
     operationsMetadata += {
       OperationReporter.report("drug_purchases", List("DCIR"), OperationTypes.Dispensations, drugPurchases.toDF, env.FeaturingPath)
-      }
+    }
 
 
     // Medical Acts

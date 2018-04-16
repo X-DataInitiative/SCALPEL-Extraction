@@ -1,6 +1,8 @@
 package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
+import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
+import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Diagnosis, Event, Molecule}
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{Diagnoses, DiagnosesConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.{MoleculePurchases, MoleculePurchasesConfig}
@@ -14,9 +16,7 @@ import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposureDefinition
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
 import fr.polytechnique.cmap.cnam.study.StudyConfig
-import fr.polytechnique.cmap.cnam.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
-import org.apache.spark.sql.{Dataset, SQLContext}
 
 
 object RosiglitazoneMain extends Main{

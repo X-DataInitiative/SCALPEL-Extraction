@@ -1,42 +1,84 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
-import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.study.pioglitazone.PioglitazoneConfig._
+import java.io.File
+import java.nio.file.Paths
+import com.typesafe.config.ConfigFactory
+import org.scalatest.FlatSpec
+import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.{InputPaths, OutputPaths}
 
-class PioglitazoneConfigSuite extends SharedContext {
+class PioglitazoneConfigSuite extends FlatSpec {
 
-  "PioglitazoneParameters" should "read the right parameters from the config file" in {
+  val inputPaths = InputPaths(
+    dcir = Some("src/test/resources/test-input/DCIR.parquet"),
+    mco = Some("src/test/resources/test-input/MCO.parquet"),
+    irBen = Some("src/test/resources/test-input/IR_BEN_R.parquet"),
+    irImb = Some("src/test/resources/test-input/IR_IMB_R.parquet"),
+    irPha = Some("src/test/resources/test-input/IR_PHA_R.parquet"),
+    dosages = Some("src/test/resources/test-input/DOSE_PER_MOLECULE.CSV")
+  )
 
-    /*
-  The parameters read from conf file :
-      min_purchases = 1 // 1 or 2
-      start_delay = 0 // can vary from 0 to 3
-      purchases_window = 0 // always 0
-      only_first = false // can be always false and handled in python / C++, but not soon
-      filter_never_sick_patients = false // always true
-      filter_lost_patients = false //keep it
-      filter_diagnosed_patients = true // keep it
-      diagnosed_patients_threshold = 6 // keep it, maybe remove the previous one and set false when this param is 0
-      filter_delayed_entries = true // keep it
-      delayed_entry_threshold = 12 // keep it, maybe remove the previous one and set false when this param is 0
-   */
+  val outputPaths = OutputPaths(
+    root = "target/test/output",
+    patients = "target/test/output/patients",
+    flatEvents = "target/test/output/flat_events",
+    coxFeatures = "target/test/output/cox_features",
+    ltsccsFeatures = "target/test/output/ltsccs_features",
+    mlppFeatures = "target/test/output/mlpp_features",
+    outcomes = "target/test/output/outcomes/cancer",
+    exposures = "target/test/output/exposures"
+  )
 
-    val PioParam = PioglitazoneConfig.pioglitazoneParameters
-    val expected = PioglitazoneParams(
-      DrugsParams(min_purchases = 1, start_delay = 0, purchases_window = 0, only_first = false),
-      MedicalActParams(),
-      DiagnosesParams(),
-      StudyParams(delayed_entry_threshold = 12),
-      FiltersParams(
-        filter_never_sick_patients = false,
-        filter_lost_patients = false,
-        filter_diagnosed_patients = true,
-        diagnosed_patients_threshold = 6,
-        filter_delayed_entries = true
-      ))
-    assert(PioParam == expected, true)
+  "load" should "correctly load the default configuration" in {
+
+    val expected = PioglitazoneConfig(inputPaths, outputPaths)
+    val config = PioglitazoneConfig.load("", "test")
+
+    assert(config == expected)
+  }
+
+  it should "correctly load a configuration file, falling back to the default file" in {
+
+    // Given
+    val default = PioglitazoneConfig(inputPaths, outputPaths)
+    val tempPath = "target/test/test.conf"
+    val configContent = """
+        | input {
+        |   dcir: "new/in/path"
+        | }
+        | output {
+        |   root: "new/out/path"
+        | }
+        | exposures {
+        |   min_purchases: 2
+        |   purchases_window: 6
+        | }
+        | outcomes {
+        |   cancer_definition: "narrow"
+        | }
+      """.trim.stripMargin
+    pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(configContent), Paths.get(tempPath))
+
+    val expected = default.copy(
+      input = default.input.copy(
+        dcir = Some("new/in/path")
+      ),
+      output = default.output.copy(
+        root = "new/out/path"
+      ),
+      exposures = default.exposures.copy(
+        minPurchases = 2,
+        purchasesWindow = 6
+      ),
+      outcomes = default.outcomes.copy(
+        cancerDefinition = "narrow"
+      )
+    )
+
+    // When
+    val result = PioglitazoneConfig.load(tempPath, "test")
+
+    // Then
+    try assert(result == expected)
+    finally new File(tempPath).delete()
   }
 }
-
-
-

@@ -3,8 +3,13 @@ package fr.polytechnique.cmap.cnam.study
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
+import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.{InputPaths, OutputPaths}
 
+/**
+  * @deprecated Replaced by ....etl.config.StudyConfig
+  */
 object StudyConfig {
+
   private lazy val conf: Config = {
     // This is a little hacky. In the future, it may be nice to find a better way.
     val sqlContext = SQLContext.getOrCreate(SparkContext.getOrCreate())
@@ -16,37 +21,15 @@ object StudyConfig {
     newConfig.withFallback(defaultConfig).resolve()
   }
 
-  case class InputPaths(
-    dcir: String,
-    pmsiMco: String,
-    pmsiHad: String,
-    pmsiSsr: String,
-    irBen: String,
-    irImb: String,
-    irPha: String,
-    dosages: String
-  )
-
-  case class OutputPaths(
-    root: String,
-    patients: String,
-    flatEvents: String,
-    coxFeatures: String,
-    ltsccsFeatures: String,
-    mlppFeatures: String,
-    outcomes: String,
-    exposures: String
-  )
-
   lazy val inputPaths = InputPaths(
-    dcir = conf.getString("paths.input.dcir"),
-    pmsiMco = conf.getString("paths.input.pmsi_mco"),
-    pmsiHad = conf.getString("paths.input.pmsi_had"),
-    pmsiSsr = conf.getString("paths.input.pmsi_ssr"),
-    irBen = conf.getString("paths.input.ir_ben"),
-    irImb = conf.getString("paths.input.ir_imb"),
-    irPha = conf.getString("paths.input.ir_pha"),
-    dosages = conf.getString("paths.input.dosages")
+    dcir = Some(conf.getString("paths.input.dcir")),
+    mco = Some(conf.getString("paths.input.pmsi_mco")),
+    had = Some(conf.getString("paths.input.pmsi_had")),
+    ssr = Some(conf.getString("paths.input.pmsi_ssr")),
+    irBen = Some(conf.getString("paths.input.ir_ben")),
+    irImb = Some(conf.getString("paths.input.ir_imb")),
+    irPha = Some(conf.getString("paths.input.ir_pha")),
+    dosages = Some(conf.getString("paths.input.dosages"))
   )
 
   lazy val outputPaths = OutputPaths(

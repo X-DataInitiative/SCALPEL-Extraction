@@ -1,77 +1,79 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
-import com.typesafe.config.{Config, ConfigFactory}
-import fr.polytechnique.cmap.cnam.etl.config.CaseClassConfig
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.SQLContext
-import fr.polytechnique.cmap.cnam.util.functions.makeTS
+import java.time.LocalDate
+import fr.polytechnique.cmap.cnam.etl.config.{ConfigLoader, StudyConfig}
 
-object PioglitazoneConfig {
+case class PioglitazoneConfig(
+    input: StudyConfig.InputPaths,
+    output: StudyConfig.OutputPaths,
+    exposures: PioglitazoneConfig.ExposuresConfig = PioglitazoneConfig.ExposuresConfig(),
+    outcomes: PioglitazoneConfig.OutcomesConfig = PioglitazoneConfig.OutcomesConfig(),
+    filters: PioglitazoneConfig.FiltersConfig = PioglitazoneConfig.FiltersConfig())
+  extends StudyConfig {
 
-  private lazy val conf: Config = {
-    // This is a little hacky. In the future, it may be nice to find a better way.
-    val sqlContext = SQLContext.getOrCreate(SparkContext.getOrCreate())
-    val configPath: String = sqlContext.getConf("conf", "")
-    val environment: String = sqlContext.getConf("env", "test")
-    val defaultConfig = ConfigFactory.parseResources("config/pioglitazone/pioglitazone.conf").resolve().getConfig(environment)
-    val newConfig = ConfigFactory.parseFile(new java.io.File(configPath)).resolve()
-    newConfig.withFallback(defaultConfig).resolve()
+  // The following config items are not overridable by the config file
+  val base = PioglitazoneConfig.BaseConfig
+  val drugs = PioglitazoneConfig.DrugsConfig
+  val medicalActs = PioglitazoneConfig.MedicalActsConfig
+  val diagnoses = PioglitazoneConfig.DiagnosesConfig
+}
+
+object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
+
+  /** Base fixed parameters for this study. */
+  final object BaseConfig {
+    val ageReferenceDate: LocalDate = LocalDate.of(2007, 1, 1)
+    val studyStart: LocalDate = LocalDate.of(2006, 1, 1)
+    val studyEnd: LocalDate = LocalDate.of(2010, 1, 1)
   }
 
-  case class StudyParams(
-    ageReferenceDate: java.sql.Timestamp = makeTS(2006, 12, 31, 23, 59, 59),
-    studyStart: java.sql.Timestamp = makeTS(2006, 1, 1),
-    studyEnd: java.sql.Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
-    lastDate: java.sql.Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
-    cancerDefinition: String = "broad",
-    delayed_entry_threshold: Int = 12 /* keep it, maybe remove the previous one and set false when this param is 0*/)
+  /** Fixed parameters needed for the Drugs extractors. */
+  final object DrugsConfig {
+    val drugCategories: List[String] = List("A10")
+  }
 
-  case class DiagnosesParams(
-    codesMapDP: List[String] = List("C67", "C77", "C78", "C79"),
-    codesMapDR: List[String] = List("C67", "C77", "C78", "C79"),
-    codesMapDA: List[String] = List("C67"),
-    imbDiagnosisCodes: List[String] = List("C67"))
+  /** Fixed parameters needed for the Diagnoses extractors. */
+  final object DiagnosesConfig {
+    val codesMapDP: List[String] = primaryDiagCode :: secondaryDiagCodes
+    val codesMapDR: List[String] = primaryDiagCode :: secondaryDiagCodes
+    val codesMapDA: List[String] = List(primaryDiagCode)
+    val imbDiagnosisCodes: List[String] = List(primaryDiagCode)
+  }
 
-  case class MedicalActParams(
-    dcirMedicalActCodes: List[String] = List(),
-    mcoCIM10MedicalActCodes: List[String] = List(),
-    mcoCCAMMedicalActCodes: List[String] = List())
+  /** Fixed parameters needed for the Medical Acts extractors. */
+  final object MedicalActsConfig {
+    val dcirMedicalActCodes: List[String] = dcirCCAMActCodes
+    val mcoCIM10MedicalActCodes: List[String] = mcoCIM10ActCodes
+    val mcoCCAMMedicalActCodes: List[String] = mcoCCAMActCodes
+  }
 
-  case class FiltersParams(
-    filter_never_sick_patients: Boolean = false, // always true
-    filter_lost_patients: Boolean = false,
-    filter_diagnosed_patients: Boolean = true,
-    diagnosed_patients_threshold: Int = 6, // keep it, maybe remove the previous one and set false when this param is 0
-    filter_delayed_entries: Boolean = true)
+  /** Parameters needed for the Exposures transformer. */
+  case class ExposuresConfig(
+    minPurchases: Int = 1,
+    startDelay: Int = 0,
+    purchasesWindow: Int = 0,
+    onlyFirst: Boolean = false)
 
-  case class DrugsParams(
-    min_purchases: Int = 1, // 1 or 2
-    start_delay: Int = 0, // can vary from 0 to 3
-    purchases_window: Int = 0, // always 0
-    only_first: Boolean = false /* can be always false and handled in python / C++, but not soon*/,
-    drugCategories: List[String] = List("A10"))
+  /** Parameters needed for the Outcomes transformer. */
+  case class OutcomesConfig(
+    cancerDefinition: String = "naive")
 
-  case class PioglitazoneParams(
-    drugs: DrugsParams = DrugsParams(),
-    medicalActs: MedicalActParams = MedicalActParams(),
-    diagnoses: DiagnosesParams = DiagnosesParams(),
-    study: StudyParams = StudyParams(),
-    filters: FiltersParams = FiltersParams())
-    extends CaseClassConfig
+  /** Parameters needed for the Filters. */
+  case class FiltersConfig(
+    filterNeverSickPatients: Boolean = false,
+    filterDiagnosedPatients: Boolean = true,
+    diagnosedPatientsThreshold: Int = 6,
+    filterDelayedEntries: Boolean = true,
+    delayedEntryThreshold: Int = 12)
 
-
-    lazy val pioglitazoneParameters = PioglitazoneParams(
-      drugs = DrugsParams(min_purchases = conf.getInt("min_purchases"),
-        start_delay = conf.getInt("start_delay"),
-        only_first = conf.getBoolean("only_first"),
-        purchases_window = conf.getInt("purchases_window")),
-      filters = FiltersParams(
-        filter_never_sick_patients = conf.getBoolean("filter_never_sick_patients"),
-        filter_lost_patients = conf.getBoolean("filter_lost_patients"),
-        filter_diagnosed_patients = conf.getBoolean("filter_diagnosed_patients"),
-        diagnosed_patients_threshold = conf.getInt("diagnosed_patients_threshold"),
-        filter_delayed_entries = conf.getBoolean("filter_delayed_entries")
-       ),
-      study = StudyParams(delayed_entry_threshold = conf.getInt("delayed_entry_threshold")))
-
+  /**
+    * Reads a configuration file and merges it with the default file.
+    * @param path The path of the given file.
+    * @param env The environment in the config file (usually can be "cmap", "cnam" or "test").
+    * @return An instance of PioglitazoneConfig containing all parameters.
+    */
+  def load(path: String, env: String): PioglitazoneConfig = {
+    val defaultPath = "config/pioglitazone/default.conf"
+    loadConfigWithDefaults[PioglitazoneConfig](path, defaultPath, env)
+  }
 }
