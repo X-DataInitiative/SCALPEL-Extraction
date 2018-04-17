@@ -1,38 +1,87 @@
 package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
-import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.study.rosiglitazone.RosiglitazoneConfig._
+import java.nio.file.{Files, Paths}
+import com.typesafe.config.ConfigFactory
+import org.scalatest.FlatSpec
+import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.{InputPaths, OutputPaths}
 
-class RosiglitazoneConfigSuite extends SharedContext {
+class RosiglitazoneConfigSuite extends FlatSpec {
 
-  "RosiglitazoneParameters" should "read the right parameters from the config file" in {
+  val inputPaths = InputPaths(
+    dcir = Some("src/test/resources/test-input/DCIR.parquet"),
+    mco = Some("src/test/resources/test-input/MCO.parquet"),
+    irBen = Some("src/test/resources/test-input/IR_BEN_R.parquet"),
+    irImb = Some("src/test/resources/test-input/IR_IMB_R.parquet"),
+    irPha = Some("src/test/resources/test-input/IR_PHA_R.parquet"),
+    dosages = Some("src/test/resources/test-input/DOSE_PER_MOLECULE.CSV")
+  )
 
-    /*
-  The parameters read from conf file :
-      min_purchases = 1 // 1 or 2
-      start_delay = 0 // can vary from 0 to 3
-      purchases_window = 0 // always 0
-      only_first = false // can be always false and handled in python / C++, but not soon
-      filter_never_sick_patients = false // always true
-      filter_lost_patients = false //keep it
-      filter_diagnosed_patients = true // keep it
-      diagnosed_patients_threshold = 6 // keep it, maybe remove the previous one and set false when this param is 0
-      filter_delayed_entries = true // keep it
-      delayed_entry_threshold = 12 // keep it, maybe remove the previous one and set false when this param is 0
-   */
+  val outputPaths = OutputPaths(
+    root = "target/test/output",
+    patients = "target/test/output/patients",
+    flatEvents = "target/test/output/flat_events",
+    coxFeatures = "target/test/output/cox_features",
+    ltsccsFeatures = "target/test/output/ltsccs_features",
+    mlppFeatures = "target/test/output/mlpp_features",
+    outcomes = "target/test/output/outcomes/heart_problems",
+    exposures = "target/test/output/exposures"
+  )
 
-    val rosiParam = RosiglitazoneConfig.rosiglitazoneParameters
-    val expected = RosiglitazoneParams(
-      DrugsParams(min_purchases = 1, start_delay = 0, purchases_window = 0, only_first = false),
-      StudyParams(delayed_entry_threshold = 12),
-      FiltersParams(
-        filter_never_sick_patients = false,
-        filter_lost_patients = false,
-        filter_diagnosed_patients = true,
-        diagnosed_patients_threshold = 6,
-        filter_delayed_entries = true
+  "load" should "correctly load the default configuration" in {
+
+    val expected = RosiglitazoneConfig(inputPaths, outputPaths)
+    val config = RosiglitazoneConfig.load("", "test")
+
+    assert(config == expected)
+  }
+
+  it should "correctly load a configuration file, falling back to the default file" in {
+
+    // Given
+    val default = RosiglitazoneConfig(inputPaths, outputPaths)
+    val tempPath = "test.conf"
+    val configContent = """
+        | input {
+        |   dcir: "new/in/path"
+        | }
+        | output {
+        |   root: "new/out/path"
+        | }
+        | exposures {
+        |   min_purchases: 2
+        |   purchases_window: 6
+        | }
+        | outcomes {
+        |   heart_problem_definition: "other"
+        | }
+      """.trim.stripMargin
+    pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(configContent), Paths.get(tempPath))
+
+    val expected = default.copy(
+      input = default.input.copy(
+        dcir = Some("new/in/path")
+      ),
+      output = default.output.copy(
+        root = "new/out/path"
+      ),
+      exposures = default.exposures.copy(
+        minPurchases = 2,
+        purchasesWindow = 6
+      ),
+      outcomes = default.outcomes.copy(
+        heartProblemDefinition = "other"
       )
     )
-    assert(rosiParam == expected)
+
+    // When
+    val result = RosiglitazoneConfig.load(tempPath, "test")
+
+    // Then
+    try {
+      assert(result == expected)
+    }
+    finally {
+      Files.delete(Paths.get(tempPath))
+    }
   }
 }
