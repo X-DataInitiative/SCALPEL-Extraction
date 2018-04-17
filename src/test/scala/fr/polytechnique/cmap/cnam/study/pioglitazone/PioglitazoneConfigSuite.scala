@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
-import java.io.File
-import java.nio.file.Paths
+import java.nio.file.{Files, Paths}
 import com.typesafe.config.ConfigFactory
 import org.scalatest.FlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.{InputPaths, OutputPaths}
@@ -40,7 +39,7 @@ class PioglitazoneConfigSuite extends FlatSpec {
 
     // Given
     val default = PioglitazoneConfig(inputPaths, outputPaths)
-    val tempPath = "target/test/test.conf"
+    val tempPath = "test.conf"
     val configContent = """
         | input {
         |   dcir: "new/in/path"
@@ -78,7 +77,11 @@ class PioglitazoneConfigSuite extends FlatSpec {
     val result = PioglitazoneConfig.load(tempPath, "test")
 
     // Then
-    try assert(result == expected)
-    finally new File(tempPath).delete()
+    try {
+      assert(result == expected)
+    }
+    finally {
+      Files.delete(Paths.get(tempPath))
+    }
   }
 }
