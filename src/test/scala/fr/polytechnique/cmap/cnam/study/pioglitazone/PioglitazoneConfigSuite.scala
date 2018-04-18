@@ -50,8 +50,8 @@ class PioglitazoneConfigSuite extends FlatSpec {
         |   root: "new/out/path"
         | }
         | exposures {
-        |   min_purchases: 2
-        |   purchases_window: 6
+        |   min_purchases: 1
+        |   purchases_window: 3 months
         | }
         | outcomes {
         |   cancer_definition: "narrow"
@@ -67,8 +67,8 @@ class PioglitazoneConfigSuite extends FlatSpec {
         root = "new/out/path"
       ),
       exposures = default.exposures.copy(
-        minPurchases = 2,
-        purchasesWindow = 6.months
+        minPurchases = 1,
+        purchasesWindow = 3.months
       ),
       outcomes = default.outcomes.copy(
         cancerDefinition = CancerDefinition.Narrow

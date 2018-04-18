@@ -480,7 +480,6 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1))
     ).toDF(PatientID, Value, Start)
 
-    
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(makeTS(2008,  5, 1))),
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  2, 1)), Some(makeTS(2008,  5, 1))),

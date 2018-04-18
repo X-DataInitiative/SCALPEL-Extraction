@@ -7,7 +7,10 @@ import fr.polytechnique.cmap.cnam.etl.config.{BaseConfig, ConfigLoader, StudyCon
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchasesConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.patients.PatientsConfig
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformerConfig
+import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformerConfig
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformerConfig
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes.CancerDefinition
 
@@ -21,9 +24,12 @@ case class PioglitazoneConfig(
 
   // The following config items are not overridable by the config file
   val base: BaseConfig = PioglitazoneConfig.BaseConfig
+  val patients: PatientsConfig = PioglitazoneConfig.PatientsConfig
   val molecules: MoleculePurchasesConfig = PioglitazoneConfig.MoleculePurchasesConfig
   val medicalActs: MedicalActsConfig = PioglitazoneConfig.MedicalActsConfig
   val diagnoses: DiagnosesConfig = PioglitazoneConfig.DiagnosesConfig
+  val observationPeriod: ObservationPeriodTransformerConfig = PioglitazoneConfig.ObservationPeriodTransformerConfig
+  val followUp: FollowUpTransformerConfig = PioglitazoneConfig.FollowUpTransformerConfig
 }
 
 object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
@@ -33,6 +39,11 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
     val ageReferenceDate: LocalDate = LocalDate.of(2007, 1, 1)
     val studyStart: LocalDate = LocalDate.of(2006, 1, 1)
     val studyEnd: LocalDate = LocalDate.of(2010, 1, 1)
+  }
+
+  /** Fixed parameters needed for the Patients extractors. */
+  final object PatientsConfig extends PatientsConfig {
+    override val ageReferenceDate: LocalDate = PioglitazoneConfig.BaseConfig.ageReferenceDate
   }
 
   /** Fixed parameters needed for the Drugs extractors. */
@@ -57,6 +68,19 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
     val mcoCECodes: List[String] = List()
   }
 
+  /** Fixed parameters needed for the ObservationPeriod transformer. */
+  final object ObservationPeriodTransformerConfig extends ObservationPeriodTransformerConfig {
+    val studyStart: LocalDate = BaseConfig.studyStart
+    val studyEnd: LocalDate = BaseConfig.studyEnd
+  }
+
+  /** Fixed parameters needed for the FollowUp transformer. */
+  final object FollowUpTransformerConfig extends FollowUpTransformerConfig {
+    val delayMonths: Int = 6
+    val firstTargetDisease: Boolean = true
+    val outcomeName: Option[String] = Some("cancer")
+  }
+
   /** Parameters needed for the Exposures transformer. */
   case class ExposuresConfig(
       minPurchases: Int = 2,
@@ -64,9 +88,10 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
       purchasesWindow: Period = 6.months) extends ExposuresTransformerConfig {
 
     val periodStrategy: ExposurePeriodStrategy = ExposurePeriodStrategy.Unlimited
-    val endDelay: Option[Period] = Some(0.months)
-    val weightAggStrategy: WeightAggStrategy = WeightAggStrategy.NonCumulative
     val endThreshold: Option[Period] = None
+    val endDelay: Option[Period] = None
+
+    val weightAggStrategy: WeightAggStrategy = WeightAggStrategy.NonCumulative
     val cumulativeExposureWindow: Option[Int] = None
     val cumulativeStartThreshold: Option[Int] = None
     val cumulativeEndThreshold: Option[Int] = None

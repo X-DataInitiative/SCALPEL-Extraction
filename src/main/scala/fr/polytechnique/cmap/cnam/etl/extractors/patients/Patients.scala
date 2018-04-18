@@ -1,8 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
+import java.sql.Timestamp
 import fr.polytechnique.cmap.cnam.etl.patients._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
+import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 
@@ -53,7 +55,8 @@ class Patients(config: PatientsConfig) {
         col("mco.deathDate"))
     )
 
-    val age = floor(months_between(lit(config.ageReferenceDate), birthDate) / 12)
+    val ageReferenceDate: Timestamp = config.ageReferenceDate
+    val age = floor(months_between(lit(ageReferenceDate), birthDate) / 12)
     val filterPatientsByAge = age >= config.minAge && age < config.maxAge
 
     patients.where(filterPatientsByAge)

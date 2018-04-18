@@ -13,6 +13,6 @@ package object implicits {
     java.sql.Timestamp.valueOf(datetime)
   }
   implicit def javaDateToTimestamp(date: LocalDate): java.sql.Timestamp = {
-    java.sql.Timestamp.valueOf(LocalDateTime.of(date, LocalTime.of(0, 0, 0)))
+    java.sql.Timestamp.valueOf(date.atStartOfDay)
   }
 }

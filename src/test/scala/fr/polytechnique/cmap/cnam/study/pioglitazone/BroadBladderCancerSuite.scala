@@ -41,7 +41,7 @@ class BroadBladderCancerSuite extends SharedContext {
     ).toDS
 
     // When
-    import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes.BroadBladderCancer.isDirectDiagnosis
+    import BroadBladderCancer.isDirectDiagnosis
     val result = inputDS.filter(ev => isDirectDiagnosis(ev))
 
     // Then
@@ -68,7 +68,7 @@ class BroadBladderCancerSuite extends SharedContext {
     ).toDS
 
     // When
-    import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes.BroadBladderCancer.BroadBladderCancerOutcome
+    import BroadBladderCancer.BroadBladderCancerOutcome
     val result = inputDS.directOutcomes
 
     // Then

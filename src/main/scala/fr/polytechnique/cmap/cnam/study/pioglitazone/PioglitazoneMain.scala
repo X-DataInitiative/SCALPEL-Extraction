@@ -3,17 +3,17 @@ package fr.polytechnique.cmap.cnam.study.pioglitazone
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.extractors.acts.{MedicalActs, MedicalActsConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActs
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.Diagnoses
-import fr.polytechnique.cmap.cnam.etl.extractors.molecules.{MoleculePurchases, MoleculePurchasesConfig}
-import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
+import fr.polytechnique.cmap.cnam.etl.extractors.patients.Patients
 import fr.polytechnique.cmap.cnam.etl.extractors.tracklosses.{Tracklosses, TracklossesConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.{EventFilters, PatientFilters}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.MLPPLoader
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposuresTransformerConfig, ExposuresTransformer}
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposuresTransformer, ExposuresTransformerConfig}
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes._
@@ -36,9 +36,9 @@ object PioglitazoneMain extends Main {
     import EventFilters._
     import PatientFilters._
 
-    val conf = PioglitazoneConfig.load(argsMap("conf"), argsMap("env"))
-    val inputPaths = conf.input
-    val outputPaths = conf.output
+    val config = PioglitazoneConfig.load(argsMap("conf"), argsMap("env"))
+    val inputPaths = config.input
+    val outputPaths = config.output
     logger.info("Input Paths: " + inputPaths.toString)
     logger.info("Output Paths: " + outputPaths.toString)
     logger.info("study config....")
@@ -49,22 +49,16 @@ object PioglitazoneMain extends Main {
     val sources: Sources = Sources.sanitize(sqlContext.readSources(inputPaths))
 
     logger.info("Extracting patients...")
-    val patientsConfig = PatientsConfig(conf.base.ageReferenceDate)
-    val patients: Dataset[Patient] = new Patients(patientsConfig).extract(sources).cache()
+    val patients: Dataset[Patient] = new Patients(config.patients).extract(sources).cache()
 
     logger.info("Extracting molecule events...")
-    val moleculesConfig = MoleculePurchasesConfig(drugClasses = conf.molecules.drugClasses)
-    val drugEvents: Dataset[Event[Molecule]] = new MoleculePurchases(moleculesConfig).extract(sources).cache()
+    val drugEvents: Dataset[Event[Molecule]] = new MoleculePurchases(config.molecules).extract(sources).cache()
 
     logger.info("Extracting diagnosis events...")
-    val diseaseEvents: Dataset[Event[Diagnosis]] = new Diagnoses(conf.diagnoses).extract(sources).cache()
+    val diseaseEvents: Dataset[Event[Diagnosis]] = new Diagnoses(config.diagnoses).extract(sources).cache()
 
     logger.info("Extracting medical acts...")
-    val medicalActConfig = MedicalActsConfig(
-      conf.medicalActs.dcirCodes,
-      conf.medicalActs.mcoCIMCodes,
-      conf.medicalActs.mcoCCAMCodes)
-    val medicalActs = new MedicalActs(medicalActConfig).extract(sources)
+    val medicalActs = new MedicalActs(config.medicalActs).extract(sources)
 
     logger.info("Merging all events...")
     val allEvents: Dataset[Event[AnyEvent]] = unionDatasets(
@@ -73,7 +67,7 @@ object PioglitazoneMain extends Main {
     )
 
     logger.info("Extracting Tracklosses...")
-    val tracklossConfig = TracklossesConfig(studyEnd = conf.base.studyEnd)
+    val tracklossConfig = TracklossesConfig(studyEnd = config.base.studyEnd)
     val tracklosses = new Tracklosses(tracklossConfig).extract(sources).cache()
 
     logger.info("Writing patients...")
@@ -83,33 +77,28 @@ object PioglitazoneMain extends Main {
     allEvents.toDF.write.parquet(outputPaths.flatEvents)
 
     logger.info("Extracting Observations...")
-    val observations = new ObservationPeriodTransformer(conf.base.studyStart, conf.base.studyEnd)
-      .transform(allEvents)
-      .cache()
+    val observations = new ObservationPeriodTransformer(config.observationPeriod).transform(allEvents).cache()
 
     logger.info("Extracting cancer outcomes...")
-    val (outcomeName, outcomes) = conf.outcomes.cancerDefinition match {
-      case CancerDefinition.Broad => (BroadBladderCancer.outcomeName, BroadBladderCancer.transform(diseaseEvents))
-      case CancerDefinition.Naive => (NaiveBladderCancer.outcomeName, NaiveBladderCancer.transform(diseaseEvents))
-      case CancerDefinition.Narrow => (NarrowBladderCancer.outcomeName, NarrowBladderCancer.transform(diseaseEvents, medicalActs))
-    }
+    val outcomesTransformer = new PioglitazoneOutcomeTransformer(config.outcomes.cancerDefinition)
+    val outcomes = outcomesTransformer.transform(diseaseEvents, medicalActs)
 
     logger.info("Extracting Follow-up...")
     val patiensWithObservations = patients.joinWith(observations, patients.col("patientId") === observations.col("patientId"))
 
-    val followups = new FollowUpTransformer(delayMonths = 6, firstTargetDisease = true, Some("cancer"))
+    val followups = new FollowUpTransformer(config.followUp)
       .transform(patiensWithObservations, drugEvents, outcomes, tracklosses)
       .cache()
 
     logger.info("Filtering Patients...")
     val filteredPatients = {
-      val firstFilterResult = if (conf.filters.filterDelayedEntries)
-        patients.filterDelayedPatients(drugEvents, conf.base.studyStart, conf.filters.delayedEntryThreshold)
+      val firstFilterResult = if (config.filters.filterDelayedEntries)
+        patients.filterDelayedPatients(drugEvents, config.base.studyStart, config.filters.delayedEntryThreshold)
       else
         patients
 
-      if (conf.filters.filterDiagnosedPatients)
-        firstFilterResult.filterEarlyDiagnosedPatients(outcomes, followups, outcomeName)
+      if (config.filters.filterDiagnosedPatients)
+        firstFilterResult.filterEarlyDiagnosedPatients(outcomes, followups, outcomesTransformer.outcomeName)
       else
         patients
     }
@@ -118,7 +107,8 @@ object PioglitazoneMain extends Main {
     outcomes.filterPatients(filteredPatients.idsSet)
 
     logger.info("Extracting Exposures...")
-    val patientsWithFollowups = filteredPatients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
+    val patientsWithFollowups = filteredPatients.joinWith(
+      followups, followups.col("patientId") === patients.col("patientId"))
 
     val exposuresConfig = ExposuresTransformerConfig()
 
@@ -130,7 +120,7 @@ object PioglitazoneMain extends Main {
     exposures.write.parquet(outputPaths.exposures)
 
     logger.info("Extracting MLPP features...")
-    val params = MLPPLoader.Params(minTimestamp = conf.base.studyStart, maxTimestamp = conf.base.studyEnd)
+    val params = MLPPLoader.Params(minTimestamp = config.base.studyStart, maxTimestamp = config.base.studyEnd)
     MLPPLoader(params).load(outcomes, exposures, patients, outputPaths.mlppFeatures)
 
     Some(allEvents)

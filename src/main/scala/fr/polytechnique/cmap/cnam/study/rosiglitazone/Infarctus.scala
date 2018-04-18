@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
 import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, Outcome}
-import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer
 import org.apache.spark.sql.Dataset
 
-object Infarctus extends OutcomeTransformer{
+object Infarctus extends OutcomesTransformer{
 
   override val outcomeName: String = "infarctus"
 

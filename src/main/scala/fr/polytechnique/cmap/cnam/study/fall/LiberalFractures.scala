@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
 import fr.polytechnique.cmap.cnam.etl.events.{Event, MedicalAct, Outcome}
-import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer
 import org.apache.spark.sql.Dataset
 
-object LiberalFractures extends OutcomeTransformer {
+object LiberalFractures extends OutcomesTransformer {
 
   override val outcomeName = "Liberal"
 

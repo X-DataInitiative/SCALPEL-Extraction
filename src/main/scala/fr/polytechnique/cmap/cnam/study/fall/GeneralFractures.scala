@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
 import org.apache.spark.sql.Dataset
@@ -11,7 +11,7 @@ import org.apache.spark.sql.Dataset
  * https://datainitiative.atlassian.net/wiki/spaces/CFC/pages/61282101/General+fractures+Fall+study
  */
 
-object GeneralFractures extends OutcomeTransformer with FractureCodes {
+object GeneralFractures extends OutcomesTransformer with FractureCodes {
 
   override val outcomeName: String = "generic_fall"
 

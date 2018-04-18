@@ -16,12 +16,13 @@ trait WeightAggregator {
   }
 }
 
-
 abstract class WeightAggregatorImpl(data: DataFrame) {
 
   // todo: refactor the parametrization (maybe passing a single config object).
   // The current approach is not maintainable nor scalable
   // Note [2018/04]: This can evolve into an ADT (pureconfig supports it)
+  // Note [2018/04]: Apparently, the first three parameters (cum*) are note being used by any
+  //   strategy. This needs to be investigated.
   def aggregateWeight(
       cumWindow: Option[Int] = None,
       cumStartThreshold: Option[Int] = None,

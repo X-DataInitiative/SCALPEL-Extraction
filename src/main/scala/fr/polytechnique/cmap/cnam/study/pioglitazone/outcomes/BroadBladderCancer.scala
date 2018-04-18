@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer
 import fr.polytechnique.cmap.cnam.study.pioglitazone.PioglitazoneStudyCodes
 
 /*
@@ -10,7 +10,7 @@ import fr.polytechnique.cmap.cnam.study.pioglitazone.PioglitazoneStudyCodes
  * https://datainitiative.atlassian.net/wiki/pages/viewpage.action?pageId=60093165
  */
 
-object BroadBladderCancer extends OutcomeTransformer with PioglitazoneStudyCodes {
+object BroadBladderCancer extends OutcomesTransformer with PioglitazoneStudyCodes {
 
   override val outcomeName: String = "broad_bladder_cancer"
 

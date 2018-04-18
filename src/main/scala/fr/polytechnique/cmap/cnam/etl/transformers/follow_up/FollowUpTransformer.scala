@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
 
-
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
@@ -11,8 +10,8 @@ import fr.polytechnique.cmap.cnam.etl.transformers.observation._
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
 import fr.polytechnique.cmap.cnam.util.RichDataFrames._
 
+class FollowUpTransformer(config: FollowUpTransformerConfig) {
 
-class FollowUpTransformer(delayMonths: Int, firstTargetDisease: Boolean, outcomeName: Option[String]) {
   import Columns._
 
   val outputColumns = List(
@@ -22,7 +21,7 @@ class FollowUpTransformer(delayMonths: Int, firstTargetDisease: Boolean, outcome
     col(EndReason)
   )
 
-  val followUpEndModelCandidates = if(firstTargetDisease)
+  val followUpEndModelCandidates = if(config.firstTargetDisease)
     List(col(TracklossDate), col(DeathDate), col(ObservationEnd), col(FirstTargetDiseaseDate))
   else
     List(col(TracklossDate), col(DeathDate), col(ObservationEnd))
@@ -53,13 +52,13 @@ class FollowUpTransformer(delayMonths: Int, firstTargetDisease: Boolean, outcome
     val window = Window.partitionBy(PatientID)
 
     val firstTargetDiseaseDate = min(
-        when(col(Category) === Outcome.category && col(Value).contains(outcomeName.getOrElse(None)), col(Start))
+        when(col(Category) === Outcome.category && col(Value).contains(config.outcomeName.getOrElse(None)), col(Start))
     ).over(window)
 
     import input.sqlContext.implicits._
 
     input.repartition(col(PatientID))
-      .withFollowUpStart(delayMonths)
+      .withFollowUpStart(config.delayMonths)
       .withTrackloss
       .withColumn(FirstTargetDiseaseDate, firstTargetDiseaseDate)
       .withColumn(FollowUpEnd,  minColumn(followUpEndModelCandidates:_*))
@@ -69,8 +68,6 @@ class FollowUpTransformer(delayMonths: Int, firstTargetDisease: Boolean, outcome
       .dropDuplicates(Seq(PatientID))
       .as[FollowUp]
   }
-
-
 }
 
 object FollowUpTransformer {

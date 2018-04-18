@@ -1,22 +1,27 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
 
+import org.apache.spark.sql.functions.lit
+import org.apache.spark.sql.types.TimestampType
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriod
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
-import org.apache.spark.sql.functions.lit
-import org.apache.spark.sql.types.TimestampType
 
 
 
 class FollowUpTransformerSuite extends SharedContext {
 
+  case class FollowUpTestConfig(
+      delayMonths: Int = 2,
+      firstTargetDisease: Boolean = true,
+      outcomeName: Option[String] = Some("cancer")) extends FollowUpTransformerConfig
+
   "withFollowUpStart" should "add a column with the start of the follow-up period" in {
 
     val sqlCtx = sqlContext
-    import Columns._
     import sqlCtx.implicits._
+    import Columns._
 
     // Given
     val input = Seq(
@@ -49,8 +54,8 @@ class FollowUpTransformerSuite extends SharedContext {
   "withTrackLoss" should "add the date of the right trackloss event" in {
 
     val sqlCtx = sqlContext
-    import Columns._
     import sqlCtx.implicits._
+    import Columns._
 
     // Given
     val input = Seq(
@@ -78,8 +83,8 @@ class FollowUpTransformerSuite extends SharedContext {
   it should "get the first trackloss" in {
 
     val sqlCtx = sqlContext
-    import Columns._
     import sqlCtx.implicits._
+    import Columns._
 
     // Given
     val input = Seq(
@@ -111,8 +116,8 @@ class FollowUpTransformerSuite extends SharedContext {
   it should "avoid useless trackloss" in {
 
     val sqlCtx = sqlContext
-    import Columns._
     import sqlCtx.implicits._
+    import Columns._
 
     // Given
     val input = Seq(
@@ -139,8 +144,8 @@ class FollowUpTransformerSuite extends SharedContext {
 
   "withEndReason" should "add a column for the reason of follow-up end" in {
     val sqlCtx = sqlContext
-    import Columns._
     import sqlCtx.implicits._
+    import Columns._
 
     // Given
     val input = Seq(
@@ -204,8 +209,7 @@ class FollowUpTransformerSuite extends SharedContext {
       FollowUp("pika", makeTS(2006, 3, 1), makeTS(2008, 10, 1), "Death"),
       FollowUp("patient03", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd")
     ).toDS
-
-    val transformer = new FollowUpTransformer(2, true, Some("cancer"))
+    val transformer = new FollowUpTransformer(FollowUpTestConfig())
 
     // When
     val result = transformer.transform(patients, prescriptions, outcomes, tracklosses)
@@ -248,13 +252,12 @@ class FollowUpTransformerSuite extends SharedContext {
       FollowUp("patient03", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd")
     ).toDS
 
-    val transformer = new FollowUpTransformer(2, false, Some("cancer"))
+    val transformer = new FollowUpTransformer(FollowUpTestConfig(firstTargetDisease = false))
 
     // When
     val result = transformer.transform(patients, prescriptions, outcomes, tracklosses)
 
     // Then
-
     assertDSs(result, expected)
   }
 
@@ -286,13 +289,12 @@ class FollowUpTransformerSuite extends SharedContext {
       FollowUp("patient03", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd")
     ).toDS
 
-    val transformer = new FollowUpTransformer(2, false, Some("cancer"))
+    val transformer = new FollowUpTransformer(FollowUpTestConfig(firstTargetDisease = false))
 
     // When
     val result = transformer.transform(patients, prescriptions, outcomes, tracklosses)
 
     // Then
-
     assertDSs(result, expected)
   }
 }

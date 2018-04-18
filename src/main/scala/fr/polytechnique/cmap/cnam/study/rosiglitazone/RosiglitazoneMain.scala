@@ -11,9 +11,9 @@ import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.MLPPLoader
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposuresTransformerConfig, ExposuresTransformer}
-import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
-import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposuresTransformer, ExposuresTransformerConfig}
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.{FollowUpTransformer, FollowUpTransformerConfig}
+import fr.polytechnique.cmap.cnam.etl.transformers.observation.{ObservationPeriodTransformer, ObservationPeriodTransformerConfig}
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
 
@@ -72,16 +72,18 @@ object RosiglitazoneMain extends Main{
     outcomes.toDF.write.parquet(outputPaths.outcomes)
 
     logger.info("Extracting Observations...")
-    val observations = new ObservationPeriodTransformer(conf.base.studyStart, conf.base.studyEnd)
-      .transform(allEvents)
-      .cache()
+    val observations = new ObservationPeriodTransformer(
+      ObservationPeriodTransformerConfig(conf.base.studyStart, conf.base.studyEnd))
+        .transform(allEvents)
+        .cache()
 
     logger.info("Extracting Follow-up...")
     val patientsWithObservations = patients.joinWith(observations, patients.col("patientId") === observations.col("patientId"))
 
-    val followups = new FollowUpTransformer(conf.exposures.startDelay, firstTargetDisease =  true, Some("heart_problem"))
-      .transform(patientsWithObservations, drugEvents, outcomes, tracklosses)
-      .cache()
+    val followups = new FollowUpTransformer(
+      FollowUpTransformerConfig(conf.exposures.startDelay, firstTargetDisease =  true, Some("heart_problem")))
+        .transform(patientsWithObservations, drugEvents, outcomes, tracklosses)
+        .cache()
 
     logger.info("Extracting Exposures...")
     val patientsWithFollowups = patients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
