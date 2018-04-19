@@ -1,9 +1,8 @@
-package fr.polytechnique.cmap.cnam.study.pioglitazone
+package fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes.NarrowBladderCancer
 import fr.polytechnique.cmap.cnam.util._
 import fr.polytechnique.cmap.cnam.util.functions._
 

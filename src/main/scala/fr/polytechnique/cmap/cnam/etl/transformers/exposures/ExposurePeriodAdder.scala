@@ -23,6 +23,5 @@ abstract class ExposurePeriodAdderImpl(data: DataFrame) {
       startDelay: Period,
       purchasesWindow: Period,
       endThreshold: Option[Period],
-      endDelay: Option[Period])
-    : DataFrame
+      endDelay: Option[Period]): DataFrame
 }

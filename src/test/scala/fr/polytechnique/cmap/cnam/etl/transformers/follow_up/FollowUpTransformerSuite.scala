@@ -13,9 +13,10 @@ import fr.polytechnique.cmap.cnam.util.functions.makeTS
 class FollowUpTransformerSuite extends SharedContext {
 
   case class FollowUpTestConfig(
-      delayMonths: Int = 2,
-      firstTargetDisease: Boolean = true,
-      outcomeName: Option[String] = Some("cancer")) extends FollowUpTransformerConfig
+      override val delayMonths: Int = 2,
+      override val firstTargetDisease: Boolean = true,
+      override val outcomeName: Option[String] = Some("cancer"))
+    extends FollowUpTransformerConfig(delayMonths, firstTargetDisease, outcomeName)
 
   "withFollowUpStart" should "add a column with the start of the follow-up period" in {
 

@@ -35,73 +35,78 @@ case class PioglitazoneConfig(
 object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
 
   /** Base fixed parameters for this study. */
-  final object BaseConfig extends BaseConfig {
-    val ageReferenceDate: LocalDate = LocalDate.of(2007, 1, 1)
-    val studyStart: LocalDate = LocalDate.of(2006, 1, 1)
-    val studyEnd: LocalDate = LocalDate.of(2010, 1, 1)
-  }
+  final object BaseConfig extends BaseConfig(
+    ageReferenceDate = LocalDate.of(2007, 1, 1),
+    studyStart = LocalDate.of(2006, 1, 1),
+    studyEnd = LocalDate.of(2010, 1, 1)
+  )
 
   /** Fixed parameters needed for the Patients extractors. */
-  final object PatientsConfig extends PatientsConfig {
-    override val ageReferenceDate: LocalDate = PioglitazoneConfig.BaseConfig.ageReferenceDate
-  }
+  final object PatientsConfig extends PatientsConfig(
+    ageReferenceDate = PioglitazoneConfig.BaseConfig.ageReferenceDate
+  )
 
   /** Fixed parameters needed for the Drugs extractors. */
-  final object MoleculePurchasesConfig extends MoleculePurchasesConfig {
-    val drugClasses: List[String] = List("A10")
-    val maxBoxQuantity: Int = 10
-  }
+  final object MoleculePurchasesConfig extends MoleculePurchasesConfig(
+    drugClasses = List("A10"),
+    maxBoxQuantity = 10
+  )
 
   /** Fixed parameters needed for the Diagnoses extractors. */
-  final object DiagnosesConfig extends DiagnosesConfig {
-    val dpCodes: List[String] = primaryDiagCode :: secondaryDiagCodes
-    val drCodes: List[String] = primaryDiagCode :: secondaryDiagCodes
-    val daCodes: List[String] = List(primaryDiagCode)
-    val imbCodes: List[String] = List(primaryDiagCode)
-  }
+  final object DiagnosesConfig extends DiagnosesConfig(
+    dpCodes = primaryDiagCode :: secondaryDiagCodes,
+    drCodes = primaryDiagCode :: secondaryDiagCodes,
+    daCodes = List(primaryDiagCode),
+    imbCodes = List(primaryDiagCode)
+  )
 
   /** Fixed parameters needed for the Medical Acts extractors. */
-  final object MedicalActsConfig extends MedicalActsConfig {
-    val dcirCodes: List[String] = dcirCCAMActCodes
-    val mcoCIMCodes: List[String] = mcoCIM10ActCodes
-    val mcoCCAMCodes: List[String] = mcoCCAMActCodes
-    val mcoCECodes: List[String] = List()
-  }
+  final object MedicalActsConfig extends MedicalActsConfig(
+    dcirCodes = dcirCCAMActCodes,
+    mcoCIMCodes = mcoCIM10ActCodes,
+    mcoCCAMCodes = mcoCCAMActCodes,
+    mcoCECodes = List()
+  )
 
   /** Fixed parameters needed for the ObservationPeriod transformer. */
-  final object ObservationPeriodTransformerConfig extends ObservationPeriodTransformerConfig {
-    val studyStart: LocalDate = BaseConfig.studyStart
-    val studyEnd: LocalDate = BaseConfig.studyEnd
-  }
+  final object ObservationPeriodTransformerConfig extends ObservationPeriodTransformerConfig(
+    studyStart = BaseConfig.studyStart,
+    studyEnd = BaseConfig.studyEnd
+  )
 
   /** Fixed parameters needed for the FollowUp transformer. */
-  final object FollowUpTransformerConfig extends FollowUpTransformerConfig {
-    val delayMonths: Int = 6
-    val firstTargetDisease: Boolean = true
-    val outcomeName: Option[String] = Some("cancer")
-  }
+  final object FollowUpTransformerConfig extends FollowUpTransformerConfig(
+    delayMonths = 6,
+    firstTargetDisease = true,
+    outcomeName = Some("cancer")
+  )
 
   /** Parameters needed for the Exposures transformer. */
   case class ExposuresConfig(
-      minPurchases: Int = 2,
-      startDelay: Period = 3.month,
-      purchasesWindow: Period = 6.months) extends ExposuresTransformerConfig {
+      override val minPurchases: Int = 2,
+      override val startDelay: Period = 3.month,
+      override val purchasesWindow: Period = 6.months) extends ExposuresTransformerConfig(
 
-    val periodStrategy: ExposurePeriodStrategy = ExposurePeriodStrategy.Unlimited
-    val endThreshold: Option[Period] = None
-    val endDelay: Option[Period] = None
+    minPurchases = minPurchases,
+    startDelay = startDelay,
+    purchasesWindow = purchasesWindow,
 
-    val weightAggStrategy: WeightAggStrategy = WeightAggStrategy.NonCumulative
-    val cumulativeExposureWindow: Option[Int] = None
-    val cumulativeStartThreshold: Option[Int] = None
-    val cumulativeEndThreshold: Option[Int] = None
-    val dosageLevelIntervals: Option[List[Int]] = None
-    val purchaseIntervals: Option[List[Int]] = None
-  }
+    periodStrategy = ExposurePeriodStrategy.Unlimited,
+    endThreshold = None,
+    endDelay = None,
+
+    weightAggStrategy = WeightAggStrategy.NonCumulative,
+    cumulativeExposureWindow = None,
+    cumulativeStartThreshold = None,
+    cumulativeEndThreshold = None,
+    dosageLevelIntervals = None,
+    purchaseIntervals = None
+  )
 
   /** Parameters needed for the Outcomes transformer. */
   case class OutcomesConfig(
-      cancerDefinition: CancerDefinition = CancerDefinition.default) extends OutcomesTransformerConfig
+      cancerDefinition: CancerDefinition = CancerDefinition.default)
+    extends OutcomesTransformerConfig
 
   /** Parameters needed for the Filters. */
   case class FiltersConfig(

@@ -7,10 +7,10 @@ import fr.polytechnique.cmap.cnam.util.functions._
 
 class ObservationPeriodTransformerSuite extends SharedContext {
 
-  val testConfig = new ObservationPeriodTransformerConfig {
-    override val studyStart: LocalDate = LocalDate.of(2006, 1, 1)
-    override val studyEnd: LocalDate = LocalDate.of(2010, 1, 1)
-  }
+  val testConfig = new ObservationPeriodTransformerConfig(
+    studyStart = LocalDate.of(2006, 1, 1),
+    studyEnd = LocalDate.of(2010, 1, 1)
+  )
 
   "withObservationStart" should "add a column with the start of the observation period" in {
     val sqlCtx = sqlContext

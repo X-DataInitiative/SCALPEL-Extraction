@@ -2,11 +2,12 @@ package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
 import me.danielpes.spark.datetime.Period
 import me.danielpes.spark.datetime.implicits._
+import fr.polytechnique.cmap.cnam.etl.transformers.TransformerConfig
 
 /**
   * A class to represent the exposure we want to generate from the data
   *
-  * periodStrategy            Period stratgy. Possible values: "unlimited" | "limited"
+  * periodStrategy            Period strategy. Possible values: "unlimited" | "limited"
   *                           (multiple exposures with start and end)
   *
   * startDelay                Number of periods after which a patient will be considered exposed
@@ -21,7 +22,7 @@ import me.danielpes.spark.datetime.implicits._
   * weightAggStrategy         Weight Aggregation strategy.
   *                           Possible values: "non-cumulative" |  "purchase-based" | "dosage-based" | "time-based"
   *
-  * endThreshold              If periodStartegy="limited", represents the period without purchases
+  * endThreshold              If periodStrategy="limited", represents the period without purchases
   *                           for an exposure to be considered "finished"
   *
   * cumulativeExposureWindow  Number of months to quantile.
@@ -34,30 +35,25 @@ import me.danielpes.spark.datetime.implicits._
   *
   * purchaseIntervals         List of consumption levels in mg / put only 0 when we want all the weights to 1
   */
-trait ExposuresTransformerConfig {
-  val startDelay: Period
-  val minPurchases: Int
-  val purchasesWindow: Period
+class ExposuresTransformerConfig(
+  val startDelay: Period,
+  val minPurchases: Int,
+  val purchasesWindow: Period,
 
   // Idea for the future: the following blocks could evolve into two ADTs (pureconfig supports it)
-  val periodStrategy: ExposurePeriodStrategy
-  val endThreshold: Option[Period]
-  val endDelay: Option[Period]
+  val periodStrategy: ExposurePeriodStrategy,
+  val endThreshold: Option[Period],
+  val endDelay: Option[Period],
 
-  val weightAggStrategy: WeightAggStrategy
-  val cumulativeExposureWindow: Option[Int]
-  val cumulativeStartThreshold: Option[Int]
-  val cumulativeEndThreshold: Option[Int]
-  val dosageLevelIntervals: Option[List[Int]]
-  val purchaseIntervals: Option[List[Int]]
-}
+  val weightAggStrategy: WeightAggStrategy,
+  val cumulativeExposureWindow: Option[Int],
+  val cumulativeStartThreshold: Option[Int],
+  val cumulativeEndThreshold: Option[Int],
+  val dosageLevelIntervals: Option[List[Int]],
+  val purchaseIntervals: Option[List[Int]]) extends TransformerConfig
 
 object ExposuresTransformerConfig {
 
-  /**
-    * @deprecated
-    * For backwards compatibility
-    */
   def apply(
       startDelay: Period = 3.months,
       minPurchases: Int = 2,
@@ -72,40 +68,25 @@ object ExposuresTransformerConfig {
       cumulativeStartThreshold: Option[Int] = Some(6),
       cumulativeEndThreshold: Option[Int] = Some(4),
       dosageLevelIntervals: Option[List[Int]] = Some(List(0, 100, 200, 300, 400, 500)),
-      purchaseIntervals: Option[List[Int]] = Some(List(0, 3, 5))) // TODO : remove
+      purchaseIntervals: Option[List[Int]] = Some(List(0, 3, 5)))
     : ExposuresTransformerConfig = {
 
-    val _startDelay = startDelay
-    val _minPurchases = minPurchases
-    val _purchasesWindow = purchasesWindow
+    new ExposuresTransformerConfig (
+      startDelay,
+      minPurchases,
+      purchasesWindow,
 
-    val _periodStrategy = periodStrategy
-    val _endThreshold = endThreshold
-    val _endDelay = endDelay
+      periodStrategy,
+      endThreshold,
+      endDelay,
 
-    val _weightAggStrategy = weightAggStrategy
-    val _cumulativeExposureWindow = cumulativeExposureWindow
-    val _cumulativeStartThreshold = cumulativeStartThreshold
-    val _cumulativeEndThreshold = cumulativeEndThreshold
-    val _dosageLevelIntervals = dosageLevelIntervals
-    val _purchaseIntervals = purchaseIntervals
-
-    new ExposuresTransformerConfig {
-      val startDelay: Period = _startDelay
-      val minPurchases: Int = _minPurchases
-      val purchasesWindow: Period = _purchasesWindow
-
-      val periodStrategy: ExposurePeriodStrategy = _periodStrategy
-      val endThreshold: Option[Period] = _endThreshold
-      val endDelay: Option[Period] = _endDelay
-
-      val weightAggStrategy: WeightAggStrategy = _weightAggStrategy
-      val cumulativeExposureWindow: Option[Int] = _cumulativeExposureWindow
-      val cumulativeStartThreshold: Option[Int] = _cumulativeStartThreshold
-      val cumulativeEndThreshold: Option[Int] = _cumulativeEndThreshold
-      val dosageLevelIntervals: Option[List[Int]] = _dosageLevelIntervals
-      val purchaseIntervals: Option[List[Int]] = _purchaseIntervals
-    }
+      weightAggStrategy,
+      cumulativeExposureWindow,
+      cumulativeStartThreshold,
+      cumulativeEndThreshold,
+      dosageLevelIntervals,
+      purchaseIntervals
+    )
   }
 }
 

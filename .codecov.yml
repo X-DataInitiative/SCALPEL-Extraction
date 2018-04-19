@@ -1,2 +1,8 @@
 ignore:
   - "**/*Main.scala"
+
+coverage:
+  status:
+    patch:
+      default:
+        target: 75%

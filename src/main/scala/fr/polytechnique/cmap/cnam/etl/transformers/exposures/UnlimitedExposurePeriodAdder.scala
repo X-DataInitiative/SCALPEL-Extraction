@@ -16,8 +16,7 @@ private class UnlimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeri
       startDelay: Period = 3.months,
       purchasesWindow: Period = 6.months,
       endThreshold: Option[Period] = None,
-      endDelay: Option[Period] = None)
-    : DataFrame = {
+      endDelay: Option[Period] = None): DataFrame = {
 
     val window = Window.partitionBy(PatientID, Value)
 
