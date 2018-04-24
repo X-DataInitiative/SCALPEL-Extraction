@@ -2,7 +2,8 @@ package fr.polytechnique.cmap.cnam.study.fall
 
 import java.io.PrintWriter
 import java.sql.Timestamp
-
+import scala.collection.mutable
+import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.DcirAct
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.{MedicalActs, MedicalActsConfig}
@@ -19,9 +20,6 @@ import fr.polytechnique.cmap.cnam.study.fall.follow_up.FallStudyFollowUps
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.functions._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
-import org.apache.spark.sql.{Dataset, SQLContext}
-
-import scala.collection.mutable
 
 object FallMain extends Main with FractureCodes {
 
@@ -62,7 +60,7 @@ object FallMain extends Main with FractureCodes {
   }
 
   object FallEnv extends Env {
-    override val FeaturingPath = Path("/shared/fall/staging/featuring/")
+    override val FeaturingPath = Path("/shared/fall/staging/master/pharma/")
     override val McoPath = Path("/shared/fall/All/flattening/flat_table/MCO")
     override val McoCePath = Path("/shared/fall/All/flattening/flat_table/MCO_CE")
     override val DcirPath = Path("/shared/fall/All/flattening/flat_table/DCIR")
@@ -115,49 +113,29 @@ object FallMain extends Main with FractureCodes {
     val env = getEnv(argsMap)
 
     val sources = Sources.sanitize(readSources(sqlContext, env))
-    val dcir = sources.dcir.get.persist()
-    val mco = sources.mco.get.persist()
+    val dcir = sources.dcir.get.repartition(4000).persist()
+    val mco = sources.mco.get.repartition(4000).persist()
 
     val fracturesCodes = BodySite.extractCIM10CodesFromSites(List(BodySites))
     val fracturesPath = Path(env.FeaturingPath, "fractures")
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
-    // Extract Patients
-    val patients = new Patients(PatientsConfig(env.StudyStart)).extract(sources).cache()
-    operationsMetadata += {
-      OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R"), OperationTypes.Patients, patients.toDF, env.FeaturingPath)
-    }
 
     // Extract Drug purchases
     logger.info("Drug Purchases")
     val drugPurchases = DrugsExtractor
-      .extract(DrugClassificationLevel.Therapeutic, sources, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
+      .extract(DrugClassificationLevel.Pharmacological, sources, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
       .cache()
     operationsMetadata += {
       OperationReporter.report("drug_purchases", List("DCIR"), OperationTypes.Dispensations, drugPurchases.toDF, env.FeaturingPath)
     }
 
-
-    // Medical Acts
-    val codesCCAM = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList
-    val acts = new MedicalActs(
-       MedicalActsConfig(
-         dcirCodes = codesCCAM,
-         mcoCECodes = codesCCAM
-       )
-    ).extract(sources).persist()
+    // Extract Patients
+    val patients = new Patients(PatientsConfig(env.StudyStart)).extract(sources).cache()
     operationsMetadata += {
-      OperationReporter.report("acts", List("DCIR", "MCO", "MCO_CE"), OperationTypes.MedicalActs, acts.toDF, env.FeaturingPath)
+      OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R"), OperationTypes.Patients, patients.toDF, env.FeaturingPath)
     }
-    dcir.unpersist()
-
-    // Diagnoses
-    val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = fracturesCodes, daCodes = fracturesCodes)).extract(sources).persist()
-    operationsMetadata += {
-      OperationReporter.report("diagnoses", List("MCO", "IR_IMB_R"), OperationTypes.Diagnosis, diagnoses.toDF, env.FeaturingPath)
-    }
-    mco.unpersist()
 
     // Filter Patients
     import PatientFilters._
@@ -178,9 +156,36 @@ object FallMain extends Main with FractureCodes {
     }
     drugPurchases.unpersist()
 
+    // Medical Acts
+    val codesCCAM = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList
+    val acts = new MedicalActs(
+      MedicalActsConfig(
+        dcirCodes = codesCCAM,
+        mcoCECodes = codesCCAM
+      )
+    ).extract(sources).persist()
+    operationsMetadata += {
+      OperationReporter.report("acts", List("DCIR", "MCO", "MCO_CE"), OperationTypes.MedicalActs, acts.toDF, env.FeaturingPath)
+    }
+
+    dcir.unpersist()
+
+    // Diagnoses
+    val diagnoses = new Diagnoses(DiagnosesConfig(dpCodes = fracturesCodes, daCodes = fracturesCodes)).extract(sources).persist()
+    operationsMetadata += {
+      OperationReporter.report("diagnoses", List("MCO", "IR_IMB_R"), OperationTypes.Diagnosis, diagnoses.toDF, env.FeaturingPath)
+    }
+    mco.unpersist()
+
+    // Hospitalized Fractures
+    val hospitalizedFractures = HospitalizedFractures.transform(diagnoses, acts, List(BodySites))
+    operationsMetadata += {
+      OperationReporter.report("hospitalized_fractures", List("diagnoses", "acts"), OperationTypes.Outcomes, hospitalizedFractures.toDF, fracturesPath)
+    }
+    diagnoses.unpersist()
+
     // Liberal Medical Acts
-    val liberalActs = acts.filter(act =>
-      act.groupID == DcirAct.groupID.Liberal && !CCAMExceptions.contains(act.value)).persist()
+    val liberalActs = acts.filter(act => act.groupID == DcirAct.groupID.Liberal && !CCAMExceptions.contains(act.value)).persist()
     operationsMetadata += {
       OperationReporter.report("liberal_acts", List("acts"), OperationTypes.MedicalActs, liberalActs.toDF, env.FeaturingPath)
     }
@@ -191,12 +196,6 @@ object FallMain extends Main with FractureCodes {
       OperationReporter.report("liberal_fractures", List("liberal_acts"), OperationTypes.Outcomes, liberalFractures.toDF, fracturesPath)
     }
     liberalActs.unpersist()
-
-    // Hospitalized Fractures
-    val hospitalizedFractures = HospitalizedFractures.transform(diagnoses, acts, List(BodySites))
-    operationsMetadata += {
-      OperationReporter.report("hospitalized_fractures", List("diagnoses", "acts"), OperationTypes.Outcomes, hospitalizedFractures.toDF, fracturesPath)
-    }
 
     // Public Ambulatory Fractures
     val publicAmbulatoryFractures = PublicAmbulatoryFractures.transform(acts)

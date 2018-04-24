@@ -94,7 +94,7 @@ private[patients] object DcirPatients {
       deathDateCol.as("deathDate")
     )
 
-    val persistedDcir = dcir.select(inputColumns:_*).persist()
+    val persistedDcir = dcir.select(inputColumns:_*)
 
     val birthYears: DataFrame = persistedDcir.findBirthYears
 
@@ -104,8 +104,6 @@ private[patients] object DcirPatients {
       .join(birthYears, "patientID")
       .estimateFields
       .as[Patient]
-
-    persistedDcir.unpersist()
     result
   }
 }

@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
-import org.apache.log4j.Logger
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.util.functions._
@@ -31,7 +30,7 @@ private[patients] object McoPatients {
           countDistinct(col("deathDate")).as("count"),
           min(col("deathDate")).as("deathDate")
         ).cache()
-
+      /*
       val conflicts = result
         .filter(col("count") > 1)
         .select(col("patientID"))
@@ -43,7 +42,7 @@ private[patients] object McoPatients {
           conflicts.deep.mkString("\n") +
           "\nhave conflicting DEATH DATES in MCO." +
           "\nTaking Minimum Death Dates")
-
+    */
       result
     }
   }
