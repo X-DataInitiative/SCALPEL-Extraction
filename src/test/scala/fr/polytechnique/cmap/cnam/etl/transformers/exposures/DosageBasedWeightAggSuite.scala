@@ -42,7 +42,7 @@ class DosageBasedWeightAggSuite extends SharedContext{
     // When
     val dosageLevelIntervals = List(0,140,200,300)
     val instance = new DosageBasedWeightAgg(input)
-    val result = instance.aggregateWeight(None,None,None,None,Some(dosageLevelIntervals))
+    val result = instance.aggregateWeight(dosageLevelIntervals = Some(dosageLevelIntervals))
       .select(PatientID, Value, ExposureStart, Weight)
 
     // Then
@@ -83,7 +83,7 @@ class DosageBasedWeightAggSuite extends SharedContext{
 
     val dosageLevelIntervals = List(0)
     val instance = new DosageBasedWeightAgg(input)
-    val result = instance.aggregateWeight(None,None,None,None,Some(dosageLevelIntervals))
+    val result = instance.aggregateWeight(dosageLevelIntervals = Some(dosageLevelIntervals))
       .select(PatientID, Value, ExposureStart, Weight)
 
     // Then
@@ -111,7 +111,7 @@ class DosageBasedWeightAggSuite extends SharedContext{
     // When
     val dosageLevelIntervals = List(0,140,200,300)
     val instance = new DosageBasedWeightAgg(input)
-    val result = instance.aggregateWeight(None,None,None,None,Some(dosageLevelIntervals))
+    val result = instance.aggregateWeight(dosageLevelIntervals = Some(dosageLevelIntervals))
       .select(PatientID, Value, ExposureStart, Weight)
     // Then
     assertDFs(result, expected)

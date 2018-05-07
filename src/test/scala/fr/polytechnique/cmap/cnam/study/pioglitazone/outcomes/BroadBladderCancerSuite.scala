@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.study.pioglitazone
+package fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, Outcome}
@@ -9,8 +9,8 @@ class BroadBladderCancerSuite extends SharedContext {
 
     // Given
     val sqlCtx = sqlContext
-    import fr.polytechnique.cmap.cnam.util.functions.makeTS
     import sqlCtx.implicits._
+    import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
     val inputDS = Seq(
       Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
@@ -40,7 +40,7 @@ class BroadBladderCancerSuite extends SharedContext {
     ).toDS
 
     // When
-    import fr.polytechnique.cmap.cnam.study.pioglitazone.BroadBladderCancer.isDirectDiagnosis
+    import BroadBladderCancer.isDirectDiagnosis
     val result = inputDS.filter(ev => isDirectDiagnosis(ev))
 
     // Then
@@ -51,8 +51,8 @@ class BroadBladderCancerSuite extends SharedContext {
 
     // Given
     val sqlCtx = sqlContext
-    import fr.polytechnique.cmap.cnam.util.functions.makeTS
     import sqlCtx.implicits._
+    import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
     val inputDS = Seq(
       Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
@@ -67,7 +67,7 @@ class BroadBladderCancerSuite extends SharedContext {
     ).toDS
 
     // When
-    import fr.polytechnique.cmap.cnam.study.pioglitazone.BroadBladderCancer.BroadBladderCancerOutcome
+    import BroadBladderCancer.BroadBladderCancerOutcome
     val result = inputDS.directOutcomes
 
     // Then
@@ -136,8 +136,8 @@ class BroadBladderCancerSuite extends SharedContext {
 
     // Given
     val sqlCtx = sqlContext
-    import fr.polytechnique.cmap.cnam.util.functions.makeTS
     import sqlCtx.implicits._
+    import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
     val inputDS = Seq(
       Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
@@ -169,8 +169,8 @@ class BroadBladderCancerSuite extends SharedContext {
   "transform" should "correctly transform the input Dataset according to BroadBladderCancer definition" in {
 
     val sqlCtx = sqlContext
-    import fr.polytechnique.cmap.cnam.util.functions.makeTS
     import sqlCtx.implicits._
+    import fr.polytechnique.cmap.cnam.util.functions.makeTS
     val inputDS = Seq(
       Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
       Event[Diagnosis]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),

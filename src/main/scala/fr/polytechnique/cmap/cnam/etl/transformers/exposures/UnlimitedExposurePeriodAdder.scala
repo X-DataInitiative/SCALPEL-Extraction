@@ -11,14 +11,12 @@ private class UnlimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeri
 
   import Columns._
 
-  // todo: add first-only parameter, similar to mlpp
   def withStartEnd(
       minPurchases: Int = 2,
       startDelay: Period = 3.months,
-      endDelay: Period = 0.months,
       purchasesWindow: Period = 6.months,
-      tracklossThreshold: Period = 4.months)
-    : DataFrame = {
+      endThreshold: Option[Period] = None,
+      endDelay: Option[Period] = None): DataFrame = {
 
     val window = Window.partitionBy(PatientID, Value)
 

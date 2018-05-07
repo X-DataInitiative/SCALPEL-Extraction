@@ -2,10 +2,10 @@ package fr.polytechnique.cmap.cnam.study.fall
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
 
-object PublicAmbulatoryFractures extends  OutcomeTransformer with FractureCodes {
+object PublicAmbulatoryFractures extends  OutcomesTransformer with FractureCodes {
 
   override val outcomeName: String = "public_ambulatory_fall"
 

@@ -1,28 +1,27 @@
 package fr.polytechnique.cmap.cnam.study.fall.exposures
 
 import java.sql.Timestamp
-
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposureDefinition, ExposurePeriodStrategy, WeightAggStrategy}
 import me.danielpes.spark.datetime.implicits._
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
 
 object FallStudyExposures {
 
-  def fallMainExposuresDefinition(studyStart: Timestamp): ExposureDefinition = {
+  def fallMainExposuresDefinition(studyStart: Timestamp): ExposuresTransformerConfig = {
 
-    ExposureDefinition(
-      periodStrategy = ExposurePeriodStrategy.Limited,
+    ExposuresTransformerConfig(
       startDelay = 0.months,
-      endDelay = 30.days,
       minPurchases = 1,
       purchasesWindow = 0.months,
+
+      periodStrategy = ExposurePeriodStrategy.Limited,
+      endThreshold = Some(60.days),
+      endDelay = Some(30.days),
+
       weightAggStrategy = WeightAggStrategy.NonCumulative,
-      tracklossThreshold = 60.days,
-      cumulativeExposureWindow = 0,
-      cumulativeStartThreshold = 0,
-      cumulativeEndThreshold = 0,
-      dosageLevelIntervals = List(),
-      purchaseIntervals = List(),
-      studyStart = studyStart,
-      filterDelayedPatients = false)
+      cumulativeExposureWindow = Some(0),
+      cumulativeStartThreshold = Some(0),
+      cumulativeEndThreshold = Some(0),
+      dosageLevelIntervals = Some(List()),
+      purchaseIntervals = Some(List()))
   }
 }

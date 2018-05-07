@@ -19,7 +19,7 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
-
+scalacOptions := Seq("-Xmacro-settings:materialize-derivations")
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 
 val sparkDependencies = List(

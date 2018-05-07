@@ -79,9 +79,9 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
   def withStartEnd(
       minPurchases: Int = 2,
       startDelay: Period = 3.months,
-      endDelay: Period = 0.months,
       purchasesWindow: Period = 4.months,
-      endThreshold: Period = 4.months)
+      endThreshold: Option[Period] = Some(4.months),
+      endDelay: Option[Period] = Some(0.months))
     : DataFrame = {
 
     val outputColumns = (data.columns.toList ++ List(ExposureStart, ExposureEnd)).map(col)
@@ -90,10 +90,10 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       .withNextDate
       .persist()
 
-    val tracklosses = eventsWithDelta.getTracklosses(endThreshold)
+    val tracklosses = eventsWithDelta.getTracklosses(endThreshold.get)
 
     val result = eventsWithDelta
-      .withExposureEnd(tracklosses, endDelay)
+      .withExposureEnd(tracklosses, endDelay.get)
       .withExposureStart(purchasesWindow, minPurchases)
 
     eventsWithDelta.unpersist()

@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.study.fall
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
 
 /*
@@ -10,7 +10,7 @@ import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
  * https://datainitiative.atlassian.net/wiki/spaces/CFC/pages/61282101/General+fractures+Fall+study
  */
 
-object PrivateAmbulatoryFractures extends OutcomeTransformer with FractureCodes {
+object PrivateAmbulatoryFractures extends OutcomesTransformer with FractureCodes {
 
   override val outcomeName: String = "private_ambulatory_fall"
 

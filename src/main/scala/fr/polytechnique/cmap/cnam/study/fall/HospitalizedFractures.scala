@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomeTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.functions._
@@ -13,7 +13,7 @@ import org.apache.spark.sql.functions._
 
 case class HospitalStay(patientID: String, id: String)
 
-object HospitalizedFractures extends OutcomeTransformer with FractureCodes {
+object HospitalizedFractures extends OutcomesTransformer with FractureCodes {
 
   override val outcomeName: String = "hospitalized_fall"
 

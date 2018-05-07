@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.study.pioglitazone
+package fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext

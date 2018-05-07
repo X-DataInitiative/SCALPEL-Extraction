@@ -1,5 +1,5 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.outcomes
 
-trait OutcomeTransformer {
+trait OutcomesTransformer {
   val outcomeName: String
 }
