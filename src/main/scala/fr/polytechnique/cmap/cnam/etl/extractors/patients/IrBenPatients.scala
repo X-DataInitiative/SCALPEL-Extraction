@@ -31,6 +31,7 @@ private[patients] object IrBenPatients {
           col("patientID"),
           col("BEN_SEX_COD").cast("int").as("gender")
         ).distinct
+        .cache
 
       val patients = result.select(col("patientID")).distinct()
 
@@ -74,10 +75,7 @@ private[patients] object IrBenPatients {
     val birthDates = persistedIrBen.getBirthDate(minYear, maxYear)
     val deathDates = persistedIrBen.getDeathDate
 
-    persistedIrBen.unpersist()
-
-    persistedIrBen
-      .getGender
+    persistedIrBen.getGender
       .join(deathDates, Seq("patientID"), "left_outer")
       .join(birthDates, Seq("patientID"), "left_outer")
       .select(outputColumns: _*)
