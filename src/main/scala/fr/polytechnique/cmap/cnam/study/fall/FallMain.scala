@@ -2,13 +2,14 @@ package fr.polytechnique.cmap.cnam.study.fall
 
 import java.io.PrintWriter
 import java.sql.Timestamp
+
 import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.DcirAct
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.{MedicalActs, MedicalActsConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{Diagnoses, DiagnosesConfig}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassificationLevel, DrugsExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugsExtractor, MoleculeCombinationLevel, TherapeuticLevel}
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
@@ -60,7 +61,7 @@ object FallMain extends Main with FractureCodes {
   }
 
   object FallEnv extends Env {
-    override val FeaturingPath = Path("/shared/fall/staging/master/pharma/")
+    override val FeaturingPath = Path("/shared/fall/staging/master/03_05_2018/molecule_combination/")
     override val McoPath = Path("/shared/fall/All/flattening/flat_table/MCO")
     override val McoCePath = Path("/shared/fall/All/flattening/flat_table/MCO_CE")
     override val DcirPath = Path("/shared/fall/All/flattening/flat_table/DCIR")
@@ -68,7 +69,7 @@ object FallMain extends Main with FractureCodes {
     override val IrBenPath = Path("/shared/fall/All/flattening/single_table/IR_BEN_R")
     override val StudyStart: Timestamp = makeTS(2015,1,1)
     override val StudyEnd: Timestamp = makeTS(2016,1,1)
-    override val IrPhaPath = Path("/shared/fall/All/flattening/single_table/IR_PHA_R")
+    override val IrPhaPath = Path("/shared/fall/All/flattening/single_table/IR_PHA_R_With_molecules")
   }
 
   object TestEnv extends Env {
@@ -80,7 +81,7 @@ object FallMain extends Main with FractureCodes {
     override val IrBenPath = Path("src/test/resources/test-input/IR_BEN_R.parquet")
     override val StudyStart: Timestamp = makeTS(2006,1,1)
     override val StudyEnd: Timestamp = makeTS(2010,1,1)
-    override val IrPhaPath = Path("src/test/resources/test-input/IR_PHA_R.parquet")
+    override val IrPhaPath = Path("src/test/resources/test-input/IR_PHA_R_With_molecules.parquet")
   }
 
   def readSources(sqlContext: SQLContext, env: Env): Sources = {
@@ -125,7 +126,7 @@ object FallMain extends Main with FractureCodes {
     // Extract Drug purchases
     logger.info("Drug Purchases")
     val drugPurchases = DrugsExtractor
-      .extract(DrugClassificationLevel.Pharmacological, sources, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
+      .extract(MoleculeCombinationLevel, sources, List(Antidepresseurs, Hypnotiques, Neuroleptiques, Antihypertenseurs))
       .cache()
     operationsMetadata += {
       OperationReporter.report("drug_purchases", List("DCIR"), OperationTypes.Dispensations, drugPurchases.toDF, env.FeaturingPath)
