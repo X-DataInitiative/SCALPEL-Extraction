@@ -4,7 +4,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.util.functions._
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{DataFrame, Dataset}
 import org.apache.spark.sql.functions._
 
 class MLPPLoaderSuite extends SharedContext {
@@ -571,7 +571,7 @@ class MLPPLoaderSuite extends SharedContext {
     assertDFs(result, expected)
   }
 
-  "makeOutcomes" should "create a single-column dataframe with the sparse time-dependent outcomes" in {
+  "makeOutcomes" should "create a double-column dataframe with the sparse time-dependent outcomes" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -581,17 +581,21 @@ class MLPPLoaderSuite extends SharedContext {
       maxTimestamp = makeTS(2006, 2, 1),
       bucketSize = 3 // bucketCount = 10
     )
-    val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1),
-      LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
-    ).toDS()
+    val input: DataFrame = Seq(
+      ("PA", 0, 1, 75, Some(6), "femur", 0, 0, 6),
+      ("PA", 0, 1, 75, Some(6), "main", 1, 2, 6),
+      ("PC", 2, 1, 50, Some(1), "femur", 0, 0, 1)
+    ).toDF("patientID", "patientIDIndex", "gender", "age", "diseaseBucket", "diseaseType", "diseaseTypeIndex", "startBucket", "endBucket")
 
-    val expected = Seq(6, 21).toDS.toDF("index")
+    val expected = Seq(
+      (6, 0),
+      (6, 1),
+      (21, 0)
+    ).toDS.toDF("patientBucketIndex", "diseaseTypeIndex")
 
     // When
     val writer = MLPPLoader(params)
-    import writer.DiscreteExposures
+    import writer.MLPPDataFrame
     val result = input.makeOutcomes
 
     // Then
@@ -604,21 +608,22 @@ class MLPPLoaderSuite extends SharedContext {
 
     // Given
     val params = MLPPLoader.Params(featuresAsList = true)
-    val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1),
-      LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
-    ).toDS()
+    val input: DataFrame = Seq(
+      ("PA", 0, 1, 75, Some(6), "femur", 2, 0, 6),
+      ("PA", 0, 1, 75, Some(6), "main", 1, 1, 6),
+      ("PA", 0, 1, 75, Some(6), "femur", 2, 2, 6),
+      ("PC", 2, 1, 50, Some(1), "femur", 2, 0, 1)
+    ).toDF("patientID", "patientIDIndex", "gender", "age", "diseaseBucket", "diseaseType", "diseaseTypeIndex", "startBucket", "endBucket")
 
     val expected = Seq(
-      (0, 6),
-      (2, 1)
-    ).toDF("patientIndex", "bucket")
+      (0, 6, 1),
+      (0, 6, 2),
+      (2, 1, 2)
+    ).toDF("patientIndex", "bucket", "outcomeType")
 
     // When
     val writer = MLPPLoader(params)
-    import writer.DiscreteExposures
+    import writer.MLPPDataFrame
     val result = input.makeOutcomes
 
     // Then
@@ -668,19 +673,19 @@ class MLPPLoaderSuite extends SharedContext {
 
     val patient: Dataset[Patient] = Seq(
       Patient("PA", 1, makeTS(1960, 1, 1), None),
-      Patient("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15))),
-      Patient("PC", 2, makeTS(1970, 1, 1), None)
+      Patient("PC", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15))),
+      Patient("PB", 2, makeTS(1970, 1, 1), None)
     ).toDS
 
     val outcome: Dataset[Event[Outcome]] = Seq(
-      Outcome("PA", "targetDisease", makeTS(2006, 5, 15)),
-      Outcome("PB", "targetDisease", makeTS(2006, 3, 15))
+      Outcome("PA", "type1", "targetDisease", makeTS(2006, 5, 15)),
+      Outcome("PC", "type2", "targetDisease", makeTS(2006, 3, 15))
     ).toDS
 
     val exposure: Dataset[Event[Exposure]] = Seq(
-      Exposure("PC", "Mol1", 1.0, makeTS(2006, 5, 15), makeTS(1789, 12, 31)),
-      Exposure("PB", "Mol1", 1.0, makeTS(2006, 1, 15), makeTS(1789, 12, 31)),
-      Exposure("PB", "Mol1", 1.0, makeTS(2006, 3, 15), makeTS(1789, 12, 31)),
+      Exposure("PB", "Mol1", 1.0, makeTS(2006, 5, 15), makeTS(1789, 12, 31)),
+      Exposure("PC", "Mol1", 1.0, makeTS(2006, 1, 15), makeTS(1789, 12, 31)),
+      Exposure("PC", "Mol1", 1.0, makeTS(2006, 3, 15), makeTS(1789, 12, 31)),
       Exposure("PA", "Mol1", 1.0, makeTS(2006, 1, 15), makeTS(1789, 12, 31)),
       Exposure("PA", "Mol1", 1.0, makeTS(2006, 3, 15), makeTS(1789, 12, 31)),
       Exposure("PA", "Mol1", 1.0, makeTS(2006, 4, 15), makeTS(1789, 12, 31)),
@@ -711,17 +716,22 @@ class MLPPLoaderSuite extends SharedContext {
       MLPPFeature("PA", 0, "Mol3", 2, 5, 2, 5, 10, 1.0),
       MLPPFeature("PA", 0, "Mol3", 2, 6, 3, 6, 11, 1.0),
       // Patient B
-      MLPPFeature("PB", 1, "Mol1", 0, 0, 0,  7,  0, 1.0),
-      MLPPFeature("PB", 1, "Mol1", 0, 1, 1,  8,  1, 1.0),
-      MLPPFeature("PB", 1, "Mol1", 0, 2, 2,  9,  2, 1.0),
-      MLPPFeature("PB", 1, "Mol1", 0, 2, 0,  9,  0, 1.0)
+      MLPPFeature("PC", 1, "Mol1", 0, 0, 0,  7,  0, 1.0),
+      MLPPFeature("PC", 1, "Mol1", 0, 1, 1,  8,  1, 1.0),
+      MLPPFeature("PC", 1, "Mol1", 0, 2, 2,  9,  2, 1.0),
+      MLPPFeature("PC", 1, "Mol1", 0, 2, 0,  9,  0, 1.0)
     ).toDF
 
     val expectedZMatrix = Seq(
       (3D, 1D, 1D, 46, 1, "PA", 0),
-      (2D, 0D, 0D, 56, 1, "PB", 1),
-      (1D, 0D, 0D, 36, 2, "PC", 2)
+      (2D, 0D, 0D, 56, 1, "PC", 2),
+      (1D, 0D, 0D, 36, 2, "PB", 1)
     ).toDF("MOL0000_Mol1", "MOL0001_Mol2", "MOL0002_Mol3", "age", "gender", "patientID", "patientIDIndex")
+
+    val expectedOutcomes : DataFrame = Seq(
+      ("9", "1"),
+      ("4", "0")
+    ).toDF( "patientBucketIndex", "diseaseTypeIndex")
 
     // When
     val result = MLPPLoader(params)
@@ -731,8 +741,10 @@ class MLPPLoaderSuite extends SharedContext {
         path = rootDir).toDF
     val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
     val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
+    val outcomesResult = sqlContext.read.option("header", true).csv(s"$rootDir/csv/Outcomes.csv")
 
     // Then
+    assertDFs(outcomesResult, expectedOutcomes)
     assertDFs(result, expectedFeatures)
     assertDFs(writtenResult, expectedFeatures)
     assertDFs(StaticExposures, expectedZMatrix)
@@ -824,4 +836,97 @@ class MLPPLoaderSuite extends SharedContext {
     assertDFs(writtenResult, expectedFeatures)
     assertDFs(StaticExposures, expectedZMatrix)
  }
+
+  "load" should "create the final matrices and write them as parquet files with featuresAsList" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val rootDir = "target/test/output"
+    val params = MLPPLoader.Params(
+      minTimestamp = makeTS(2006, 1, 1),
+      maxTimestamp = makeTS(2006, 8, 1), // 7 total buckets
+      bucketSize = 30,
+      lagCount = 4,
+      featuresAsList = true
+    )
+
+    val patient: Dataset[Patient] = Seq(
+      Patient("PA", 1, makeTS(1960, 1, 1), None),
+      Patient("PC", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15))),
+      Patient("PB", 2, makeTS(1970, 1, 1), None)
+    ).toDS
+
+    val outcome: Dataset[Event[Outcome]] = Seq(
+      Outcome("PA", "type1", "targetDisease", makeTS(2006, 5, 15)),
+      Outcome("PC", "type2", "targetDisease", makeTS(2006, 3, 15))
+    ).toDS
+
+    val exposure: Dataset[Event[Exposure]] = Seq(
+      Exposure("PB", "Mol1", 1.0, makeTS(2006, 5, 15), makeTS(1789, 12, 31)),
+      Exposure("PC", "Mol1", 1.0, makeTS(2006, 1, 15), makeTS(1789, 12, 31)),
+      Exposure("PC", "Mol1", 1.0, makeTS(2006, 3, 15), makeTS(1789, 12, 31)),
+      Exposure("PA", "Mol1", 1.0, makeTS(2006, 1, 15), makeTS(1789, 12, 31)),
+      Exposure("PA", "Mol1", 1.0, makeTS(2006, 3, 15), makeTS(1789, 12, 31)),
+      Exposure("PA", "Mol1", 1.0, makeTS(2006, 4, 15), makeTS(1789, 12, 31)),
+      Exposure("PA", "Mol2", 1.0, makeTS(2006, 3, 15), makeTS(1789, 12, 31)),
+      Exposure("PA", "Mol3", 1.0, makeTS(2006, 4, 15), makeTS(1789, 12, 31))
+    ).toDS
+
+    val expectedFeatures = Seq(
+      // Patient A
+      MLPPFeature("PA", 0, "Mol1", 0, 0, 0, 0,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 1, 1, 1,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 2, 2, 2,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 3, 3, 3,  3, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 2, 0, 2,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 3, 1, 3,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 4, 2, 4,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 5, 3, 5,  3, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 3, 0, 3,  0, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 4, 1, 4,  1, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 5, 2, 5,  2, 1.0),
+      MLPPFeature("PA", 0, "Mol1", 0, 6, 3, 6,  3, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 2, 0, 2,  4, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 3, 1, 3,  5, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 4, 2, 4,  6, 1.0),
+      MLPPFeature("PA", 0, "Mol2", 1, 5, 3, 5,  7, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 3, 0, 3,  8, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 4, 1, 4,  9, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 5, 2, 5, 10, 1.0),
+      MLPPFeature("PA", 0, "Mol3", 2, 6, 3, 6, 11, 1.0),
+      // Patient B
+      MLPPFeature("PC", 1, "Mol1", 0, 0, 0,  7,  0, 1.0),
+      MLPPFeature("PC", 1, "Mol1", 0, 1, 1,  8,  1, 1.0),
+      MLPPFeature("PC", 1, "Mol1", 0, 2, 2,  9,  2, 1.0),
+      MLPPFeature("PC", 1, "Mol1", 0, 2, 0,  9,  0, 1.0)
+    ).toDF
+
+    val expectedZMatrix = Seq(
+      (3D, 1D, 1D, 46, 1, "PA", 0),
+      (2D, 0D, 0D, 56, 1, "PC", 2),
+      (1D, 0D, 0D, 36, 2, "PB", 1)
+    ).toDF("MOL0000_Mol1", "MOL0001_Mol2", "MOL0002_Mol3", "age", "gender", "patientID", "patientIDIndex")
+
+    val expectedOutcomes : DataFrame = Seq(
+      ("0", "4", "0"),
+      ("1", "2", "1")
+    ).toDF( "patientIndex","bucket", "outcomeType")
+
+    // When
+    val result = MLPPLoader(params)
+      .load(patient = patient,
+        outcome = outcome,
+        exposure = exposure,
+        path = rootDir).toDF
+    val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
+    val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
+    val outcomesResult = sqlContext.read.option("header", true).csv(s"$rootDir/csv/Outcomes.csv")
+
+    // Then
+    assertDFs(outcomesResult, expectedOutcomes)
+    assertDFs(result, expectedFeatures)
+    assertDFs(writtenResult, expectedFeatures)
+    assertDFs(StaticExposures, expectedZMatrix)
+  }
 }
