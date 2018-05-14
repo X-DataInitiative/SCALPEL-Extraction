@@ -1,15 +1,15 @@
 package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
 import java.sql.Timestamp
-
-import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
-import fr.polytechnique.cmap.cnam.util.functions._
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
+import fr.polytechnique.cmap.cnam.util.functions._
+
 
 class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
 
@@ -61,15 +61,26 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
     def withDiseaseType: DataFrame = {
       data.withColumnRenamed("groupID", "diseaseType")
     }
-    def withDiseaseBucket: DataFrame = {
-      val window = Window.partitionBy("patientId")
 
-      val hadDisease: Column = (col("category") === Outcome.category) &&
-        (col("startBucket") < minColumn(col("endBucket"), lit(bucketCount)))
+    def withDiseaseBucket(keepFirstOnly: Boolean): DataFrame = {
+      if (keepFirstOnly) {
+        val window = Window.partitionBy("patientId")
 
-      val diseaseBucket: Column = min(when(hadDisease, col("startBucket"))).over(window)
+        val hadDisease: Column = (col("category") === Outcome.category) &&
+          (col("startBucket") < minColumn(col("endBucket"), lit(bucketCount)))
 
-      data.withColumn("diseaseBucket", diseaseBucket)
+        val diseaseBucket: Column = min(when(hadDisease, col("startBucket"))).over(window)
+
+        data.withColumn("diseaseBucket", diseaseBucket)
+      }
+      else {
+        data.withColumn(
+          "diseaseBucket", when(
+            col("category") === Outcome.category &&
+              (col("startBucket") < minColumn(col("endBucket"), lit(bucketCount))), col("startBucket")
+          )
+        )
+      }
     }
 
     def withIndices(columnNames: Seq[String]): DataFrame = {
@@ -113,7 +124,7 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
     }
 
     def makeOutcomes: DataFrame = {
-      if(params.featuresAsList) {
+      if (params.featuresAsList) {
         data
           .select(Seq(col("patientIDIndex"), col("diseaseBucket"), col("diseaseTypeIndex")): _*)
           .distinct.toDF("patientIndex", "bucket", "outcomeType")
@@ -283,7 +294,7 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
       .withDeathBucket
       .withTracklossBucket
       .withEndBucket
-      .withDiseaseBucket
+      .withDiseaseBucket(true)
       .withIndices(Seq("patientID"))
       .persist()
 
@@ -304,8 +315,6 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
       .select("patientIDIndex")
       .distinct()
       .withColumnRenamed("patientIDIndex", "patientExposedID")
-
-
 
     import exposedPatients.sqlContext.implicits._
     val filteredExposures = initialExposures.filter(_.diseaseBucket.isDefined)

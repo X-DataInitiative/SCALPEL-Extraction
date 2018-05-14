@@ -150,6 +150,7 @@ class MLPPLoaderSuite extends SharedContext {
       ("PA", "molecule", "PIOGLITAZONE", 0, Some( 4)),
       ("PA", "molecule", "PIOGLITAZONE", 5, Some( 4)),
       ("PA", "outcome", "targetDisease", 3, Some( 4)),
+      ("PA", "outcome", "targetDisease", 5, Some( 6)),
       ("PB", "molecule", "PIOGLITAZONE", 2, Some(16)),
       ("PB", "outcome", "targetDisease", 4, Some(16)),
       ("PC", "molecule", "PIOGLITAZONE", 0, Some( 6)),
@@ -162,6 +163,7 @@ class MLPPLoaderSuite extends SharedContext {
       ("PA", "molecule", "PIOGLITAZONE", 0, Some( 4), Some(3)),
       ("PA", "molecule", "PIOGLITAZONE", 5, Some( 4), Some(3)),
       ("PA", "outcome", "targetDisease", 3, Some( 4), Some(3)),
+      ("PA", "outcome", "targetDisease", 5, Some( 6), Some(3)),
       ("PB", "molecule", "PIOGLITAZONE", 2, Some(16), Some(4)),
       ("PB", "outcome", "targetDisease", 4, Some(16), Some(4)),
       ("PC", "molecule", "PIOGLITAZONE", 0, Some( 6),    None),
@@ -173,7 +175,35 @@ class MLPPLoaderSuite extends SharedContext {
     // When
     val writer = MLPPLoader()
     import writer.MLPPDataFrame
-    val result = input.withDiseaseBucket
+    val result = input.withDiseaseBucket(true)
+
+    // Then
+    assertDFs(result, expected)
+  }
+
+  "withDiseaseBucket" should "add a column with the timeBucket of the targetDisease of each patient" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input = Seq(
+      ("PA", "outcome", "targetDisease", 3, Some( 4)),
+      ("PA", "outcome", "targetDisease", 5, Some( 6)),
+      ("PB", "outcome", "targetDisease", 4, Some(16)),
+      ("PD", "outcome", "targetDisease", 4, Some( 3))
+    ).toDF("patientID", "category", "value", "startBucket", "endBucket")
+
+    val expected = Seq(
+      ("PA", "outcome", "targetDisease", 3, Some( 4), Some(3)),
+      ("PA", "outcome", "targetDisease", 5, Some( 6), Some(5)),
+      ("PB", "outcome", "targetDisease", 4, Some(16), Some(4)),
+      ("PD", "outcome", "targetDisease", 4, Some( 3),    None)
+    ).toDF("patientID", "category", "value", "startBucket", "endBucket", "diseaseBucket")
+
+    // When
+    val writer = MLPPLoader()
+    import writer.MLPPDataFrame
+    val result = input.withDiseaseBucket(false)
 
     // Then
     assertDFs(result, expected)
