@@ -22,9 +22,12 @@ trait ConfigLoader {
   implicit def productHint[T]: ProductHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, SnakeCase))
 
   // For reading enums
-  implicit def coproductHint[T]: CoproductHint[T] = new EnumCoproductHint[T]
+  //   Note: the override I discovered by reading pureconfig's code, it's not in their docs.
+  implicit def coproductHint[T]: CoproductHint[T] = new EnumCoproductHint[T] {
+    override def fieldValue(name: String): String  = SnakeCase.fromTokens(CamelCase.toTokens(name))
+  }
 
-  // For reading Periods
+  // For reading Periods (check pureconfig's docs about "Supporting new Types")
   implicit val myPeriodReader: ConfigReader[Period] = ConfigReader[String].map { s =>
     val (n, unit) = (s.split(" ")(0).toInt, s.split(" ")(1))
     unit match {

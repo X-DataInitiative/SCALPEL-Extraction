@@ -1,8 +1,9 @@
-package fr.polytechnique.cmap.cnam.study.rosiglitazone
+package fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes
 
+import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, Outcome}
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer
-import org.apache.spark.sql.Dataset
+import fr.polytechnique.cmap.cnam.study.rosiglitazone.RosiglitazoneStudyCodes
 
 object Infarctus extends OutcomesTransformer{
 

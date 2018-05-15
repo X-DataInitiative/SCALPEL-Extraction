@@ -1,7 +1,17 @@
 package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
 import java.time.LocalDate
-import fr.polytechnique.cmap.cnam.etl.config.{ConfigLoader, StudyConfig}
+import me.danielpes.spark.datetime.Period
+import me.danielpes.spark.datetime.implicits._
+import fr.polytechnique.cmap.cnam.etl.config.{BaseConfig, ConfigLoader, StudyConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchasesConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.patients.PatientsConfig
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformerConfig
+import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformerConfig
+import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformerConfig
+import fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes.OutcomeDefinition
 
 case class RosiglitazoneConfig(
     input: StudyConfig.InputPaths,
@@ -12,42 +22,82 @@ case class RosiglitazoneConfig(
   extends StudyConfig {
 
   // The following config items are not overridable by the config file
-  val base = RosiglitazoneConfig.BaseConfig
-  val drugs = RosiglitazoneConfig.DrugsConfig
-  val diagnoses = RosiglitazoneConfig.DiagnosesConfig
+  val base: BaseConfig = RosiglitazoneConfig.BaseConfig
+  val patients: PatientsConfig = RosiglitazoneConfig.PatientsConfig
+  val molecules: MoleculePurchasesConfig = RosiglitazoneConfig.MoleculePurchasesConfig
+  val diagnoses: DiagnosesConfig = RosiglitazoneConfig.DiagnosesConfig
+  val observationPeriod: ObservationPeriodTransformerConfig = RosiglitazoneConfig.ObservationPeriodTransformerConfig
+  val followUp: FollowUpTransformerConfig = RosiglitazoneConfig.FollowUpConfig(outcomes.outcomeDefinition)
 }
 
 object RosiglitazoneConfig extends ConfigLoader {
 
   /** Base fixed parameters for this study. */
-  final object BaseConfig {
-    val ageReferenceDate: LocalDate = LocalDate.of(2010, 1, 1)
-    val studyStart: LocalDate = LocalDate.of(2009, 1, 1)
-    val studyEnd: LocalDate = LocalDate.of(2011, 1, 1)
-  }
+  final object BaseConfig extends BaseConfig (
+    ageReferenceDate = LocalDate.of(2010, 1, 1),
+    studyStart = LocalDate.of(2009, 1, 1),
+    studyEnd = LocalDate.of(2011, 1, 1)
+  )
 
   /** Fixed parameters needed for the Drugs extractors. */
-  final object DrugsConfig {
-    val drugCategories: List[String] = List("A10")
-  }
+  final object MoleculePurchasesConfig extends MoleculePurchasesConfig(
+    drugClasses = List("A10"),
+    maxBoxQuantity = 10
+  )
+
+  /** Fixed parameters needed for the Patients extractors. */
+  final object PatientsConfig extends PatientsConfig(
+    ageReferenceDate = RosiglitazoneConfig.BaseConfig.ageReferenceDate
+  )
 
   /** Fixed parameters needed for the Diagnoses extractors. */
-  final object DiagnosesConfig {
-    val codesMapDP: List[String] = RosiglitazoneStudyCodes.diagCodeInfarct
-    val codesMapDR: List[String] = RosiglitazoneStudyCodes.diagCodeInfarct
-    val codesMapDA: List[String] = RosiglitazoneStudyCodes.diagCodeInfarct
-    val imbDiagnosisCodes: List[String] = List()
-  }
+  final object DiagnosesConfig extends DiagnosesConfig(
+    dpCodes = RosiglitazoneStudyCodes.diagCodeInfarct,
+    drCodes = RosiglitazoneStudyCodes.diagCodeInfarct,
+    daCodes = RosiglitazoneStudyCodes.diagCodeInfarct,
+    imbCodes = List()
+  )
+
+  /** Fixed parameters needed for the ObservationPeriod transformer. */
+  final object ObservationPeriodTransformerConfig extends ObservationPeriodTransformerConfig(
+    studyStart = BaseConfig.studyStart,
+    studyEnd = BaseConfig.studyEnd
+  )
+
+  /** Fixed parameters needed for the FollowUp transformer. */
+  case class FollowUpConfig(
+      outcomeDefinition: OutcomeDefinition) extends FollowUpTransformerConfig(
+    delayMonths = 6,
+    firstTargetDisease = true,
+    outcomeName = Some(outcomeDefinition.outcomeName)
+  )
+
   /** Parameters needed for the Exposures transformer. */
   case class ExposuresConfig(
-    minPurchases: Int = 1,
-    startDelay: Int = 0,
-    purchasesWindow: Int = 0,
-    onlyFirst: Boolean = false)
+      override val minPurchases: Int = 1,
+      override val startDelay: Period = 0.month,
+      override val purchasesWindow: Period = 0.months) extends ExposuresTransformerConfig(
+
+    minPurchases = minPurchases,
+    startDelay = startDelay,
+    purchasesWindow = purchasesWindow,
+
+    periodStrategy = ExposurePeriodStrategy.Unlimited,
+    endThreshold = None,
+    endDelay = None,
+
+    weightAggStrategy = WeightAggStrategy.NonCumulative,
+    cumulativeExposureWindow = None,
+    cumulativeStartThreshold = None,
+    cumulativeEndThreshold = None,
+    dosageLevelIntervals = None,
+    purchaseIntervals = None
+  )
 
   /** Parameters needed for the Outcomes transformer. */
   case class OutcomesConfig(
-    heartProblemDefinition: String = "infarctus")
+      outcomeDefinition: OutcomeDefinition = OutcomeDefinition.default)
+    extends OutcomesTransformerConfig
 
   /** Parameters needed for the Filters. */
   case class FiltersConfig(

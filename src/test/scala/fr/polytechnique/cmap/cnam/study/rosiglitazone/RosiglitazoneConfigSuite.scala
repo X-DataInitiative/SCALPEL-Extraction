@@ -1,9 +1,11 @@
 package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
-import java.nio.file.{Files, Paths}
+import java.nio.file.Paths
 import com.typesafe.config.ConfigFactory
+import me.danielpes.spark.datetime.implicits._
 import org.scalatest.FlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes.OutcomeDefinition
 
 class RosiglitazoneConfigSuite extends FlatSpec {
 
@@ -49,13 +51,13 @@ class RosiglitazoneConfigSuite extends FlatSpec {
         | }
         | exposures {
         |   min_purchases: 2
-        |   purchases_window: 6
+        |   purchases_window: 6 months
         | }
         | outcomes {
-        |   heart_problem_definition: "other"
+        |   outcome_definition: "heart_failure"
         | }
       """.trim.stripMargin
-    pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(configContent), Paths.get(tempPath))
+    pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(configContent), Paths.get(tempPath), true)
 
     val expected = default.copy(
       input = default.input.copy(
@@ -66,10 +68,10 @@ class RosiglitazoneConfigSuite extends FlatSpec {
       ),
       exposures = default.exposures.copy(
         minPurchases = 2,
-        purchasesWindow = 6
+        purchasesWindow = 6.months
       ),
       outcomes = default.outcomes.copy(
-        heartProblemDefinition = "other"
+        outcomeDefinition = OutcomeDefinition.HeartFailure
       )
     )
 
@@ -77,11 +79,6 @@ class RosiglitazoneConfigSuite extends FlatSpec {
     val result = RosiglitazoneConfig.load(tempPath, "test")
 
     // Then
-    try {
-      assert(result == expected)
-    }
-    finally {
-      Files.delete(Paths.get(tempPath))
-    }
+    assert(result == expected)
   }
 }
