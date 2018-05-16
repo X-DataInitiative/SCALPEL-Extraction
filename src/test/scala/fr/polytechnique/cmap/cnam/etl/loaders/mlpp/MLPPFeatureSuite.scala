@@ -7,7 +7,7 @@ class MLPPFeatureSuite extends FlatSpec {
     // Given
     val bucketCount = 10
     val lagCount = 10
-    val exposure = LaggedExposure("PE", 4, 1, 40, None, "Mol3", 2, 3, 9, 5, 1.0)
+    val exposure = LaggedExposure("PE", 4, 1, 40, "Mol3", 2, 3, 9, 5, 1.0)
     val expected = MLPPFeature("PE", 4, "Mol3", 2, 3, 5, 43, 25, 1.0)
     // When
     val result = MLPPFeature.fromLaggedExposure(exposure, bucketCount, lagCount)
