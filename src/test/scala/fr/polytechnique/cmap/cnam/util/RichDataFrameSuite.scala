@@ -2,13 +2,13 @@ package fr.polytechnique.cmap.cnam.util
 
 import org.mockito._
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.RichDataFrames._
+import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 
 
 private case class Alpha(name: String, param: Int=2)
 private case class Beta(name: String, age: Int)
 
-class RichDataFramesSuite extends SharedContext {
+class RichDataFrameSuite extends SharedContext {
 
   "===" should "return true" in {
     val sqlCtx = sqlContext

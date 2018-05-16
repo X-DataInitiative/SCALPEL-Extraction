@@ -16,6 +16,7 @@ import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposuresTransform
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
 import fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes.RosiglitazoneOutcomeTransformer
+import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
 
@@ -109,8 +110,11 @@ object RosiglitazoneMain extends Main{
     exposures.write.parquet(outputPaths.exposures)
 
     logger.info("Extracting MLPP features...")
-    val params = MLPPLoader.Params(minTimestamp = config.base.studyStart, maxTimestamp = config.base.studyEnd)
-    MLPPLoader(params).load(outcomes, exposures, patients, outputPaths.mlppFeatures)
+    val params = MLPPLoader.Params(
+      outputRootPath = Path(outputPaths.mlppFeatures),
+      minTimestamp = config.base.studyStart,
+      maxTimestamp = config.base.studyEnd)
+    MLPPLoader(params).load(outcomes, exposures, patients)
 
     Some(allEvents)
   }

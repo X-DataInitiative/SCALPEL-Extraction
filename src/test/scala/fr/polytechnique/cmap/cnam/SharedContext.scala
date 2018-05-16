@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam
 
 import java.io.File
 import java.util.{Locale, TimeZone}
-import fr.polytechnique.cmap.cnam.util.{Locales, LoggerLevels, RichDataFrames}
+import fr.polytechnique.cmap.cnam.util.{Locales, LoggerLevels, RichDataFrame}
 import org.apache.commons.io.FileUtils
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql._
@@ -44,7 +44,7 @@ abstract class SharedContext
         df2.show(100, false)
       }
 
-      import RichDataFrames._
+      import RichDataFrame._
       assert(df1 === df2)
 
     } finally {
