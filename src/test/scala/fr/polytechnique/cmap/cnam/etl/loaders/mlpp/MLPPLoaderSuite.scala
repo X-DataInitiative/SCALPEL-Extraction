@@ -166,7 +166,7 @@ class MLPPLoaderSuite extends SharedContext {
     val result = input.withDiseaseBucket(true)
 
     // Then
-    assertDFs(result, expected, true)
+    assertDFs(result, expected)
   }
 
   "withDiseaseBucket" should "add a column with the timeBucket of the targetDisease of each patient" in {
@@ -645,7 +645,7 @@ class MLPPLoaderSuite extends SharedContext {
     val result = input.makeOutcomes
 
     // Then
-    assertDFs(result, expected, true)
+    assertDFs(result, expected)
   }
 
   "makeStaticOutcomes" should "create Dataframe with the sparse static outcomes" in {
@@ -987,7 +987,7 @@ class MLPPLoaderSuite extends SharedContext {
     val outcomesResult = sqlContext.read.option("header", true).csv(s"$rootDir/csv/Outcomes.csv")
 
     // Then
-    assertDFs(outcomesResult, expectedOutcomes, true)
+    assertDFs(outcomesResult, expectedOutcomes)
     assertDFs(result, expectedFeatures)
     assertDFs(writtenResult, expectedFeatures)
     assertDFs(StaticExposures, expectedZMatrix)

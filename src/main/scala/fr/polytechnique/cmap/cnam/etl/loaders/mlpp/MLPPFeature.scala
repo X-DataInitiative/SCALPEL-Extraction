@@ -3,8 +3,8 @@ package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 case class MLPPFeature(
     patientID: String,
     patientIndex: Int,
-    moleculeName: String,
-    moleculeIndex: Int,
+    exposureType: String,
+    exposureTypeIndex: Int,
     bucketIndex: Int,
     lagIndex: Int,
     rowIndex: Int,
@@ -21,8 +21,8 @@ object MLPPFeature {
     MLPPFeature(
       patientID = e.patientID,
       patientIndex = e.patientIDIndex,
-      moleculeName = e.exposureType,
-      moleculeIndex = e.exposureTypeIndex,
+      exposureType = e.exposureType,
+      exposureTypeIndex = e.exposureTypeIndex,
       lagIndex = e.lag,
       bucketIndex = e.startBucket,
       rowIndex = r,

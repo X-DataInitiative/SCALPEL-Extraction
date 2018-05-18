@@ -113,28 +113,20 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
       outcomes.withColumnRenamed("groupID", "diseaseType")
     }
 
-    // TODO: Find a solution for the keep first only part
-    // This function has two different tricky behaviours that are misleading based on the parameter passed.
-    // If keepFirstOnly is passed than it creates a window over patientID et diseaseType
     def withDiseaseBucket(keepFirstOnly: Boolean): DataFrame = {
-      if (keepFirstOnly) {
-        val window = Window.partitionBy("patientID", "diseaseType")
 
-        val hadDisease: Column = (col("category") === Outcome.category) &&
-          (col("startBucket") < minColumn(col("endBucket"), lit(bucketCount)))
+      val hadDisease: Column = (col("category") === Outcome.category) &&
+        (col("startBucket") < minColumn(col("endBucket"), lit(bucketCount)))
 
-        val diseaseBucket: Column = min(when(hadDisease, col("startBucket"))).over(window)
+      val diseaseBucket: Column =
+        if (keepFirstOnly) {
+          val window = Window.partitionBy("patientID", "diseaseType")
+          min(when(hadDisease, col("startBucket"))).over(window)
+        }
+        else
+          when(hadDisease, col("startBucket"))
 
-        outcomes.withColumn("diseaseBucket", diseaseBucket)
-      }
-      else {
-        outcomes.withColumn(
-          "diseaseBucket", when(
-            col("category") === Outcome.category &&
-              (col("startBucket") < minColumn(col("endBucket"), lit(bucketCount))), col("startBucket")
-          )
-        )
-      }
+      outcomes.withColumn("diseaseBucket", diseaseBucket)
     }
 
     def makeOutcomes: DataFrame = {
@@ -291,11 +283,11 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
 
 
   /**
-    * Builds a Dataset of Patient with patients that have at least one outcome and one expositions
-    * @param outcome: Dataset of the Outcomes
-    * @param exposure: Dataset of Exposures
-    * @param patient: Dataset of patients
-    * @return Dataset of patients
+    * Builds a Dataset of Patient with patients that have at least one outcome and one exposition.
+    * @param outcome: Dataset of the Outcome.
+    * @param exposure: Dataset of Exposure.
+    * @param patient: Dataset of Patient.
+    * @return Dataset of Patient.
     */
   def getFinalPatients(
     outcome: Dataset[Event[Outcome]],
@@ -358,6 +350,7 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
     // Based on filtered outcomes, make final outcomes
     val outcomes = outcomeEvents.makeOutcomes
     val staticOutcomes = outcomeEvents.makeStaticOutcomes
+    outcomeEvents.writeLookupFiles(rootDir)
 
     // Make MLPP ready features
     val features: Dataset[MLPPFeature] = exposureEvents.lagExposures.toMLPPFeatures
