@@ -23,7 +23,7 @@ class OutcomeStats(object):
             idx = pd.date_range(data.index.min(), data.index.max())
             data.index = pd.DatetimeIndex(data.index)
             data = data.reindex(idx, fill_value=0)
-            ax.bar(data.start, data["count"],
+            ax.bar(data.index, data["count"],
                    color=sns.xkcd_rgb["pumpkin orange"])
 
         patch_dates_axes(ax)

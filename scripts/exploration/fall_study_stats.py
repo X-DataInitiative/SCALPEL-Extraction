@@ -1,58 +1,79 @@
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import pandas as pd
+import pyspark.sql.functions as fn
 import seaborn as sns
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_pdf import PdfPages
 
 from exploration.outcomes_stats import OutcomeStats
-from exploration.utils import add_information_to_axe, millify, patch_dates_axes
+from exploration.utils import add_information_to_axe, add_percentage_axe, \
+    add_x_percentage_axe, millify, patch_dates_axes
 
 
 class TherapeuticStats(object):
 
     def __init__(self, event_df, colors_dict, event_type):
+        self.event_df = event_df
         self.stats = event_df.groupby("value").count().toPandas()
         self.colors_dict = colors_dict
         self.event_type = event_type
 
     def plot(self):
-        palette = self.stats.sort_values("value").value.map(lambda x: self.colors_dict[x])
-        ax = sns.barplot(data=self.stats.sort_values("value"), x="value", y="count",
-                         palette=palette)
+        stats = self.event_df.groupby("value").count().toPandas()
+        palette = stats.sort_values("value").value.map(lambda x: self.colors_dict[x])
+        ax = plt.gca()
+        sns.barplot(data=stats.sort_values("value"), x="value", y="count",
+                         palette=palette, ax=ax)
         ax.set_title("Distribution de {} au niveau thérapeutique".format(self.event_type))
         ax.set_xlabel("Classes thérapeutiques")
         ax.set_ylabel("Nombre de {}".format(self.event_type))
         ax.yaxis.set_major_formatter(millify)
         return ax
 
+    def plot_with_percentage(self):
+        data = self.event_df.groupby("value").agg(
+            fn.countDistinct('patientID').alias("NBpatients")).toPandas().sort_values("value")
+        palette = data.sort_values("value").value.map(lambda x: self.colors_dict[x])
+        ax = sns.barplot(data=data, x="value", y="NBpatients", palette=palette)
+        add_information_to_axe(
+            ax,
+            "Pourcentage de chaque classe de {} sur population".format(self.event_type),
+            "Classe therapeutiques",
+            "Nombre de patients"
+        )
+        add_percentage_axe(ax, total=data["NBpatients"].sum())
+        return ax
 
+    
 class PharmaStats(object):
 
-    def __init__(self, molecule_mapping: pd.DataFrame, event_df, event_type,
+    def __init__(self, molecule_mapping, event_df, event_type,
                  colors_dict):
-        counting_df = event_df.groupby("value").count().toPandas()
-        self.stats = pd.merge(
-            counting_df,
-            molecule_mapping[["therapeutic", "pharmaceutic_family"]].drop_duplicates(),
-            left_on="value",
-            right_on="pharmaceutic_family", how='inner'
-        )
+        self.event_df = event_df
+        self.molecule_mapping = molecule_mapping
         self.event_type = event_type
         self.colors_dict = colors_dict
 
     def plot(self):
-        t = self.stats.sort_values("value")
-        palette = t.therapeutic.map(lambda x: self.colors_dict[x])
+        counting_df = self.event_df.groupby("value").count().toPandas()
+        stats = pd.merge(
+            counting_df,
+            self.molecule_mapping[["therapeutic", "pharmaceutic_family"]].drop_duplicates(),
+            left_on="value",
+            right_on="pharmaceutic_family", how='inner'
+        )
+        stats = stats.sort_values("value")
+        palette = stats.therapeutic.map(lambda x: self.colors_dict[x])
 
         patches = [mpatches.Patch(color=self.colors_dict[therapeutic_class],
                                   label=therapeutic_class)
-                   for therapeutic_class in t["therapeutic"].drop_duplicates().values]
+                   for therapeutic_class in stats["therapeutic"].drop_duplicates().values]
+        ax = plt.gca()
+        sns.barplot(data=stats, y="value", x="count",
+                         orient="h", palette=palette, saturation=1.0, ax=ax)
 
-        ax = sns.barplot(data=t, y="value", x="count",
-                         orient="h", palette=palette, saturation=1.0)
-
-        ax.set_xticklabels(t.value.values)
+        ax.set_xticklabels(stats.value.values)
 
         ax.set_ylabel("Classes pharmaceutiques")
         ax.set_xlabel("Nombre de {}".format(self.event_type))
@@ -61,6 +82,38 @@ class PharmaStats(object):
         ax.set_title("Nombre de {} par classe pharmaceutique".format(self.event_type))
         plt.legend(handles=patches)
 
+        return ax
+
+    def plot_with_percentage(self):
+        counting_df = self.event_df.groupby("value").agg(
+            fn.countDistinct('patientID').alias("NBpatients")).toPandas()
+        stats = pd.merge(
+            counting_df,
+            self.molecule_mapping[
+                ["therapeutic", "pharmaceutic_family"]].drop_duplicates(),
+            left_on="value",
+            right_on="pharmaceutic_family", how='inner'
+        )
+        stats = stats.sort_values("value")
+        palette = stats.therapeutic.map(lambda x: self.colors_dict[x])
+
+        patches = [mpatches.Patch(color=self.colors_dict[therapeutic_class],
+                                  label=therapeutic_class)
+                   for therapeutic_class in stats["therapeutic"].drop_duplicates().values]
+        ax = plt.gca()
+        sns.barplot(data=stats, y="value", x="NBpatients",
+                    orient="h", palette=palette, saturation=1.0, ax=ax)
+
+        ax.set_xticklabels(stats.value.values)
+
+        ax.set_ylabel("Classes pharmaceutiques")
+        ax.set_xlabel("Nombre de patients")
+        ax.xaxis.set_major_formatter(millify)
+
+        ax.set_title("Pourcentage de chaque classe de {} sur population".format(self.event_type), y=1.10, loc="right")
+        plt.legend(handles=patches)
+        add_x_percentage_axe(ax, total=counting_df["NBpatients"].sum(), x_limit=30)
+        
         return ax
 
 
@@ -94,11 +147,11 @@ class MoleculeStats(object):
                                   hatch=self.pharma_dict[pharma_class])
                    for therapeutic_class, pharma_class in
                    t[["therapeutic", "pharmaceutic_family"]].drop_duplicates().values]
+        ax = plt.gca()
+        sns.barplot(data=t, y="molecule", x="count", orient="h", palette=palette,
+                         saturation=1.0, ax=ax)
 
-        ax = sns.barplot(data=t, y="PHA_ATC_C07", x="count", orient="h", palette=palette,
-                         saturation=1.0)
-
-        ax.set_yticklabels(t.value.values)
+        #ax.set_yticklabels(t.value.values)
         # Loop over the bars
         for text, thisbar in zip(ax.get_yticklabels(), ax.patches):
             # Set a different hatch for each bar
@@ -109,12 +162,11 @@ class MoleculeStats(object):
         ax.set_xlabel("Nombre de {}".format(self.event_type))
         ax.xaxis.set_major_formatter(millify)
         plt.legend(handles=patches)
-
+        
         return ax
 
     def plot_overall_top_molecules(self, top=20):
-        t = self.stats.sort_values("count")[-top:].sort_values(
-            ["pharmaceutic_family", "value"])
+        t = self.stats.sort_values("count")[-top:]
         ax = self._plot(t)
         ax.set_title("Top molecules selon {}".format(self.event_type))
         return ax
@@ -122,6 +174,7 @@ class MoleculeStats(object):
     def plot_top_of_therapeutic_classes(self, top=5):
         t = self.stats.groupby("therapeutic", as_index=False).apply(
             lambda x: x.sort_values("count", ascending=False)[:top])
+        
         ax = self._plot(t)
         ax.set_title(
             "Top molécules chaque classe Thérapeutique selon {}".format(self.event_type))
