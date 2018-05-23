@@ -676,6 +676,35 @@ class MLPPLoaderSuite extends SharedContext {
     assertDFs(result, expected)
   }
 
+  "enrichEvents" should "add columns such deathBucket & endBucket to the passed Dataframe" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input: DataFrame = Seq(
+      ("PA", "outcome", "targetDisease", makeTS(2006, 5, 15), 2, makeTS(1960, 1, 1),
+        None),
+      ("PC", "outcome", "targetDisease", makeTS(2006, 3, 15), 1, makeTS(1950, 1, 1),
+        Some(makeTS(2006, 4, 15))),
+      ("PC", "trackloss", "trackloss", makeTS(2006, 4, 1), 1, makeTS(1950, 1, 1),
+        Some(makeTS(2006, 4, 15)))
+    ).toDF("patientID", "category", "value", "start", "gender", "birthDate", "deathDate")
+
+    val expected: DataFrame = Seq(
+      ("PA", "outcome", "targetDisease", makeTS(2006, 5, 15), 2, makeTS(1960, 1, 1),
+        None, 46, 134, None, None, 1460),
+      ("PC", "outcome", "targetDisease", makeTS(2006, 3, 15), 1, makeTS(1950, 1, 1),
+        Some(makeTS(2006, 4, 15)), 56, 73, Some(104), Some(90), 90),
+      ("PC", "trackloss", "trackloss", makeTS(2006, 4, 1), 1, makeTS(1950, 1, 1),
+        Some(makeTS(2006, 4, 15)), 56, 90, Some(104), Some(90), 90)
+    ).toDF("patientID", "category", "value", "start", "gender", "birthDate", "deathDate", "age",
+      "startBucket", "deathBucket", "tracklossBucket", "endBucket")
+
+    val result = MLPPLoader().enrichEvents(input)
+    assertDFs(result, expected)
+  }
+
+
   "load" should "create the final matrices and write them as parquet files" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -752,9 +781,9 @@ class MLPPLoaderSuite extends SharedContext {
 
     // When
     val result = MLPPLoader(params)
-      .load(patient = patient,
-        outcome = outcome,
-        exposure = exposure,
+      .load(patients = patient,
+        outcomes = outcome,
+        exposures = exposure,
         path = rootDir).toDF
     val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
     val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
@@ -840,9 +869,9 @@ class MLPPLoaderSuite extends SharedContext {
 
     // When
     val result = MLPPLoader(params).load(
-      patient = patient,
-      outcome = outcome,
-      exposure = exposure,
+      patients = patient,
+      outcomes = outcome,
+      exposures = exposure,
       path = rootDir).toDF
     val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
     val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
@@ -853,55 +882,7 @@ class MLPPLoaderSuite extends SharedContext {
     assertDFs(StaticExposures, expectedZMatrix)
  }
 
-  "getFinalPatients" should "create a patient DataFrame with patients that exist in Outcomes, Exposures and Patients" in {
-    val sqlCtx = sqlContext
-    import sqlCtx.implicits._
-
-    // Given
-    val rootDir = "target/test/output"
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 8, 1), // 7 total buckets
-      bucketSize = 30,
-      lagCount = 4,
-      featuresAsList = true
-    )
-
-    val patient: Dataset[Patient] = Seq(
-      Patient("PA", 1, makeTS(1960, 1, 1), None),
-      Patient("PC", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15))),
-      Patient("PB", 2, makeTS(1970, 1, 1), None)
-    ).toDS
-
-    val outcome: Dataset[Event[Outcome]] = Seq(
-      Outcome("PA", "type1", "targetDisease", makeTS(2006, 5, 15)),
-      Outcome("PC", "type2", "targetDisease", makeTS(2006, 3, 15)),
-      Outcome("PE", "type3", "targetDisease", makeTS(2006, 7, 15))
-    ).toDS
-
-    val exposure: Dataset[Event[Exposure]] = Seq(
-      Exposure("PB", "Mol1", 1.0, makeTS(2006, 5, 15), makeTS(1789, 12, 31)),
-      Exposure("PC", "Mol1", 1.0, makeTS(2006, 1, 15), makeTS(1789, 12, 31)),
-      Exposure("PC", "Mol1", 1.0, makeTS(2006, 3, 15), makeTS(1789, 12, 31)),
-      Exposure("PA", "Mol1", 1.0, makeTS(2006, 1, 15), makeTS(1789, 12, 31)),
-      Exposure("PA", "Mol1", 1.0, makeTS(2006, 3, 15), makeTS(1789, 12, 31)),
-      Exposure("PA", "Mol1", 1.0, makeTS(2006, 4, 15), makeTS(1789, 12, 31)),
-      Exposure("PA", "Mol2", 1.0, makeTS(2006, 3, 15), makeTS(1789, 12, 31)),
-      Exposure("PA", "Mol3", 1.0, makeTS(2006, 4, 15), makeTS(1789, 12, 31)),
-      Exposure("PE", "Mol3", 1.0, makeTS(2006, 4, 15), makeTS(1789, 12, 31))
-    ).toDS
-
-    val expected: Dataset[Patient] = Seq(
-      Patient("PA", 1, makeTS(1960, 1, 1), None),
-      Patient("PC", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15)))
-    ).toDS
-
-    val result = MLPPLoader(params).getFinalPatients(outcome, exposure, patient)
-
-    assertDSs(result, expected)
-  }
-
-  "load" should "create the final matrices and write them as parquet files with featuresAsList" in {
+  it should "create the final matrices and write them as parquet files with featuresAsList" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -978,9 +959,9 @@ class MLPPLoaderSuite extends SharedContext {
 
     // When
     val result = MLPPLoader(params)
-      .load(patient = patient,
-        outcome = outcome,
-        exposure = exposure,
+      .load(patients = patient,
+        outcomes = outcome,
+        exposures = exposure,
         path = rootDir).toDF
     val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
     val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")

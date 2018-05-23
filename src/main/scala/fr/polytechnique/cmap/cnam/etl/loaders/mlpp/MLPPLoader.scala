@@ -202,7 +202,7 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
       // Basically, this means we are filling the diagonal for the given exposure, stopping
       //   when we reach either the last lag or the defined end bucket (min among bucket count,
       //   death date and target disease date)
-      val createLags: (LaggedExposure) => Seq[LaggedExposure] = {
+      val createLags: LaggedExposure => Seq[LaggedExposure] = {
         e: LaggedExposure => (0 until lagCount).collect {
           case newLag if e.startBucket + newLag < e.endBucket =>
             e.copy(startBucket = e.startBucket + newLag, lag = newLag)
@@ -281,76 +281,55 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
     }
   }
 
-
-  /**
-    * Builds a Dataset of Patient with patients that have at least one outcome and one exposition.
-    * @param outcome: Dataset of the Outcome.
-    * @param exposure: Dataset of Exposure.
-    * @param patient: Dataset of Patient.
-    * @return Dataset of Patient.
-    */
-  def getFinalPatients(
-    outcome: Dataset[Event[Outcome]],
-    exposure: Dataset[Event[Exposure]],
-    patient: Dataset[Patient]): Dataset[Patient] = {
-    val patientsWithOutcome = outcome.select("patientID").distinct().toDF("patientID")
-    val patientsWithExposure = exposure.select("patientID").distinct().toDF("patientID")
-
-    val finalPatientsIDs = patientsWithExposure.join(patientsWithOutcome, "patientID")
-    import outcome.sqlContext.implicits._
-    patient.join(finalPatientsIDs, "patientID").as[Patient]
-  }
-
-  // Maybe put this in an implicit class of Dataset[FlatEvent]? This would cause the need of the following:
-  //   val writer = MLPPWriter(params)
-  //   import writer.FlatEventDataset (or import writer._)
-  //   data.write(path)
-  //
-  // Returns the features dataset for convenience
-  def load(
-      outcome: Dataset[Event[Outcome]],
-      exposure: Dataset[Event[Exposure]],
-      patient: Dataset[Patient],
-      path: String): Dataset[MLPPFeature] = {
-
-    val rootDir = if(path.last == '/') path.dropRight(1) else path
-
-    val finalPatients = getFinalPatients(outcome, exposure, patient)
-    val input = finalPatients.join(outcome.toDF.union(exposure.toDF), "patientID")
-
-    val eventsEnhanced = input
+  def enrichEvents(events: DataFrame): DataFrame ={
+    events
       .withAge
       .withStartBucket
       .withDeathBucket
       .withTracklossBucket
       .withEndBucket
-      .withIndices(Seq("patientID"))
-      .persist()
+  }
 
-    val outcomeEvents = eventsEnhanced
-      .where(col("category") === "outcome")
+  def load(
+    outcomes: Dataset[Event[Outcome]],
+    exposures: Dataset[Event[Exposure]],
+    patients: Dataset[Patient],
+    path: String): Dataset[MLPPFeature] = {
+
+    val rootDir = if(path.last == '/') path.dropRight(1) else path
+
+    val richOutcomes = enrichEvents(outcomes.join(patients, "patientID"))
+      .where(col("startBucket") < col("endBucket"))
+
+    val richExposures = enrichEvents(exposures.join(patients, "patientID"))
+      .where(col("startBucket") < col("endBucket"))
+
+    val commonPatients = richOutcomes.select("patientID").distinct().join(
+      richExposures.select("patientID").distinct(), "patientID"
+    ).withIndices(Seq("patientID"))
+
+    val outcomeEvents = richOutcomes.join(commonPatients, "patientID")
       .withDiseaseType
       .withDiseaseBucket(true)
       .withIndices(Seq("diseaseType"))
 
-    import input.sqlContext.implicits._
-    val exposureEvents: Dataset[LaggedExposure] = eventsEnhanced
-      .where((col("category") === "exposure") && (col("startBucket") < col("endBucket")))
+    import richExposures.sqlContext.implicits._
+    val exposureEvents: Dataset[LaggedExposure] = richExposures
+      .join(commonPatients, "patientID")
       .withColumnRenamed("value", "exposureType")
       .withIndices(Seq("exposureType"))
       .toDiscreteExposures
       .as[LaggedExposure]
       .persist()
 
-    // TODO: this should be the last thing to do
     val metadata: Metadata = exposureEvents.makeMetadata
     val staticExposures: DataFrame = exposureEvents.makeStaticExposures
 
-    val censoring = exposureEvents.makeCensoring
-    // Based on filtered outcomes, make final outcomes
-    val outcomes = outcomeEvents.makeOutcomes
-    val staticOutcomes = outcomeEvents.makeStaticOutcomes
-    outcomeEvents.writeLookupFiles(rootDir)
+    val censoring: DataFrame = exposureEvents.makeCensoring
+
+    val outputOutcomes: DataFrame = outcomeEvents.makeOutcomes
+    val staticOutcomes: DataFrame = outcomeEvents.makeStaticOutcomes
+
 
     // Make MLPP ready features
     val features: Dataset[MLPPFeature] = exposureEvents.lagExposures.toMLPPFeatures
@@ -364,18 +343,18 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
     censoring.writeCSV(s"$rootDir/csv/Censoring.csv")
 
     // write outcomes ("Y" matrices)
-    outcomes.writeCSV(s"$rootDir/csv/Outcomes.csv")
+    outputOutcomes.writeCSV(s"$rootDir/csv/Outcomes.csv")
     staticOutcomes.writeCSV(s"$rootDir/csv/StaticOutcomes.csv")
 
     // write lookup tables
     exposureEvents.writeLookupFiles(rootDir)
+    outcomeEvents.writeLookupFiles(rootDir)
 
     // write sparse features ("X" matrix)
     featuresDF.write.parquet(s"$rootDir/parquet/SparseFeatures")
     featuresDF.writeCSV(s"$rootDir/csv/SparseFeatures.csv")
 
     // write metadata
-    import input.sqlContext.implicits._
     Seq(metadata).toDF.writeCSV(s"$rootDir/csv/metadata.csv")
 
     featuresDF.unpersist()
