@@ -57,7 +57,7 @@ class MLPPMainSuite extends SharedContext{
       // Patient B
       MLPPFeature("PB", 1, "Mol1", 0, 14, 0,  226,  0, 1.0),
       MLPPFeature("PB", 1, "Mol1", 0, 73, 0,  285,  0, 1.0)
-    ).toDF("patientID", "patientIndex", "moleculeName", "moleculeIndex", "bucketIndex", "lagIndex", "rowIndex", "colIndex", "value")
+    ).toDF("patientID", "patientIndex", "exposureType", "exposureTypeIndex", "bucketIndex", "lagIndex", "rowIndex", "colIndex", "value")
 
     // When
     val configPath = "src/test/resources/config/filtering-broad.conf"

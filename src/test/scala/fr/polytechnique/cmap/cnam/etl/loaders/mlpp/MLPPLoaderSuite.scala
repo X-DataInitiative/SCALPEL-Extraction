@@ -147,33 +147,51 @@ class MLPPLoaderSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("PA", "molecule", "PIOGLITAZONE", 0, Some( 4)),
-      ("PA", "molecule", "PIOGLITAZONE", 5, Some( 4)),
+      ("PA", "outcome", "targetDisease", 3, Some( 4), "type1"),
+      ("PA", "outcome", "targetDisease", 5, Some( 6), "type1"),
+      ("PB", "outcome", "targetDisease", 4, Some(16), "type3"),
+      ("PD", "outcome", "targetDisease", 4, Some( 3), "type2")
+    ).toDF("patientID", "category", "value", "startBucket", "endBucket", "diseaseType")
+
+    val expected = Seq(
+      ("PB", "outcome", "targetDisease", 4, Some(16), "type3", Some(4)),
+      ("PA", "outcome", "targetDisease", 3, Some( 4), "type1", Some(3)),
+      ("PA", "outcome", "targetDisease", 5, Some( 6), "type1", Some(3)),
+      ("PD", "outcome", "targetDisease", 4, Some( 3), "type2", None)
+    ).toDF("patientID", "category", "value", "startBucket", "endBucket", "diseaseType", "diseaseBucket")
+
+    // When
+    val writer = MLPPLoader()
+    import writer.MLPPOutcomesDataFrame
+    val result = input.withDiseaseBucket(true)
+
+    // Then
+    assertDFs(result, expected)
+  }
+
+  "withDiseaseBucket" should "add a column with the timeBucket of the targetDisease of each patient" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input = Seq(
       ("PA", "outcome", "targetDisease", 3, Some( 4)),
-      ("PB", "molecule", "PIOGLITAZONE", 2, Some(16)),
+      ("PA", "outcome", "targetDisease", 5, Some( 6)),
       ("PB", "outcome", "targetDisease", 4, Some(16)),
-      ("PC", "molecule", "PIOGLITAZONE", 0, Some( 6)),
-      ("PD", "molecule", "PIOGLITAZONE", 2, Some( 3)),
-      ("PD", "molecule", "PIOGLITAZONE", 3, Some( 3)),
       ("PD", "outcome", "targetDisease", 4, Some( 3))
     ).toDF("patientID", "category", "value", "startBucket", "endBucket")
 
     val expected = Seq(
-      ("PA", "molecule", "PIOGLITAZONE", 0, Some( 4), Some(3)),
-      ("PA", "molecule", "PIOGLITAZONE", 5, Some( 4), Some(3)),
       ("PA", "outcome", "targetDisease", 3, Some( 4), Some(3)),
-      ("PB", "molecule", "PIOGLITAZONE", 2, Some(16), Some(4)),
+      ("PA", "outcome", "targetDisease", 5, Some( 6), Some(5)),
       ("PB", "outcome", "targetDisease", 4, Some(16), Some(4)),
-      ("PC", "molecule", "PIOGLITAZONE", 0, Some( 6),    None),
-      ("PD", "molecule", "PIOGLITAZONE", 2, Some( 3),    None),
-      ("PD", "molecule", "PIOGLITAZONE", 3, Some( 3),    None),
       ("PD", "outcome", "targetDisease", 4, Some( 3),    None)
     ).toDF("patientID", "category", "value", "startBucket", "endBucket", "diseaseBucket")
 
     // When
     val writer = MLPPLoader()
-    import writer.MLPPDataFrame
-    val result = input.withDiseaseBucket
+    import writer.MLPPOutcomesDataFrame
+    val result = input.withDiseaseBucket(false)
 
     // Then
     assertDFs(result, expected)
@@ -276,21 +294,21 @@ class MLPPLoaderSuite extends SharedContext {
       ("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8),
       ("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8),
       ("PB", 1, 2, 40,    None, "Mol2", 1, 6, 8)
-    ).toDF("patientID", "patientIDIndex", "gender", "age", "diseaseBucket", "molecule", "moleculeIndex", "startBucket", "endBucket")
+    ).toDF("patientID", "patientIDIndex", "gender", "age", "diseaseBucket", "exposureType", "exposureTypeIndex", "startBucket", "endBucket")
 
     val expected = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6),"Mol1", 0, 0, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6),"Mol1", 0, 2, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6),"Mol2", 1, 3, 6, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None,"Mol1", 0, 0, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None,"Mol1", 0, 4, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None,"Mol2", 1, 6, 8, 0, 1.0)
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 0, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 3, 6, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 0, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 4, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol2", 1, 6, 8, 0, 1.0)
     ).toDF
 
     // When
     val writer = MLPPLoader()
     import writer.MLPPDataFrame
-    val result = input.makeDiscreteExposures.select(expected.columns.map(col): _*)
+    val result = input.toDiscreteExposures.select(expected.columns.map(col): _*)
 
     // Then
     assertDFs(result, expected)
@@ -352,32 +370,32 @@ class MLPPLoaderSuite extends SharedContext {
     // Given
     val params = MLPPLoader.Params(lagCount = 4)
     val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol2", 1, 4, 6, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8, 0, 1.0)
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 0, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 4, 6, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 0, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 4, 8, 0, 1.0)
     ).toDS
 
     val expected = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 1, 6, 1, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, 2, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 3, 6, 3, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 3, 6, 1, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 4, 6, 2, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 5, 6, 3, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol2", 1, 4, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol2", 1, 5, 6, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 1, 8, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 2, 8, 2, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 3, 8, 3, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 5, 8, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 6, 8, 2, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 7, 8, 3, 1.0)
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 0, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 1, 6, 1, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 2, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 3, 6, 3, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 3, 6, 1, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 4, 6, 2, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 5, 6, 3, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 4, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 5, 6, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 0, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 1, 8, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 2, 8, 2, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 3, 8, 3, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 4, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 5, 8, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 6, 8, 2, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 7, 8, 3, 1.0)
     ).toDF
 
     // When
@@ -401,13 +419,13 @@ class MLPPLoaderSuite extends SharedContext {
       lagCount = 4
     )
     val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol3", 2, 1, 6, 1, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol2", 1, 2, 6, 2, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol3", 2, 1, 8, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol4", 3, 6, 8, 2, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol5", 4, 7, 8, 3, 1.0)
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 0, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol3", 2, 1, 6, 1, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 2, 6, 2, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 0, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol3", 2, 1, 8, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol4", 3, 6, 8, 2, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol5", 4, 7, 8, 3, 1.0)
     ).toDS
     val expected: Metadata = Metadata(30, 20, 2, 15, 2, 5, 4)
 
@@ -432,24 +450,24 @@ class MLPPLoaderSuite extends SharedContext {
       lagCount = 4
     )
     val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 0, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 1, 6, 1, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, 2, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 3, 6, 3, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 2, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 3, 6, 1, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 4, 6, 2, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol1", 0, 5, 6, 3, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol2", 1, 4, 6, 0, 1.0),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "Mol2", 1, 5, 6, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 0, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 1, 8, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 2, 8, 2, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 3, 8, 3, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 4, 8, 0, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 5, 8, 1, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 6, 8, 2, 1.0),
-      LaggedExposure("PB", 1, 2, 40,    None, "Mol1", 0, 7, 8, 3, 1.0)
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 0, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 1, 6, 1, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 2, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 3, 6, 3, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 3, 6, 1, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 4, 6, 2, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 5, 6, 3, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 4, 6, 0, 1.0),
+      LaggedExposure("PA", 0, 1, 75, "Mol2", 1, 5, 6, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 0, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 1, 8, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 2, 8, 2, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 3, 8, 3, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 4, 8, 0, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 5, 8, 1, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 6, 8, 2, 1.0),
+      LaggedExposure("PB", 1, 2, 40, "Mol1", 0, 7, 8, 3, 1.0)
     ).toDS
 
     val expected = Seq(
@@ -489,11 +507,11 @@ class MLPPLoaderSuite extends SharedContext {
 
     // Given
     val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1),
-      LaggedExposure("PB", 1, 2, 40,    None, "INS", 0, 1, 8, 0, 1),
-      LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
+      LaggedExposure("PA", 0, 1, 75, "ROS", 2, 0, 6, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, "PIO", 1, 1, 6, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, "ROS", 2, 2, 6, 0, 1),
+      LaggedExposure("PB", 1, 2, 40, "INS", 0, 1, 8, 0, 1),
+      LaggedExposure("PC", 2, 1, 50, "ROS", 2, 0, 1, 0, 1)
     ).toDS()
 
     val expected = Seq(
@@ -522,12 +540,12 @@ class MLPPLoaderSuite extends SharedContext {
       bucketSize = 3 // bucketCount = 10
     )
     val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 5, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 5, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 5, 0, 1),
-      LaggedExposure("PC", 2, 1, 65, Some(8), "PIO", 1, 1, 7, 0, 1),
-      LaggedExposure("PC", 2, 1, 65, Some(8), "ROS", 2, 2, 7, 0, 1),
-      LaggedExposure("PD", 3, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
+      LaggedExposure("PA", 0, 1, 75, "ROS", 2, 0, 5, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, "PIO", 1, 1, 5, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, "ROS", 2, 2, 5, 0, 1),
+      LaggedExposure("PC", 2, 1, 65, "PIO", 1, 1, 7, 0, 1),
+      LaggedExposure("PC", 2, 1, 65, "ROS", 2, 2, 7, 0, 1),
+      LaggedExposure("PD", 3, 1, 50, "ROS", 2, 0, 1, 0, 1)
     ).toDS()
 
     val expected = Seq(5, 27, 31).toDS.toDF("index")
@@ -548,12 +566,12 @@ class MLPPLoaderSuite extends SharedContext {
     // Given
     val params = MLPPLoader.Params(featuresAsList = true)
     val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 5, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 5, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 5, 0, 1),
-      LaggedExposure("PC", 2, 1, 65,    None, "PIO", 1, 1, 7, 0, 1),
-      LaggedExposure("PC", 2, 1, 65,    None, "ROS", 2, 2, 7, 0, 1),
-      LaggedExposure("PD", 3, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
+      LaggedExposure("PA", 0, 1, 75, "ROS", 2, 0, 5, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, "PIO", 1, 1, 5, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, "ROS", 2, 2, 5, 0, 1),
+      LaggedExposure("PC", 2, 1, 65, "PIO", 1, 1, 7, 0, 1),
+      LaggedExposure("PC", 2, 1, 65, "ROS", 2, 2, 7, 0, 1),
+      LaggedExposure("PD", 3, 1, 50, "ROS", 2, 0, 1, 0, 1)
     ).toDS()
 
     val expected = Seq(
@@ -595,14 +613,14 @@ class MLPPLoaderSuite extends SharedContext {
 
     // When
     val writer = MLPPLoader(params)
-    import writer.MLPPDataFrame
+    import writer.MLPPOutcomesDataFrame
     val result = input.makeOutcomes
 
     // Then
     assertDFs(result, expected)
   }
 
-  it should "create in the new format when featuresAsList is true" in {
+   it should "create in the new format when featuresAsList is true" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -619,18 +637,18 @@ class MLPPLoaderSuite extends SharedContext {
       (0, 6, 1),
       (0, 6, 2),
       (2, 1, 2)
-    ).toDF("patientIndex", "bucket", "outcomeType")
+    ).toDF("patientIndex", "bucket", "diseaseType")
 
     // When
     val writer = MLPPLoader(params)
-    import writer.MLPPDataFrame
+    import writer.MLPPOutcomesDataFrame
     val result = input.makeOutcomes
 
     // Then
     assertDFs(result, expected)
   }
 
-  "makeStaticOutcomes" should "create a single-column dataframe with the sparse static outcomes" in {
+  "makeStaticOutcomes" should "create Dataframe with the sparse static outcomes" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -640,23 +658,52 @@ class MLPPLoaderSuite extends SharedContext {
       maxTimestamp = makeTS(2006, 2, 1),
       bucketSize = 3 // bucketCount = 10
     )
-    val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 0, 6, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "PIO", 1, 1, 6, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, Some(6), "ROS", 2, 2, 6, 0, 1),
-      LaggedExposure("PC", 2, 1, 50, Some(1), "ROS", 2, 0, 1, 0, 1)
-    ).toDS()
+    val input: DataFrame = Seq(
+      ("PA", 0, 1, 75, Some(6), "femur", 2, 0, 6),
+      ("PA", 0, 1, 75, Some(6), "main", 1, 1, 6),
+      ("PA", 0, 1, 75, Some(6), "femur", 2, 2, 6),
+      ("PC", 2, 1, 50, Some(1), "femur", 2, 0, 1)
+      ).toDF("patientID", "patientIDIndex", "gender", "age", "diseaseBucket", "diseaseType", "diseaseTypeIndex", "startBucket", "endBucket")
 
-    val expected = Seq(0, 2).toDS.toDF
+    val expected = Seq((2, 2), (0, 2), (0, 1)).toDF("patientIDIndex", "diseaseType")
 
     // When
     val writer = MLPPLoader(params)
-    import writer.DiscreteExposures
+    import writer.MLPPOutcomesDataFrame
     val result = input.makeStaticOutcomes
 
     // Then
     assertDFs(result, expected)
   }
+
+  "enrichEvents" should "add columns such deathBucket & endBucket to the passed Dataframe" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input: DataFrame = Seq(
+      ("PA", "outcome", "targetDisease", makeTS(2006, 5, 15), 2, makeTS(1960, 1, 1),
+        None),
+      ("PC", "outcome", "targetDisease", makeTS(2006, 3, 15), 1, makeTS(1950, 1, 1),
+        Some(makeTS(2006, 4, 15))),
+      ("PC", "trackloss", "trackloss", makeTS(2006, 4, 1), 1, makeTS(1950, 1, 1),
+        Some(makeTS(2006, 4, 15)))
+    ).toDF("patientID", "category", "value", "start", "gender", "birthDate", "deathDate")
+
+    val expected: DataFrame = Seq(
+      ("PA", "outcome", "targetDisease", makeTS(2006, 5, 15), 2, makeTS(1960, 1, 1),
+        None, 46, 134, None, None, 1460),
+      ("PC", "outcome", "targetDisease", makeTS(2006, 3, 15), 1, makeTS(1950, 1, 1),
+        Some(makeTS(2006, 4, 15)), 56, 73, Some(104), Some(90), 90),
+      ("PC", "trackloss", "trackloss", makeTS(2006, 4, 1), 1, makeTS(1950, 1, 1),
+        Some(makeTS(2006, 4, 15)), 56, 90, Some(104), Some(90), 90)
+    ).toDF("patientID", "category", "value", "start", "gender", "birthDate", "deathDate", "age",
+      "startBucket", "deathBucket", "tracklossBucket", "endBucket")
+
+    val result = MLPPLoader().enrichEvents(input)
+    assertDFs(result, expected)
+  }
+
 
   "load" should "create the final matrices and write them as parquet files" in {
     val sqlCtx = sqlContext
@@ -724,8 +771,7 @@ class MLPPLoaderSuite extends SharedContext {
 
     val expectedZMatrix = Seq(
       (3D, 1D, 1D, 46, 1, "PA", 0),
-      (2D, 0D, 0D, 56, 1, "PC", 2),
-      (1D, 0D, 0D, 36, 2, "PB", 1)
+      (2D, 0D, 0D, 56, 1, "PC", 1)
     ).toDF("MOL0000_Mol1", "MOL0001_Mol2", "MOL0002_Mol3", "age", "gender", "patientID", "patientIDIndex")
 
     val expectedOutcomes : DataFrame = Seq(
@@ -735,9 +781,9 @@ class MLPPLoaderSuite extends SharedContext {
 
     // When
     val result = MLPPLoader(params)
-      .load(patient = patient,
-        outcome = outcome,
-        exposure = exposure,
+      .load(patients = patient,
+        outcomes = outcome,
+        exposures = exposure,
         path = rootDir).toDF
     val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
     val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
@@ -818,15 +864,14 @@ class MLPPLoaderSuite extends SharedContext {
 
     val expectedZMatrix = Seq(
       (3D, 1D, 1D, 46, 1, "PA", 0),
-      (2D, 0D, 0D, 56, 1, "PB", 1),
-      (1D, 0D, 0D, 36, 2, "PC", 2)
+      (2D, 0D, 0D, 56, 1, "PB", 1)
     ).toDF("MOL0000_Mol1", "MOL0001_Mol2", "MOL0002_Mol3", "age", "gender", "patientID", "patientIDIndex")
 
     // When
     val result = MLPPLoader(params).load(
-      patient = patient,
-      outcome = outcome,
-      exposure = exposure,
+      patients = patient,
+      outcomes = outcome,
+      exposures = exposure,
       path = rootDir).toDF
     val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
     val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
@@ -837,7 +882,7 @@ class MLPPLoaderSuite extends SharedContext {
     assertDFs(StaticExposures, expectedZMatrix)
  }
 
-  "load" should "create the final matrices and write them as parquet files with featuresAsList" in {
+  it should "create the final matrices and write them as parquet files with featuresAsList" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -904,20 +949,19 @@ class MLPPLoaderSuite extends SharedContext {
 
     val expectedZMatrix = Seq(
       (3D, 1D, 1D, 46, 1, "PA", 0),
-      (2D, 0D, 0D, 56, 1, "PC", 2),
-      (1D, 0D, 0D, 36, 2, "PB", 1)
+      (2D, 0D, 0D, 56, 1, "PC", 1)
     ).toDF("MOL0000_Mol1", "MOL0001_Mol2", "MOL0002_Mol3", "age", "gender", "patientID", "patientIDIndex")
 
     val expectedOutcomes : DataFrame = Seq(
       ("0", "4", "0"),
       ("1", "2", "1")
-    ).toDF( "patientIndex","bucket", "outcomeType")
+    ).toDF( "patientIndex","bucket", "diseaseType")
 
     // When
     val result = MLPPLoader(params)
-      .load(patient = patient,
-        outcome = outcome,
-        exposure = exposure,
+      .load(patients = patient,
+        outcomes = outcome,
+        exposures = exposure,
         path = rootDir).toDF
     val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
     val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")

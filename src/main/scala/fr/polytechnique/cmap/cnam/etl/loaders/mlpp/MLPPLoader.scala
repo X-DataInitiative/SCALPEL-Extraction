@@ -1,15 +1,15 @@
 package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
 import java.sql.Timestamp
-
-import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
-import fr.polytechnique.cmap.cnam.util.functions._
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
+import fr.polytechnique.cmap.cnam.util.functions._
+
 
 class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
 
@@ -58,20 +58,6 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
       data.withColumn("endBucket", endBucket)
     }
 
-    def withDiseaseType: DataFrame = {
-      data.withColumnRenamed("groupID", "diseaseType")
-    }
-    def withDiseaseBucket: DataFrame = {
-      val window = Window.partitionBy("patientId")
-
-      val hadDisease: Column = (col("category") === Outcome.category) &&
-        (col("startBucket") < minColumn(col("endBucket"), lit(bucketCount)))
-
-      val diseaseBucket: Column = min(when(hadDisease, col("startBucket"))).over(window)
-
-      data.withColumn("diseaseBucket", diseaseBucket)
-    }
-
     def withIndices(columnNames: Seq[String]): DataFrame = {
 
       columnNames.foldLeft(data){
@@ -101,30 +87,15 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
       }
     }
 
-    def makeDiscreteExposures: Dataset[LaggedExposure] = {
+    def toDiscreteExposures: Dataset[LaggedExposure] = {
 
       val discreteColumns: Seq[Column] = Seq("patientID", "patientIDIndex", "gender", "age",
-        "diseaseBucket", "molecule", "moleculeIndex", "startBucket", "endBucket").map(col)
+        "exposureType", "exposureTypeIndex", "startBucket", "endBucket").map(col)
 
       data
         // In the future, we might change it to sum("weight").as("weight")
         .groupBy(discreteColumns: _*).agg(lit(0).as("lag"), lit(1.0).as("weight"))
         .as[LaggedExposure]
-    }
-
-    def makeOutcomes: DataFrame = {
-      if(params.featuresAsList) {
-        data
-          .select(Seq(col("patientIDIndex"), col("diseaseBucket"), col("diseaseTypeIndex")): _*)
-          .distinct.toDF("patientIndex", "bucket", "outcomeType")
-      }
-      else {
-        val b = bucketCount
-        data
-          .withColumn("patientBucketIndex", col("patientIDIndex") * b + col("diseaseBucket"))
-          .select(Seq(col("patientBucketIndex"), col("diseaseTypeIndex")): _*)
-          .distinct
-      }
     }
 
     def writeCSV(path: String): Unit = {
@@ -133,6 +104,61 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
         .option("delimiter", ",")
         .option("header", "true")
         .save(path)
+    }
+  }
+
+  implicit class MLPPOutcomesDataFrame(outcomes: DataFrame) {
+
+    def withDiseaseType: DataFrame = {
+      outcomes.withColumnRenamed("groupID", "diseaseType")
+    }
+
+    def withDiseaseBucket(keepFirstOnly: Boolean): DataFrame = {
+
+      val hadDisease: Column = (col("category") === Outcome.category) &&
+        (col("startBucket") < minColumn(col("endBucket"), lit(bucketCount)))
+
+      val diseaseBucket: Column =
+        if (keepFirstOnly) {
+          val window = Window.partitionBy("patientID", "diseaseType")
+          min(when(hadDisease, col("startBucket"))).over(window)
+        }
+        else
+          when(hadDisease, col("startBucket"))
+
+      outcomes.withColumn("diseaseBucket", diseaseBucket)
+    }
+
+    def makeOutcomes: DataFrame = {
+      if (params.featuresAsList) {
+        outcomes
+          .select(Seq(col("patientIDIndex"), col("diseaseBucket"), col("diseaseTypeIndex")): _*)
+          .distinct.toDF("patientIndex", "bucket", "diseaseType")
+      }
+      else {
+        val b = bucketCount
+        outcomes
+          .withColumn("patientBucketIndex", col("patientIDIndex") * b + col("diseaseBucket"))
+          .select(Seq(col("patientBucketIndex"), col("diseaseTypeIndex")): _*)
+          .distinct
+      }
+    }
+
+    // The following function assumes the data has been filtered and contains only patients with the disease
+    def makeStaticOutcomes: DataFrame = {
+      outcomes
+        .select(Seq(col("patientIDIndex"), col("diseaseTypeIndex")): _*)
+        .distinct
+        .toDF("patientIDIndex", "diseaseType")
+    }
+
+    def writeLookupFiles(rootDir: String): Unit = {
+      val inputDF = outcomes.toDF
+
+      inputDF
+        .select("diseaseType", "diseaseTypeIndex")
+        .dropDuplicates(Seq("diseaseType"))
+        .writeCSV(s"$rootDir/csv/OutcomesLookup.csv")
     }
   }
 
@@ -146,18 +172,18 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
       //   the outer scope, so I just compute it again here.
       val max = math.max _
       val patientCount = exposures.map(_.patientIDIndex).reduce(max) + 1
-      val moleculeCount = exposures.map(_.moleculeIndex).reduce(max) + 1
+      val exposureTypeCount = exposures.map(_.exposureTypeIndex).reduce(max) + 1
       val lags = params.lagCount
       val buckets = bucketCount
       val bucketSize = params.bucketSize
 
       Metadata(
         rows = patientCount * buckets,
-        columns = moleculeCount * lags,
+        columns = exposureTypeCount * lags,
         patients = patientCount,
         buckets = buckets,
         bucketSize = bucketSize,
-        molecules = moleculeCount,
+        exposureType = exposureTypeCount,
         lags = lags
       )
     }
@@ -168,15 +194,15 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
       // The following function transforms a single initial exposure like (Pat1, MolA, 4, 0, 1)
       //   into a sequence of lagged exposures like:
       //
-      //     Patient  Molecule  Bucket  Lag  Value
-      //      Pat1      MolA      4      0     1
-      //      Pat1      MolA      5      1     1
-      //      Pat1      MolA      6      2     1
+      //     Patient  ExposureType  Bucket  Lag  Value
+      //      Pat1        MolA        4      0     1
+      //      Pat1        MolA        5      1     1
+      //      Pat1        MolA        6      2     1
       //
       // Basically, this means we are filling the diagonal for the given exposure, stopping
       //   when we reach either the last lag or the defined end bucket (min among bucket count,
       //   death date and target disease date)
-      val createLags: (LaggedExposure) => Seq[LaggedExposure] = {
+      val createLags: LaggedExposure => Seq[LaggedExposure] = {
         e: LaggedExposure => (0 until lagCount).collect {
           case newLag if e.startBucket + newLag < e.endBucket =>
             e.copy(startBucket = e.startBucket + newLag, lag = newLag)
@@ -202,15 +228,15 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
       // We rename the molecule values considering their index, so we can order the columns later.
       //   The name will be in the format "MOLXXXX_MoleculeName", where XXXX is its left-padded
       //   index.
-      val moleculeColumn: Column = concat(
+      val exposureTypeColumn: Column = concat(
         lit("MOL"),
-        lpad(col("moleculeIndex").cast(StringType), 4, "0"),
+        lpad(col("exposureTypeIndex").cast(StringType), 4, "0"),
         lit("_"),
-        col("molecule")
+        col("exposureType")
       )
 
       val pivoted = exposuresDF
-        .withColumn("toPivot", moleculeColumn)
+        .withColumn("toPivot", exposureTypeColumn)
         .groupBy(referenceColumns: _*)
         .pivot("toPivot").agg(sum("weight")).na.fill(0D)
 
@@ -239,13 +265,6 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
       }
     }
 
-
-    // The following function assumes the data has been filtered and contains only patients with the
-    //   disease
-    def makeStaticOutcomes: DataFrame = {
-      exposures.map(_.patientIDIndex).distinct.toDF
-    }
-
     def writeLookupFiles(rootDir: String): Unit = {
       val inputDF = exposures.toDF
 
@@ -255,84 +274,65 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
         .writeCSV(s"$rootDir/csv/PatientsLookup.csv")
 
       inputDF
-        .select("molecule", "moleculeIndex")
-        .dropDuplicates(Seq("molecule"))
+        .select("exposureType", "exposureTypeIndex")
+        .dropDuplicates(Seq("exposureType"))
         .writeCSV(s"$rootDir/csv/MoleculeLookup.csv")
+
     }
   }
 
-
-  // Maybe put this in an implicit class of Dataset[FlatEvent]? This would cause the need of the following:
-  //   val writer = MLPPWriter(params)
-  //   import writer.FlatEventDataset (or import writer._)
-  //   data.write(path)
-  //
-  // Returns the features dataset for convenience
-  def load(
-      outcome: Dataset[Event[Outcome]],
-      exposure: Dataset[Event[Exposure]],
-      patient: Dataset[Patient],
-      path: String): Dataset[MLPPFeature] = {
-
-    val rootDir = if(path.last == '/') path.dropRight(1) else path
-    val input = patient.join(outcome.toDF.union(exposure.toDF), "patientID")
-
-    val eventsEnhanced = input
+  def enrichEvents(events: DataFrame): DataFrame ={
+    events
       .withAge
       .withStartBucket
       .withDeathBucket
       .withTracklossBucket
       .withEndBucket
-      .withDiseaseBucket
-      .withIndices(Seq("patientID"))
-      .persist()
+  }
 
-    val outcomesEvents = eventsEnhanced
-      .where(col("category") === "outcome")
+  def load(
+    outcomes: Dataset[Event[Outcome]],
+    exposures: Dataset[Event[Exposure]],
+    patients: Dataset[Patient],
+    path: String): Dataset[MLPPFeature] = {
+
+    val rootDir = if(path.last == '/') path.dropRight(1) else path
+
+    val richOutcomes = enrichEvents(outcomes.join(patients, "patientID"))
+      .where(col("startBucket") < col("endBucket"))
+
+    val richExposures = enrichEvents(exposures.join(patients, "patientID"))
+      .where(col("startBucket") < col("endBucket"))
+
+    val commonPatients = richOutcomes.select("patientID").distinct().join(
+      richExposures.select("patientID").distinct(), "patientID"
+    ).withIndices(Seq("patientID"))
+
+    val outcomeEvents = richOutcomes.join(commonPatients, "patientID")
       .withDiseaseType
+      .withDiseaseBucket(true)
       .withIndices(Seq("diseaseType"))
 
-    val initialExposures: Dataset[LaggedExposure] = eventsEnhanced
-      .where(col("category") === "exposure")
-      .withColumnRenamed("value", "molecule")
-      .where(col("startBucket") < col("endBucket"))
-      .withIndices(Seq("molecule"))
-      .makeDiscreteExposures
+    import richExposures.sqlContext.implicits._
+    val exposureEvents: Dataset[LaggedExposure] = richExposures
+      .join(commonPatients, "patientID")
+      .withColumnRenamed("value", "exposureType")
+      .withIndices(Seq("exposureType"))
+      .toDiscreteExposures
+      .as[LaggedExposure]
       .persist()
 
-    val exposedPatients = initialExposures
-      .select("patientIDIndex")
-      .distinct()
-      .withColumnRenamed("patientIDIndex", "patientExposedID")
+    val metadata: Metadata = exposureEvents.makeMetadata
+    val staticExposures: DataFrame = exposureEvents.makeStaticExposures
+
+    val censoring: DataFrame = exposureEvents.makeCensoring
+
+    val outputOutcomes: DataFrame = outcomeEvents.makeOutcomes
+    val staticOutcomes: DataFrame = outcomeEvents.makeStaticOutcomes
 
 
-
-    import exposedPatients.sqlContext.implicits._
-    val filteredExposures = initialExposures.filter(_.diseaseBucket.isDefined)
-      .toDF()
-      .withIndices(Seq("patientIDIndex"))
-      .drop("patientIDIndex")
-      .withColumnRenamed("patientIDIndexIndex", "patientIDIndex")
-      .as[LaggedExposure]
-
-    val metadata: Metadata = initialExposures.makeMetadata
-    val staticExposures: DataFrame = initialExposures.makeStaticExposures
-
-    val censoring = initialExposures.makeCensoring
-    val filteredOutcomes =  outcomesEvents
-      .join(exposedPatients,
-        outcomesEvents.col("patientIDIndex") === exposedPatients.col("patientExposedID"),
-        joinType = "inner")
-      .withIndices(Seq("patientIDIndex"))
-      .drop(Seq("patientExposedID", "patientIDIndex"):_*)
-      .withColumnRenamed("patientIDIndexIndex", "patientIDIndex")
-
-
-    val outcomes = filteredOutcomes.makeOutcomes
-
-    val staticOutcomes = filteredExposures.makeStaticOutcomes
-    val ff = filteredExposures.lagExposures
-    val features: Dataset[MLPPFeature] = ff.toMLPPFeatures
+    // Make MLPP ready features
+    val features: Dataset[MLPPFeature] = exposureEvents.lagExposures.toMLPPFeatures
     val featuresDF = features.toDF.persist()
 
     // write static exposures ("Z" matrix)
@@ -343,23 +343,22 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
     censoring.writeCSV(s"$rootDir/csv/Censoring.csv")
 
     // write outcomes ("Y" matrices)
-    outcomes.writeCSV(s"$rootDir/csv/Outcomes.csv")
+    outputOutcomes.writeCSV(s"$rootDir/csv/Outcomes.csv")
     staticOutcomes.writeCSV(s"$rootDir/csv/StaticOutcomes.csv")
 
     // write lookup tables
-    initialExposures.writeLookupFiles(rootDir)
+    exposureEvents.writeLookupFiles(rootDir)
+    outcomeEvents.writeLookupFiles(rootDir)
 
     // write sparse features ("X" matrix)
     featuresDF.write.parquet(s"$rootDir/parquet/SparseFeatures")
     featuresDF.writeCSV(s"$rootDir/csv/SparseFeatures.csv")
 
     // write metadata
-//    import input.sqlContext.implicits._
     Seq(metadata).toDF.writeCSV(s"$rootDir/csv/metadata.csv")
 
     featuresDF.unpersist()
-    filteredExposures.unpersist()
-    initialExposures.unpersist()
+    exposureEvents.unpersist()
 
     // Return the features for convenience
     features
