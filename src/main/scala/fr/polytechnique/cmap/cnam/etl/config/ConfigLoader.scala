@@ -21,10 +21,14 @@ trait ConfigLoader {
   // For reading snake_case config items
   implicit def productHint[T]: ProductHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, SnakeCase))
 
-  // For reading enums
-  implicit def coproductHint[T]: CoproductHint[T] = new EnumCoproductHint[T]
+  // For reading enums.
+  implicit def coproductHint[T]: CoproductHint[T] = new EnumCoproductHint[T] {
+    // The following override allows converting from snake_case (in the config file) to CamelCase.
+    // I found this by looking at pureconfig's code, not the docs.
+    override def fieldValue(name: String): String  = SnakeCase.fromTokens(CamelCase.toTokens(name))
+  }
 
-  // For reading Periods
+  // For reading Periods (check pureconfig's docs about "Supporting new Types")
   implicit val myPeriodReader: ConfigReader[Period] = ConfigReader[String].map { s =>
     val (n, unit) = (s.split(" ")(0).toInt, s.split(" ")(1))
     unit match {

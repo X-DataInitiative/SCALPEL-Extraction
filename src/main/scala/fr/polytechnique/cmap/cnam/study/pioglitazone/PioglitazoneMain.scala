@@ -84,10 +84,10 @@ object PioglitazoneMain extends Main {
     val outcomes = outcomesTransformer.transform(diseaseEvents, medicalActs)
 
     logger.info("Extracting Follow-up...")
-    val patiensWithObservations = patients.joinWith(observations, patients.col("patientId") === observations.col("patientId"))
+    val patientsWithObservations = patients.joinWith(observations, patients.col("patientId") === observations.col("patientId"))
 
     val followups = new FollowUpTransformer(config.followUp)
-      .transform(patiensWithObservations, drugEvents, outcomes, tracklosses)
+      .transform(patientsWithObservations, drugEvents, outcomes, tracklosses)
       .cache()
 
     logger.info("Filtering Patients...")
@@ -105,6 +105,7 @@ object PioglitazoneMain extends Main {
 
     logger.info("Writing cancer outcomes...")
     outcomes.filterPatients(filteredPatients.idsSet)
+      .write.parquet(outputPaths.outcomes)
 
     logger.info("Extracting Exposures...")
     val patientsWithFollowups = filteredPatients.joinWith(

@@ -56,7 +56,7 @@ object Sources {
       sqlContext,
       dcirPath = paths.dcir,
       mcoPath = paths.mco,
-      mcoCePath = paths.mco,
+      mcoCePath = paths.mcoCe,
       hadPath = paths.had,
       ssrPath = paths.ssr,
       irBenPath = paths.irBen,

@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.study.rosiglitazone
+package fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
