@@ -30,7 +30,7 @@ case class RosiglitazoneConfig(
   val followUp: FollowUpTransformerConfig = RosiglitazoneConfig.FollowUpConfig(outcomes.outcomeDefinition)
 }
 
-object RosiglitazoneConfig extends ConfigLoader {
+object RosiglitazoneConfig extends ConfigLoader with RosiglitazoneStudyCodes {
 
   /** Base fixed parameters for this study. */
   final object BaseConfig extends BaseConfig (
@@ -52,9 +52,9 @@ object RosiglitazoneConfig extends ConfigLoader {
 
   /** Fixed parameters needed for the Diagnoses extractors. */
   final object DiagnosesConfig extends DiagnosesConfig(
-    dpCodes = RosiglitazoneStudyCodes.diagCodeInfarct,
-    drCodes = RosiglitazoneStudyCodes.diagCodeInfarct,
-    daCodes = RosiglitazoneStudyCodes.diagCodeInfarct,
+    dpCodes = infarctusDiagnosisCodes,
+    drCodes = infarctusDiagnosisCodes,
+    daCodes = infarctusDiagnosisCodes,
     imbCodes = List()
   )
 

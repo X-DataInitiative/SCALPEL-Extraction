@@ -6,16 +6,12 @@ import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer
 
 class RosiglitazoneOutcomeTransformer(definition: OutcomeDefinition) extends OutcomesTransformer {
 
-  val outcomeName: String = definition match {
-    case OutcomeDefinition.Infarctus => Infarctus.outcomeName
-    case OutcomeDefinition.HeartFailure => HeartFailure.outcomeName
-  }
+  val outcomeName: String = definition.outcomeName
 
   def transform(diagnoses: Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
     definition match {
       case OutcomeDefinition.Infarctus => Infarctus.transform(diagnoses)
-      // TODO:
-      // case OutcomeDefinition.HeartFailure => HeartFailure.transform(diagnoses)
+      // TODO: case OutcomeDefinition.HeartFailure => HeartFailure.transform(diagnoses)
     }
   }
 }

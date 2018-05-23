@@ -21,9 +21,10 @@ trait ConfigLoader {
   // For reading snake_case config items
   implicit def productHint[T]: ProductHint[T] = ProductHint[T](ConfigFieldMapping(CamelCase, SnakeCase))
 
-  // For reading enums
-  //   Note: the override I discovered by reading pureconfig's code, it's not in their docs.
+  // For reading enums.
   implicit def coproductHint[T]: CoproductHint[T] = new EnumCoproductHint[T] {
+    // The following override allows converting from snake_case (in the config file) to CamelCase.
+    // I found this by looking at pureconfig's code, not the docs.
     override def fieldValue(name: String): String  = SnakeCase.fromTokens(CamelCase.toTokens(name))
   }
 
