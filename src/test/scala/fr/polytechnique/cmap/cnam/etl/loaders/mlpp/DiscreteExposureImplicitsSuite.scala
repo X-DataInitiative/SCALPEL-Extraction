@@ -149,11 +149,11 @@ class DiscreteExposureImplicitsSuite extends SharedContext {
 
     // Given
     val input: Dataset[LaggedExposure] = Seq(
-      LaggedExposure("PA", 0, 1, 75, "ROS", 2, 0, 6, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, "ROS (A)", 2, 0, 6, 0, 1),
       LaggedExposure("PA", 0, 1, 75, "PIO", 1, 1, 6, 0, 1),
-      LaggedExposure("PA", 0, 1, 75, "ROS", 2, 2, 6, 0, 1),
+      LaggedExposure("PA", 0, 1, 75, "ROS (A)", 2, 2, 6, 0, 1),
       LaggedExposure("PB", 1, 2, 40, "INS", 0, 1, 8, 0, 1),
-      LaggedExposure("PC", 2, 1, 50, "ROS", 2, 0, 1, 0, 1)
+      LaggedExposure("PC", 2, 1, 50, "ROS (A)", 2, 0, 1, 0, 1)
     ).toDS()
     val discreteExposureImplicits = new DiscreteExposureImplicits(input)
 
@@ -161,13 +161,23 @@ class DiscreteExposureImplicitsSuite extends SharedContext {
       (0D, 1D, 2D, 75, 1, "PA", 0),
       (1D, 0D, 0D, 40, 2, "PB", 1),
       (0D, 0D, 1D, 50, 1, "PC", 2)
-    ).toDF("MOL0000_INS", "MOL0001_PIO", "MOL0002_ROS", "age", "gender", "patientID", "patientIDIndex")
+    ).toDF("MOL0000_INS", "MOL0001_PIO", "MOL0002_ROS_A", "age", "gender", "patientID", "patientIDIndex")
 
     // When
     val result = discreteExposureImplicits.makeStaticExposures
 
     // Then
     assertDFs(result, expected)
+
+    //test to save the data with the special character in the format of parquet
+    result.write.parquet("target/test/output/exposure")
+
+    //when
+    val result1 = sqlCtx.read.parquet("target/test/output/exposure")
+      .toDF("MOL0000_INS", "MOL0001_PIO", "MOL0002_ROS_A", "age", "gender", "patientID", "patientIDIndex")
+
+    //then
+    assertDFs(result1, expected)
   }
 
   "makeCensoring" should "create the output dataframe with censoring information" in {

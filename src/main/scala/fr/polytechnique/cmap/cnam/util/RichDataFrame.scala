@@ -1,19 +1,12 @@
 package fr.polytechnique.cmap.cnam.util
 
 import scala.reflect.runtime.universe.{TypeTag, typeOf}
-import org.apache.spark.sql.functions.{col, udf}
+import org.apache.spark.sql.functions.{col, regexp_replace, udf}
 import org.apache.spark.sql.types.{DataType, StringType, StructField, StructType}
-import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
+import org.apache.spark.sql.{DataFrame, Dataset}
 
 
 class RichDataFrame(dataFrame: DataFrame) {
-
-  def writeParquet(path: String, isOverwrite: Boolean = true ): Unit = {
-    val saveMode : SaveMode = if(isOverwrite) SaveMode.Ignore else SaveMode.Overwrite
-    dataFrame.write
-      .mode(saveMode)
-      .parquet(path)
-  }
 
   /**
     * This method compares the equality of two data frames. To qualify equality, the rows
@@ -53,7 +46,7 @@ class RichDataFrame(dataFrame: DataFrame) {
 
   def withIndices(columnNames: Seq[String]): DataFrame = {
     import dataFrame.sqlContext.implicits._
-    columnNames.foldLeft(dataFrame){
+    columnNames.foldLeft(dataFrame) {
       (currentData, columnName) => {
 
         // WARNING: The following code is dangerous, but there is no perfect solution.
@@ -79,11 +72,20 @@ class RichDataFrame(dataFrame: DataFrame) {
       }
     }
   }
+
+  def avoidSpecialCharactersBeforePivot(column: String): DataFrame = {
+    //replace ",; " to "_"
+    val underscoreCol = regexp_replace(col(column), "[\\,,;, ]", "_")
+    //replace "(){}" to ""
+    val bracketCol = regexp_replace(underscoreCol, "[\\(,\\),\\{,\\}]", "")
+    dataFrame.withColumn(column, bracketCol)
+  }
 }
 
 object RichDataFrame {
 
   implicit def toRichDataFrame(dataFrame: DataFrame): RichDataFrame = new RichDataFrame(dataFrame)
+
   def renameTupleColumns[A: TypeTag, B: TypeTag](input: Dataset[(A, B)]): Dataset[(A, B)] = {
     import input.sqlContext.implicits._
     val aName = typeOf[A].typeSymbol.name.toString

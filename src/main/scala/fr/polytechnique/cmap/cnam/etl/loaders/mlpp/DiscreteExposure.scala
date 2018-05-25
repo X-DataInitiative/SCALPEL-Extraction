@@ -63,7 +63,8 @@ class DiscreteExposureImplicits(exposures: Dataset[LaggedExposure]) {
   }
 
   def makeStaticExposures: DataFrame = {
-    val exposuresDF = exposures.toDF
+    //avoid a column name which contains a space after a pivot
+    val exposuresDF = exposures.toDF.avoidSpecialCharactersBeforePivot("exposureType")
 
     val referenceColumnNames = List("age", "gender", "patientID", "patientIDIndex")
     val referenceColumns = referenceColumnNames.map(col)
