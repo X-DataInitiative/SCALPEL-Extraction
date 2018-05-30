@@ -52,9 +52,9 @@ object RosiglitazoneConfig extends ConfigLoader with RosiglitazoneStudyCodes {
 
   /** Fixed parameters needed for the Diagnoses extractors. */
   final object DiagnosesConfig extends DiagnosesConfig(
-    dpCodes = infarctusDiagnosisCodes,
-    drCodes = infarctusDiagnosisCodes,
-    daCodes = infarctusDiagnosisCodes,
+    dpCodes = infarctusDiagnosisCodes ++ diagCodeHeartFailure ++ diagCodeHeartComplication,
+    drCodes = infarctusDiagnosisCodes ++ diagCodeHeartFailure ++ diagCodeHeartComplication,
+    daCodes = infarctusDiagnosisCodes ++ diagCodeHeartFailure ++ diagCodeHeartComplication,
     imbCodes = List()
   )
 

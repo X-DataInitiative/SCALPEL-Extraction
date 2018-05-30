@@ -62,7 +62,7 @@ object RosiglitazoneMain extends Main{
     logger.info("Writing patients...")
     patients.toDF.write.parquet(outputPaths.patients)
 
-    logger.info("Writing events...")
+    logger.info("Writing drugs and diagnoses events...")
     allEvents.toDF.write.parquet(outputPaths.flatEvents)
 
     logger.info("Extracting Observations...")
@@ -115,4 +115,3 @@ object RosiglitazoneMain extends Main{
     Some(allEvents)
   }
 }
-
