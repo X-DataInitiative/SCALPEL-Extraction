@@ -11,7 +11,7 @@ class RosiglitazoneOutcomeTransformer(definition: OutcomeDefinition) extends Out
   def transform(diagnoses: Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
     definition match {
       case OutcomeDefinition.Infarctus => Infarctus.transform(diagnoses)
-      // TODO: case OutcomeDefinition.HeartFailure => HeartFailure.transform(diagnoses)
+      case OutcomeDefinition.HeartFailure => HeartFailure.transform(diagnoses)
     }
   }
 }
