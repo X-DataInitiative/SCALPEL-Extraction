@@ -26,7 +26,9 @@ object Sources {
     irBenPath: Option[String] = None,
     irImbPath: Option[String] = None,
     irPhaPath: Option[String] = None,
-    dosagesPath: Option[String] = None): Sources = {
+    dosagesPath: Option[String] = None,
+    patientListPath: Option[String] = None
+    ): Sources = {
 
     Sources(
       dcir = dcirPath.map(DcirSource.read(sqlContext, _)),

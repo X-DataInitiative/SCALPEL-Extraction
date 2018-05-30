@@ -16,7 +16,7 @@ object DrugsExtractor extends java.io.Serializable{
       col("ER_PHA_F__PHA_PRS_C13").cast(StringType).as("CIP13"),
       col("PHA_ATC_C07").cast(StringType).as("ATC5"),
       col("EXE_SOI_DTD").cast(TimestampType).as("eventDate"),
-      col("molecule_combination").cast(StringType).as("molecules")
+      col("ER_PHA_F__PHA_PRS_C13").cast(StringType).as("molecules")
     )
 
     lazy val irPhaR = sources.irPha.get

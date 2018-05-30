@@ -23,7 +23,7 @@ private[acts] object McoCEMedicalActs {
 
   def correctCamCode(camCodes: Seq[String])(row: Row): Boolean = {
     val camCode = row.getAs[String](ColNames.CamCode)
-    if (camCode != null) camCodes.map(camCode.startsWith).exists(identity) else false
+    camCode != null
   }
 
   def extract(mcoCE: DataFrame, ccamCodes: Seq[String]): Dataset[Event[MedicalAct]] = {

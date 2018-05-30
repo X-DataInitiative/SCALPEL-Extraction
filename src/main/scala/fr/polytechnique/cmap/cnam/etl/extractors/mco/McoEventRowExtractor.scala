@@ -21,7 +21,7 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
 
   def extractCode(r: Row, colName: ColName, codes: Seq[String]): Option[String] = {
     val idx = r.fieldIndex(colName)
-    codes.find(!r.isNullAt(idx) && r.getString(idx).startsWith(_))
+    if(!r.isNullAt(idx)) Some(r.getString(idx)) else None
   }
 
   def eventFromRow[A <: AnyEvent](

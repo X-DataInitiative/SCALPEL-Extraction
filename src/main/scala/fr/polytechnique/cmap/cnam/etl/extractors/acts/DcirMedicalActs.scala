@@ -24,9 +24,11 @@ private[acts] object DcirMedicalActs {
 
   def medicalActFromRow(ccamCodes: Seq[String])(r: Row): Option[Event[MedicalAct]] = {
 
-    val foundCode: Option[String] = ccamCodes.find {
+    val foundCode: Option[String] = {
       val idx = r.fieldIndex(ColNames.CamCode)
-      !r.isNullAt(r.fieldIndex(ColNames.CamCode)) && r.getString(idx).startsWith(_)
+      if(! (r.isNullAt(r.fieldIndex(ColNames.CamCode)) || r.isNullAt(r.fieldIndex(ColNames.Date)))) {
+        Some(r.getAs[String](ColNames.CamCode))
+      } else None
     }
 
     foundCode match {
