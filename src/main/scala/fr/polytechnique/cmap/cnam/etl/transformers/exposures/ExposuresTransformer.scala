@@ -7,7 +7,7 @@ import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.etl.events.{Dispensation, Event, Exposure}
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
-import fr.polytechnique.cmap.cnam.util.RichDataFrames._
+import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 
 class ExposuresTransformer(config: ExposuresTransformerConfig)
   extends ExposurePeriodAdder with WeightAggregator {

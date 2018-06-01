@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.observation._
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
-import fr.polytechnique.cmap.cnam.util.RichDataFrames._
+import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 
 class FollowUpTransformer(config: FollowUpTransformerConfig) {
 

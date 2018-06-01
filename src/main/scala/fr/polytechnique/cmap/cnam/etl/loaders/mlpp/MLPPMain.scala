@@ -1,12 +1,12 @@
 package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
 import java.sql.Timestamp
-
+import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.functions._
-import org.apache.spark.sql.{Dataset, SQLContext}
 
 object MLPPMain extends Main {
   
@@ -86,11 +86,12 @@ object MLPPMain extends Main {
 
     logger.info("Extracting MLPP features...")
     val params = MLPPLoader.Params(
+      outputRootPath = Path(env.featuringPath),
       includeCensoredBucket = env.includeCensoredBucket,
       minTimestamp = env.studyStart,
       maxTimestamp = env.studyEnd,
       featuresAsList = true)
-    MLPPLoader(params).load(outcomes, exposures, patients, env.featuringPath)
+    MLPPLoader(params).load(outcomes, exposures, patients)
     None
   }
 }
