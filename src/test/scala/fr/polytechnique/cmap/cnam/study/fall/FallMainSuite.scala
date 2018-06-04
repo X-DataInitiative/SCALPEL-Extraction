@@ -4,42 +4,6 @@ import fr.polytechnique.cmap.cnam.SharedContext
 
 class FallMainSuite extends SharedContext {
 
-  "getEnv" should "return correct default environment" in {
-    // Given
-    val args = Map[String, String]()
-    val expected = FallMain.TestEnv
-
-    // When
-    val result = FallMain.getEnv(args)
-
-    // Then
-    assert(result == expected)
-  }
-
-  it should "return the Fall environment when specified" in {
-    // Given
-    val args = Map(("env", "fall"))
-    val expected = FallMain.FallEnv
-
-    // When
-    val result = FallMain.getEnv(args)
-
-    // Then
-    assert(result == expected)
-  }
-
-  it should "return the CMAP environment when specified" in {
-    // Given
-    val args = Map(("env", "cmap"))
-    val expected = FallMain.CmapEnv
-
-    // When
-    val result = FallMain.getEnv(args)
-
-    // Then
-    assert(result == expected)
-  }
-
   "appName" should "return the correct string" in {
     // Given
     val expected = "fall study"
@@ -54,8 +18,13 @@ class FallMainSuite extends SharedContext {
   "run" should "return None" in {
     val sqlCtx = sqlContext
 
+    //Given
+    val params = Map(
+      "conf" -> "/src/main/resources/config/fall/default.conf",
+      "env" -> "test")
+
     // When
-    val result = FallMain.run(sqlCtx, Map(("env", "test")))
+    val result = FallMain.run(sqlCtx, params)
 
     // Then
     assert(result.isEmpty)

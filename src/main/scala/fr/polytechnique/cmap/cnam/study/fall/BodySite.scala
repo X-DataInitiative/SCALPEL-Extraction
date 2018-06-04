@@ -45,6 +45,32 @@ object BodySite{
 
     getSiteFromCode(code, sitesNodes, codeType)
   }
+
+  def fromString(site: String): BodySite = site match{
+    case "MembreSuperieurProximal" => MembreSuperieurProximal
+    case "MembreInferieurDistal" => MembreInferieurDistal
+    case "MembreSuperieurDistal" => MembreSuperieurDistal
+    case "RestOfBody" => RestOfBody
+    case "FemurExclusionCol" => FemurExclusionCol
+    case "Clavicule" => Clavicule
+    case "Jambe" => Jambe
+    case "ColDuFemur" => ColDuFemur
+    case "Cheville" => Cheville
+    case "Pied" => Pied
+    case "Doigt" => Doigt
+    case "Poignet" => Poignet
+    case "CoudeAvantBras" => CoudeAvantbras
+    case "Ribs" => Ribs
+    case "BassinRachis" => BassinRachis
+    case "Rachis" => Rachis
+    case "Bassin" => Bassin
+    case "CraneFace" => CraneFace
+    case "Crane" => Crane
+    case "Face" => Face
+    case "Dent" => Dent
+    case "AllSites" => AllSites
+    case "BodySites" => BodySites
+  }
 }
 
 trait LeafSite extends BodySite with Serializable{
