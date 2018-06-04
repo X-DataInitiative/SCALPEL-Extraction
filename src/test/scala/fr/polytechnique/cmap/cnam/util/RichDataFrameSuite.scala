@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.util
 
-import org.mockito._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 
@@ -52,18 +51,20 @@ class RichDataFrameSuite extends SharedContext {
     assert(!result)
   }
 
-  "storeParquet" should "call the write method" in {
+  "avoidSpecialCharactersBeforePivot" should "replace all the special characters in a column" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
-    // Given
-    val df = sc.parallelize(Seq(1,2,3)).toDF("InterestingName")
-    val spyDF = Mockito.spy(df)
 
-    // When
-    spyDF.writeParquet("anyPath")
+    //Given
+    val df = Seq("ROS A", "INS (B)", "PIO,{C}").toDF("col1")
 
-    // Then
-    Mockito.verify(spyDF).write
+    val expected = Seq("ROS_A", "INS_B", "PIO_C").toDF("col1")
+
+    //When
+    val result = df.avoidSpecialCharactersBeforePivot("col1")
+
+    //Then
+    assertDFs(result, expected)
   }
 
   "renameDataset" should "rename the two columns of a dataset from tuple" in {
