@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.events.Exposure
-import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.MLPPLoader.Params
+import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig
 import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 import fr.polytechnique.cmap.cnam.util.functions.daysBetween
 
@@ -23,9 +23,9 @@ class MLPPExposuresImplicits(data: DataFrame) {
   }
 }
 
-class MLPPExposures(params: Params) {
+class MLPPExposures(params: MLPPConfig) {
 
-  private val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
+  private val bucketCount = (daysBetween(params.extra.maxTimestamp, params.extra.minTimestamp) / params.base.bucketSize).toInt
 
   implicit def toMLPPExposures(dataFrame: DataFrame): MLPPExposuresImplicits = new MLPPExposuresImplicits(dataFrame)
 
@@ -43,21 +43,21 @@ class MLPPExposures(params: Params) {
     import DiscreteExposure._
     val staticExposures: DataFrame = exposures.makeStaticExposures.persist()
     // write static exposures ("Z" matrix)
-    staticExposures.write.parquet(s"${params.outputRootPath}/parquet/StaticExposures")
-    staticExposures.writeCSV(s"${params.outputRootPath}/csv/StaticExposures.csv")
+    staticExposures.write.parquet(params.output.staticExposuresParquet)
+    staticExposures.writeCSV(params.output.staticExposuresCSV)
     staticExposures.unpersist()
 
     // Make MLPP ready features
-    val features: Dataset[MLPPFeature] = exposures.lagExposures(params.lagCount).toMLPPFeatures(params.lagCount, bucketCount)
+    val features: Dataset[MLPPFeature] = exposures.lagExposures(params.base.lagCount).toMLPPFeatures(params.base.lagCount, bucketCount)
 
     val featuresDF = features.toDF().persist()
     // write sparse features ("X" matrix)
-    featuresDF.write.parquet(s"${params.outputRootPath}/parquet/SparseFeatures")
-    featuresDF.writeCSV(s"${params.outputRootPath}/csv/SparseFeatures.csv")
+    featuresDF.write.parquet(params.output.sparseFeaturesParquet)
+    featuresDF.writeCSV(params.output.sparseFeaturesCSV)
     featuresDF.unpersist()
 
     // write lookup tables
-    exposures.writeLookupFiles(params.outputRootPath.toString)
+    exposures.writeLookupFiles(params)
     features
   }
 

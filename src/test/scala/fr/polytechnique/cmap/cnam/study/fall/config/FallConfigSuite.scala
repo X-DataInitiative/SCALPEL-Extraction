@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.study.fall.config
 import java.nio.file.Paths
 import com.typesafe.config.ConfigFactory
 import org.scalatest.FlatSpec
-import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.PharmacologicalLevel
 
 

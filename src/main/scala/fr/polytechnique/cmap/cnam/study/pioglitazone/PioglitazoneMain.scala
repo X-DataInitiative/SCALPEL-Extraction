@@ -11,6 +11,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.tracklosses.{Tracklosses, Track
 import fr.polytechnique.cmap.cnam.etl.filters.{EventFilters, PatientFilters}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.MLPPLoader
+import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposuresTransformer, ExposuresTransformerConfig}
@@ -28,8 +29,8 @@ object PioglitazoneMain extends Main {
 
   /**
     * Arguments expected:
-    *   "conf" -> "path/to/file.conf" (default: "$resources/config/pioglitazone/default.conf")
-    *   "env" -> "cnam" | "cmap" | "test" (default: "test")
+    * "conf" -> "path/to/file.conf" (default: "$resources/config/pioglitazone/default.conf")
+    * "env" -> "cnam" | "cmap" | "test" (default: "test")
     */
   def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[Event[AnyEvent]]] = {
 
@@ -122,11 +123,14 @@ object PioglitazoneMain extends Main {
     exposures.write.parquet(outputPaths.exposures)
 
     logger.info("Extracting MLPP features...")
-    val params = MLPPLoader.Params(
-      outputRootPath = Path(outputPaths.mlppFeatures),
-      minTimestamp = config.base.studyStart,
-      maxTimestamp = config.base.studyEnd)
-    MLPPLoader(params).load(outcomes, exposures, patients)
+    val mlppConf = MLPPConfig(
+      input = MLPPConfig.InputPaths(patients = Some(outputPaths.patients),
+        outcomes = Some(outputPaths.outcomes),
+        exposures = Some(outputPaths.exposures)),
+      output = MLPPConfig.OutputPaths(root = Path(outputPaths.mlppFeatures)),
+      extra = MLPPConfig.ExtraConfig(minTimestamp = config.base.studyStart,
+        maxTimestamp = config.base.studyEnd))
+    MLPPLoader(mlppConf).load(outcomes, exposures, patients)
 
     Some(allEvents)
   }

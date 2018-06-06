@@ -1,6 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
+import java.nio.file.Paths
+import com.typesafe.config.ConfigFactory
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig
 import fr.polytechnique.cmap.cnam.util.functions.{daysBetween, makeTS}
 
 class MLPPDataFrameImplicitsSuite extends SharedContext {
@@ -11,11 +14,32 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 2),
-      bucketSize = 2
-    )
+    val tempPath = "target/test.conf"
+    val strConf =
+      """
+        | input {
+        |   patients: "src/test/resources/MLPP/patient"
+        |   outcomes: "src/test/resources/MLPP/outcome"
+        |   exposures: "src/test/resources/MLPP/exposure"
+        | }
+        |
+        | output {
+        |   root: "target/test/output/featuring"
+        | }
+        |
+        | base {
+        |   bucket_size: 2
+        |   features_as_list: false
+        | }
+        |
+        | extra {
+        |   min_timestamp: "2006-01-01"
+        |   max_timestamp: "2006-02-02"
+        | }
+      """.stripMargin
+    pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(strConf), Paths.get(tempPath), true)
+
+    val params = MLPPConfig.load(tempPath, "test")
 
     val input = Seq(
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(1950, 1, 1),
@@ -56,9 +80,8 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
-    val params = MLPPLoader.Params()
-
     // Given
+    val minTimestamp = makeTS(2006, 1, 1)
     val input = Seq(
       ("Patient_A", makeTS(1950, 1, 1)),
       ("Patient_A", makeTS(1950, 1, 1)),
@@ -83,7 +106,7 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     ).toDF("patientID", "birthDate", "age")
 
     // When
-    val result = mlppDataFrameImplicits.withAge(params.minTimestamp)
+    val result = mlppDataFrameImplicits.withAge(minTimestamp)
 
     // Then
     assertDFs(result, expected)
@@ -94,11 +117,9 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 2),
-      bucketSize = 2
-    )
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2006, 2, 2)
+    val bucketSize = 2
 
     val input = Seq(
       ("PA", makeTS(2006, 1, 1)),
@@ -114,7 +135,7 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     ).toDF("patientID", "start", "startBucket")
 
     // When
-    val result = mlppDataFrameImplicits.withStartBucket(params.minTimestamp, params.maxTimestamp, params.bucketSize)
+    val result = mlppDataFrameImplicits.withStartBucket(minTimestamp, maxTimestamp, bucketSize)
 
     // Then
     assertDFs(result, expected)
@@ -125,11 +146,9 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 2),
-      bucketSize = 2
-    )
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2006, 2, 2)
+    val bucketSize = 2
 
     val input = Seq(
       ("PA", Some(makeTS(2006, 1, 1))),
@@ -147,7 +166,7 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     ).toDF("patientID", "deathDate", "deathBucket")
 
     // When
-    val result = mlppDataFrameImplicits.withDeathBucket(params.minTimestamp, params.maxTimestamp, params.bucketSize)
+    val result = mlppDataFrameImplicits.withDeathBucket(minTimestamp, maxTimestamp, bucketSize)
 
     // Then
     assertDFs(result, expected)
@@ -157,9 +176,11 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
-    val params = MLPPLoader.Params()
-
     // Given
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2009, 12, 31, 23, 59, 59)
+    val bucketSize = 1
+
     val input = Seq(
       ("PA", "molecule", "PIOGLITAZONE", 0, Some(4)),
       ("PA", "molecule", "PIOGLITAZONE", 5, Some(4)),
@@ -186,7 +207,7 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     ).toDF("patientID", "category", "eventId", "startBucket", "deathBucket", "tracklossBucket")
 
     // When
-    val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
+    val bucketCount = (daysBetween(maxTimestamp, minTimestamp) / bucketSize).toInt
     val result = mlppDataFrameImplicits.withTracklossBucket(bucketCount)
 
     // Then
@@ -198,11 +219,11 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 2),
-      bucketSize = 2
-    )
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2006, 2, 2)
+    val bucketSize = 2
+    val includeCensoredBucket = false
+
 
     val input = Seq(
       ("PA", Some(2), None),
@@ -224,8 +245,8 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     ).toDF("patientID", "endBucket")
 
     // When
-    val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
-    val result = mlppDataFrameImplicits.withEndBucket(params.includeCensoredBucket, bucketCount)
+    val bucketCount = (daysBetween(maxTimestamp, minTimestamp) / bucketSize).toInt
+    val result = mlppDataFrameImplicits.withEndBucket(includeCensoredBucket, bucketCount)
       .select("patientID", "endBucket")
 
     // Then
@@ -238,12 +259,10 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 2),
-      bucketSize = 2,
-      includeCensoredBucket = true
-    )
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2006, 2, 2)
+    val bucketSize = 2
+    val includeCensoredBucket = true
 
     val input = Seq(
       ("PA", Some(16), None),
@@ -269,8 +288,8 @@ class MLPPDataFrameImplicitsSuite extends SharedContext {
     ).toDF("patientID", "endBucket")
 
     // When
-    val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
-    val result = mlppDataFrameImplicits.withEndBucket(params.includeCensoredBucket, bucketCount)
+    val bucketCount = (daysBetween(maxTimestamp, minTimestamp) / bucketSize).toInt
+    val result = mlppDataFrameImplicits.withEndBucket(includeCensoredBucket, bucketCount)
       .select("patientID", "endBucket")
 
     // Then
