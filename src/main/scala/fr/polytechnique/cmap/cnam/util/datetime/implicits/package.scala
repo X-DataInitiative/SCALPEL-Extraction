@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.util.datetime
 
+import java.sql.Timestamp
 import java.time.{LocalDate, LocalDateTime, LocalTime}
 
 /* inspired by https://github.com/danielpes/spark-datetime-lite */
@@ -14,5 +15,8 @@ package object implicits {
   }
   implicit def javaDateToTimestamp(date: LocalDate): java.sql.Timestamp = {
     java.sql.Timestamp.valueOf(date.atStartOfDay)
+  }
+  implicit def ordered: Ordering[Timestamp] = new Ordering[Timestamp] {
+    def compare(x: Timestamp, y: Timestamp): Int = x compareTo y
   }
 }

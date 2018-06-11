@@ -24,6 +24,7 @@ case class FallConfig(
   val base: BaseConfig = FallConfig.BaseConfig
   val medicalActs: MedicalActsConfig = FallConfig.MedicalActsConfig
   val diagnoses: DiagnosesConfig = DiagnosesConfig(sites.fracturesCodes, sites.fracturesCodes)
+  val outcomes: FracturesTransformerConfig = FallConfig.FracturesConfig
 }
 
 object FallConfig extends FallConfigLoader with FractureCodes {
@@ -48,6 +49,9 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     mcoCCAMCodes = List(),
     mcoCIMCodes = List()
   )
+
+  /** Fixed parameters for outcomes transformer **/
+  final object FracturesConfig extends FracturesTransformerConfig(fallFrame = 3.months)
 
   /** parameters needed for drugs extractor**/
   case class DrugsConfig(
