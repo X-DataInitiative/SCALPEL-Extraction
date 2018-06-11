@@ -34,7 +34,7 @@ private[fall] class FracturesTransformerImplicits(outcomes: Dataset[Event[Outcom
 }
 
 object FracturesTransformerImplicits {
-  implicit def addOutcomesImplicits(outcomes: Dataset[Event[Outcome]]): FracturesTransformerImplicits = {
+  implicit def addFracturesImplicits(outcomes: Dataset[Event[Outcome]]): FracturesTransformerImplicits = {
     new FracturesTransformerImplicits(outcomes)
   }
 }
