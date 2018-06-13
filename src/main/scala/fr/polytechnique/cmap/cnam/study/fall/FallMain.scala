@@ -25,50 +25,46 @@ object FallMain extends Main with FractureCodes {
 
   override def appName: String = "fall study"
 
-  override def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
+  def computeExposures(operationsMetadata: mutable.Buffer[OperationMetadata], fallConfig: FallConfig, sources: Sources): mutable.Buffer[OperationMetadata] = {
 
-    val startTimestamp = new java.util.Date()
-    val fallConfig = FallConfig.load(argsMap("conf"), argsMap("env"))
-
-    logger.info("Reading sources")
-    import implicits.SourceReader
-    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input))
-    val dcir = sources.dcir.get.repartition(4000).persist()
-    val mco = sources.mco.get.repartition(4000).persist()
-
-    val operationsMetadata = mutable.Buffer[OperationMetadata]()
-
-    // Extract Drug purchases
     logger.info("Drug Purchases")
     val drugPurchases = new DrugsExtractor(fallConfig.drugs).extract(sources).cache()
     operationsMetadata += {
-      OperationReporter.report("drug_purchases", List("DCIR"), OperationTypes.Dispensations, drugPurchases.toDF, Path(fallConfig.output.root))
+    OperationReporter.report("drug_purchases", List("DCIR"), OperationTypes.Dispensations, drugPurchases.toDF, Path(fallConfig.output.root))
     }
 
     // Extract Patients
     val patients = new Patients(PatientsConfig(fallConfig.base.studyStart)).extract(sources).cache()
     operationsMetadata += {
-      OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R"), OperationTypes.Patients, patients.toDF, Path(fallConfig.output.patients))
+    OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R"), OperationTypes.Patients, patients.toDF, Path(fallConfig.output.patients))
     }
 
     // Filter Patients
     import PatientFilters._
     val filteredPatients: Dataset[Patient] = patients.filterNoStartGap(drugPurchases, fallConfig.base.studyStart, fallConfig.patients.startGapInMonths)
     operationsMetadata += {
-      OperationReporter.report("filter_patients", List("drug_purchases", "extract_patients"), OperationTypes.Patients, filteredPatients.toDF, Path(fallConfig.output.root))
+    OperationReporter.report("filter_patients", List("drug_purchases", "extract_patients"), OperationTypes.Patients, filteredPatients.toDF, Path(fallConfig.output.root))
     }
     patients.unpersist()
 
     // Exposures
     val exposures = {
-      val definition = fallConfig.exposures
-      val patientsWithFollowUp = FallStudyFollowUps.transform(patients, fallConfig.base.studyStart, fallConfig.base.studyEnd, fallConfig.patients.followupStartDelay)
-      new ExposuresTransformer(definition).transform(patientsWithFollowUp, drugPurchases)
+    val definition = fallConfig.exposures
+    val patientsWithFollowUp = FallStudyFollowUps.transform(patients, fallConfig.base.studyStart, fallConfig.base.studyEnd, fallConfig.patients.followupStartDelay)
+    new ExposuresTransformer(definition).transform(patientsWithFollowUp, drugPurchases)
     }
     operationsMetadata += {
-      OperationReporter.report("exposures", List("drug_purchases"), OperationTypes.Exposures, exposures.toDF, Path(fallConfig.output.exposures))
+    OperationReporter.report("exposures", List("drug_purchases"), OperationTypes.Exposures, exposures.toDF, Path(fallConfig.output.exposures))
     }
+
     drugPurchases.unpersist()
+    operationsMetadata
+  }
+
+  def computeOutcomes(operationsMetadata: mutable.Buffer[OperationMetadata], fallConfig: FallConfig, sources: Sources): mutable.Buffer[OperationMetadata] = {
+
+    val dcir = sources.dcir.get.repartition(4000).persist()
+    val mco = sources.mco.get.repartition(4000).persist()
 
     // Medical Acts
     val acts = new MedicalActs(fallConfig.medicalActs).extract(sources).persist()
@@ -99,6 +95,27 @@ object FallMain extends Main with FractureCodes {
     diagnoses.unpersist()
     liberalActs.unpersist()
     acts.unpersist()
+    operationsMetadata
+  }
+
+  override def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
+
+    val startTimestamp = new java.util.Date()
+    val fallConfig = FallConfig.load(argsMap("conf"), argsMap("env"))
+
+    logger.info("Reading sources")
+    import implicits.SourceReader
+    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input))
+
+    var operationsMetadata = mutable.Buffer[OperationMetadata]()
+
+    // Compute Exposures
+    if(fallConfig.runParameters.exposure)
+      operationsMetadata = computeExposures(operationsMetadata, fallConfig, sources)
+
+    // Compute Outcomes
+    if(fallConfig.runParameters.outcome)
+      operationsMetadata = computeOutcomes(operationsMetadata, fallConfig, sources)
 
     // Write Metadata
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
