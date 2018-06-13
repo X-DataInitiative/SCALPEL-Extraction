@@ -64,21 +64,23 @@ class FallConfigSuite extends FlatSpec{
                          |  sites {
                          |    sites: ["BodySites"]
                          |  }
+                         |  run_parameters {
+                         |    exposure: true
+                         |    outcome: false
+                         |  }
                          |  """.trim.stripMargin
 
     val expected = defaultConf.copy(
-      input = defaultConf.input.copy(
-        mco = Some("new/in/path")
-      ),
-      output = defaultConf.output.copy(
-        root = "new/out/path"
-      ),
-      exposures = defaultConf.exposures.copy(
-        minPurchases = 2
-      ),
-      drugs = defaultConf.drugs.copy(
-        level = PharmacologicalLevel
-      )
+      input = defaultConf.input
+        .copy(mco = Some("new/in/path")),
+      output = defaultConf.output
+        .copy(root = "new/out/path"),
+      exposures = defaultConf.exposures
+        .copy(minPurchases = 2),
+      drugs = defaultConf.drugs
+        .copy(level = PharmacologicalLevel),
+      runParameters = defaultConf.runParameters
+        .copy(outcome = false)
     )
     //When
     pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(stringConfig), Paths.get(tempPath), true)
