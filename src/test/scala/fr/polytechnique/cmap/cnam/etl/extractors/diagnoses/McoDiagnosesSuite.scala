@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.sources.data.McoPreProcessor
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class McoDiagnosesSuite extends SharedContext {
@@ -31,7 +32,7 @@ class McoDiagnosesSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = McoDiagnoses.extract(input, dpCodes, drCodes, dasCodes)
+    val result = McoDiagnoses.extract(McoPreProcessor.prepareDF(input), dpCodes, drCodes, dasCodes)
 
     // Then
     assertDSs(result, expected)

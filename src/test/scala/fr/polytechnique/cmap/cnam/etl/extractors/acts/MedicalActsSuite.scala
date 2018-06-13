@@ -1,12 +1,12 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import java.sql.Date
-
+import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.etl.sources.data.McoPreProcessor
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
-import org.apache.spark.sql.functions._
 
 class MedicalActsSuite extends SharedContext {
 
@@ -22,7 +22,7 @@ class MedicalActsSuite extends SharedContext {
       mcoCCAMCodes = List("AAAA123")
     )
     val sources = {
-      val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
+      val mco = McoPreProcessor.prepareDF(spark.read.parquet("src/test/resources/test-input/MCO.parquet"))
       val dcir = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
       new Sources(mco = Some(mco), dcir = Some(dcir))
     }
@@ -70,7 +70,7 @@ class MedicalActsSuite extends SharedContext {
     }
 
     val sources = {
-      val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
+      val mco = McoPreProcessor.prepareDF(spark.read.parquet("src/test/resources/test-input/MCO.parquet"))
       val dcir = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
       new Sources(mco = Some(mco), mcoCe = Some(mcoCE), dcir = Some(dcir))
     }
@@ -114,7 +114,7 @@ class MedicalActsSuite extends SharedContext {
     }
 
     val sources = {
-      val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
+      val mco = McoPreProcessor.prepareDF(spark.read.parquet("src/test/resources/test-input/MCO.parquet"))
       val dcir = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
         .withColumn(
           "ER_CAM_F__CAM_PRS_IDE", when($"ER_CAM_F__CAM_PRS_IDE".isNull, "ABCD123").otherwise($"ER_CAM_F__CAM_PRS_IDE")

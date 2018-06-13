@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.sources.data.McoPreProcessor
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class McoMedicalActsSuite extends SharedContext {
@@ -28,7 +29,7 @@ class McoMedicalActsSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = McoMedicalActs.extract(input, cim10Codes, ccamCodes)
+    val result = McoMedicalActs.extract(McoPreProcessor.prepareDF(input), cim10Codes, ccamCodes)
 
     // Then
     assertDSs(result, expected)

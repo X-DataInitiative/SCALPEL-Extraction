@@ -13,8 +13,7 @@ private[diagnoses] object McoDiagnoses extends McoEventRowExtractor {
       daCodes: Seq[String]): Dataset[Event[Diagnosis]] = {
 
     import mco.sqlContext.implicits._
-    val df = prepareDF(mco)
-    df.flatMap { r =>
+    mco.flatMap { r =>
       eventFromRow[Diagnosis](r, MainDiagnosis, ColNames.DP, dpCodes) ++
       eventFromRow[Diagnosis](r, LinkedDiagnosis, ColNames.DR, drCodes) ++
       eventFromRow[Diagnosis](r, AssociatedDiagnosis, ColNames.DA, daCodes)

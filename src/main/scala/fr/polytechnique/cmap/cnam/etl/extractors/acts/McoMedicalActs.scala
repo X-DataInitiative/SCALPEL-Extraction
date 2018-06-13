@@ -12,8 +12,7 @@ private[acts] object McoMedicalActs extends McoEventRowExtractor {
       ccamCodes: Seq[String]): Dataset[Event[MedicalAct]] = {
 
     import mco.sqlContext.implicits._
-    val df = prepareDF(mco)
-    df.flatMap { r =>
+    mco.flatMap { r =>
       eventFromRow[MedicalAct](r, McoCIM10Act, ColNames.DP, cimCodes) ++
       eventFromRow[MedicalAct](r, McoCCAMAct, ColNames.CCAM, ccamCodes)
     }.distinct

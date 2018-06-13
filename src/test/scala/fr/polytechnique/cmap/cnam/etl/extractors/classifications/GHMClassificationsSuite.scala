@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.classifications
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Classification, Event, GHMClassification}
+import fr.polytechnique.cmap.cnam.etl.sources.data.McoPreProcessor
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class GHMClassificationsSuite extends SharedContext{
@@ -11,7 +12,7 @@ class GHMClassificationsSuite extends SharedContext{
     import sqlCtx.implicits._
 
     // Given
-    val input = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
+    val input = McoPreProcessor.prepareDF(spark.read.parquet("src/test/resources/test-input/MCO.parquet"))
     val ghmCodes = Seq("12H50L")
 
     val expected = Seq(
@@ -39,7 +40,7 @@ class GHMClassificationsSuite extends SharedContext{
     val expected = sqlContext.sparkSession.emptyDataset[Event[Classification]]
 
     // When
-    val result = GHMClassifications.extract(input, ghmCodes.toSet)
+    val result = GHMClassifications.extract(McoPreProcessor.prepareDF(input), ghmCodes.toSet)
 
     // Then
     assertDSs(result, expected)

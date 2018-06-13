@@ -16,8 +16,7 @@ object GHMClassifications extends McoEventRowExtractor{
       return mco.sqlContext.sparkSession.emptyDataset[Event[Classification]]
     }
 
-    val df = prepareDF(mco)
-    df.flatMap { r =>
+    mco.flatMap { r =>
       eventFromRow[Classification](r, GHMClassification, ColNames.GHM, ghmCodes.toSeq)
     }.distinct()
   }

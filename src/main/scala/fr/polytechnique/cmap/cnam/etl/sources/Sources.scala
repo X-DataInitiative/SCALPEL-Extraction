@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.sources
 
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.InputPaths
-import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource}
+import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoPreProcessor, McoSource}
 import fr.polytechnique.cmap.cnam.etl.sources.value.{DosagesSource, IrBenSource, IrImbSource, IrPhaSource}
 
 case class Sources(
@@ -40,9 +40,16 @@ object Sources {
   }
 
   def sanitize(sources: Sources): Sources = {
+
+    val mcoPreProcessed: Option[DataFrame] =
+      if(sources.mco.isEmpty)
+        None
+      else
+        Some(McoPreProcessor.prepareDF(sources.mco.map(McoSource.sanitize).get))
+
     sources.copy(
       dcir = sources.dcir.map(DcirSource.sanitize),
-      mco = sources.mco.map(McoSource.sanitize),
+      mco = mcoPreProcessed,
       mcoCe = sources.mcoCe.map(McoCeSource.sanitize),
       irBen = sources.irBen.map(IrBenSource.sanitize),
       irImb = sources.irImb.map(IrImbSource.sanitize),

@@ -1,11 +1,11 @@
-package fr.polytechnique.cmap.cnam.etl.extractors.mco
+package fr.polytechnique.cmap.cnam.etl.sources.data
 
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.col
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class McoSourceSuite extends SharedContext with McoSource {
+class McoPreProcessorSuite extends SharedContext {
 
   lazy val fakeMcoData = {
 
@@ -37,6 +37,7 @@ class McoSourceSuite extends SharedContext with McoSource {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
+    import McoPreProcessor._
 
     // Given
     val input = fakeMcoData
@@ -53,7 +54,6 @@ class McoSourceSuite extends SharedContext with McoSource {
       Tuple1(makeTS(2011, 12, 1))
     ).toDF(NewColumns.EstimatedStayStart)
 
-
     // When
     val output: DataFrame = input
       .estimateStayStartTime
@@ -62,4 +62,5 @@ class McoSourceSuite extends SharedContext with McoSource {
     // Then
     assertDFs(output, expected)
   }
+
 }
