@@ -6,6 +6,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.etl.events.Trackloss
+import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
 import fr.polytechnique.cmap.cnam.util.functions.daysBetween
 
@@ -82,18 +83,18 @@ class MLPPDataFrameImplicits(data: DataFrame) {
   }
 }
 
-class MLPPDataFrame(params: MLPPLoader.Params) {
+class MLPPDataFrame(params: MLPPConfig) {
 
-  private val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
+  private val bucketCount = (daysBetween(params.extra.maxTimestamp, params.extra.minTimestamp) / params.base.bucketSize).toInt
 
   implicit def toMLPPDataFrame(dataFrame: DataFrame): MLPPDataFrameImplicits = new MLPPDataFrameImplicits(dataFrame)
 
   def makeMLPPDataFrame(input: DataFrame): DataFrame = {
     input
-      .withAge(params.minTimestamp)
-      .withStartBucket(params.minTimestamp, params.maxTimestamp, params.bucketSize)
-      .withDeathBucket(params.minTimestamp, params.maxTimestamp, params.bucketSize)
+      .withAge(params.extra.minTimestamp)
+      .withStartBucket(params.extra.minTimestamp, params.extra.maxTimestamp, params.base.bucketSize)
+      .withDeathBucket(params.extra.minTimestamp, params.extra.maxTimestamp, params.base.bucketSize)
       .withTracklossBucket(bucketCount)
-      .withEndBucket(params.includeCensoredBucket, bucketCount)
+      .withEndBucket(params.extra.includeCensoredBucket, bucketCount)
   }
 }

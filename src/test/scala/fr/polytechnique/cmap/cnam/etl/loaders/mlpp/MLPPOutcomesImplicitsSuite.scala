@@ -1,7 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
+import java.nio.file.Paths
+import com.typesafe.config.ConfigFactory
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig
 import fr.polytechnique.cmap.cnam.util.functions.{daysBetween, makeTS}
 
 class MLPPOutcomesImplicitsSuite extends SharedContext {
@@ -11,12 +14,22 @@ class MLPPOutcomesImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 1),
-      bucketSize = 3, // bucketCount = 10
-      featuresAsList = true
-    )
+    val tempPath = "target/test.conf"
+    val strConf =
+      """
+        | base={
+        |   bucket_size = 3
+        |   features_as_list = true
+        | }
+        |
+        | extra={
+        |   min_timestamp = "2006-01-01"
+        |   max_timestamp = "2006-02-01"
+        | }
+      """.stripMargin
+    pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(strConf), Paths.get(tempPath), true)
+
+    val params = MLPPConfig.load(tempPath, "test")
 
     val input = Seq(
       ("PA", 0, "outcome", "femur", 3, Some(4)),
@@ -36,7 +49,7 @@ class MLPPOutcomesImplicitsSuite extends SharedContext {
     val mlppOutcomes = new MLPPOutcomes(params)
     val result = mlppOutcomes.makeOutcomes(input)
     import mlppOutcomes._
-    val result1 = result.makeOutcomes(params.featuresAsList, 10)
+    val result1 = result.makeOutcomes(params.base.featuresAsList, 10)
     val result2 = result.makeStaticOutcomes
     //then
     assertDFs(result1, expected1)
@@ -47,9 +60,12 @@ class MLPPOutcomesImplicitsSuite extends SharedContext {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
-    val params = MLPPLoader.Params()
-    val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
     // Given
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2009, 12, 31, 23, 59, 59)
+    val bucketSize = 1
+    val bucketCount = (daysBetween(maxTimestamp, minTimestamp) / bucketSize).toInt
+
     val input = Seq(
       ("PA", "outcome", "targetDisease", "type1", 3, Some(4)),
       ("PA", "outcome", "targetDisease", "type1", 5, Some(6)),
@@ -76,9 +92,12 @@ class MLPPOutcomesImplicitsSuite extends SharedContext {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
-    val params = MLPPLoader.Params()
-    val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
     // Given
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2009, 12, 31, 23, 59, 59)
+    val bucketSize = 1
+    val bucketCount = (daysBetween(maxTimestamp, minTimestamp) / bucketSize).toInt
+
     val input = Seq(
       ("PA", "outcome", "targetDisease", 3, Some(4)),
       ("PA", "outcome", "targetDisease", 5, Some(6)),
@@ -106,12 +125,10 @@ class MLPPOutcomesImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 1),
-      bucketSize = 3 // bucketCount = 10
-    )
-    val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2006, 2, 1)
+    val bucketSize = 3 // bucketCount = 10
+    val bucketCount = (daysBetween(maxTimestamp, minTimestamp) / bucketSize).toInt
 
     val input: DataFrame = Seq(
       ("PA", 0, 1, 75, Some(6), "femur", 0, 0, 6),
@@ -127,7 +144,7 @@ class MLPPOutcomesImplicitsSuite extends SharedContext {
     ).toDS.toDF("patientBucketIndex", "diseaseTypeIndex")
 
     // When
-    val result = mlppOutcomesImplicits.makeOutcomes(params.featuresAsList, bucketCount)
+    val result = mlppOutcomesImplicits.makeOutcomes(false, bucketCount)
     // Then
     assertDFs(result, expected)
   }
@@ -137,8 +154,10 @@ class MLPPOutcomesImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(featuresAsList = true)
-    val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2009, 12, 31, 23, 59, 59)
+    val bucketSize = 1
+    val bucketCount = (daysBetween(maxTimestamp, minTimestamp) / bucketSize).toInt
 
     val input: DataFrame = Seq(
       ("PA", 0, 1, 75, Some(6), "femur", 2, 0, 6),
@@ -156,7 +175,7 @@ class MLPPOutcomesImplicitsSuite extends SharedContext {
 
     // When
 
-    val result = mlppOutcomesImplicits.makeOutcomes(params.featuresAsList, bucketCount)
+    val result = mlppOutcomesImplicits.makeOutcomes(true, bucketCount)
 
     // Then
     assertDFs(result, expected)
@@ -167,11 +186,6 @@ class MLPPOutcomesImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 1),
-      bucketSize = 3 // bucketCount = 10
-    )
     val input: DataFrame = Seq(
       ("PA", 0, 1, 75, Some(6), "femur", 2, 0, 6),
       ("PA", 0, 1, 75, Some(6), "main", 1, 1, 6),

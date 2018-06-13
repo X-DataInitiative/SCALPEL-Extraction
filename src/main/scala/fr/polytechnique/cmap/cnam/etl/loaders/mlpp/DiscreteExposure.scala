@@ -4,6 +4,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StringType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.DiscreteExposure._
+import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig
 import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 import fr.polytechnique.cmap.cnam.util.functions.daysBetween
 
@@ -108,19 +109,19 @@ class DiscreteExposureImplicits(exposures: Dataset[LaggedExposure]) {
     }
   }
 
-  def writeLookupFiles(rootDir: String): Unit = {
+  def writeLookupFiles(params: MLPPConfig): Unit = {
     val inputDF = exposures.toDF
 
     import fr.polytechnique.cmap.cnam.util.RichDataFrame._
     inputDF
       .select("patientID", "patientIDIndex", "gender", "age")
       .dropDuplicates(Seq("patientID"))
-      .writeCSV(s"$rootDir/csv/PatientsLookup.csv")
+      .writeCSV(params.output.patientsLookup)
 
     inputDF
       .select("exposureType", "exposureTypeIndex")
       .dropDuplicates(Seq("exposureType"))
-      .writeCSV(s"$rootDir/csv/MoleculeLookup.csv")
+      .writeCSV(params.output.moleculeLookup)
   }
 
 }
@@ -130,22 +131,22 @@ object DiscreteExposure {
     new DiscreteExposureImplicits(dataset)
 }
 
-class DiscreteExposure(params: MLPPLoader.Params) {
+class DiscreteExposure(params: MLPPConfig) {
 
-  private val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
+  private val bucketCount = (daysBetween(params.extra.maxTimestamp, params.extra.minTimestamp) / params.base.bucketSize).toInt
 
   def writeMetadata(exposures: Dataset[LaggedExposure]): Unit = {
     import exposures.sqlContext.implicits._
 
-    Seq(exposures.makeMetadata(params.lagCount, bucketCount, params.bucketSize))
+    Seq(exposures.makeMetadata(params.base.lagCount, bucketCount, params.base.bucketSize))
       .toDF
-      .writeCSV(s"${params.outputRootPath}/csv/metadata.csv")
+      .writeCSV(params.output.metadata)
   }
 
   def writeCensoring(exposures: Dataset[LaggedExposure]): Unit = {
     exposures
-      .makeCensoring(bucketCount, params.featuresAsList)
-      .writeCSV(s"${params.outputRootPath}/csv/Censoring.csv")
+      .makeCensoring(bucketCount, params.base.featuresAsList)
+      .writeCSV(params.output.censoring)
   }
 
 }
