@@ -31,7 +31,8 @@ object MLPPConfig extends ModelConfigLoader {
     bucketSize: Int = 1,
     lagCount: Int = 1,
     keepFirstOnly: Boolean = true,
-    featuresAsList: Boolean = true)
+    featuresAsList: Boolean = true,
+    startGapInMonths: Int = 2)
 
   /**
     * these params depends on env
@@ -44,7 +45,8 @@ object MLPPConfig extends ModelConfigLoader {
   case class InputPaths(
     patients: Option[String] = None,
     outcomes: Option[String] = None,
-    exposures: Option[String] = None) extends ModelConfig.InputPaths(patients, outcomes, exposures)
+    exposures: Option[String] = None,
+    drugPurchases: Option[String] = None) extends ModelConfig.InputPaths(patients, outcomes, exposures)
 
   case class OutputPaths(root: Path) extends ModelConfig.OutputPaths(root) {
     //the paths as below are related to the root

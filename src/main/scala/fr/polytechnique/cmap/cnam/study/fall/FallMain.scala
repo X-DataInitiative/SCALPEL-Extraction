@@ -25,43 +25,42 @@ object FallMain extends Main with FractureCodes {
 
   override def appName: String = "fall study"
 
-  def computeExposures(operationsMetadata: mutable.Buffer[OperationMetadata], fallConfig: FallConfig, sources: Sources): mutable.Buffer[OperationMetadata] = {
+  def computeExposures(
+    operationsMetadata: mutable.Buffer[OperationMetadata],
+    fallConfig: FallConfig,
+    sources: Sources): mutable.Buffer[OperationMetadata] = {
 
     logger.info("Drug Purchases")
     val drugPurchases = new DrugsExtractor(fallConfig.drugs).extract(sources).cache()
     operationsMetadata += {
-    OperationReporter.report("drug_purchases", List("DCIR"), OperationTypes.Dispensations, drugPurchases.toDF, Path(fallConfig.output.root))
+      OperationReporter.report("drug_purchases", List("DCIR"), OperationTypes.Dispensations, drugPurchases.toDF, Path(fallConfig.output.root))
     }
 
     // Extract Patients
     val patients = new Patients(PatientsConfig(fallConfig.base.studyStart)).extract(sources).cache()
     operationsMetadata += {
-    OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R"), OperationTypes.Patients, patients.toDF, Path(fallConfig.output.patients))
-    }
-
-    // Filter Patients
-    import PatientFilters._
-    val filteredPatients: Dataset[Patient] = patients.filterNoStartGap(drugPurchases, fallConfig.base.studyStart, fallConfig.patients.startGapInMonths)
-    operationsMetadata += {
-    OperationReporter.report("filter_patients", List("drug_purchases", "extract_patients"), OperationTypes.Patients, filteredPatients.toDF, Path(fallConfig.output.root))
+      OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R"), OperationTypes.Patients, patients.toDF, Path(fallConfig.output.patients))
     }
     patients.unpersist()
 
     // Exposures
     val exposures = {
-    val definition = fallConfig.exposures
-    val patientsWithFollowUp = FallStudyFollowUps.transform(patients, fallConfig.base.studyStart, fallConfig.base.studyEnd, fallConfig.patients.followupStartDelay)
-    new ExposuresTransformer(definition).transform(patientsWithFollowUp, drugPurchases)
+      val definition = fallConfig.exposures
+      val patientsWithFollowUp = FallStudyFollowUps.transform(patients, fallConfig.base.studyStart, fallConfig.base.studyEnd, fallConfig.patients.followupStartDelay)
+      new ExposuresTransformer(definition).transform(patientsWithFollowUp, drugPurchases)
     }
     operationsMetadata += {
-    OperationReporter.report("exposures", List("drug_purchases"), OperationTypes.Exposures, exposures.toDF, Path(fallConfig.output.exposures))
+      OperationReporter.report("exposures", List("drug_purchases"), OperationTypes.Exposures, exposures.toDF, Path(fallConfig.output.exposures))
     }
 
     drugPurchases.unpersist()
     operationsMetadata
   }
 
-  def computeOutcomes(operationsMetadata: mutable.Buffer[OperationMetadata], fallConfig: FallConfig, sources: Sources): mutable.Buffer[OperationMetadata] = {
+  def computeOutcomes(
+    operationsMetadata: mutable.Buffer[OperationMetadata],
+    fallConfig: FallConfig,
+    sources: Sources): mutable.Buffer[OperationMetadata] = {
 
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
@@ -110,11 +109,11 @@ object FallMain extends Main with FractureCodes {
     var operationsMetadata = mutable.Buffer[OperationMetadata]()
 
     // Compute Exposures
-    if(fallConfig.runParameters.exposure)
+    if (fallConfig.runParameters.exposure)
       operationsMetadata = computeExposures(operationsMetadata, fallConfig, sources)
 
     // Compute Outcomes
-    if(fallConfig.runParameters.outcome)
+    if (fallConfig.runParameters.outcome)
       operationsMetadata = computeOutcomes(operationsMetadata, fallConfig, sources)
 
     // Write Metadata

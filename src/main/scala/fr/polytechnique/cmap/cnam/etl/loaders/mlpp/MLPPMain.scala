@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig
 import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig.load
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
@@ -18,6 +19,7 @@ object MLPPMain extends Main {
     val patients: Dataset[Patient] = sqlContext.read.parquet(conf.input.patients.get).as[Patient]
     val outcomes: Dataset[Event[Outcome]] = sqlContext.read.parquet(conf.input.outcomes.get).as[Event[Outcome]]
     val exposures: Dataset[Event[Exposure]] = sqlContext.read.parquet(conf.input.exposures.get).as[Event[Exposure]]
+    val drugPurchases: Dataset[Event[Drug]] = sqlContext.read.parquet(conf.input.drugPurchases.get).as[Event[Drug]]
   }
 
   def readInput(sqlContext: SQLContext, conf: MLPPConfig): Input = new Input(sqlContext, conf)
@@ -31,12 +33,18 @@ object MLPPMain extends Main {
 
     val outcomes: Dataset[Event[Outcome]] = inputData.outcomes
 
-    val patients: Dataset[Patient] = inputData.patients
+    import PatientFilters._
+    // Filter Patients
+    val patients: Dataset[Patient] = inputData.patients.filterNoStartGap(inputData.drugPurchases,
+      conf.extra.minTimestamp,
+      conf.base.startGapInMonths)
+      .cache()
 
     val exposures: Dataset[Event[Exposure]] = inputData.exposures
 
     logger.info("Extracting MLPP features...")
     MLPPLoader(conf).load(outcomes, exposures, patients)
+    patients.unpersist()
     None
   }
 }
