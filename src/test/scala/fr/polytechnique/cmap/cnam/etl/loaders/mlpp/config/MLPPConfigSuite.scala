@@ -15,7 +15,8 @@ class MLPPConfigSuite extends FlatSpec {
     val input = InputPaths(
       patients = Some("src/test/resources/MLPP/patient"),
       outcomes = Some("src/test/resources/MLPP/outcome"),
-      exposures = Some("src/test/resources/MLPP/exposure"))
+      exposures = Some("src/test/resources/MLPP/exposure"),
+      drugPurchases = Some("src/test/resources/MLPP/drugs"))
 
     val output = OutputPaths(Path("target/test/output/featuring"))
 
@@ -50,6 +51,7 @@ class MLPPConfigSuite extends FlatSpec {
         |   patients: "src/test/resources/MLPP/patient"
         |   outcomes: "src/test/resources/MLPP/outcome"
         |   exposures: "src/test/resources/MLPP/exposure"
+        |   drug_purchases = "src/test/resources/MLPP/drugs"
         | }
         |
         | output={
