@@ -1,6 +1,8 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
 import java.io.PrintWriter
+import scala.collection.mutable
+import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.DcirAct
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActs
@@ -18,9 +20,6 @@ import fr.polytechnique.cmap.cnam.study.fall.follow_up.FallStudyFollowUps
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
-import org.apache.spark.sql.{Dataset, SQLContext}
-
-import scala.collection.mutable
 
 object FallMain extends Main with FractureCodes {
 
@@ -40,7 +39,6 @@ object FallMain extends Main with FractureCodes {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
     // Extract Drug purchases
-    logger.info("Drug Purchases")
     val drugPurchases = new DrugsExtractor(fallConfig.drugs).extract(sources).cache()
     operationsMetadata += {
       OperationReporter.report("drug_purchases", List("DCIR"), OperationTypes.Dispensations, drugPurchases.toDF, Path(fallConfig.output.root))

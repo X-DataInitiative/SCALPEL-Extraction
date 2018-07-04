@@ -1,11 +1,10 @@
 package fr.polytechnique.cmap.cnam.study.fall.follow_up
 
 import java.sql.Timestamp
-
-import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import me.danielpes.spark.datetime.implicits._
 import org.apache.spark.sql.Dataset
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 
 object FallStudyFollowUps {
   def transform(

@@ -1,13 +1,13 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.drugs
 
+import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.functions.lit
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.DrugsConfig
 import fr.polytechnique.cmap.cnam.study.fall.codes.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
+import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.DrugsConfig
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.functions.lit
 
 class DrugsExtractorSuite extends SharedContext{
 
