@@ -1,4 +1,6 @@
-package fr.polytechnique.cmap.cnam.etl.config
+package fr.polytechnique.cmap.cnam.etl.config.study
+
+import fr.polytechnique.cmap.cnam.etl.config.Config
 
 object StudyConfig {
   case class InputPaths(
@@ -23,4 +25,4 @@ object StudyConfig {
     exposures: String)
 }
 
-trait StudyConfig
+trait StudyConfig extends Config

@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl
 
 import org.apache.spark.sql.SQLContext
-import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.InputPaths
+import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.InputPaths
 import fr.polytechnique.cmap.cnam.etl.sources._
 
 package object implicits {

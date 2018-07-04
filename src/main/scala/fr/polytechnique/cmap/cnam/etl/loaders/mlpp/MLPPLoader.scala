@@ -1,23 +1,19 @@
 package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
-import java.sql.Timestamp
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.RichDataFrame._
-import fr.polytechnique.cmap.cnam.util.functions._
 
-class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
+class MLPPLoader(params: MLPPConfig) {
 
-  private val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
-  
   def load(
     outcomes: Dataset[Event[Outcome]],
     exposures: Dataset[Event[Exposure]],
     patients: Dataset[Patient]): Dataset[MLPPFeature] = {
-    
+
 
     val mlppDataFrame = new MLPPDataFrame(params)
 
@@ -57,18 +53,5 @@ class MLPPLoader(params: MLPPLoader.Params = MLPPLoader.Params()) {
 
 
 object MLPPLoader {
-  
-  case class Params(
-    outputRootPath: Path = Path("/"), //it need to replace this default value when you use this
-    bucketSize: Int = 1,
-    lagCount: Int = 1,
-    minTimestamp: Timestamp = makeTS(2006, 1, 1),
-    maxTimestamp: Timestamp = makeTS(2009, 12, 31, 23, 59, 59),
-    keepFirstOnly: Boolean = true,
-    includeCensoredBucket: Boolean = false,
-    featuresAsList: Boolean = false
-  )
-  
-  def apply(params: Params = Params()) = new MLPPLoader(params)
-  
+  def apply(params: MLPPConfig) = new MLPPLoader(params)
 }

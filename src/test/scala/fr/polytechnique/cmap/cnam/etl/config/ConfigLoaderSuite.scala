@@ -4,6 +4,7 @@ import java.io.File
 import java.nio.file.Paths
 import com.typesafe.config.ConfigFactory
 import org.scalatest.FlatSpec
+import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 
 class ConfigLoaderSuite extends FlatSpec {
 

@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.study.pioglitazone
 import java.nio.file.{Files, Paths}
 import com.typesafe.config.ConfigFactory
 import org.scalatest.FlatSpec
-import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes.CancerDefinition
 import me.danielpes.spark.datetime.implicits._
 
