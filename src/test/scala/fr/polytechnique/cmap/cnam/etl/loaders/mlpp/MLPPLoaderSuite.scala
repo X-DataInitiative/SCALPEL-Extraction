@@ -1,10 +1,12 @@
 package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
+import java.nio.file.Paths
+import com.typesafe.config.ConfigFactory
 import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class MLPPLoaderSuite extends SharedContext {
@@ -14,14 +16,33 @@ class MLPPLoaderSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val rootDir = "target/test/output/"
-    val params = MLPPLoader.Params(
-      outputRootPath = Path(rootDir),
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 8, 1), // 7 total buckets
-      bucketSize = 30,
-      lagCount = 4
-    )
+    val tempPath = "target/test.conf"
+    val strConf =
+      """
+        | input {
+        |   patients: "src/test/resources/MLPP/patient"
+        |   outcomes: "src/test/resources/MLPP/outcome"
+        |   exposures: "src/test/resources/MLPP/exposure"
+        | }
+        |
+        | output={
+        |   root = "target/test/output/"
+        | }
+        |
+        | base={
+        |   lag_count = 4
+        |   bucket_size = 30
+        |   features_as_list = false
+        | }
+        |
+        | extra={
+        |   min_timestamp = "2006-01-01"
+        |   max_timestamp = "2006-08-01"
+        | }
+      """.stripMargin
+    pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(strConf), Paths.get(tempPath), true)
+
+    val params = MLPPConfig.load(tempPath, "test")
 
     val patient: Dataset[Patient] = Seq(
       Patient("PA", 1, makeTS(1960, 1, 1), None),
@@ -86,10 +107,10 @@ class MLPPLoaderSuite extends SharedContext {
 
     // When
     val result = MLPPLoader(params)
-          .load(outcomes = outcome, exposures = exposure, patients = patient).toDF
-    val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
-    val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
-    val outcomesResult = sqlContext.read.option("header", true).csv(s"$rootDir/csv/Outcomes.csv")
+      .load(outcomes = outcome, exposures = exposure, patients = patient).toDF
+    val writtenResult = sqlContext.read.parquet(params.output.sparseFeaturesParquet)
+    val StaticExposures = sqlContext.read.parquet(params.output.staticExposuresParquet)
+    val outcomesResult = sqlContext.read.option("header", true).csv(params.output.outcomes)
 
     // Then
     assertDFs(outcomesResult, expectedOutcomes)
@@ -103,15 +124,35 @@ class MLPPLoaderSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val rootDir = "target/test/output"
-    val params = MLPPLoader.Params(
-      outputRootPath = Path(rootDir),
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 8, 1), // 7 total buckets
-      bucketSize = 30,
-      lagCount = 4,
-      includeCensoredBucket = true
-    )
+    val tempPath = "target/test.conf"
+    val strConf =
+      """
+        | input {
+        |   patients: "src/test/resources/MLPP/patient"
+        |   outcomes: "src/test/resources/MLPP/outcome"
+        |   exposures: "src/test/resources/MLPP/exposure"
+        | }
+        |
+        | output={
+        |   root = "target/test/output/"
+        | }
+        |
+        | base={
+        |   lag_count = 4
+        |   bucket_size = 30
+        |   features_as_list = false
+        | }
+        |
+        | extra={
+        |   min_timestamp = "2006-01-01"
+        |   max_timestamp = "2006-08-01"
+        |   include_censored_bucket = true
+        | }
+      """.stripMargin
+    pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(strConf), Paths.get(tempPath), true)
+
+    val params = MLPPConfig.load(tempPath, "test")
+
     val patient: Dataset[Patient] = Seq(
       Patient("PC", 2, makeTS(1970, 1, 1), None),
       Patient("PB", 1, makeTS(1950, 1, 1), Some(makeTS(2006, 4, 15))),
@@ -172,8 +213,8 @@ class MLPPLoaderSuite extends SharedContext {
 
     // When
     val result = MLPPLoader(params).load(outcomes = outcome, exposures = exposure, patients = patient).toDF
-    val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
-    val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
+    val writtenResult = sqlContext.read.parquet(params.output.sparseFeaturesParquet)
+    val StaticExposures = sqlContext.read.parquet(params.output.staticExposuresParquet)
 
     // Then
     assertDFs(result, expectedFeatures)
@@ -186,15 +227,33 @@ class MLPPLoaderSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val rootDir = "target/test/output"
-    val params = MLPPLoader.Params(
-      outputRootPath = Path(rootDir),
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 8, 1), // 7 total buckets
-      bucketSize = 30,
-      lagCount = 4,
-      featuresAsList = true
-    )
+    val tempPath = "target/test.conf"
+    val strConf =
+      """
+        | input {
+        |   patients: "src/test/resources/MLPP/patient"
+        |   outcomes: "src/test/resources/MLPP/outcome"
+        |   exposures: "src/test/resources/MLPP/exposure"
+        | }
+        |
+        | output={
+        |   root = "target/test/output/"
+        | }
+        |
+        | base={
+        |   lag_count = 4
+        |   bucket_size = 30
+        |   features_as_list = true
+        | }
+        |
+        | extra={
+        |   min_timestamp = "2006-01-01"
+        |   max_timestamp = "2006-08-01"
+        | }
+      """.stripMargin
+    pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(strConf), Paths.get(tempPath), true)
+
+    val params = MLPPConfig.load(tempPath, "test")
 
     val patient: Dataset[Patient] = Seq(
       Patient("PA", 1, makeTS(1960, 1, 1), None),
@@ -255,15 +314,15 @@ class MLPPLoaderSuite extends SharedContext {
     val expectedOutcomes: DataFrame = Seq(
       ("0", "4", "0"),
       ("1", "2", "1")
-    ).toDF( "patientIndex","bucket", "diseaseType")
+    ).toDF("patientIndex", "bucket", "diseaseType")
 
 
     // When
     val result = MLPPLoader(params)
-          .load(outcomes = outcome, exposures = exposure, patients = patient).toDF
-    val writtenResult = sqlContext.read.parquet(s"$rootDir/parquet/SparseFeatures")
-    val StaticExposures = sqlContext.read.parquet(s"$rootDir/parquet/StaticExposures")
-    val outcomesResult = sqlContext.read.option("header", true).csv(s"$rootDir/csv/Outcomes.csv")
+      .load(outcomes = outcome, exposures = exposure, patients = patient).toDF
+    val writtenResult = sqlContext.read.parquet(params.output.sparseFeaturesParquet)
+    val StaticExposures = sqlContext.read.parquet(params.output.staticExposuresParquet)
+    val outcomesResult = sqlContext.read.option("header", true).csv(params.output.outcomes)
 
     // Then
     assertDFs(outcomesResult, expectedOutcomes)

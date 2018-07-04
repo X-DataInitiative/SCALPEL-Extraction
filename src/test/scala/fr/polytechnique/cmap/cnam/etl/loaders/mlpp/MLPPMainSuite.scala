@@ -5,42 +5,6 @@ import fr.polytechnique.cmap.cnam.SharedContext
 
 class MLPPMainSuite extends SharedContext{
 
-  "getEnv" should "return correct default environment" in {
-    // Given
-    val args = Map[String, String]()
-    val expected = MLPPMain.TestEnv
-
-    // When
-    val result = MLPPMain.getEnv(args)
-
-    // Then
-    assert(result == expected)
-  }
-
-  it should "return the Fall environment when specified" in {
-    // Given
-    val args = Map(("env", "fall"))
-    val expected = MLPPMain.FallEnv
-
-    // When
-    val result = MLPPMain.getEnv(args)
-
-    // Then
-    assert(result == expected)
-  }
-
-  it should "return the CMAP environment when specified" in {
-
-    // Given
-    val args = Map(("env", "cmap"))
-    val expected = MLPPMain.CmapEnv
-
-    // When
-    val result = MLPPMain.getEnv(args)
-
-    // Then
-    assert(result == expected)
-  }
   
   "run" should "run the whole pipeline with MLPP featuring" in {
     val sqlCtx = sqlContext
@@ -64,7 +28,7 @@ class MLPPMainSuite extends SharedContext{
     MLPPMain.run(sqlContext, Map("conf" -> configPath, "env" -> "test", "study" -> "pioglitazone"))
 
     // Then
-    val mlppSparseFeatures = sqlCtx.read.parquet(MLPPMain.TestEnv.featuringPath + "/parquet/SparseFeatures")
+    val mlppSparseFeatures = sqlCtx.read.parquet( "target/test/output/featuring/parquet/SparseFeatures")
 
     assertDFs(mlppSparseFeatures, expectedFeatures)
 

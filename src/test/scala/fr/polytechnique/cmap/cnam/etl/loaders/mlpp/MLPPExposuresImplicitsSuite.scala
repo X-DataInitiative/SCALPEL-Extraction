@@ -1,8 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.loaders.mlpp
 
+import java.nio.file.Paths
+import com.typesafe.config.ConfigFactory
 import org.apache.spark.sql.functions.col
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.functions.makeTS
+import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig
 
 class MLPPExposuresImplicitsSuite extends SharedContext {
 
@@ -11,11 +13,22 @@ class MLPPExposuresImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 2),
-      bucketSize = 2
-    )
+    val tempPath = "target/test.conf"
+    val strConf =
+      """
+        | base={
+        |   bucket_size = 2
+        |   features_as_list = false
+        | }
+        |
+        | extra={
+        |   min_timestamp = "2006-01-01"
+        |   max_timestamp = "2006-02-02"
+        | }
+      """.stripMargin
+    pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(strConf), Paths.get(tempPath), true)
+
+    val params = MLPPConfig.load(tempPath, "test")
 
     val input = Seq(
       ("PA", 0, "exposure", 1, 75, Some(6), "Mol1", 0, 0, 6),

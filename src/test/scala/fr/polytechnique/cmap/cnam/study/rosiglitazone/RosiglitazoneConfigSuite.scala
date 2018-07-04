@@ -4,7 +4,7 @@ import java.nio.file.Paths
 import com.typesafe.config.ConfigFactory
 import me.danielpes.spark.datetime.implicits._
 import org.scalatest.FlatSpec
-import fr.polytechnique.cmap.cnam.etl.config.StudyConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes.OutcomeDefinition
 
 class RosiglitazoneConfigSuite extends FlatSpec {

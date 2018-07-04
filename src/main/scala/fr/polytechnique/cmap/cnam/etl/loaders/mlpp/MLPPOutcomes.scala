@@ -4,6 +4,7 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{col, lit, min, when}
 import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.etl.events.Outcome
+import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities.minColumn
 import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 import fr.polytechnique.cmap.cnam.util.functions.daysBetween
@@ -49,17 +50,17 @@ class MLPPOutcomesImplicits(dataFrame: DataFrame) {
     dataFrame.select("patientIDIndex").distinct.toDF
   }
 
-  def writeLookupFiles(rootDir: String): Unit = {
+  def writeLookupFiles(params: MLPPConfig): Unit = {
     dataFrame
       .select("diseaseType", "diseaseTypeIndex")
       .dropDuplicates(Seq("diseaseType"))
-      .writeCSV(s"$rootDir/csv/OutcomesLookup.csv")
+      .writeCSV(params.output.outcomesLookup)
   }
 }
 
-class MLPPOutcomes(params: MLPPLoader.Params) {
+class MLPPOutcomes(params: MLPPConfig) {
 
-  private val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
+  private val bucketCount = (daysBetween(params.extra.maxTimestamp, params.extra.minTimestamp) / params.base.bucketSize).toInt
 
   implicit def toMLPPOutcomesImplicits(dataFrame: DataFrame): MLPPOutcomesImplicits =
     new MLPPOutcomesImplicits(dataFrame)
@@ -68,16 +69,16 @@ class MLPPOutcomes(params: MLPPLoader.Params) {
     enhancedEvents
       .where(col("category") === Outcome.category)
       .withDiseaseType
-      .withDiseaseBucket(params.keepFirstOnly, bucketCount)
+      .withDiseaseBucket(params.base.keepFirstOnly, bucketCount)
       .withIndices(Seq("diseaseType"))
   }
 
   def writeOutcomes(enhancedEvents: DataFrame): Unit = {
     val outcomes = makeOutcomes(enhancedEvents).persist()
     // write outcomes ("Y" matrices)
-    outcomes.makeOutcomes(params.featuresAsList, bucketCount).writeCSV(s"${params.outputRootPath}/csv/Outcomes.csv")
-    outcomes.makeStaticOutcomes.writeCSV(s"${params.outputRootPath}/csv/StaticOutcomes.csv")
-    outcomes.writeLookupFiles(params.outputRootPath.toString)
+    outcomes.makeOutcomes(params.base.featuresAsList, bucketCount).writeCSV(params.output.outcomes)
+    outcomes.makeStaticOutcomes.writeCSV(params.output.staticStaticOutcomes)
+    outcomes.writeLookupFiles(params)
     outcomes.unpersist()
   }
 

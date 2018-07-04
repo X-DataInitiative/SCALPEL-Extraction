@@ -11,12 +11,11 @@ class DiscreteExposureImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 1),
-      bucketSize = 2,
-      lagCount = 4
-    )
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2006, 2, 1)
+    val bucketSize = 2
+    val lagCount = 4
+
     val input: Dataset[LaggedExposure] = Seq(
       LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 0, 6, 0, 1.0),
       LaggedExposure("PA", 0, 1, 75, "Mol3", 2, 1, 6, 1, 1.0),
@@ -30,9 +29,9 @@ class DiscreteExposureImplicitsSuite extends SharedContext {
 
     val expected: Metadata = Metadata(30, 20, 2, 15, 2, 5, 4)
 
-    val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
+    val bucketCount = (daysBetween(maxTimestamp, minTimestamp) / bucketSize).toInt
     // When
-    val result = discreteExposureImplicits.makeMetadata(params.lagCount, bucketCount, params.bucketSize)
+    val result = discreteExposureImplicits.makeMetadata(lagCount, bucketCount, bucketSize)
 
     // Then
     assert(result == expected)
@@ -43,7 +42,7 @@ class DiscreteExposureImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(lagCount = 4)
+    val lagCount = 4
     val input: Dataset[LaggedExposure] = Seq(
       LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 0, 6, 0, 1.0),
       LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 2, 6, 0, 1.0),
@@ -75,7 +74,7 @@ class DiscreteExposureImplicitsSuite extends SharedContext {
     ).toDF
 
     // When
-    val result = discreteExposureImplicits.lagExposures(params.lagCount).toDF
+    val result = discreteExposureImplicits.lagExposures(lagCount).toDF
 
     // Then
     assertDFs(result, expected)
@@ -86,12 +85,11 @@ class DiscreteExposureImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 2),
-      bucketSize = 2,
-      lagCount = 4
-    )
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2006, 2, 2)
+    val bucketSize = 2
+    val lagCount = 4
+
     val input: Dataset[LaggedExposure] = Seq(
       LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 0, 6, 0, 1.0),
       LaggedExposure("PA", 0, 1, 75, "Mol1", 0, 1, 6, 1, 1.0),
@@ -135,9 +133,9 @@ class DiscreteExposureImplicitsSuite extends SharedContext {
       MLPPFeature("PB", 1, "Mol1", 0, 6, 2, 22, 2, 1.0),
       MLPPFeature("PB", 1, "Mol1", 0, 7, 3, 23, 3, 1.0)
     ).toDF
-    val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
+    val bucketCount = (daysBetween(maxTimestamp, minTimestamp) / bucketSize).toInt
     // When
-    val result = discreteExposureImplicits.toMLPPFeatures(params.lagCount, bucketCount).toDF
+    val result = discreteExposureImplicits.toMLPPFeatures(lagCount, bucketCount).toDF
 
     // Then
     assertDFs(result, expected)
@@ -185,11 +183,11 @@ class DiscreteExposureImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(
-      minTimestamp = makeTS(2006, 1, 1),
-      maxTimestamp = makeTS(2006, 2, 1),
-      bucketSize = 3 // bucketCount = 10
-    )
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2006, 2, 1)
+    val bucketSize = 3 // bucketCount = 10
+    val featuresAsList = false
+
     val input: Dataset[LaggedExposure] = Seq(
       LaggedExposure("PA", 0, 1, 75, "ROS", 2, 0, 5, 0, 1),
       LaggedExposure("PA", 0, 1, 75, "PIO", 1, 1, 5, 0, 1),
@@ -201,9 +199,9 @@ class DiscreteExposureImplicitsSuite extends SharedContext {
     val discreteExposureImplicits = new DiscreteExposureImplicits(input)
 
     val expected = Seq(5, 27, 31).toDS.toDF("index")
-    val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
+    val bucketCount = (daysBetween(maxTimestamp, minTimestamp) / bucketSize).toInt
     // When
-    val result = discreteExposureImplicits.makeCensoring(bucketCount, params.featuresAsList)
+    val result = discreteExposureImplicits.makeCensoring(bucketCount, featuresAsList)
 
     // Then
     assertDFs(result, expected)
@@ -214,7 +212,11 @@ class DiscreteExposureImplicitsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val params = MLPPLoader.Params(featuresAsList = true)
+    val minTimestamp = makeTS(2006, 1, 1)
+    val maxTimestamp = makeTS(2009, 12, 31, 23, 59, 59)
+    val bucketSize = 1
+    val featuresAsList = true
+
     val input: Dataset[LaggedExposure] = Seq(
       LaggedExposure("PA", 0, 1, 75, "ROS", 2, 0, 5, 0, 1),
       LaggedExposure("PA", 0, 1, 75, "PIO", 1, 1, 5, 0, 1),
@@ -230,9 +232,9 @@ class DiscreteExposureImplicitsSuite extends SharedContext {
       (2, 7),
       (3, 1)
     ).toDF("patientIndex", "bucket")
-    val bucketCount = (daysBetween(params.maxTimestamp, params.minTimestamp) / params.bucketSize).toInt
+    val bucketCount = (daysBetween(maxTimestamp, minTimestamp) / bucketSize).toInt
     // When
-    val result = discreteExposureImplicits.makeCensoring(bucketCount, params.featuresAsList)
+    val result = discreteExposureImplicits.makeCensoring(bucketCount, featuresAsList)
 
     // Then
     assertDFs(result, expected)

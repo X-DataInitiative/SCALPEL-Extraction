@@ -44,10 +44,10 @@ trait ConfigLoader {
    *   It could be added to the trait itself, but the type is only needed by this method, so for
    *   now I think we can leave it here.
    */
-  protected[etl] def loadConfigWithDefaults[C <: StudyConfig : ClassTag : ConfigReader](
-      configPath: String,
-      defaultsPath: String,
-      env: String): C = {
+  protected[etl] def loadConfigWithDefaults[C <: Config : ClassTag : ConfigReader](
+    configPath: String,
+    defaultsPath: String,
+    env: String): C = {
 
     val defaultConfig = ConfigFactory.parseResources(defaultsPath).resolve.getConfig(env)
     val config = ConfigFactory.parseFile(new java.io.File(configPath)).resolve.withFallback(defaultConfig).resolve
