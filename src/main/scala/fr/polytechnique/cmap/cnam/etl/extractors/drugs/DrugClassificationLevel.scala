@@ -8,3 +8,12 @@ trait DrugClassificationLevel extends Serializable {
     .exists(family => family.cip13Codes.contains(cip13))
   def apply(purchase: Purchase, families: List[DrugConfig]): List[Event[Drug]]
 }
+
+object DrugClassificationLevel{
+  def fromString(level: String) : DrugClassificationLevel =
+    level match {
+      case "Therapeutic" => TherapeuticLevel
+      case "Pharmacological" => PharmacologicalLevel
+      case "MoleculeCombination" => MoleculeCombinationLevel
+  }
+}

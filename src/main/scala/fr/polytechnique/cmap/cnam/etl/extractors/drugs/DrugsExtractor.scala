@@ -1,13 +1,14 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.drugs
 
-import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{StringType, TimestampType}
+import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.DrugsConfig
 
 
-object DrugsExtractor extends java.io.Serializable{
+class DrugsExtractor(drugConfig: DrugsConfig) extends java.io.Serializable{
 
   def formatSource(sources : Sources): Dataset[Purchase] = {
 
@@ -32,14 +33,12 @@ object DrugsExtractor extends java.io.Serializable{
       .as[Purchase]
   }
 
-  def extract(
-      drugClassificationLevel: DrugClassificationLevel,
-      sources : Sources,
-      drugFamilies: List[DrugConfig]): Dataset[Event[Drug]] = {
+  def extract(sources : Sources): Dataset[Event[Drug]] = {
 
     val drugPurchases = formatSource(sources)
     val spark: SparkSession = drugPurchases.sparkSession
     import spark.implicits._
-    drugPurchases.flatMap(purchase => drugClassificationLevel(purchase, drugFamilies))
+    drugPurchases.flatMap(purchase => drugConfig.level(purchase, drugConfig.families))
+
   }
 }
