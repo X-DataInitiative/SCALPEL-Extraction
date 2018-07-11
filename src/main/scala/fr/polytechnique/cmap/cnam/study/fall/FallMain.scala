@@ -4,7 +4,7 @@ import java.io.PrintWriter
 import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.events.DcirAct
+import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, Outcome}
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActs
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.Diagnoses
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugsExtractor
@@ -84,37 +84,19 @@ object FallMain extends Main with FractureCodes {
     }
     mco.unpersist()
 
-    // Hospitalized Fractures
-    val hospitalizedFractures = HospitalizedFractures.transform(diagnoses, acts, fallConfig.sites.sites)
-    operationsMetadata += {
-      OperationReporter.report("hospitalized_fractures", List("diagnoses", "acts"), OperationTypes.Outcomes, hospitalizedFractures.toDF, Path(fallConfig.output.outcomes))
-    }
-    diagnoses.unpersist()
-
     // Liberal Medical Acts
     val liberalActs = acts.filter(act => act.groupID == DcirAct.groupID.Liberal && !CCAMExceptions.contains(act.value)).persist()
     operationsMetadata += {
       OperationReporter.report("liberal_acts", List("acts"), OperationTypes.MedicalActs, liberalActs.toDF, Path(fallConfig.output.root))
     }
 
-    // Liberal Fractures
-    val liberalFractures = LiberalFractures.transform(liberalActs)
+    // fractures from All sources
+    val fractures: Dataset[Event[Outcome]] = new FracturesTransformer(fallConfig).transform(liberalActs, acts, diagnoses)
     operationsMetadata += {
-      OperationReporter.report("liberal_fractures", List("liberal_acts"), OperationTypes.Outcomes, liberalFractures.toDF, Path(fallConfig.output.outcomes))
+      OperationReporter.report("fractures", List("acts"), OperationTypes.Outcomes, fractures.toDF, Path(fallConfig.output.outcomes))
     }
+    diagnoses.unpersist()
     liberalActs.unpersist()
-
-    // Public Ambulatory Fractures
-    val publicAmbulatoryFractures = PublicAmbulatoryFractures.transform(acts)
-    operationsMetadata += {
-      OperationReporter.report("public_ambulatory_fractures", List("acts"), OperationTypes.Outcomes, publicAmbulatoryFractures.toDF, Path(fallConfig.output.outcomes))
-    }
-
-    // Private Ambulatory Fractures
-    val privateAmbulatoryFractures =  PrivateAmbulatoryFractures.transform(acts)
-    operationsMetadata += {
-      OperationReporter.report("private_ambulatory_fractures", List("acts"), OperationTypes.Outcomes, privateAmbulatoryFractures.toDF, Path(fallConfig.output.outcomes))
-    }
     acts.unpersist()
 
     // Write Metadata

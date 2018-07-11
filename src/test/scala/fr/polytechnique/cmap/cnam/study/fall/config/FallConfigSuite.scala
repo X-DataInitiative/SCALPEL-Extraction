@@ -12,6 +12,7 @@ class FallConfigSuite extends FlatSpec{
   val inputPaths = InputPaths(
     dcir = Some("src/test/resources/test-input/DCIR.parquet"),
     mco = Some("src/test/resources/test-input/MCO.parquet"),
+    mcoCe = None,
     irBen = Some("src/test/resources/test-input/IR_BEN_R.parquet"),
     irImb = Some("src/test/resources/test-input/IR_IMB_R.parquet"),
     irPha = Some("src/test/resources/test-input/IR_PHA_R_With_molecules.parquet")
@@ -24,7 +25,7 @@ class FallConfigSuite extends FlatSpec{
     coxFeatures = "target/test/output/cox_features",
     ltsccsFeatures = "target/test/output/ltsccs_features",
     mlppFeatures = "target/test/output/mlpp_features",
-    outcomes = "target/test/output/outcomes/cancer",
+    outcomes = "target/test/output/outcomes/fractures",
     exposures = "target/test/output/exposures"
   )
   "load" should "load default config file" in {
