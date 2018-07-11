@@ -10,7 +10,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs._
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
 import fr.polytechnique.cmap.cnam.study.fall.codes._
-import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{DrugsConfig, ExposureConfig, SitesConfig}
+import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{DrugsConfig, ExposureConfig, FracturesConfig, SitesConfig}
 import fr.polytechnique.cmap.cnam.study.fall.{BodySite, BodySites}
 
 case class FallConfig(
@@ -19,12 +19,12 @@ case class FallConfig(
     drugs: DrugsConfig = FallConfig.DrugsConfig(),
     exposures: ExposureConfig = FallConfig.ExposureConfig(),
     sites: SitesConfig = FallConfig.SitesConfig(),
-    patients: FallConfig.PatientsConfig = FallConfig.PatientsConfig()) extends StudyConfig{
+    patients: FallConfig.PatientsConfig = FallConfig.PatientsConfig(),
+    outcomes: FracturesConfig = FallConfig.FracturesConfig()) extends StudyConfig{
 
   val base: BaseConfig = FallConfig.BaseConfig
   val medicalActs: MedicalActsConfig = FallConfig.MedicalActsConfig
   val diagnoses: DiagnosesConfig = DiagnosesConfig(sites.fracturesCodes, sites.fracturesCodes)
-  val outcomes: FracturesTransformerConfig = FallConfig.FracturesConfig
 }
 
 object FallConfig extends FallConfigLoader with FractureCodes {
@@ -50,8 +50,10 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     mcoCIMCodes = List()
   )
 
-  /** Fixed parameters for outcomes transformer **/
-  final object FracturesConfig extends FracturesTransformerConfig(fallFrame = 3.months)
+  /** parameters for outcomes transformer **/
+  case class FracturesConfig(override val fallFrame: Period = 0.months) extends FracturesTransformerConfig(
+    fallFrame = fallFrame
+  )
 
   /** parameters needed for drugs extractor**/
   case class DrugsConfig(

@@ -5,7 +5,7 @@ import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer
 import fr.polytechnique.cmap.cnam.study.fall.FracturesTransformerImplicits._
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
-import fr.polytechnique.cmap.cnam.study.fall.config.FracturesTransformerConfig
+import fr.polytechnique.cmap.cnam.study.fall.config.{FallConfig, FracturesTransformerConfig}
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
 
 /*
@@ -13,13 +13,17 @@ import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
  * https://datainitiative.atlassian.net/wiki/spaces/CFC/pages/61282101/General+fractures+Fall+study
  */
 
-class FracturesTransformer(config: FracturesTransformerConfig) extends OutcomesTransformer with FractureCodes {
+class FracturesTransformer(config: FallConfig) extends OutcomesTransformer with FractureCodes {
 
-  override val outcomeName: String = "generic_fall"
+  override val outcomeName: String = "all_fall"
 
     def transform(
        liberalActs: Dataset[Event[MedicalAct]],
-       acts: Dataset[Event[MedicalAct]]): Dataset[Event[Outcome]] = {
+       acts: Dataset[Event[MedicalAct]],
+       diagnoses: Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
+
+      // Hospitalized fractures
+      val hospitralizedFractures = HospitalizedFractures.transform(diagnoses, acts, config.sites.sites)
 
       // Liberal Fractures
       val liberalFractures = LiberalFractures.transform(liberalActs)
@@ -31,10 +35,11 @@ class FracturesTransformer(config: FracturesTransformerConfig) extends OutcomesT
       val privateAmbulatoryFractures = PrivateAmbulatoryFractures.transform(acts)
 
       unionDatasets(
+        hospitralizedFractures,
         liberalFractures,
         publicAmbulatoryFractures,
         privateAmbulatoryFractures
-      ).groupConsecutiveFractures(config.fallFrame)
+      ).groupConsecutiveFractures(config.outcomes.fallFrame)
     }
 
 }

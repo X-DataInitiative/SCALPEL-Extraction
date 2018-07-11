@@ -91,7 +91,7 @@ object FallMain extends Main with FractureCodes {
     }
 
     // fractures from All sources
-    val fractures: Dataset[Event[Outcome]] = new FracturesTransformer(fallConfig.outcomes).transform(liberalActs, acts)
+    val fractures: Dataset[Event[Outcome]] = new FracturesTransformer(fallConfig).transform(liberalActs, acts, diagnoses)
     operationsMetadata += {
       OperationReporter.report("fractures", List("acts"), OperationTypes.Outcomes, fractures.toDF, Path(fallConfig.output.outcomes))
     }
