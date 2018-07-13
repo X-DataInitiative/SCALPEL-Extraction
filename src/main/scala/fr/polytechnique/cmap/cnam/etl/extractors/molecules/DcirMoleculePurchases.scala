@@ -38,7 +38,7 @@ private[molecules] object DcirMoleculePurchases {
       drugClasses: List[String],
       maxBoxQuantity: Int): Dataset[Event[Molecule]] = {
 
-    val sqlContext = dcir.sqlContext
+    val sparkSession = dcir.sparkSession
 
     val dcirInputColumns: List[Column] = List(
       col("NUM_ENQ").cast(StringType).as("patientID"),
@@ -70,10 +70,10 @@ private[molecules] object DcirMoleculePurchases {
       .withColumn("moleculeName", moleculeMappingUDF(col("moleculeName")))
       .persist()
 
-    val CIP07List = sqlContext.sparkContext.broadcast(
+    val CIP07List = sparkSession.sparkContext.broadcast(
       moleculesInfo.select("CIP07").distinct.where(col("CIP07").isNotNull).collect.map(_.getString(0))
     )
-    val CIP13List = sqlContext.sparkContext.broadcast(
+    val CIP13List = sparkSession.sparkContext.broadcast(
       moleculesInfo.select("CIP13").distinct.where(col("CIP13").isNotNull).collect.map(_.getString(0))
     )
 
@@ -85,7 +85,7 @@ private[molecules] object DcirMoleculePurchases {
       .where(col("CIP07").isin(CIP07List.value: _*) || col("CIP13").isin(CIP13List.value: _*))
       .persist()
 
-    import sqlContext.implicits._
+    import sparkSession.implicits._
     val result = validatedDcir
       .addMoleculesInfo(moleculesInfo) // Add molecule name and dosage
       .withColumn("totalDose", col("dosage") * col("nBoxes")) // Compute total dose

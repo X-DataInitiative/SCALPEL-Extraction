@@ -81,7 +81,7 @@ class DcirMoleculePurchasesSuite extends SharedContext {
 
     // Given
     val dcir: DataFrame = sqlContext.read.load("src/test/resources/test-input/DCIR.parquet")
-    val irPha: DataFrame = sqlContext.read.load("src/test/resources/test-input/IR_PHA_R.parquet")
+    val irPha: DataFrame = sqlContext.read.load("src/test/resources/test-input/IR_PHA_R_With_molecules.parquet")
     val dosages: DataFrame = sqlContext.read
       .format("com.databricks.spark.csv")
       .option("header", "true")
@@ -107,4 +107,5 @@ class DcirMoleculePurchasesSuite extends SharedContext {
     // Then
     assertDFs(result.toDF, expected)
  }
+ 
 }

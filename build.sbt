@@ -3,16 +3,12 @@ name := "SNIIRAM-featuring"
 version := "1.0"
 
 scalaVersion := "2.11.12"
-val sparkVersion = "2.1.0"
+val sparkVersion = "2.3.0"
 
 logLevel in compile := Level.Warn
 parallelExecution in Test := false
 test in assembly := {}
-
-// Necessary for using pureconfig with Spark 2.1.0. Can be removed after upgrading Spark version.
-// Source: https://pureconfig.github.io/docs/faq.html
-assemblyShadeRules in assembly := Seq(ShadeRule.rename("shapeless.**" -> "new_shapeless.@1").inAll)
-
+  
 assemblyMergeStrategy in assembly := {
   case PathList("org", "apache", xs @ _*) => MergeStrategy.last
   case x =>
