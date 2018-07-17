@@ -24,6 +24,7 @@ def fracture_stat_chart(metapath: str, flowpath: str, outpath: str, start_date: 
     start_date: The date since when the stats are to be analysed. Input in format YYYY-MM-DD
     end_date: The date till when the stats are to be analysed. Input in format YYYY-MM-DD
     """
+
     with open(metapath, 'r') as fp:
         metadata_json = json.load(fp)
     with open(flowpath, 'r') as fp:
@@ -31,6 +32,7 @@ def fracture_stat_chart(metapath: str, flowpath: str, outpath: str, start_date: 
     hospath, liberal_path, private_amb_path, public_amb_path = scan_metadata(metadata_json)
     outcomes = merge_path(hospath, private_amb_path, public_amb_path, liberal_path)
     outcomes = outcomes.filter(fn.col('start').between(pd.to_datetime(start_date), pd.to_datetime(end_date)))
+    metadata_json = json.dumps(metadata_json)
     events = build_events_flowchart(outcomes, flowchart_json, metadata_json)
     for i, fractures in enumerate(events):
         file_path = path.join(outpath, "fractures_stats_apres_etape_{}".format(i))
@@ -57,7 +59,7 @@ def merge_path(hospath: str, private_amb_path: str, public_amb_path: str, libera
     public_amb = spark.read.parquet(public_amb_path)
     liberal = spark.read.parquet(liberal_path)
     outcomes = hospit.union(private_amb).union(public_amb).union(liberal)
-    return [outcomes]
+    return outcomes
 
 
 def scan_metadata(metadata_json):
@@ -69,20 +71,19 @@ def scan_metadata(metadata_json):
 
     Returns
     -------
-    The filepath for different kinds of fractures.
+    The filepaths for different kinds of fractures.
     """
-    meta = json.loads(metadata_json)
     liberal_path = hospath = private_amb_path = public_amb_path = 'null'
-    for items in meta["operations"]:
+    for items in metadata_json["operations"]:
         if "liberal_fractures" in items["name"]:
             liberal_path = items["output_path"]
-    for items in meta["operations"]:
+    for items in metadata_json["operations"]:
         if "hospitalized_fractures" in items["name"]:
             hospath = items["output_path"]
-    for items in meta["operations"]:
+    for items in metadata_json["operations"]:
         if "public_ambulatory_fractures" in items["name"]:
             public_amb_path = items["output_path"]
-    for items in meta["operations"]:
+    for items in metadata_json["operations"]:
         if "private_ambulatory_fractures" in items["name"]:
             private_amb_path = items["output_path"]
     if liberal_path == 'null' or hospath == 'null' or public_amb_path == 'null' or private_amb_path == 'null':
