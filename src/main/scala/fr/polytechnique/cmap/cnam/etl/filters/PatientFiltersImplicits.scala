@@ -31,7 +31,8 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
     */
   def idsSet: Set[String] = patients.map(_.patientID).collect.toSet
 
-  /** Removes all patients who got a given Outcome event before the start of their follow-up period
+  /** First, keep only patients with an Outcome and a Followup period.
+    * Then, removes all patients who got a given Outcome event before the start of their follow-up period
     * @param outcomes A dataset of outcomes
     * @param followUpPeriods A dataset containing the follow-up periods of the patients
     * @param outcomeName The name of the outcome to find
