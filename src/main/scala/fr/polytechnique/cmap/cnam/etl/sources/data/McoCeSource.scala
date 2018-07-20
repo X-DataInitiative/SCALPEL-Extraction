@@ -2,9 +2,8 @@ package fr.polytechnique.cmap.cnam.etl.sources.data
 
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{Column, DataFrame}
-import fr.polytechnique.cmap.cnam.etl.sources.SourceManager
 
-object McoCeSource extends SourceManager with McoSourceSanitizer{
+object McoCeSource extends DataSourceManager with McoSourceSanitizer{
 
   // Shared Columns
   val ETA_NUM: Column = col("ETA_NUM")

@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
+import java.sql.Timestamp
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.InputPaths
 import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource}
@@ -48,6 +49,18 @@ object Sources {
       irImb = sources.irImb.map(IrImbSource.sanitize),
       irPha = sources.irPha.map(IrPhaSource.sanitize),
       dosages = sources.dosages.map(DosagesSource.sanitize)
+    )
+  }
+
+  def sanitizeDates(sources: Sources, studyStart: Timestamp, studyEnd: Timestamp): Sources = {
+    sources.copy(
+      dcir = sources.dcir.map(DcirSource.sanitizeDates(_, studyStart, studyEnd)),
+      mco = sources.mco.map(McoSource.sanitizeDates(_, studyStart, studyEnd)),
+      mcoCe = sources.mcoCe.map(McoCeSource.sanitizeDates(_, studyStart, studyEnd)),
+      irBen = sources.irBen,
+      irImb = sources.irImb,
+      irPha = sources.irPha,
+      dosages = sources.dosages
     )
   }
 
