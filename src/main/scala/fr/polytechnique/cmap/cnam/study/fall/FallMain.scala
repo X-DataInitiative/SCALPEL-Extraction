@@ -32,7 +32,10 @@ object FallMain extends Main with FractureCodes {
 
     logger.info("Reading sources")
     import implicits.SourceReader
-    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input))
+    val sources = Sources.sanitizeDates(
+      Sources.sanitize(sqlContext.readSources(fallConfig.input)),
+      fallConfig.base.studyStart, fallConfig.base.studyEnd
+    )
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
 

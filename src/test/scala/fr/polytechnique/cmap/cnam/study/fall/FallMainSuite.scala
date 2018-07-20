@@ -21,7 +21,8 @@ class FallMainSuite extends SharedContext {
     //Given
     val params = Map(
       "conf" -> "/src/main/resources/config/fall/default.conf",
-      "env" -> "test")
+      "env" -> "test"
+    )
 
     // When
     val result = FallMain.run(sqlCtx, params)

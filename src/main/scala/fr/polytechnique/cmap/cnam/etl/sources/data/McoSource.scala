@@ -2,14 +2,13 @@ package fr.polytechnique.cmap.cnam.etl.sources.data
 
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{Column, DataFrame}
-import fr.polytechnique.cmap.cnam.etl.sources.SourceManager
 
 /**
   * Extractor class for the MCO table
   * This filtering is explained here
   * https://datainitiative.atlassian.net/wiki/pages/viewpage.action?pageId=40304642
   */
-object McoSource extends SourceManager with McoSourceSanitizer{
+object McoSource extends DataSourceManager with McoSourceSanitizer{
   // MCO & MCO_CE shared columns
   val ETA_NUM: Column = col("ETA_NUM")
   val NIR_RET: Column = col("NIR_RET")
