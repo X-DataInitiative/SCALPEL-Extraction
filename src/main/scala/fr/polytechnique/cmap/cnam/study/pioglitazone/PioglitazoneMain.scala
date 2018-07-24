@@ -152,7 +152,7 @@ object PioglitazoneMain extends Main {
       OperationReporter
         .report(
           "followup",
-          List("outcomes", "trackloss"),
+          List("drug_purchases", "outcomes", "trackloss"),
           OperationTypes.AnyEvents,
           followups.toDF,
           Path(config.output.root)
