@@ -81,7 +81,7 @@ private[molecules] object DcirMoleculePurchases {
       .select(dcirInputColumns: _*)
       .where(col("eventDate").isNotNull)
       .filterBoxQuantities(maxBoxQuantity)
-      .na.drop("any", Seq("CIP07", "CIP13"))
+      .na.drop("all", Seq("CIP07", "CIP13"))
       .where(col("CIP07").isin(CIP07List.value: _*) || col("CIP13").isin(CIP13List.value: _*))
       .persist()
 
