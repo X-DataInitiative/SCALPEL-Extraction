@@ -19,8 +19,6 @@ class CaseClassConfigSuite extends FlatSpec {
     val result = input.toPrettyString
 
     // Then
-    println(result)
-    println(expected)
     assert(result == expected)
   }
 }

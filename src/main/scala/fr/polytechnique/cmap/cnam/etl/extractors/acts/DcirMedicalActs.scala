@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
+import scala.util.Try
 import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, MedicalAct}
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
@@ -32,8 +33,13 @@ private[acts] object DcirMedicalActs {
     foundCode match {
       case None => None
       case Some(code) =>
-        val groupID = getGroupId(r)
-        groupID.map { groupIDValue =>
+        val groupID = {
+          getGroupId(r) recover {
+            case _:IllegalArgumentException => Some(DcirAct.groupID.DcirAct)
+            case _ => None
+          }
+        }
+        groupID.get.map { groupIDValue =>
           DcirAct(
             patientID = r.getAs[String](ColNames.PatientID),
             groupID = groupIDValue,
@@ -44,7 +50,13 @@ private[acts] object DcirMedicalActs {
     }
   }
 
-  def getGroupId(r: Row): Option[String] = {
+  /**
+    * Get the information of the origin of DCIR act that is being extracted. It returns a
+    * Failure[IllegalArgumentException] if the DCIR schema is old, a success if the DCIR schema contains an information.
+    * @param r the row of DCIR to be investigated.
+    * @return Try[Option[String]\]
+    */
+  def getGroupId(r: Row): Try[Option[String]] = Try {
 
     // First delete Public stuff
     if (!r.isNullAt(r.fieldIndex(ColNames.Sector)) && getSector(r) != 2) {

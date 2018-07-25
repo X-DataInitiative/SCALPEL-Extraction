@@ -1,5 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
+import scala.util.Success
+import org.scalatest.Matchers.{an, convertToAnyShouldWrapper}
+import org.scalatest.TryValues._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
 import fr.polytechnique.cmap.cnam.SharedContext
@@ -100,7 +103,7 @@ class DcirMedicalActsSuite extends SharedContext {
     )
     val array = Array[Any](0D, 2D, 6D)
     val input = new GenericRowWithSchema(array, schema)
-    val expected = Some(DcirAct.groupID.PrivateAmbulatory)
+    val expected = Success(Some(DcirAct.groupID.PrivateAmbulatory))
 
     // When
     val result = DcirMedicalActs.getGroupId(input)
@@ -110,18 +113,31 @@ class DcirMedicalActsSuite extends SharedContext {
 
   }
 
-  it should "return None if it is public related" in {
+  it should "return Success(None) if it is public related" in {
     // Given
     val schema = StructType(StructField(ColNames.Sector, StringType) :: Nil)
     val array = Array[Any](1D)
     val input = new GenericRowWithSchema(array, schema)
-    val expected = None
-
     // When
     val result = DcirMedicalActs.getGroupId(input)
 
     // Then
-    assert(result == expected)
+    result.success.value shouldBe None
+  }
+
+  it should "return IllegalArgumentException if the information of source of act is unavailable in DCIR" in {
+    // Given
+    val schema = StructType(
+      StructField(ColNames.GHSCode, DoubleType) ::
+        StructField(ColNames.Sector, StringType) ::Nil
+    )
+    val array = Array[Any](0D, 2D, 6D)
+    val input = new GenericRowWithSchema(array, schema)
+    // When
+    val result = DcirMedicalActs.getGroupId(input)
+
+    // Then
+    result.failure.exception shouldBe an [IllegalArgumentException]
   }
 
   "extract" should "return a Dataset of Medical Acts" in {
