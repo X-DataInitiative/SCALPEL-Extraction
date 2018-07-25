@@ -44,7 +44,9 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
 
   /** Fixed parameters needed for the Patients extractors. */
   final object PatientsConfig extends PatientsConfig(
-    ageReferenceDate = PioglitazoneConfig.BaseConfig.ageReferenceDate
+    ageReferenceDate = PioglitazoneConfig.BaseConfig.ageReferenceDate,
+    maxAge = 80,
+    minAge = 40
   )
 
   /** Fixed parameters needed for the Drugs extractors. */
