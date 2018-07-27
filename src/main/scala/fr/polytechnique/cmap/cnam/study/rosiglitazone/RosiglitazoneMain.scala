@@ -1,5 +1,8 @@
 package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
+import java.io.PrintWriter
+import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Diagnosis, Event, Molecule}
@@ -7,10 +10,8 @@ import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.Diagnoses
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.Patients
 import fr.polytechnique.cmap.cnam.etl.extractors.tracklosses.{Tracklosses, TracklossesConfig}
-import fr.polytechnique.cmap.cnam.etl.filters.{EventFilters, PatientFilters}
+import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
-import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.MLPPLoader
-import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposuresTransformer, ExposuresTransformerConfig}
@@ -20,23 +21,21 @@ import fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes.RosiglitazoneOutc
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
+import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
 
 object RosiglitazoneMain extends Main {
 
   val appName = "Rosiglitazone"
 
-  def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[Event[AnyEvent]]] = {
+  def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[_]] = {
 
+    val startTimestamp = new java.util.Date()
     import sqlContext.implicits._
-    import EventFilters._
     import PatientFilters._
 
-    val config = RosiglitazoneConfig.load(argsMap("conf"), argsMap("env"))
-    val inputPaths = config.input
-    val outputPaths = config.output
-    logger.info("Input Paths: " + inputPaths.toString)
-    logger.info("Output Paths: " + outputPaths.toString)
-    logger.info("===================================")
+    val config = RosiglitazoneConfig.load(argsMap.getOrElse("conf", ""), argsMap("env"))
+
+    val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
     logger.info("Reading sources")
     import implicits.SourceReader
@@ -45,84 +44,184 @@ object RosiglitazoneMain extends Main {
       config.base.studyStart, config.base.studyEnd
     )
 
-    logger.info("Extracting patients...")
+    //Extracting Patients
     val patients: Dataset[Patient] = new Patients(config.patients).extract(sources).cache()
+    operationsMetadata += {
+      OperationReporter.report("extract_patients",
+        List("DCIR", "MCO", "IR_BEN_R"),
+        OperationTypes.Patients,
+        patients.toDF(),
+        Path(config.output.root)
+      )
+    }
 
-    logger.info("Extracting molecule events...")
-    val drugEvents: Dataset[Event[Molecule]] = new MoleculePurchases(config.molecules).extract(sources).cache()
+    // Extract Drug purchases
+    val drugPurchases: Dataset[Event[Molecule]] = new MoleculePurchases(config.molecules).extract(sources).cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "drug_purchases",
+          List("DCIR"),
+          OperationTypes.Dispensations,
+          drugPurchases.toDF,
+          Path(config.output.root)
+        )
+    }
 
-    logger.info("Extracting diagnosis events...")
-    val diseaseEvents: Dataset[Event[Diagnosis]] = new Diagnoses(config.diagnoses).extract(sources).cache()
+    // Extract Diagnoses
+    val diagnoses: Dataset[Event[Diagnosis]] = new Diagnoses(config.diagnoses).extract(sources).cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "diagnoses",
+          List("MCO", "IR_IMB_R"),
+          OperationTypes.Diagnosis,
+          diagnoses.toDF,
+          Path(config.output.root)
+        )
+    }
 
-    logger.info("Merging all events...")
-    val allEvents: Dataset[Event[AnyEvent]] = unionDatasets(
-      drugEvents.as[Event[AnyEvent]],
-      diseaseEvents.as[Event[AnyEvent]]
-    )
+    // Extract Heart Problems Outcomes
+    val outcomes = {
+      val outcomesTransformer = new RosiglitazoneOutcomeTransformer(config.outcomes.outcomeDefinition)
+      outcomesTransformer.transform(diagnoses).cache()
+    }
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "outcomes",
+          List("diagnoses"),
+          OperationTypes.Outcomes,
+          outcomes.toDF,
+          Path(config.output.root)
+        )
+    }
 
-    logger.info("Extracting Tracklosses...")
-    val tracklossConfig = TracklossesConfig(studyEnd = config.base.studyEnd)
-    val tracklosses = new Tracklosses(tracklossConfig).extract(sources).cache()
+    // Extract Follow-up
+    val followups = {
+      //Extract Trackloss
+      val tracklosses = {
+        val tracklossConfig = TracklossesConfig(studyEnd = config.base.studyEnd)
+        new Tracklosses(tracklossConfig).extract(sources).cache()
+      }
+      operationsMetadata += {
+        OperationReporter
+          .report(
+            "trackloss",
+            List("DCIR"),
+            OperationTypes.AnyEvents,
+            tracklosses.toDF,
+            Path(config.output.root)
+          )
+      }
 
-    logger.info("Writing patients...")
-    patients.toDF.write.parquet(outputPaths.patients)
+      val observations = {
+        val allEvents: Dataset[Event[AnyEvent]] = unionDatasets(
+          drugPurchases.as[Event[AnyEvent]],
+          diagnoses.as[Event[AnyEvent]]
+        )
+        new ObservationPeriodTransformer(config.observationPeriod).transform(allEvents).cache()
+      }
 
-    logger.info("Writing drugs and diagnoses events...")
-    allEvents.toDF.write.parquet(outputPaths.flatEvents)
+      val patientsWithObservations = patients
+        .joinWith(observations, patients.col("patientId") === observations.col("patientId"))
 
-    logger.info("Extracting Observations...")
-    val observations = new ObservationPeriodTransformer(config.observationPeriod).transform(allEvents).cache()
+      val cachedFollowups = new FollowUpTransformer(config.followUp)
+        .transform(patientsWithObservations, drugPurchases, outcomes, tracklosses)
+        .cache()
 
-    logger.info("Extracting heart problems outcomes...")
-    val outcomesTransformer = new RosiglitazoneOutcomeTransformer(config.outcomes.outcomeDefinition)
-    val outcomes = outcomesTransformer.transform(diseaseEvents)
+      operationsMetadata += {
+        OperationReporter
+          .report(
+            "followup",
+            List("drug_purchases", "outcomes", "trackloss"),
+            OperationTypes.AnyEvents,
+            cachedFollowups.toDF,
+            Path(config.output.root)
+          )
+      }
 
-    logger.info("Extracting Follow-up...")
-    val patientsWithObservations = patients.joinWith(observations, patients.col("patientId") === observations.col("patientId"))
+      //unpersist
+      tracklosses.unpersist()
+      observations.unpersist()
 
-    val followups = new FollowUpTransformer(config.followUp)
-      .transform(patientsWithObservations, drugEvents, outcomes, tracklosses)
-      .cache()
+      cachedFollowups
+    }
 
-    logger.info("Filtering Patients...")
+    // Extract Filtering Patients
+    val filteredPatientsAncestors = new ListBuffer[String]
     val filteredPatients = {
-      val firstFilterResult = if (config.filters.filterDelayedEntries)
-        patients.filterDelayedPatients(drugEvents, config.base.studyStart, config.filters.delayedEntryThreshold)
+      val firstFilterResult = if (config.filters.filterDelayedEntries) {
+        filteredPatientsAncestors += "drug_purchases"
+        val delayedFreePatients = patients
+          .filterDelayedPatients(drugPurchases, config.base.studyStart, config.filters.delayedEntryThreshold)
+        operationsMetadata += {
+          OperationReporter
+            .report(
+              "delayed_patients_free",
+              List("drug_purchases"),
+              OperationTypes.Patients,
+              delayedFreePatients.toDF,
+              Path(config.output.root)
+            )
+        }
+        delayedFreePatients
+      }
       else
         patients
 
-      if (config.filters.filterDiagnosedPatients)
-        firstFilterResult.filterEarlyDiagnosedPatients(outcomes, followups, outcomesTransformer.outcomeName)
+      if (config.filters.filterDiagnosedPatients) {
+        filteredPatientsAncestors ++= List("outcomes", "followup")
+        firstFilterResult.filterEarlyDiagnosedPatients(outcomes, followups, config.outcomes.outcomeDefinition.toString)
+      }
       else
         patients
     }
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "filtered_patients",
+          filteredPatientsAncestors.toList,
+          OperationTypes.Patients,
+          filteredPatients.toDF,
+          Path(config.output.root)
+        )
+    }
 
-    logger.info("Writing heart problems outcomes...")
-    outcomes.filterPatients(filteredPatients.idsSet)
-      .write.parquet(outputPaths.outcomes)
+    // Extract Exposures
+    val exposures = {
+      val patientsWithFollowups = patients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
+      val exposureConfig = ExposuresTransformerConfig()
+      new ExposuresTransformer(exposureConfig)
+        .transform(patientsWithFollowups, drugPurchases)
+    }
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "exposures",
+          List("drug_purchases", "followup"),
+          OperationTypes.Exposures,
+          exposures.toDF,
+          Path(config.output.root)
+        )
+    }
 
-    logger.info("Extracting Exposures...")
-    val patientsWithFollowups = patients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
+    // Write Metadata
+    val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
+    val metadataJson: String = metadata.toJsonString()
 
-    val exposureConfig = ExposuresTransformerConfig()
+    new PrintWriter("metadata_rosiglitazone_" + startTimestamp.toString + ".json") {
+      write(metadataJson)
+      close()
+    }
 
-    val exposures = new ExposuresTransformer(exposureConfig)
-      .transform(patientsWithFollowups, drugEvents)
-      .cache()
+    //unpersist
+    patients.unpersist()
+    drugPurchases.unpersist()
+    diagnoses.unpersist()
+    outcomes.unpersist()
+    followups.unpersist()
 
-    logger.info("Writing Exposures...")
-    exposures.write.parquet(outputPaths.exposures)
-
-    logger.info("Extracting MLPP features...")
-    val mlppConf = MLPPConfig(
-      input = MLPPConfig.InputPaths(patients = Some(outputPaths.patients),
-        outcomes = Some(outputPaths.outcomes),
-        exposures = Some(outputPaths.exposures)),
-      output = MLPPConfig.OutputPaths(root = Path(outputPaths.mlppFeatures)),
-      extra = MLPPConfig.ExtraConfig(minTimestamp = config.base.studyStart,
-        maxTimestamp = config.base.studyEnd))
-    MLPPLoader(mlppConf).load(outcomes, exposures, patients)
-
-    Some(allEvents)
+    Some(exposures)
   }
 }
