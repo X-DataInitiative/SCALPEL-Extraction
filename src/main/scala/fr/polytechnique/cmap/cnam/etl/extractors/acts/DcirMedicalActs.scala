@@ -36,7 +36,7 @@ private[acts] object DcirMedicalActs {
         val groupID = {
           getGroupId(r) recover {
             case _:IllegalArgumentException => Some(DcirAct.groupID.DcirAct)
-            case _ => None
+            case _:UnsupportedOperationException => None
           }
         }
         groupID.get.map { groupIDValue =>
