@@ -1,17 +1,17 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict
 from itertools import product
-
-import seaborn as sns
-from matplotlib.ticker import ScalarFormatter, MultipleLocator
+from typing import Dict
+import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 from matplotlib.backends.backend_pdf import PdfPages
+from matplotlib.ticker import ScalarFormatter, MultipleLocator
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as fn
 
+from .fall_study_stats import TherapeuticStats, PharmaStats
 from .patients_stats import MyPatientsDF
-from .utils import read_data_frame
 
 
 class DrugsDataFrame(MyPatientsDF):
@@ -266,12 +266,8 @@ class DrugPurchaseStatsPlotter(object):
         return ax
 
 
-def save_drugs_stats(patients_path: str, drugs_path: str, strategy: DrugsStatsStrategy,
+def save_drugs_stats(patients: DataFrame, drugs: DataFrame, strategy: DrugsStatsStrategy,
                      output_path: str):
-    print("Reading patients")
-    patients = read_data_frame(patients_path)
-    print("Readings drugs")
-    drugs = read_data_frame(drugs_path)
     print("Building stats")
     builder = DrugPurchaseStatsBuilder(patients, drugs, strategy)
     print("Building plotts")
@@ -318,3 +314,24 @@ def save_drugs_stats(patients_path: str, drugs_path: str, strategy: DrugsStatsSt
             plt.tight_layout()
             plt.subplots_adjust(right=0.75)
             pdf.savefig(fig)
+
+
+def save_therapeutic_stats(output_path: str, events: DataFrame, colors_dict, event_type) -> None:
+    filepath = output_path + "{}_niveau_therapeutique.pdf".format(event_type)
+
+    with PdfPages(filepath) as pdf:
+        therapeutic_stats = TherapeuticStats(events, colors_dict, event_type)
+        fig = plt.figure()
+        therapeutic_stats.plot()
+        pdf.savefig(fig)
+
+
+def save_pharmaceutical_stats(outpath: str, events: DataFrame, colors_dict, event_type, molecule_mapping_csv: str):
+    molecule_mapping = pd.read_csv(molecule_mapping_csv)
+    filepath = outpath + "{}_niveau_pharmaceutique.pdf".format(event_type)
+    with PdfPages(filepath) as pdf:
+        stats = PharmaStats(molecule_mapping[["pharmaceutic_family", "therapeutic"]].drop_duplicates(), events,
+                            event_type, colors_dict)
+        fig = plt.figure(figsize=(8, 5))
+        stats.plot()
+        pdf.savefig(fig)
