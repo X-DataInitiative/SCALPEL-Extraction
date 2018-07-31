@@ -7,9 +7,11 @@ from matplotlib.axes import Axes
 from pyspark.sql import DataFrame, SQLContext, SparkSession
 
 
+def get_spark_context():
+    return SQLContext.getOrCreate(SparkSession.builder.getOrCreate())
+
 def read_data_frame(filepath: str) -> DataFrame:
-    return (SQLContext
-            .getOrCreate(SparkSession.builder.getOrCreate())
+    return (get_spark_context()
             .read.parquet(filepath).cache())
 
 
