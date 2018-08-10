@@ -120,6 +120,6 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     val result = instance.filterNoStartGap(moleculeEvents, studyStart)
 
     // Then
-    assertDSs(result, expected, true)
+    assertDSs(result, expected)
   }
 }

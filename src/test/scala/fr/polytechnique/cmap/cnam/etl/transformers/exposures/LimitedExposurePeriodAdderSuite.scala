@@ -273,7 +273,6 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       .select(PatientID, Value, Start, ExposureEnd)
 
     // Then
-    result.show()
     assertDFs(result, expected)
   }
 
@@ -331,7 +330,6 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       .select(PatientID, Value, Start, ExposureEnd)
 
     // Then
-    result.show()
     assertDFs(result, expected)
   }
 

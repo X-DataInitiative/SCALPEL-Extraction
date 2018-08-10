@@ -43,7 +43,6 @@ class MedicalActsSuite extends SharedContext {
     val result = new MedicalActs(config).extract(sources)
 
     // Then
-    sources.dcir.get.show
     assertDSs(result, expected)
   }
 

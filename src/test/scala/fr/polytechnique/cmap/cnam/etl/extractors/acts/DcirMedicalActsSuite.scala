@@ -1,5 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
+import scala.util.Success
+import org.scalatest.Matchers.{an, convertToAnyShouldWrapper}
+import org.scalatest.TryValues._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
 import fr.polytechnique.cmap.cnam.SharedContext
@@ -17,6 +20,12 @@ class DcirMedicalActsSuite extends SharedContext {
     StructField(ColNames.GHSCode, DoubleType) ::
     StructField(ColNames.Sector, DoubleType) ::
     StructField(ColNames.Date, DateType) :: Nil
+  )
+
+  val oldSchema = StructType(
+    StructField(ColNames.PatientID, StringType) ::
+      StructField(ColNames.CamCode, StringType) ::
+      StructField(ColNames.Date, DateType) :: Nil
   )
 
   "medicalActFromRow" should "return a Medical Act event when it's found in the row" in {
@@ -46,6 +55,20 @@ class DcirMedicalActsSuite extends SharedContext {
 
     // Then
     assert(result.isEmpty)
+  }
+
+  it should "return a DCIR act if the event is in a older version of DCIR" in {
+    // Given
+    val codes = List("AAAA", "BBBB")
+    val inputArray = Array[Any]("Patient_A", "AAAA", makeTS(2010, 1, 1))
+    val inputRow = new GenericRowWithSchema(inputArray, oldSchema)
+    val expected = Some(DcirAct("Patient_A", DcirAct.groupID.DcirAct, "AAAA", makeTS(2010, 1, 1)))
+
+    // When
+    val result = DcirMedicalActs.medicalActFromRow(codes)(inputRow)
+
+    // Then
+    assert(result == expected)
   }
 
   "getGHS" should "return the value in the correct column" in {
@@ -100,7 +123,7 @@ class DcirMedicalActsSuite extends SharedContext {
     )
     val array = Array[Any](0D, 2D, 6D)
     val input = new GenericRowWithSchema(array, schema)
-    val expected = Some(DcirAct.groupID.PrivateAmbulatory)
+    val expected = Success(Some(DcirAct.groupID.PrivateAmbulatory))
 
     // When
     val result = DcirMedicalActs.getGroupId(input)
@@ -110,18 +133,31 @@ class DcirMedicalActsSuite extends SharedContext {
 
   }
 
-  it should "return None if it is public related" in {
+  it should "return Success(None) if it is public related" in {
     // Given
     val schema = StructType(StructField(ColNames.Sector, StringType) :: Nil)
     val array = Array[Any](1D)
     val input = new GenericRowWithSchema(array, schema)
-    val expected = None
-
     // When
     val result = DcirMedicalActs.getGroupId(input)
 
     // Then
-    assert(result == expected)
+    result.success.value shouldBe None
+  }
+
+  it should "return IllegalArgumentException if the information of source of act is unavailable in DCIR" in {
+    // Given
+    val schema = StructType(
+      StructField(ColNames.GHSCode, DoubleType) ::
+        StructField(ColNames.Sector, StringType) ::Nil
+    )
+    val array = Array[Any](0D, 2D, 6D)
+    val input = new GenericRowWithSchema(array, schema)
+    // When
+    val result = DcirMedicalActs.getGroupId(input)
+
+    // Then
+    result.failure.exception shouldBe an [IllegalArgumentException]
   }
 
   "extract" should "return a Dataset of Medical Acts" in {
