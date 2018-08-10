@@ -31,12 +31,12 @@ object FallConfig extends FallConfigLoader with FractureCodes {
 
   /** Base fixed parameters for this study. */
   final object BaseConfig extends BaseConfig(
-    ageReferenceDate = LocalDate.of(2015, 1, 1),
-    studyStart = LocalDate.of(2015, 1, 1),
-    studyEnd = LocalDate.of(2016, 1, 1)
+    ageReferenceDate = LocalDate.of(2014, 1, 1),
+    studyStart = LocalDate.of(2014, 1, 1),
+    studyEnd = LocalDate.of(2017, 1, 1)
   )
 
-  /** Fixed parameters needed for the Patients extractors. */
+  /** parameters needed for the Patients extractors. */
   case class PatientsConfig(
     ageReferenceDate: LocalDate = FallConfig.BaseConfig.ageReferenceDate,
     startGapInMonths: Int = 2,
