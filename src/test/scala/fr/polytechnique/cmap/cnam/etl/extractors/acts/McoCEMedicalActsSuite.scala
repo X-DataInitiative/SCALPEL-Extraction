@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
-import java.sql.Date
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import fr.polytechnique.cmap.cnam.SharedContext
@@ -33,12 +32,10 @@ class McoCEMedicalActsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val date = new Date(makeTS(2003, 2, 1).getTime)
-
     val input = List(
-      ("george", "coloscopie", date),
-      ("georgette", "angine", date)
-    ).toDF("NUM_ENQ", "MCO_FMSTC__CCAM_COD", "EXE_SOI_DTD")
+      ("george", "coloscopie", "01022003"),
+      ("georgette", "angine", "01022003")
+    ).toDF("NUM_ENQ", "MCO_FMSTC__CCAM_COD", "ENT_DAT")
 
     val expected = List(
       McoCEAct("georgette", "ACE", "angine", makeTS(2003, 2, 1))

@@ -63,9 +63,9 @@ class MedicalActsSuite extends SharedContext {
     val mcoCE = {
       val date = new Date(makeTS(2003, 2, 1).getTime)
       Seq(
-        ("george", "coloscopie", date),
-        ("georgette", "angine", date)
-      ).toDF("NUM_ENQ", "MCO_FMSTC__CCAM_COD", "EXE_SOI_DTD")
+        ("george", "coloscopie", "01022003"),
+        ("georgette", "angine", "01022003")
+      ).toDF("NUM_ENQ", "MCO_FMSTC__CCAM_COD", "ENT_DAT")
     }
 
     val sources = {
@@ -105,11 +105,10 @@ class MedicalActsSuite extends SharedContext {
     )
 
     val mcoCE = {
-      val date = new Date(makeTS(2003, 2, 1).getTime)
       Seq(
-        ("george", "coloscopie", date),
-        ("georgette", "angine", date)
-      ).toDF("NUM_ENQ", "MCO_FMSTC__CCAM_COD", "EXE_SOI_DTD")
+        ("george", "coloscopie", "01022003"),
+        ("georgette", "angine", "01022003")
+      ).toDF("NUM_ENQ", "MCO_FMSTC__CCAM_COD", "ENT_DAT")
     }
 
     val sources = {

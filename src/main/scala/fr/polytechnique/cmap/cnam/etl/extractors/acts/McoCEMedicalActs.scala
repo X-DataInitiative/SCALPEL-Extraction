@@ -1,23 +1,23 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 
 private[acts] object McoCEMedicalActs {
 
   final object ColNames {
     final lazy val PatientID = "NUM_ENQ"
     final lazy val CamCode = "MCO_FMSTC__CCAM_COD"
-    final lazy val Date = "EXE_SOI_DTD"
+    final lazy val Date = "ENT_DAT"
     def allCols = List(PatientID, CamCode, Date)
   }
 
   val outputCols = List(
     col(ColNames.PatientID).as("patientID"),
     col(ColNames.CamCode).as("code"),
-    col(ColNames.Date).cast(TimestampType).as("eventDate"),
+    parseTimestamp(col(ColNames.Date), "ddMMyyyy").as("eventDate"),
     lit("ACE").as("groupID")
   )
 
