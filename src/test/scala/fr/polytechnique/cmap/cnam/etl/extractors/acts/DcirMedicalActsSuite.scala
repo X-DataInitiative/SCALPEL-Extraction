@@ -22,6 +22,12 @@ class DcirMedicalActsSuite extends SharedContext {
     StructField(ColNames.Date, DateType) :: Nil
   )
 
+  val oldSchema = StructType(
+    StructField(ColNames.PatientID, StringType) ::
+      StructField(ColNames.CamCode, StringType) ::
+      StructField(ColNames.Date, DateType) :: Nil
+  )
+
   "medicalActFromRow" should "return a Medical Act event when it's found in the row" in {
 
     // Given
@@ -49,6 +55,20 @@ class DcirMedicalActsSuite extends SharedContext {
 
     // Then
     assert(result.isEmpty)
+  }
+
+  it should "return a DCIR act if the event is in a older version of DCIR" in {
+    // Given
+    val codes = List("AAAA", "BBBB")
+    val inputArray = Array[Any]("Patient_A", "AAAA", makeTS(2010, 1, 1))
+    val inputRow = new GenericRowWithSchema(inputArray, oldSchema)
+    val expected = Some(DcirAct("Patient_A", DcirAct.groupID.DcirAct, "AAAA", makeTS(2010, 1, 1)))
+
+    // When
+    val result = DcirMedicalActs.medicalActFromRow(codes)(inputRow)
+
+    // Then
+    assert(result == expected)
   }
 
   "getGHS" should "return the value in the correct column" in {
