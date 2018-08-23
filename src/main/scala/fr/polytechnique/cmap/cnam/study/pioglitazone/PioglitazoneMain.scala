@@ -36,6 +36,7 @@ object PioglitazoneMain extends Main {
     */
   def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[_]] = {
 
+    val format = new java.text.SimpleDateFormat("yyyy_MM_dd_HH_mm_ss")
     val startTimestamp = new java.util.Date()
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
@@ -225,7 +226,7 @@ object PioglitazoneMain extends Main {
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
     val metadataJson: String = metadata.toJsonString()
 
-    new PrintWriter("metadata_pioglitazone_" + startTimestamp.toString + ".json") {
+    new PrintWriter("metadata_pioglitazone_" + format.format(startTimestamp) + ".json") {
       write(metadataJson)
       close()
     }

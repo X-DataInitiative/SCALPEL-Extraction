@@ -27,6 +27,7 @@ object FallMain extends Main with FractureCodes {
 
   override def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
 
+    val format = new java.text.SimpleDateFormat("yyyy_MM_dd_HH_mm_ss")
     val startTimestamp = new java.util.Date()
     val fallConfig = FallConfig.load(argsMap("conf"), argsMap("env"))
 
@@ -50,7 +51,7 @@ object FallMain extends Main with FractureCodes {
     // Extract Patients
     val patients = new Patients(PatientsConfig(fallConfig.base.studyStart)).extract(sources).cache()
     operationsMetadata += {
-      OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R"), OperationTypes.Patients, patients.toDF, Path(fallConfig.output.patients))
+      OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R"), OperationTypes.Patients, patients.toDF, Path(fallConfig.output.root))
     }
 
     // Filter Patients
@@ -68,7 +69,7 @@ object FallMain extends Main with FractureCodes {
       new ExposuresTransformer(definition).transform(patientsWithFollowUp, drugPurchases)
     }
     operationsMetadata += {
-      OperationReporter.report("exposures", List("drug_purchases"), OperationTypes.Exposures, exposures.toDF, Path(fallConfig.output.exposures))
+      OperationReporter.report("exposures", List("drug_purchases"), OperationTypes.Exposures, exposures.toDF, Path(fallConfig.output.root))
     }
     drugPurchases.unpersist()
 
@@ -96,7 +97,7 @@ object FallMain extends Main with FractureCodes {
     // fractures from All sources
     val fractures: Dataset[Event[Outcome]] = new FracturesTransformer(fallConfig).transform(liberalActs, acts, diagnoses)
     operationsMetadata += {
-      OperationReporter.report("fractures", List("acts"), OperationTypes.Outcomes, fractures.toDF, Path(fallConfig.output.outcomes))
+      OperationReporter.report("fractures", List("acts"), OperationTypes.Outcomes, fractures.toDF, Path(fallConfig.output.root))
     }
     diagnoses.unpersist()
     liberalActs.unpersist()
@@ -106,7 +107,7 @@ object FallMain extends Main with FractureCodes {
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
     val metadataJson: String = metadata.toJsonString()
 
-    new PrintWriter("metadata.json") {
+    new PrintWriter("metadata_fall_" + format.format(startTimestamp) + ".json") {
       write(metadataJson)
       close()
     }

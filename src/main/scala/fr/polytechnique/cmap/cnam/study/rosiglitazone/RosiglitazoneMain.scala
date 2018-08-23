@@ -29,6 +29,7 @@ object RosiglitazoneMain extends Main {
 
   def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[_]] = {
 
+    val format = new java.text.SimpleDateFormat("yyyy_MM_dd_HH_mm_ss")
     val startTimestamp = new java.util.Date()
     import sqlContext.implicits._
     import PatientFilters._
@@ -210,7 +211,7 @@ object RosiglitazoneMain extends Main {
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
     val metadataJson: String = metadata.toJsonString()
 
-    new PrintWriter("metadata_rosiglitazone_" + startTimestamp.toString + ".json") {
+    new PrintWriter("metadata_rosiglitazone_" + format.format(startTimestamp) + ".json") {
       write(metadataJson)
       close()
     }

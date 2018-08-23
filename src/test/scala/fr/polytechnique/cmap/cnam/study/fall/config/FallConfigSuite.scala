@@ -19,14 +19,7 @@ class FallConfigSuite extends FlatSpec{
   )
 
   val outputPaths = OutputPaths(
-    root = "target/test/output",
-    patients = "target/test/output/patients",
-    flatEvents = "target/test/output/flat_events",
-    coxFeatures = "target/test/output/cox_features",
-    ltsccsFeatures = "target/test/output/ltsccs_features",
-    mlppFeatures = "target/test/output/mlpp_features",
-    outcomes = "target/test/output/outcomes/fractures",
-    exposures = "target/test/output/exposures"
+    root = "target/test/output"
   )
   "load" should "load default config file" in {
     //Given
