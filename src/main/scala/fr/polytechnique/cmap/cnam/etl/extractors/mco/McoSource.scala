@@ -73,5 +73,5 @@ trait McoSource extends ColumnNames {
     }
   }
 
-  def prepareDF(df: DataFrame): DataFrame = df.estimateStayStartTime
+  def estimateStayStartTime(mco: DataFrame): DataFrame = mco.estimateStayStartTime
 }

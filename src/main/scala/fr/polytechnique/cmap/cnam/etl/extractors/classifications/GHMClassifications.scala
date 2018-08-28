@@ -16,9 +16,13 @@ object GHMClassifications extends McoEventRowExtractor{
       return mco.sqlContext.sparkSession.emptyDataset[Event[Classification]]
     }
 
-    val df = prepareDF(mco)
+    val df = estimateStayStartTime(mco)
     df.flatMap { r =>
       eventFromRow[Classification](r, GHMClassification, ColNames.GHM, ghmCodes.toSeq)
     }.distinct()
   }
+
+  override def extractors: List[McoRowExtractor] = ???
+
+  override def specificCols: List[String] = ???
 }
