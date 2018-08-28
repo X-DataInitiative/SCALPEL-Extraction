@@ -13,7 +13,7 @@ class Diagnoses(config: DiagnosesConfig) {
       sources.irImb.get,
       config.imbCodes
     )
-    val mcoDiagnoses = McoDiagnoses(config.dpCodes, config.drCodes, config.daCodes).extract(sources.mco.get)
+    val mcoDiagnoses = McoDiagnoses(config.dpCodes, config.drCodes, config.daCodes).extract[Diagnosis](sources.mco.get)
 
     unionDatasets(imbDiagnoses, mcoDiagnoses).distinct()
   }

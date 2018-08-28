@@ -1,9 +1,11 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.mco
 
 import java.sql.Timestamp
-import org.apache.spark.sql.{DataFrame, Dataset, Row, functions}
+import org.apache.spark.sql._
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.EventRowExtractor
+import scala.reflect.ClassTag
+import scala.reflect.runtime.universe.TypeTag
 
 trait McoEventRowExtractor extends EventRowExtractor with McoSource {
 
@@ -15,9 +17,15 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
 
   def extractors: List[McoRowExtractor]
 
-  def specificCols: List[String]
+  def extractorCols: List[String]
 
-  val inputCols: List[String] = List(ColNames.PatientID, ColNames.EtaNum, ColNames.RsaNum, ColNames.Year) ++ specificCols
+  val inputCols: Seq[String] = Seq(
+    ColNames.PatientID,
+    ColNames.EtaNum,
+    ColNames.RsaNum,
+    ColNames.Year,
+    NewColumns.EstimatedStayStart
+  ) ++ extractorCols
 
   override def extractPatientId(r: Row): String = {
     r.getAs[String](ColNames.PatientID)
@@ -51,9 +59,10 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
     )
   }
 
-  def extract[A](mco: DataFrame): Dataset[Event[A]] =
+  def extract[A <: AnyEvent : ClassTag : TypeTag](mco: DataFrame): Dataset[Event[A]] = {
+    import mco.sqlContext.implicits._
     mco.estimateStayStartTime
-      .select(specificCols.map(functions.col): _*)
+      .select(inputCols.map(functions.col): _*)
       .flatMap { r =>
         lazy val patientId = extractPatientId(r)
         lazy val groupId = extractGroupId(r)
@@ -68,4 +77,6 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
           )
         )
       }.distinct
+  }
+
 }

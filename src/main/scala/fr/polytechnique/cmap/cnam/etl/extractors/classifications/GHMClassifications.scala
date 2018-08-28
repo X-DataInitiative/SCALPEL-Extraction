@@ -24,5 +24,5 @@ object GHMClassifications extends McoEventRowExtractor{
 
   override def extractors: List[McoRowExtractor] = ???
 
-  override def specificCols: List[String] = ???
+  override def extractorCols: List[String] = ???
 }

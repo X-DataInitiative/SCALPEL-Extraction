@@ -6,7 +6,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoEventRowExtractor
 
 private[acts] case class McoMedicalActs(cimCodes: Seq[String], ccamCodes: Seq[String]) extends McoEventRowExtractor {
 
-  override def specificCols: List[String] = List(ColNames.DP, ColNames.CCAM)
+  override def extractorCols: List[String] = List(ColNames.DP, ColNames.CCAM)
 
   def extract(
     mco: DataFrame,

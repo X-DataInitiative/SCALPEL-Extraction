@@ -28,5 +28,5 @@ private[diagnoses] case class McoDiagnoses(
     McoRowExtractor(ColNames.DR, drCodes, LinkedDiagnosis),
     McoRowExtractor(ColNames.DA, daCodes, AssociatedDiagnosis))
 
-  override def specificCols: List[String] = List(ColNames.DA, ColNames.DP, ColNames.DR)
+  override def extractorCols: List[String] = List(ColNames.DA, ColNames.DP, ColNames.DR)
 }
