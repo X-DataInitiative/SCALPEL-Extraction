@@ -5,10 +5,10 @@ import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoEventRowExtractor
 
 
-object GHMClassifications extends McoEventRowExtractor{
+case class GHMClassifications(ghmCodes: Seq[String]) extends McoEventRowExtractor {
   def extract(
-      mco: DataFrame,
-      ghmCodes: Set[String]): Dataset[Event[Classification]] = {
+    mco: DataFrame,
+    ghmCodes: Set[String]): Dataset[Event[Classification]] = {
 
     import mco.sqlContext.implicits._
 
@@ -22,7 +22,11 @@ object GHMClassifications extends McoEventRowExtractor{
     }.distinct()
   }
 
-  override def extractors: List[McoRowExtractor] = ???
+  override def extractors: List[McoRowExtractor] = List(McoRowExtractor(ColNames.GHM, ghmCodes, GHMClassification))
 
-  override def extractorCols: List[String] = ???
+  override def extractorCols: List[String] = List(ColNames.GHM)
+
+  def extract(
+    mco: DataFrame): Dataset[Event[Classification]] = super
+    .extract[Classification](mco)
 }

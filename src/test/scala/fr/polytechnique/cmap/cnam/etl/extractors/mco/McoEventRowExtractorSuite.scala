@@ -6,7 +6,7 @@ import org.scalatest.FlatSpec
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, EventBuilder, EventCategory}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class McoEventRowExtractorSuite extends FlatSpec with McoEventRowExtractor {
+trait McoEventRowExtractorSuite extends FlatSpec with McoEventRowExtractor {
 
   "extractPatientId" should "return the patientID value of a row" in {
 

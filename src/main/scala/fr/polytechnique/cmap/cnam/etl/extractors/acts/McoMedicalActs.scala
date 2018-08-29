@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import org.apache.spark.sql.{DataFrame, Dataset, functions}
-import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.events.{MedicalAct, _}
 import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoEventRowExtractor
 
 private[acts] case class McoMedicalActs(cimCodes: Seq[String], ccamCodes: Seq[String]) extends McoEventRowExtractor {
@@ -29,4 +29,7 @@ private[acts] case class McoMedicalActs(cimCodes: Seq[String], ccamCodes: Seq[St
 
   override def extractors: List[McoRowExtractor] = List(McoRowExtractor(ColNames.DP, cimCodes, McoCIM10Act),
     McoRowExtractor(ColNames.CCAM, ccamCodes, McoCCAMAct))
+
+  def extract(
+    mco: DataFrame): Dataset[Event[MedicalAct]] = super.extract[MedicalAct](mco)
 }

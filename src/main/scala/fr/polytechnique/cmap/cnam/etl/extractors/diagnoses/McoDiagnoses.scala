@@ -29,4 +29,7 @@ private[diagnoses] case class McoDiagnoses(
     McoRowExtractor(ColNames.DA, daCodes, AssociatedDiagnosis))
 
   override def extractorCols: List[String] = List(ColNames.DA, ColNames.DP, ColNames.DR)
+
+  def extract(
+    mco: DataFrame): Dataset[Event[Diagnosis]] = super.extract[Diagnosis](mco)
 }

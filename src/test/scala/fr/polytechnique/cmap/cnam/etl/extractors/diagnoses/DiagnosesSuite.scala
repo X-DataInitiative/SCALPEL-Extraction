@@ -17,9 +17,9 @@ class DiagnosesSuite extends SharedContext {
       mco = Some(mco),
       irImb = Some(irImb)
     )
-    val expectedMco = McoDiagnoses.extract(
-      mco, config.dpCodes, config.drCodes, config.daCodes
-    )
+    val expectedMco = McoDiagnoses(
+      config.dpCodes, config.drCodes, config.daCodes
+    ).extract(mco)
     val expectedImb = ImbDiagnoses.extract(irImb, config.imbCodes)
 
     // Then

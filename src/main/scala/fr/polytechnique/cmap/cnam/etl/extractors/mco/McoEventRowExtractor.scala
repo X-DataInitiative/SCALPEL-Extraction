@@ -59,7 +59,7 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
     )
   }
 
-  def extract[A <: AnyEvent : ClassTag : TypeTag](mco: DataFrame): Dataset[Event[A]] = {
+  protected def extract[A <: AnyEvent : ClassTag : TypeTag](mco: DataFrame): Dataset[Event[A]] = {
     import mco.sqlContext.implicits._
     mco.estimateStayStartTime
       .select(inputCols.map(functions.col): _*)

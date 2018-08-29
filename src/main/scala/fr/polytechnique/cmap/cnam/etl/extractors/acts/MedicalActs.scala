@@ -13,7 +13,7 @@ class MedicalActs(config: MedicalActsConfig) {
     val mcoActs = McoMedicalActs(
       config.mcoCIMCodes,
       config.mcoCCAMCodes
-    ).extract[MedicalAct](
+    ).extract(
       sources.mco.get
     )
 
