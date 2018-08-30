@@ -218,6 +218,50 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
     assertDFs(result, expected)
   }
 
+  "getTrackLosses" should "return the correct tracklosses with parameter endThresholdGc = 120 days, endThresholdGc = 30 days" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input = Seq(
+      ("Patient_A", "PIOGLITAZONE", makeTS(2007,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), "GC"),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  5, 1)), Some(3.0), "NGC"),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), Some(makeTS(2009,  1, 1)), Some(8.0), "GC"),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), Some(makeTS(2009,  6, 1)), Some(5.0), "GC"),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1), Some(makeTS(2009,  8, 1)), Some(2.0), "GC"),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), Some(makeTS(2009,  9, 1)), Some(1.0), "GC"),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), Some(makeTS(2010,  3, 1)), Some(6.0), "GC"),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), Some(makeTS(2010,  4, 1)), Some(1.0), "GC"),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1), None, None, "GC"),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), Some(makeTS(2008, 12, 1)), Some(6.0), "GC"),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), Some(makeTS(2009, 11, 1)), Some(11.0), "NGC"),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1), Some(makeTS(2009, 12, 1)), Some(1.0), "GC"),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1), None, None, "NGC"),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), "NGC"),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  4, 1)), Some(1.0), "NGC"),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), Some(makeTS(2008,  5, 1)), Some(1.0), "GC"),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  5, 1), None, None, "GC")
+    ).toDF(PatientID, Value, Start, "nextDate", "delta", "dosage")
+
+    val expected = Seq(
+      ("Patient_A", "PIOGLITAZONE", makeTS(2006,  12, 31), makeTS(2008,  2, 1)),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), makeTS(2008,  5, 1)),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), makeTS(2009,  1, 1)),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), makeTS(2009,  9, 1)),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), makeTS(2010,  4, 1)),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008,  5, 31), makeTS(2008, 12, 1)),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), makeTS(2009, 12, 1)),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2007,  12, 31), makeTS(2008,  2, 1)),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), makeTS(2008,  5, 1))
+    ).toDF(PatientID, Value, Start, TracklossDate)
+
+    // When
+    import mockInstance.InnerImplicits
+    val result = input.withNextDate.getTracklosses(endThresholdGc = 120.days, endThresholdNgc = 30.days)
+
+    // Then
+    assertDFs(result, expected)
+  }
 
   "withExposureEnd" should "add a column with the end of the exposures (end delay = 0)" in {
     val sqlCtx = sqlContext

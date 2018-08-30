@@ -22,16 +22,12 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       innerData
         .withColumn("rank", row_number().over(orderedWindow)) // This is used to find the first line of the window
         //.withColumn("previousDate", lag(col(Start), 1).over(orderedWindow))
+        .withColumn("startWithThreshold", when(col("dosage") === "GC", col(Start).addPeriod(endThresholdGc)).otherwise(col(Start).addPeriod(endThresholdNgc)))
         .where(
-        (col("nextDate").isNull || // The last line of the ordered window (lead(col("start")) == null)
+          (col("nextDate").isNull) || // The last line of the ordered window (lead(col("start")) == null)
           (col("rank") === 1) || // The first line of the ordered window
-          ((col(Start).addPeriod(
-            if (col("dosage") == "GC")
-              endThresholdGc
-            else
-              endThresholdNgc) < col("nextDate")))
-          )
-      )
+          (col("startWithThreshold") < col("nextDate"))
+        )
 
         .withColumn(Start, when(col("rank") === 1, col(Start).subPeriod(1.day)).otherwise(col(Start)))
         .select(col(PatientID), col(Value), col(Start))
