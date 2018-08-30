@@ -18,14 +18,18 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
 
     def withNextDate: DataFrame = innerData.withColumn("nextDate", lead(col(Start), 1).over(orderedWindow))
 
-    def getTracklosses(endThreshold: Period = 4.months): DataFrame = {
+    def getTracklosses(endThresholdGc: Period = 4.months, endThresholdNgc: Period = 4.months): DataFrame = {
       innerData
         .withColumn("rank", row_number().over(orderedWindow)) // This is used to find the first line of the window
         //.withColumn("previousDate", lag(col(Start), 1).over(orderedWindow))
         .where(
         (col("nextDate").isNull || // The last line of the ordered window (lead(col("start")) == null)
           (col("rank") === 1) || // The first line of the ordered window
-          ((col(Start).addPeriod(endThreshold) < col("nextDate")))
+          ((col(Start).addPeriod(
+            if (col("dosage") == "GC")
+              endThresholdGc
+            else
+              endThresholdNgc) < col("nextDate")))
           )
       )
 
@@ -90,7 +94,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       .withNextDate
       .persist()
 
-    val tracklosses = eventsWithDelta.getTracklosses(endThreshold.get)
+    val tracklosses = eventsWithDelta.getTracklosses(endThreshold.get, endThreshold.get)
 
     val result = eventsWithDelta
       .withExposureEnd(tracklosses, endDelay.get)
