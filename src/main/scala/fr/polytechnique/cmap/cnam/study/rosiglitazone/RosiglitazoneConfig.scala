@@ -84,7 +84,8 @@ object RosiglitazoneConfig extends ConfigLoader with RosiglitazoneStudyCodes {
     purchasesWindow = purchasesWindow,
 
     periodStrategy = ExposurePeriodStrategy.Unlimited,
-    endThreshold = None,
+    endThresholdGc = None,
+    endThresholdNgc = None,
     endDelay = None,
 
     weightAggStrategy = WeightAggStrategy.NonCumulative,

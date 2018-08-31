@@ -42,7 +42,8 @@ class ExposuresTransformerConfig(
 
   // Idea for the future: the following blocks could evolve into two ADTs (pureconfig supports it)
   val periodStrategy: ExposurePeriodStrategy,
-  val endThreshold: Option[Period],
+  val endThresholdGc: Option[Period],
+  val endThresholdNgc: Option[Period],
   val endDelay: Option[Period],
 
   val weightAggStrategy: WeightAggStrategy,
@@ -60,7 +61,8 @@ object ExposuresTransformerConfig {
       purchasesWindow: Period = 6.months,
 
       periodStrategy: ExposurePeriodStrategy = ExposurePeriodStrategy.Unlimited,
-      endThreshold: Option[Period] = Some(4.months),
+      endThresholdGc: Option[Period] = Some(4.months),
+      endThresholdNgc: Option[Period] = Some(4.months),
       endDelay: Option[Period] = Some(0.months),
 
       weightAggStrategy: WeightAggStrategy = WeightAggStrategy.NonCumulative,
@@ -77,7 +79,8 @@ object ExposuresTransformerConfig {
       purchasesWindow,
 
       periodStrategy,
-      endThreshold,
+      endThresholdGc,
+      endThresholdNgc,
       endDelay,
 
       weightAggStrategy,

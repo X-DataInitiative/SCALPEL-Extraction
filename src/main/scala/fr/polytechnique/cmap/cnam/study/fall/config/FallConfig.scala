@@ -65,14 +65,16 @@ object FallConfig extends FallConfigLoader with FractureCodes {
       override val minPurchases: Int = 1,
       override val startDelay: Period = 0.months,
       override val purchasesWindow: Period = 0.months,
-      override val endThreshold: Option[Period] = Some(60.days),
+      override val endThresholdGc: Option[Period] = Some(60.days),
+      override val endThresholdNgc: Option[Period] = Some(60.days),
       override val endDelay: Option[Period] = Some(30.days)) extends ExposuresTransformerConfig (
 
     startDelay = startDelay,
     minPurchases = minPurchases,
     purchasesWindow = purchasesWindow,
     periodStrategy = ExposurePeriodStrategy.Limited,
-    endThreshold = endThreshold,
+    endThresholdGc = endThresholdGc,
+    endThresholdNgc = endThresholdNgc,
     endDelay = endDelay,
     weightAggStrategy = WeightAggStrategy.NonCumulative,
     cumulativeExposureWindow = Some(0),
