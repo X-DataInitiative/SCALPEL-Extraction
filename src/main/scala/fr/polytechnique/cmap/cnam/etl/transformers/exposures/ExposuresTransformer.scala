@@ -48,7 +48,7 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
     import input.sqlContext.implicits._
 
     input.toDF
-      .withStartEnd(minPurchases, startDelay, purchasesWindow, endThreshold, endDelay)
+      .withStartEnd(minPurchases, startDelay, purchasesWindow, endThreshold, endThreshold, endDelay)
       .where(col(ExposureStart) =!= col(ExposureEnd)) // This also removes rows where exposureStart = null
       .aggregateWeight(
         cumulativeExposureWindow,

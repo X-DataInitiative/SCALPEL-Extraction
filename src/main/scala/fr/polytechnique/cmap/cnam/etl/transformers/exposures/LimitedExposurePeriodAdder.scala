@@ -22,7 +22,8 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       innerData
         .withColumn("rank", row_number().over(orderedWindow)) // This is used to find the first line of the window
         //.withColumn("previousDate", lag(col(Start), 1).over(orderedWindow))
-        .withColumn("startWithThreshold", when(col("dosage") === "GC", col(Start).addPeriod(endThresholdGc)).otherwise(col(Start).addPeriod(endThresholdNgc)))
+        .withColumn("startWithThreshold",
+        when(col("weight") === 1, col(Start).addPeriod(endThresholdGc)).otherwise(col(Start).addPeriod(endThresholdNgc)))
         .where(
           (col("nextDate").isNull) || // The last line of the ordered window (lead(col("start")) == null)
           (col("rank") === 1) || // The first line of the ordered window
@@ -80,8 +81,9 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       minPurchases: Int = 2,
       startDelay: Period = 3.months,
       purchasesWindow: Period = 4.months,
-      endThreshold: Option[Period] = Some(4.months),
-      endDelay: Option[Period] = Some(0.months))
+      endThresholdGc: Option[Period] = Some(4.months),
+      endDelay: Option[Period] = Some(0.months),
+      endThresholdNgc: Option[Period] = Some(4.months))
     : DataFrame = {
 
     val outputColumns = (data.columns.toList ++ List(ExposureStart, ExposureEnd)).map(col)
@@ -90,7 +92,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       .withNextDate
       .persist()
 
-    val tracklosses = eventsWithDelta.getTracklosses(endThreshold.get, endThreshold.get)
+    val tracklosses = eventsWithDelta.getTracklosses(endThresholdGc.get, endThresholdNgc.get)
 
     val result = eventsWithDelta
       .withExposureEnd(tracklosses, endDelay.get)

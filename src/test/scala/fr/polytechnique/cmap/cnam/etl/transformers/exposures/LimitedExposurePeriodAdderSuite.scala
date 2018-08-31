@@ -60,24 +60,24 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  5, 1)), Some(3.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), Some(makeTS(2009,  1, 1)), Some(8.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), Some(makeTS(2009,  6, 1)), Some(5.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1), Some(makeTS(2009,  8, 1)), Some(1.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), Some(makeTS(2009,  9, 1)), Some(1.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), Some(makeTS(2010,  3, 1)), Some(6.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), Some(makeTS(2010,  4, 1)), Some(1.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1), None, None, "GC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), Some(makeTS(2008, 12, 1)), Some(6.0), "GC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), Some(makeTS(2009, 11, 1)), Some(11.0), "GC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1), Some(makeTS(2009, 12, 1)), Some(1.0), "GC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1), None, None, "GC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), "GC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  3, 1)), Some(1.0), "GC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1)), Some(1.0), "GC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), None, None, "GC")
-    ).toDF(PatientID, Value, Start, "nextDate", "delta", "dosage")
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  5, 1)), Some(3.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), Some(makeTS(2009,  1, 1)), Some(8.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), Some(makeTS(2009,  6, 1)), Some(5.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1), Some(makeTS(2009,  8, 1)), Some(1.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), Some(makeTS(2009,  9, 1)), Some(1.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), Some(makeTS(2010,  3, 1)), Some(6.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), Some(makeTS(2010,  4, 1)), Some(1.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1), None, None, 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), Some(makeTS(2008, 12, 1)), Some(6.0), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), Some(makeTS(2009, 11, 1)), Some(11.0), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1), Some(makeTS(2009, 12, 1)), Some(1.0), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1), None, None, 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  3, 1)), Some(1.0), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1)), Some(1.0), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), None, None, 1)
+    ).toDF(PatientID, Value, Start, "nextDate", "delta", Weight)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2007,  12, 31), makeTS(2008,  5, 1)),
@@ -103,24 +103,24 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", "PIOGLITAZONE", makeTS(2007,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  5, 1)), Some(3.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), Some(makeTS(2009,  1, 1)), Some(8.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), Some(makeTS(2009,  6, 1)), Some(5.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1), Some(makeTS(2009,  8, 1)), Some(1.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), Some(makeTS(2009,  9, 1)), Some(1.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), Some(makeTS(2010,  3, 1)), Some(6.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), Some(makeTS(2010,  4, 1)), Some(1.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1), None, None, "GC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), Some(makeTS(2008, 12, 1)), Some(6.0), "GC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), Some(makeTS(2009, 11, 1)), Some(11.0), "GC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1), Some(makeTS(2009, 12, 1)), Some(1.0), "GC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1), None, None, "GC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), "GC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  3, 1)), Some(1.0), "GC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1)), Some(1.0), "GC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), None, None, "GC")
-    ).toDF(PatientID, Value, Start, "nextDate", "delta", "dosage")
+      ("Patient_A", "PIOGLITAZONE", makeTS(2007,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  5, 1)), Some(3.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), Some(makeTS(2009,  1, 1)), Some(8.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), Some(makeTS(2009,  6, 1)), Some(5.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1), Some(makeTS(2009,  8, 1)), Some(1.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), Some(makeTS(2009,  9, 1)), Some(1.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), Some(makeTS(2010,  3, 1)), Some(6.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), Some(makeTS(2010,  4, 1)), Some(1.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1), None, None, 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), Some(makeTS(2008, 12, 1)), Some(6.0), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), Some(makeTS(2009, 11, 1)), Some(11.0), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1), Some(makeTS(2009, 12, 1)), Some(1.0), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1), None, None, 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  3, 1)), Some(1.0), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1)), Some(1.0), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), None, None, 1)
+    ).toDF(PatientID, Value, Start, "nextDate", "delta", Weight)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2006,  12, 31), makeTS(2008,  5, 1)),
@@ -146,24 +146,24 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  5, 1)), Some(3.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), Some(makeTS(2009,  1, 1)), Some(8.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), Some(makeTS(2009,  6, 1)), Some(5.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1), Some(makeTS(2009,  8, 1)), Some(2.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), Some(makeTS(2009,  9, 1)), Some(1.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), Some(makeTS(2010,  3, 1)), Some(6.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), Some(makeTS(2010,  4, 1)), Some(1.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1), None, None, "NGC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), Some(makeTS(2008, 12, 1)), Some(6.0), "NGC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), Some(makeTS(2009, 11, 1)), Some(11.0), "NGC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1), Some(makeTS(2009, 12, 1)), Some(1.0), "NGC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1), None, None, "NGC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), "NGC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  3, 1)), Some(1.0), "NGC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1)), Some(1.0), "NGC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), None, None, "NGC")
-    ).toDF(PatientID, Value, Start, "nextDate", "delta", "dosage")
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  5, 1)), Some(3.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), Some(makeTS(2009,  1, 1)), Some(8.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), Some(makeTS(2009,  6, 1)), Some(5.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1), Some(makeTS(2009,  8, 1)), Some(2.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), Some(makeTS(2009,  9, 1)), Some(1.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), Some(makeTS(2010,  3, 1)), Some(6.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), Some(makeTS(2010,  4, 1)), Some(1.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1), None, None, 2),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), Some(makeTS(2008, 12, 1)), Some(6.0), 2),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), Some(makeTS(2009, 11, 1)), Some(11.0), 2),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1), Some(makeTS(2009, 12, 1)), Some(1.0), 2),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1), None, None, 2),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), 2),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  3, 1)), Some(1.0), 2),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), Some(makeTS(2008,  4, 1)), Some(1.0), 2),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), None, None, 2)
+    ).toDF(PatientID, Value, Start, "nextDate", "delta", Weight)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2007,  12, 31), makeTS(2008,  2, 1)),
@@ -191,16 +191,16 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  2, 8)), Some(3.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 8), Some(makeTS(2009,  1, 1)), Some(8.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), Some(makeTS(2009,  1, 6)), Some(5.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 6), Some(makeTS(2009,  8, 1)), Some(2.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), Some(makeTS(2009,  8, 12)), Some(1.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 12), Some(makeTS(2010,  3, 1)), Some(6.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), Some(makeTS(2010,  3, 2)), Some(1.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 2), None, None, "NGC")
-    ).toDF(PatientID, Value, Start, "nextDate", "delta", "dosage")
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  2, 8)), Some(3.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 8), Some(makeTS(2009,  1, 1)), Some(8.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), Some(makeTS(2009,  1, 6)), Some(5.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 6), Some(makeTS(2009,  8, 1)), Some(2.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), Some(makeTS(2009,  8, 12)), Some(1.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 12), Some(makeTS(2010,  3, 1)), Some(6.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), Some(makeTS(2010,  3, 2)), Some(1.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 2), None, None, 2)
+    ).toDF(PatientID, Value, Start, "nextDate", "delta", Weight)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2007,  12, 31), makeTS(2008,  2, 8)),
@@ -224,24 +224,24 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", "PIOGLITAZONE", makeTS(2007,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  5, 1)), Some(3.0), "NGC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), Some(makeTS(2009,  1, 1)), Some(8.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), Some(makeTS(2009,  6, 1)), Some(5.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1), Some(makeTS(2009,  8, 1)), Some(2.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), Some(makeTS(2009,  9, 1)), Some(1.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), Some(makeTS(2010,  3, 1)), Some(6.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), Some(makeTS(2010,  4, 1)), Some(1.0), "GC"),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1), None, None, "GC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), Some(makeTS(2008, 12, 1)), Some(6.0), "GC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), Some(makeTS(2009, 11, 1)), Some(11.0), "NGC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1), Some(makeTS(2009, 12, 1)), Some(1.0), "GC"),
-      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1), None, None, "NGC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), "NGC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  4, 1)), Some(1.0), "NGC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), Some(makeTS(2008,  5, 1)), Some(1.0), "GC"),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  5, 1), None, None, "GC")
-    ).toDF(PatientID, Value, Start, "nextDate", "delta", "dosage")
+      ("Patient_A", "PIOGLITAZONE", makeTS(2007,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  5, 1)), Some(3.0), 2),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), Some(makeTS(2009,  1, 1)), Some(8.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), Some(makeTS(2009,  6, 1)), Some(5.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1), Some(makeTS(2009,  8, 1)), Some(2.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), Some(makeTS(2009,  9, 1)), Some(1.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), Some(makeTS(2010,  3, 1)), Some(6.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), Some(makeTS(2010,  4, 1)), Some(1.0), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1), None, None, 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), Some(makeTS(2008, 12, 1)), Some(6.0), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), Some(makeTS(2009, 11, 1)), Some(11.0), 2),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1), Some(makeTS(2009, 12, 1)), Some(1.0), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1), None, None, 2),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(1.0), 2),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), Some(makeTS(2008,  4, 1)), Some(1.0), 2),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), Some(makeTS(2008,  5, 1)), Some(1.0), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  5, 1), None, None, 1)
+    ).toDF(PatientID, Value, Start, "nextDate", "delta", Weight)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2006,  12, 31), makeTS(2008,  2, 1)),
@@ -503,24 +503,24 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1)),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1)),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1)),
-      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1)),
-      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1)),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1)),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1)),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1)),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1))
-    ).toDF(PatientID, Value, Start)
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), 1)
+    ).toDF(PatientID, Value, Start, Weight)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(makeTS(2008,  5, 1))),
@@ -538,7 +538,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // When
     val instance = new LimitedExposurePeriodAdder(input)
-    val result = instance.withStartEnd()
+    val result = instance.withStartEnd().drop(Weight)
 
     // Then
     assertDFs(result, expected)
@@ -551,24 +551,24 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1)),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1)),
-      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1)),
-      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1)),
-      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1)),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1)),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1)),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1)),
-      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1))
-    ).toDF(PatientID, Value, Start)
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008,  6, 1), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2008, 12, 1), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 11, 1), 1),
+      ("Patient_A", "SULFONYLUREA", makeTS(2009, 12, 1), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  1, 1), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  2, 1), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  3, 1), 1),
+      ("Patient_B", "PIOGLITAZONE", makeTS(2008,  4, 1), 1)
+    ).toDF(PatientID, Value, Start, Weight)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(makeTS(2008,  5, 1))),
@@ -585,7 +585,9 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // When
     val instance = new LimitedExposurePeriodAdder(input)
-    val result = instance.withStartEnd(startDelay = 90.days, purchasesWindow = 120.days, endThreshold = Some(120.days))
+    val result = instance
+      .withStartEnd(startDelay = 90.days, purchasesWindow = 120.days, endThresholdGc = Some(120.days))
+      .drop(Weight)
 
     // Then
     assertDFs(result, expected)
@@ -598,16 +600,16 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1))
-    ).toDF(PatientID, Value, Start)
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  5, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  1, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  6, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  8, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2009,  9, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  3, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2010,  4, 1), 1)
+    ).toDF(PatientID, Value, Start, Weight)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  2, 1)), Some(makeTS(2008,  2, 1))),
@@ -618,7 +620,9 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // When
     val instance = new LimitedExposurePeriodAdder(input)
-    val result = instance.withStartEnd(purchasesWindow = 50.days, endThreshold = Some(50.days))
+    val result = instance
+      .withStartEnd(purchasesWindow = 50.days, endThresholdGc = Some(50.days))
+      .drop(Weight)
 
     // Then
     assertDFs(result, expected)
@@ -631,11 +635,11 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  8, 1)),
-      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  10, 1))
-    ).toDF(PatientID, Value, Start)
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  2, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  8, 1), 1),
+      ("Patient_A", "PIOGLITAZONE", makeTS(2008,  10, 1), 1)
+    ).toDF(PatientID, Value, Start, Weight)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008,  1, 1), Some(makeTS(2008,  1, 1)), Some(makeTS(2008,  2, 1))),
@@ -644,7 +648,9 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // When
     val instance = new LimitedExposurePeriodAdder(input)
-    val result = instance.withStartEnd(purchasesWindow = 100.days, minPurchases = 1, endThreshold = Some(100.days))
+    val result = instance
+      .withStartEnd(purchasesWindow = 100.days, minPurchases = 1, endThresholdGc = Some(100.days))
+      .drop(Weight)
 
     // Then
     assertDFs(result, expected)

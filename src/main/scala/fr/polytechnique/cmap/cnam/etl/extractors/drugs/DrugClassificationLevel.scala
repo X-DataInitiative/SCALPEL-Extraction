@@ -10,6 +10,7 @@ trait DrugClassificationLevel extends Serializable {
 }
 
 object DrugClassificationLevel{
+
   def fromString(level: String) : DrugClassificationLevel =
     level match {
       case "Therapeutic" => TherapeuticLevel

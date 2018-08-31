@@ -8,6 +8,6 @@ object TherapeuticLevel extends DrugClassificationLevel {
     val filteredFamilies = families
       .filter(family => isInFamily(List(family), purchase.CIP13))
       .map(_.name)
-    filteredFamilies.map(family => Drug(purchase.patientID, family, 0, purchase.eventDate))
+    filteredFamilies.map(family => Drug(purchase.patientID, family, purchase.conditioning, purchase.eventDate))
   }
 }
