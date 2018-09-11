@@ -9,24 +9,11 @@ private[diagnoses] case class McoDiagnoses(
   drCodes: Seq[String],
   daCodes: Seq[String]) extends McoEventRowExtractor {
 
-  def extract(
-    mco: DataFrame,
-    dpCodes: Seq[String],
-    drCodes: Seq[String],
-    daCodes: Seq[String]): Dataset[Event[Diagnosis]] = {
-
-    import mco.sqlContext.implicits._
-    val df = estimateStayStartTime(mco)
-    df.flatMap { r =>
-      eventFromRow[Diagnosis](r, MainDiagnosis, ColNames.DP, dpCodes) ++
-        eventFromRow[Diagnosis](r, LinkedDiagnosis, ColNames.DR, drCodes) ++
-        eventFromRow[Diagnosis](r, AssociatedDiagnosis, ColNames.DA, daCodes)
-    }.distinct
-  }
-
-  override def extractors: List[McoRowExtractor] = List(McoRowExtractor(ColNames.DP, dpCodes, MainDiagnosis),
+  override def extractors: List[McoRowExtractor] = List(
+    McoRowExtractor(ColNames.DP, dpCodes, MainDiagnosis),
     McoRowExtractor(ColNames.DR, drCodes, LinkedDiagnosis),
-    McoRowExtractor(ColNames.DA, daCodes, AssociatedDiagnosis))
+    McoRowExtractor(ColNames.DA, daCodes, AssociatedDiagnosis)
+  )
 
   override def extractorCols: List[String] = List(ColNames.DA, ColNames.DP, ColNames.DR)
 

@@ -1,9 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.mco
 
+import org.scalatest.FlatSpec
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types.{StructField, _}
-import org.scalatest.FlatSpec
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, EventBuilder, EventCategory}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 trait McoEventRowExtractorSuite extends FlatSpec with McoEventRowExtractor {
@@ -87,34 +86,4 @@ trait McoEventRowExtractorSuite extends FlatSpec with McoEventRowExtractor {
     assert(result == expected)
   }
 
-  "eventFromRow" should "return an event if a code is found in a particular column" in {
-
-    object SomeEvent extends SomeEvent
-    trait SomeEvent extends AnyEvent with EventBuilder {
-      override val category: EventCategory[SomeEvent] = "some_event"
-    }
-
-    // Given
-    val codeColumn: ColName = "A_Column"
-    val schema = StructType(
-      StructField(ColNames.PatientID, StringType) ::
-      StructField(codeColumn, StringType) ::
-      StructField(ColNames.EtaNum, StringType) ::
-      StructField(ColNames.RsaNum, StringType) ::
-      StructField(ColNames.Year, IntegerType) ::
-      StructField(NewColumns.EstimatedStayStart, StringType) :: Nil
-    )
-    val codes = List("AAA", "BBB")
-    val inputArray = Array[Any]("Patient_A", "AAA", "1", "2", 3, makeTS(2010, 1, 1))
-    val inputRow = new GenericRowWithSchema(inputArray, schema)
-    val expected = Some(SomeEvent("Patient_A", "1_2_3", "AAA", 0.0, makeTS(2010, 1, 1), None))
-
-    // When
-    val someResult = eventFromRow(inputRow, SomeEvent, codeColumn, codes)
-    val noneResult = eventFromRow(inputRow, SomeEvent, codeColumn, Nil)
-
-    // Then
-    assert(someResult == expected)
-    assert(noneResult.isEmpty)
-  }
 }

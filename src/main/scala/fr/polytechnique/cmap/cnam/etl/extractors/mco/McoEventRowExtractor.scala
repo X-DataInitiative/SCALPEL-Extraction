@@ -9,9 +9,9 @@ import scala.reflect.runtime.universe.TypeTag
 
 trait McoEventRowExtractor extends EventRowExtractor with McoSource {
 
-  type Extractor = Row => Option[String]
+  protected type Extractor = Row => Option[String]
 
-  case class McoRowExtractor(colName: ColName, codes: Seq[String], builder: EventBuilder) {
+  protected case class McoRowExtractor(colName: ColName, codes: Seq[String], builder: EventBuilder) {
     def extract: Extractor = (r: Row) => extractCode(r: Row, colName: ColName, codes: Seq[String])
   }
 
@@ -42,21 +42,6 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
   def extractCode(r: Row, colName: ColName, codes: Seq[String]): Option[String] = {
     val idx = r.fieldIndex(colName)
     codes.find(!r.isNullAt(idx) && r.getString(idx).startsWith(_))
-  }
-
-  def eventFromRow[A <: AnyEvent](
-    r: Row, builder: EventBuilder, colName: ColName, codes: Seq[String]): Option[Event[A]] = {
-
-    val foundCode: Option[String] = extractCode(r, colName, codes)
-
-    foundCode.map(
-      code => {
-        val patientId = extractPatientId(r)
-        val groupId = extractGroupId(r)
-        val eventDate = extractStart(r)
-        builder[A](patientId, groupId, code, extractWeight(r), eventDate, extractEnd(r))
-      }
-    )
   }
 
   protected def extract[A <: AnyEvent : ClassTag : TypeTag](mco: DataFrame): Dataset[Event[A]] = {
