@@ -31,7 +31,7 @@ class McoDiagnosesSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = McoDiagnoses.extract(input, dpCodes, drCodes, dasCodes)
+    val result = McoDiagnoses(dpCodes, drCodes, dasCodes).extract(input)
 
     // Then
     assertDSs(result, expected)

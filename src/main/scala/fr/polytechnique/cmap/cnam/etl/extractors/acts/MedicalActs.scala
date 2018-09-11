@@ -10,10 +10,11 @@ class MedicalActs(config: MedicalActsConfig) {
   def extract(sources: Sources): Dataset[Event[MedicalAct]] = {
     val dcirActs = DcirMedicalActs.extract(sources.dcir.get, config.dcirCodes)
 
-    val mcoActs = McoMedicalActs.extract(
-      sources.mco.get,
+    val mcoActs = McoMedicalActs(
       config.mcoCIMCodes,
       config.mcoCCAMCodes
+    ).extract(
+      sources.mco.get
     )
 
     lazy val mcoCEActs = McoCEMedicalActs.extract(

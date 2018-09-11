@@ -28,7 +28,7 @@ class McoMedicalActsSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = McoMedicalActs.extract(input, cim10Codes, ccamCodes)
+    val result = McoMedicalActs(cim10Codes, ccamCodes).extract(input)
 
     // Then
     assertDSs(result, expected)

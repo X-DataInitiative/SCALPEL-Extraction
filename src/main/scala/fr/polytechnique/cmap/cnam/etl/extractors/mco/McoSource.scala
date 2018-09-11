@@ -9,7 +9,7 @@ import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 
 trait McoSource extends ColumnNames {
 
-  final object ColNames {
+  final object ColNames extends Serializable {
     val PatientID: ColName = "NUM_ENQ"
     val DP: ColName = "MCO_B__DGN_PAL"
     val DR: ColName = "MCO_B__DGN_REL"
@@ -26,7 +26,7 @@ trait McoSource extends ColumnNames {
     val StayEndDate: ColName = "SOR_DAT"
   }
 
-  object NewColumns {
+  object NewColumns extends Serializable {
     val EstimatedStayStart: ColName = "estimated_start"
   }
 
@@ -73,5 +73,5 @@ trait McoSource extends ColumnNames {
     }
   }
 
-  def prepareDF(df: DataFrame): DataFrame = df.estimateStayStartTime
+  def estimateStayStartTime(mco: DataFrame): DataFrame = mco.estimateStayStartTime
 }
