@@ -59,6 +59,10 @@ class FallConfigSuite extends FlatSpec{
                          |  sites {
                          |    sites: ["BodySites"]
                          |  }
+                         |  run_parameters {
+                         |    exposure: true
+                         |    outcome: false
+                         |  }
                          |  """.trim.stripMargin
 
     val expected = defaultConf.copy(
@@ -74,7 +78,9 @@ class FallConfigSuite extends FlatSpec{
       ),
       drugs = defaultConf.drugs.copy(
         level = PharmacologicalLevel
-      )
+      ),
+      runParameters = defaultConf.runParameters
+        .copy(outcome = false)
     )
     //When
     pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(stringConfig), Paths.get(tempPath), true)

@@ -20,7 +20,8 @@ case class FallConfig(
     exposures: ExposureConfig = FallConfig.ExposureConfig(),
     sites: SitesConfig = FallConfig.SitesConfig(),
     patients: FallConfig.PatientsConfig = FallConfig.PatientsConfig(),
-    outcomes: FracturesConfig = FallConfig.FracturesConfig()) extends StudyConfig{
+    outcomes: FracturesConfig = FallConfig.FracturesConfig(),
+    runParameters: FallConfig.RunConfig = FallConfig.RunConfig()) extends StudyConfig{
 
   val base: BaseConfig = FallConfig.BaseConfig
   val medicalActs: MedicalActsConfig = FallConfig.MedicalActsConfig
@@ -88,6 +89,8 @@ object FallConfig extends FallConfigLoader with FractureCodes {
   case class SitesConfig(sites: List[BodySite] = List(BodySites)) {
     val fracturesCodes = BodySite.extractCIM10CodesFromSites(sites)
   }
+
+  case class RunConfig(val outcome: Boolean = true, val exposure: Boolean = true)
 
   /**
     * Reads a configuration file and merges it with the default file.
