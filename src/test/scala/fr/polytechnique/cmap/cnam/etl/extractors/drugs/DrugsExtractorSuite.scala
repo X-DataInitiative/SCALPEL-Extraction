@@ -27,20 +27,20 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
 
     val source = new Sources(irPha = Some(Seq(
-      (Some("9111111111111"), "toto"),
-      (Some("3400935183644"), "toto"),
-      (Some("3400935418487"), "toto"),
-      (Some("3400936889651"), "toto")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      (Some("9111111111111"), "toto", "GC"),
+      (Some("3400935183644"), "toto", "NGC"),
+      (Some("3400935418487"), "toto", "GC"),
+      (Some("3400936889651"), "toto", "GC")
+    ).toDF("PHA_CIP_C13", "PHA_ATC_C07","PHA_CND_TOP")
       .withColumn("molecule_combination", lit(""))
     ), dcir = Some(inputDF))
 
     val expected: Dataset[Purchase] = Seq(
-      Purchase("patient1", "9111111111111", "toto", makeTS(2014, 5, 1)),
-      Purchase("patient2", "3400935183644", "toto", makeTS(2014, 6, 1)),
-      Purchase("patient3", "3400935418487", "toto", makeTS(2014, 7, 1)),
-      Purchase("patient4", "3400935183644", "toto", makeTS(2014, 8, 1)),
-      Purchase("patient8", "3400936889651", "toto", makeTS(2014, 9, 1))
+      Purchase("patient1", "9111111111111", "toto", makeTS(2014, 5, 1), "", 1),
+      Purchase("patient2", "3400935183644", "toto", makeTS(2014, 6, 1), "", 2),
+      Purchase("patient3", "3400935418487", "toto", makeTS(2014, 7, 1), "", 1),
+      Purchase("patient4", "3400935183644", "toto", makeTS(2014, 8, 1), "", 2),
+      Purchase("patient8", "3400936889651", "toto", makeTS(2014, 9, 1), "", 1)
     ).toDS()
 
     val drugConf = DrugsConfig(TherapeuticLevel, List())
@@ -69,17 +69,17 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient2", "Antidepresseurs", 0.0, makeTS(2014, 6, 1)),
-      Drug("patient4", "Antidepresseurs", 0.0, makeTS(2014, 8, 1)),
-      Drug("patient8", "Antidepresseurs", 0.0, makeTS(2014, 9, 1))
+      Drug("patient2", "Antidepresseurs", 1, makeTS(2014, 6, 1)),
+      Drug("patient4", "Antidepresseurs", 1, makeTS(2014, 8, 1)),
+      Drug("patient8", "Antidepresseurs", 1, makeTS(2014, 9, 1))
     ).toDS
 
     val source = new Sources(irPha = Some(Seq(
-      (Some("9111111111111"), "toto"),
-      (Some("3400935183644"), "toto"),
-      (Some("3400935418487"), "toto"),
-      (Some("3400936889651"), "toto")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      (Some("9111111111111"), "toto", "GC"),
+      (Some("3400935183644"), "toto", "GC"),
+      (Some("3400935418487"), "toto", "GC"),
+      (Some("3400936889651"), "toto", "GC")
+    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
       .withColumn("molecule_combination", lit(""))
     ), dcir = Some(inputDF))
 
@@ -105,14 +105,14 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient2", "Neuroleptiques", 0.0, makeTS(2014, 6, 1))
+      Drug("patient2", "Neuroleptiques", 2, makeTS(2014, 6, 1))
     ).toDS
 
     val source = new Sources(irPha = Some(Seq(
-      (Some("9111111111111"), "toto"),
-      (Some("3400935183644"), "toto"),
-      (Some("3400930023648"), "toto")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      (Some("9111111111111"), "toto", "NGC"),
+      (Some("3400935183644"), "toto", "NGC"),
+      (Some("3400930023648"), "toto", "NGC")
+    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
       .withColumn("molecule_combination", lit(""))
     ), dcir = Some(inputDF))
 
@@ -136,14 +136,14 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient1", "Hypnotiques", 0.0, makeTS(2014, 6, 1)),
-      Drug("patient2", "Hypnotiques", 0.0, makeTS(2014, 7, 1))
+      Drug("patient1", "Hypnotiques", 2, makeTS(2014, 6, 1)),
+      Drug("patient2", "Hypnotiques", 1, makeTS(2014, 7, 1))
     ).toDS
 
     val source = new Sources(irPha = Some(Seq(
-      (Some("3400930081143"), "toto"),
-      (Some("3400936099777"), "toto")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      (Some("3400930081143"), "toto", "NGC"),
+      (Some("3400936099777"), "toto", "GC")
+    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
       .withColumn("molecule_combination", lit(""))
     ), dcir = Some(inputDF))
 
@@ -167,14 +167,14 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient1", "Antihypertenseurs", 0.0, makeTS(2014, 6, 1))
+      Drug("patient1", "Antihypertenseurs", 1, makeTS(2014, 6, 1))
     ).toDS
 
 
     val source = new Sources(irPha = Some(Seq(
-      (Some("3400937354004"), "toto"),
-      (Some("3400936099777"), "toto")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      (Some("3400937354004"), "toto", "GC"),
+      (Some("3400936099777"), "toto", "GC")
+    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
       .withColumn("molecule_combination", lit(""))
     ), dcir = Some(inputDF))
 
@@ -206,19 +206,19 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient2", "Antidepresseurs", 0.0, makeTS(2014, 6, 1)),
-      Drug("patient4", "Antidepresseurs", 0.0, makeTS(2014, 8, 1)),
-      Drug("patient8", "Antidepresseurs", 0.0, makeTS(2014, 9, 1)),
-      Drug("patient2", "Neuroleptiques", 0.0, makeTS(2014, 6, 1))
+      Drug("patient2", "Antidepresseurs", 1, makeTS(2014, 6, 1)),
+      Drug("patient4", "Antidepresseurs", 1, makeTS(2014, 8, 1)),
+      Drug("patient8", "Antidepresseurs", 1, makeTS(2014, 9, 1)),
+      Drug("patient2", "Neuroleptiques", 1, makeTS(2014, 6, 1))
     ).toDS
 
     val source = new Sources(irPha = Some(Seq(
-      (Some("9111111111111"), "toto"),
-      (Some("3400935183644"), "N06AA04"),
-      (Some("3400935418487"), "A10BB09"),
-      (Some("3400936889651"), "N06AB03"),
-      (Some("3400930023648"), "N05AX12")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      (Some("9111111111111"), "toto", "GC"),
+      (Some("3400935183644"), "N06AA04", "GC"),
+      (Some("3400935418487"), "A10BB09", "GC"),
+      (Some("3400936889651"), "N06AB03", "GC"),
+      (Some("3400930023648"), "N05AX12", "GC")
+    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
       .withColumn("molecule_combination", lit(""))
     ), dcir = Some(inputDF))
 
@@ -251,19 +251,19 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient2", "Antidepresseurs_Tricycliques", 0.0, makeTS(2014, 6, 1)),
-      Drug("patient4", "Antidepresseurs_Tricycliques", 0.0, makeTS(2014, 8, 1)),
-      Drug("patient8", "Antidepresseurs_ISRS", 0.0, makeTS(2014, 9, 1)),
-      Drug("patient2", "Neuroleptiques_Autres_neuroleptiques", 0.0, makeTS(2014, 6, 1))
+      Drug("patient2", "Antidepresseurs_Tricycliques", 1, makeTS(2014, 6, 1)),
+      Drug("patient4", "Antidepresseurs_Tricycliques", 1, makeTS(2014, 8, 1)),
+      Drug("patient8", "Antidepresseurs_ISRS", 1, makeTS(2014, 9, 1)),
+      Drug("patient2", "Neuroleptiques_Autres_neuroleptiques", 1, makeTS(2014, 6, 1))
     ).toDS
 
     val source = new Sources(irPha = Some(Seq(
-      (Some("9111111111111"), "toto"),
-      (Some("3400935183644"), "N06AA04"),
-      (Some("3400935418487"), "A10BB09"),
-      (Some("3400936889651"), "N06AB03"),
-      (Some("3400930023648"), "N05AX12")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07")
+      (Some("9111111111111"), "toto", "GC"),
+      (Some("3400935183644"), "N06AA04", "GC"),
+      (Some("3400935418487"), "A10BB09", "GC"),
+      (Some("3400936889651"), "N06AB03", "GC"),
+      (Some("3400930023648"), "N05AX12", "GC")
+    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
         .withColumn("molecule_combination", lit(""))
     ), dcir = Some(inputDF))
 
@@ -296,21 +296,21 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient2", "", 0.0, makeTS(2014, 6, 1)),
-      Drug("patient4", "", 0.0, makeTS(2014, 8, 1)),
-      Drug("patient8", "DEXTROPROPOXYPHENE", 0.0, makeTS(2014, 9, 1)),
-      Drug("patient8", "PARACETAMOL", 0.0, makeTS(2014, 9, 1)),
-      Drug("patient8", "CAFEINE", 0.0, makeTS(2014, 9, 1)),
-      Drug("patient2", "INSULINE LISPRO (PROTAMINE)", 0.0, makeTS(2014, 6, 1))
+      Drug("patient2", "", 1, makeTS(2014, 6, 1)),
+      Drug("patient4", "", 1, makeTS(2014, 8, 1)),
+      Drug("patient8", "DEXTROPROPOXYPHENE", 1, makeTS(2014, 9, 1)),
+      Drug("patient8", "PARACETAMOL", 1, makeTS(2014, 9, 1)),
+      Drug("patient8", "CAFEINE", 1, makeTS(2014, 9, 1)),
+      Drug("patient2", "INSULINE LISPRO (PROTAMINE)", 2, makeTS(2014, 6, 1))
     ).toDS
 
     val source = new Sources(irPha = Some(Seq(
-      (Some("9111111111111"), "toto", ""),
-      (Some("3400935183644"), "N06AA04", ""),
-      (Some("3400935418487"), "A10BB09", ""),
-      (Some("3400936889651"), "N06AB03", "DEXTROPROPOXYPHENE_PARACETAMOL_CAFEINE"),
-      (Some("3400930023648"), "N05AX12", "INSULINE LISPRO (PROTAMINE)")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "molecule_combination")
+      (Some("9111111111111"), "toto", "", "GC"),
+      (Some("3400935183644"), "N06AA04", "", "GC"),
+      (Some("3400935418487"), "A10BB09", "", "GC"),
+      (Some("3400936889651"), "N06AB03", "DEXTROPROPOXYPHENE_PARACETAMOL_CAFEINE", "GC"),
+      (Some("3400930023648"), "N05AX12", "INSULINE LISPRO (PROTAMINE)", "NGC")
+    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "molecule_combination", "PHA_CND_TOP")
     ), dcir = Some(inputDF))
 
     val drugConfigAntidepresseurs: DrugConfig = Antidepresseurs
@@ -342,19 +342,19 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient2", "", 0.0, makeTS(2014, 6, 1)),
-      Drug("patient4", "", 0.0, makeTS(2014, 8, 1)),
-      Drug("patient8", "DEXTROPROPOXYPHENE_PARACETAMOL_CAFEINE", 0.0, makeTS(2014, 9, 1)),
-      Drug("patient2", "INSULINE LISPRO (PROTAMINE)", 0.0, makeTS(2014, 6, 1))
+      Drug("patient2", "", 1, makeTS(2014, 6, 1)),
+      Drug("patient4", "", 1, makeTS(2014, 8, 1)),
+      Drug("patient8", "DEXTROPROPOXYPHENE_PARACETAMOL_CAFEINE", 1, makeTS(2014, 9, 1)),
+      Drug("patient2", "INSULINE LISPRO (PROTAMINE)", 1, makeTS(2014, 6, 1))
     ).toDS
 
     val source = new Sources(irPha = Some(Seq(
-      (Some("9111111111111"), "toto", ""),
-      (Some("3400935183644"), "N06AA04", ""),
-      (Some("3400935418487"), "A10BB09", ""),
-      (Some("3400936889651"), "N06AB03", "DEXTROPROPOXYPHENE_PARACETAMOL_CAFEINE"),
-      (Some("3400930023648"), "N05AX12", "INSULINE LISPRO (PROTAMINE)")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "molecule_combination")
+      (Some("9111111111111"), "toto", "", "GC"),
+      (Some("3400935183644"), "N06AA04", "", "GC"),
+      (Some("3400935418487"), "A10BB09", "", "GC"),
+      (Some("3400936889651"), "N06AB03", "DEXTROPROPOXYPHENE_PARACETAMOL_CAFEINE", "GC"),
+      (Some("3400930023648"), "N05AX12", "INSULINE LISPRO (PROTAMINE)", "GC")
+    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "molecule_combination", "PHA_CND_TOP")
     ), dcir = Some(inputDF))
 
     val drugConfigAntidepresseurs: DrugConfig = Antidepresseurs

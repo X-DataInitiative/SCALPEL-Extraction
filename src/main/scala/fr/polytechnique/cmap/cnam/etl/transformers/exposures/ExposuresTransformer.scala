@@ -20,7 +20,8 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
 
   val exposurePeriodStrategy: ExposurePeriodStrategy = config.periodStrategy
   val endDelay: Option[Period] = config.endDelay
-  val endThreshold: Option[Period] = config.endThreshold
+  val endThresholdGc: Option[Period] = config.endThresholdGc
+  val endThresholdNgc: Option[Period] = config.endThresholdNgc
 
   val weightAggStrategy: WeightAggStrategy = config.weightAggStrategy
   val cumulativeExposureWindow: Option[Int] = config.cumulativeExposureWindow
@@ -48,7 +49,7 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
     import input.sqlContext.implicits._
 
     input.toDF
-      .withStartEnd(minPurchases, startDelay, purchasesWindow, endThreshold, endDelay)
+      .withStartEnd(minPurchases, startDelay, purchasesWindow, endThresholdGc, endDelay, endThresholdNgc)
       .where(col(ExposureStart) =!= col(ExposureEnd)) // This also removes rows where exposureStart = null
       .aggregateWeight(
         cumulativeExposureWindow,

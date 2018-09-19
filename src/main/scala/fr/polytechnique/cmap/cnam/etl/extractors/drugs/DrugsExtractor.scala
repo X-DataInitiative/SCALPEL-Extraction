@@ -10,6 +10,7 @@ import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.DrugsConfig
 
 class DrugsExtractor(drugConfig: DrugsConfig) extends java.io.Serializable{
 
+
   def formatSource(sources : Sources): Dataset[Purchase] = {
 
     val neededColumns: List[Column] = List(
@@ -17,7 +18,8 @@ class DrugsExtractor(drugConfig: DrugsConfig) extends java.io.Serializable{
       col("ER_PHA_F__PHA_PRS_C13").cast(StringType).as("CIP13"),
       col("PHA_ATC_C07").cast(StringType).as("ATC5"),
       col("EXE_SOI_DTD").cast(TimestampType).as("eventDate"),
-      col("molecule_combination").cast(StringType).as("molecules")
+      col("molecule_combination").cast(StringType).as("molecules"),
+      col("PHA_CND_TOP").cast(StringType).as("conditioning")
     )
 
     lazy val irPhaR = sources.irPha.get
@@ -29,6 +31,7 @@ class DrugsExtractor(drugConfig: DrugsConfig) extends java.io.Serializable{
 
     df
       .select(neededColumns: _*)
+      .withColumn("conditioning", when(col("conditioning") === "GC", 1).otherwise(2))
       .na.drop(Seq("eventDate", "CIP13", "ATC5"))
       .as[Purchase]
   }

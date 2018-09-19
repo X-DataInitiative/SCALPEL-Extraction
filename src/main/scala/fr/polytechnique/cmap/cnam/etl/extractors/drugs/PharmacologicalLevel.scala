@@ -10,8 +10,8 @@ object PharmacologicalLevel extends DrugClassificationLevel {
       .flatMap(_.pharmacologicalClasses)
       .filter(family => family.isCorrect(purchase.ATC5, ""))
       .map(_.name)
-    filteredFamilies.map(pharmaClass => Drug(purchase.patientID, pharmaClass, 0, purchase.eventDate))
-
+    filteredFamilies.map(pharmaClass =>
+      Drug(purchase.patientID, pharmaClass, purchase.conditioning, purchase.eventDate))
   }
 
 }

@@ -10,7 +10,7 @@ object MoleculeLevel extends DrugClassificationLevel {
       val molecules = purchase.molecules
         .split("_")
         .toList
-      molecules.map(molecule => Drug(purchase.patientID, molecule, 0, purchase.eventDate))
+      molecules.map(molecule => Drug(purchase.patientID, molecule, purchase.conditioning, purchase.eventDate))
     }
     else List.empty
   }

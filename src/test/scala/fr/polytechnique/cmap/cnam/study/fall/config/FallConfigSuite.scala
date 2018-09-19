@@ -2,10 +2,10 @@ package fr.polytechnique.cmap.cnam.study.fall.config
 
 import java.nio.file.Paths
 import com.typesafe.config.ConfigFactory
+import me.danielpes.spark.datetime.implicits._
 import org.scalatest.FlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.PharmacologicalLevel
-
 
 class FallConfigSuite extends FlatSpec{
 
@@ -45,7 +45,8 @@ class FallConfigSuite extends FlatSpec{
                          |    min_purchases: 2           // 1+ (Usually 1 or 2)
                          |    start_delay: 0 months      // 0+ (Usually between 0 and 3). Represents the delay in months between a dispensation and its exposure start date.
                          |    purchases_window: 0 months // 0+ (Usually 0 or 6) Represents the window size in months. Ignored when min_purchases=1.
-                         |    end_threshold: 60 days     // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
+                         |    end_threshold_gc: 90 days     // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
+                         |    end_threshold_ngc: 30 days     // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
                          |    end_delay: 30 days         // Number of periods that we add to the exposure end to delay it (lag).
                          |  }
                          |  patients {
@@ -68,7 +69,8 @@ class FallConfigSuite extends FlatSpec{
         root = "new/out/path"
       ),
       exposures = defaultConf.exposures.copy(
-        minPurchases = 2
+        minPurchases = 2,
+        endThresholdNgc = Some(30.days)
       ),
       drugs = defaultConf.drugs.copy(
         level = PharmacologicalLevel
