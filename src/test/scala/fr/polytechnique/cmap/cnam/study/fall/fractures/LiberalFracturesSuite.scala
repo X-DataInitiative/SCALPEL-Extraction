@@ -13,10 +13,10 @@ class LiberalFracturesSuite extends SharedContext {
     import sqlCtx.implicits._
     //Given
     val events = Seq(
-      DcirAct("Pierre", "3", "MADP001", makeTS(2017, 7, 18)),
-      DcirAct("Ben", "3", "MZMP007", makeTS(2017, 7, 18)),
-      DcirAct("Sam", "3", "HBED009", makeTS(2015, 7, 18)),
-      DcirAct("Sam", "3", "4561", makeTS(2015, 7, 18))
+      MainDiagnosis("Pierre", "3", "MADP001", makeTS(2017, 7, 18)),
+      MainDiagnosis("Ben", "3", "MZMP007", makeTS(2017, 7, 18)),
+      AssociatedDiagnosis("Sam", "3", "HBED009", makeTS(2015, 7, 18)),
+      AssociatedDiagnosis("Sam", "3", "4561", makeTS(2015, 7, 18))
     ).toDF.as[Event[MedicalAct]]
     val expected = Seq(
       Outcome("Pierre", "clavicule", "Liberal", makeTS(2017, 7, 18)),

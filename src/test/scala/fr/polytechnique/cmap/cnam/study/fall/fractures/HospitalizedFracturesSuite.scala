@@ -135,6 +135,7 @@ class HospitalizedFracturesSuite extends SharedContext{
 
     // When
     val result = HospitalizedFractures.transform(diagnoses, medicalActs, List(AllSites))
+    result.show()
     // Then
     assertDSs(result, expected)
   }
