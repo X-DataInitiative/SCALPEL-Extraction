@@ -61,8 +61,8 @@ object ExposuresTransformerConfig {
       purchasesWindow: Period = 6.months,
 
       periodStrategy: ExposurePeriodStrategy = ExposurePeriodStrategy.Unlimited,
-      endThresholdGc: Option[Period] = Some(4.months),
-      endThresholdNgc: Option[Period] = Some(4.months),
+      endThresholdGc: Option[Period] = Some(3.months),
+      endThresholdNgc: Option[Period] = Some(1.months),
       endDelay: Option[Period] = Some(0.months),
 
       weightAggStrategy: WeightAggStrategy = WeightAggStrategy.NonCumulative,

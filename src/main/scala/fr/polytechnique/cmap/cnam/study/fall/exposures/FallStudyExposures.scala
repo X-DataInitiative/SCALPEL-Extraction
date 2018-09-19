@@ -14,8 +14,8 @@ object FallStudyExposures {
       purchasesWindow = 0.months,
 
       periodStrategy = ExposurePeriodStrategy.Limited,
-      endThresholdGc = Some(60.days),
-      endThresholdNgc = Some(60.days),
+      endThresholdGc = Some(90.days),
+      endThresholdNgc = Some(30.days),
       endDelay = Some(30.days),
 
       weightAggStrategy = WeightAggStrategy.NonCumulative,

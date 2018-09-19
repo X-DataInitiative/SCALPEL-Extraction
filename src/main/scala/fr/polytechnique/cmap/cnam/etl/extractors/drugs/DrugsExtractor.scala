@@ -10,10 +10,6 @@ import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.DrugsConfig
 
 class DrugsExtractor(drugConfig: DrugsConfig) extends java.io.Serializable{
 
-  val conditioningUdf = udf{conditioning: String => conditioning match {
-    case "GC" => 1
-    case "NGC" => 2
-  }}
 
   def formatSource(sources : Sources): Dataset[Purchase] = {
 
@@ -35,7 +31,7 @@ class DrugsExtractor(drugConfig: DrugsConfig) extends java.io.Serializable{
 
     df
       .select(neededColumns: _*)
-      .withColumn("conditioning", conditioningUdf(col("conditioning")))
+      .withColumn("conditioning", when(col("conditioning") === "GC", 1).otherwise(2))
       .na.drop(Seq("eventDate", "CIP13", "ATC5"))
       .as[Purchase]
   }

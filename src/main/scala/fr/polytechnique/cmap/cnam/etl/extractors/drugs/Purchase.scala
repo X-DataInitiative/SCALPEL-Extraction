@@ -8,4 +8,4 @@ case class Purchase(
     ATC5: String = "",
     eventDate: Timestamp,
     molecules: String = "",
-    conditioning: Int = 0)
+    conditioning: Int)
