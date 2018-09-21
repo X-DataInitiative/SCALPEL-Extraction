@@ -1,11 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
+import me.danielpes.spark.datetime.implicits._
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.Columns._
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
-import me.danielpes.spark.datetime.Period
-import me.danielpes.spark.datetime.implicits._
 
 class UnlimitedExposurePeriodAdderSuite extends SharedContext {
 
@@ -43,7 +42,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
     // The first assert is to make sure the method adds no other columns
     assert(result.columns.diff(input.columns).toList == List(ExposureStart, ExposureEnd))
     assertDFs(expected, result.select(PatientID, Value, ExposureStart, ExposureEnd))
- }
+  }
 
   "withStartEnd" should "correctly add exposureStart and exposureEnd with default parameters in days" in {
 
@@ -72,7 +71,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
 
     // When
     val instance = new UnlimitedExposurePeriodAdder(input)
-    val result = instance.withStartEnd(purchasesWindow = 184.days, startDelay = 91.days) // minPurchases = 2,
+    val result = instance.withStartEnd(startDelay = 91.days, purchasesWindow = 184.days) // minPurchases = 2,
 
     // Then
     // The first assert is to make sure the method adds no other columns
@@ -107,7 +106,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
 
     // When
     val instance = new UnlimitedExposurePeriodAdder(input)
-    val result = instance.withStartEnd(purchasesWindow = 20.days, startDelay = 5.days) // minPurchases = 2,
+    val result = instance.withStartEnd(startDelay = 5.days, purchasesWindow = 20.days) // minPurchases = 2,
 
     // Then
     // The first assert is to make sure the method adds no other columns
@@ -147,7 +146,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Then
     assertDFs(expected, result.select(PatientID, Value, ExposureStart, ExposureEnd))
- }
+  }
 
   it should "correctly add exposureStart and exposureEnd for startDelay = 0" in {
 
@@ -180,7 +179,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Then
     assertDFs(expected, result.select(PatientID, Value, ExposureStart, ExposureEnd))
- }
+  }
 
   it should "correctly add exposureStart and exposureEnd for purchasesWindow = 9" in {
 
@@ -213,7 +212,7 @@ class UnlimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Then
     assertDFs(expected, result.select(PatientID, Value, ExposureStart, ExposureEnd))
- }
+  }
 
   it should "correctly add exposureStart and exposureEnd for purchasesWindow = 180 days" in {
 

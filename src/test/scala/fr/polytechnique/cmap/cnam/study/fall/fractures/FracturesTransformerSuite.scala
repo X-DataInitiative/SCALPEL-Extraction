@@ -64,7 +64,7 @@ class FracturesTransformerSuite extends SharedContext{
       val result = new  FracturesTransformer(testConf).transform(liberalActs, acts, diagnoses)
 
       //Then
-      assertDSs(result, expectedOutcomes, true)
+      assertDSs(result, expectedOutcomes)
     }
 
 }
