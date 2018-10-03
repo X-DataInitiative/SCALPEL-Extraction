@@ -30,7 +30,7 @@ private class UnlimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeri
     val potentialExposureStart: Column = if (minPurchases == 1) {
       col(Start)
     } else {
-      lag(col(Start), minPurchases - 1).over(window.orderBy(Start))
+      lag(col(Start), 1).over(window.orderBy(Start))
     }
 
     data
