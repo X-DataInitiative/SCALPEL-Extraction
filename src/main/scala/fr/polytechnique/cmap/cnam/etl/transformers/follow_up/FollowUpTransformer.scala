@@ -61,7 +61,7 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
       .withFollowUpStart(config.delayMonths)
       .withTrackloss
       .withColumn(FirstTargetDiseaseDate, firstTargetDiseaseDate)
-      .withColumn(FollowUpEnd,  minColumn(followUpEndModelCandidates:_*))
+      .withColumn(FollowUpEnd, minColumn(followUpEndModelCandidates:_*))
       .na.drop("any", Seq(FollowUpStart, FollowUpEnd))
       .withEndReason
       .select(outputColumns: _*)
@@ -107,5 +107,10 @@ object FollowUpTransformer {
 
       data.withColumn(EndReason, endReason)
     }
+
+  }
+
+  implicit class FollowUpDataset(followups: Dataset[FollowUp]) {
+    def cleanFollowUps(): Dataset[FollowUp] = followups.filter(_.isValid)
   }
 }

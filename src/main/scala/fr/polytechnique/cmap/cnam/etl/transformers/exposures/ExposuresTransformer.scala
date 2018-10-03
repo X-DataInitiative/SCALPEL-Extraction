@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
-import java.sql.Timestamp
 import me.danielpes.spark.datetime.Period
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
@@ -31,9 +30,9 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
   val purchaseIntervals: Option[List[Int]] = config.purchaseIntervals
 
   def transform[Disp <: Dispensation](
-      patients: Dataset[(Patient, FollowUp)],
-      dispensations: Dataset[Event[Disp]])
-    : Dataset[Event[Exposure]] = {
+    patients: Dataset[(Patient, FollowUp)],
+    dispensations: Dataset[Event[Disp]])
+  : Dataset[Event[Exposure]] = {
 
     val inputCols = Seq(
       col("Patient.patientID").as(PatientID),
@@ -44,25 +43,29 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
       col("FollowUp.stop").as(FollowUpEnd)
     )
 
-    val input = renameTupleColumns(patients).select(inputCols:_*).join(dispensations, Seq(PatientID))
+    val input = renameTupleColumns(patients).select(inputCols: _*).join(dispensations, Seq(PatientID))
 
     import input.sqlContext.implicits._
 
     input.toDF
+      .where(col(Start) <= col(FollowUpEnd)) // This ignores all purchases aftet the followup End
       .withStartEnd(minPurchases, startDelay, purchasesWindow, endThresholdGc, endDelay, endThresholdNgc)
       .where(col(ExposureStart) =!= col(ExposureEnd)) // This also removes rows where exposureStart = null
       .aggregateWeight(
-        cumulativeExposureWindow,
-        cumulativeStartThreshold,
-        cumulativeEndThreshold,
-        dosageLevelIntervals,
-        purchaseIntervals
+      cumulativeExposureWindow,
+      cumulativeStartThreshold,
+      cumulativeEndThreshold,
+      dosageLevelIntervals,
+      purchaseIntervals
+    )
+      .map(
+        Exposure.fromRow(
+          _,
+          nameCol = Value,
+          startCol = ExposureStart,
+          endCol = ExposureEnd
+        )
       )
-      .map(Exposure.fromRow(
-        _,
-        nameCol = Value,
-        startCol = ExposureStart,
-        endCol = ExposureEnd))
       .distinct()
   }
 }
