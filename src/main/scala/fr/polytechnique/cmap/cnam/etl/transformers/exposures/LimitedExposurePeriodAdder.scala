@@ -15,8 +15,8 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
   private val orderedWindow = window.orderBy(col(Start))
 
   def toExposure(firstLastPurchase: DataFrame): DataFrame = {
-    val condition = (col("status") === "first"
-      && lead(col("status"), 1).over(orderedWindow) === "last")
+    val condition = (col("Status") === "first"
+      && lead(col("Status"), 1).over(orderedWindow) === "last")
     firstLastPurchase.withColumn(
       ExposureEnd,
       when(condition, lead(col("purchaseReach"), 1).over(orderedWindow))
@@ -24,6 +24,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
     )
       .where(col("Status") === "first")
       .withColumn(ExposureStart, col("start"))
+      .drop("Status", "purchaseReach")
   }
 
   def getFirstAndLastPurchase(drugPurchases: DataFrame, endThresholdGc: Period, endThresholdNgc: Period): DataFrame = {
@@ -45,6 +46,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       .withColumn("previousPurchaseReach", lag(col("purchaseReach"), 1).over(orderedWindow))
       .withColumn("Status", status)
       .where(col("Status").isNotNull)
+      .select((drugPurchases.columns.toList ++ List("Status", "purchaseReach")).map(col) :_*)
   }
 
   /***
