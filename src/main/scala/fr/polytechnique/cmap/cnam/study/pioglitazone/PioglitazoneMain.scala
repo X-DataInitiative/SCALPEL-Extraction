@@ -15,7 +15,7 @@ import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposuresTransformer, ExposuresTransformerConfig}
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes._
@@ -118,7 +118,6 @@ object PioglitazoneMain extends Main {
 
 
     val followups = {
-
       val tracklosses = {
         val tracklossConfig = TracklossesConfig(studyEnd = config.base.studyEnd)
         new Tracklosses(tracklossConfig).extract(sources).cache()
@@ -137,6 +136,7 @@ object PioglitazoneMain extends Main {
       }
 
       val observations = {
+        // TODO: Observations only need and uses drugPurchases.
         val allEvents: Dataset[Event[AnyEvent]] = unionDatasets(
           drugPurchases.as[Event[AnyEvent]],
           diagnoses.as[Event[AnyEvent]]
@@ -165,7 +165,7 @@ object PioglitazoneMain extends Main {
     }
 
     val filteredPatientsAncestors = new ListBuffer[String]
-    val filteredPatients = {
+    val cnamPaperBaseCohort = {
       val firstFilterResult = if (config.filters.filterDelayedEntries) {
         filteredPatientsAncestors += "drug_purchases"
         val delayedFreePatients = patients
@@ -174,7 +174,7 @@ object PioglitazoneMain extends Main {
         operationsMetadata += {
           OperationReporter
             .report(
-              "delayed_patients_free",
+              "early_diabetics",
               List("drug_purchases"),
               OperationTypes.Patients,
               delayedFreePatients.toDF,
@@ -187,41 +187,54 @@ object PioglitazoneMain extends Main {
         patients
       }
 
-      if (config.filters.filterDiagnosedPatients) {
+      val secondFilterResult = if (config.filters.filterDiagnosedPatients) {
+
         filteredPatientsAncestors ++= List("outcomes", "followup")
-        firstFilterResult
-          .filterEarlyDiagnosedPatients(outcomes, followups, config.outcomes.cancerDefinition.toString)
+        val earlyDiagnosedPatients = firstFilterResult
+          .removeEarlyDiagnosedPatients(outcomes, followups, config.outcomes.cancerDefinition.toString).cache()
+
+        operationsMetadata += {
+          OperationReporter
+            .report(
+              "early_diagnosed_with_follow_up",
+              filteredPatientsAncestors.toList,
+              OperationTypes.Patients,
+              earlyDiagnosedPatients.toDF,
+              Path(config.output.root)
+            )
+        }
+        earlyDiagnosedPatients
 
       } else {
-        patients
+        firstFilterResult
       }
+
+      import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer.FollowUpDataset
+      val cleanFollowUps = followups.cleanFollowUps()
+      filteredPatientsAncestors += "clean_follow_up"
+      secondFilterResult.joinWith(
+        cleanFollowUps, cleanFollowUps.col("patientId") === patients.col("patientId")
+      )
     }
 
     operationsMetadata += {
       OperationReporter
         .report(
-          "filtered_patients",
+          "cnam_paper_cohort",
           filteredPatientsAncestors.toList,
           OperationTypes.Patients,
-          filteredPatients.toDF,
+          cnamPaperBaseCohort.toDF,
           Path(config.output.outputSavePath),
           config.output.saveMode
         )
     }
 
-    val exposures = {
-      val exposuresConfig = ExposuresTransformerConfig()
-      val patientsWithFollowups = patients.joinWith(
-        followups, followups.col("patientId") === patients.col("patientId")
-      )
-      new ExposuresTransformer(exposuresConfig).transform(patientsWithFollowups, drugPurchases)
-    }
-
+    val exposures = new ExposuresTransformer(config.exposures).transform(cnamPaperBaseCohort, drugPurchases)
     operationsMetadata += {
       OperationReporter
         .report(
           "exposures",
-          List("drug_purchases", "followup"),
+          List("cnam_paper_cohort", "drug_purchases", "followup"),
           OperationTypes.Exposures,
           exposures.toDF,
           Path(config.output.outputSavePath),

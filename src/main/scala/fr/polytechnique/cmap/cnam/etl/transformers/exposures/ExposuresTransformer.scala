@@ -48,7 +48,12 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
     import input.sqlContext.implicits._
 
     input.toDF
+<<<<<<< HEAD
       .withStartEnd(minPurchases, startDelay, purchasesWindow, endThresholdGc, endThresholdNgc, endDelay)
+=======
+      .where(col(Start) <= col(FollowUpEnd)) // This ignores all purchases aftet the followup End
+      .withStartEnd(minPurchases, startDelay, purchasesWindow, endThresholdGc, endDelay, endThresholdNgc)
+>>>>>>> CNAM-359: Correct multiple bugs to retrieve pio data.
       .where(col(ExposureStart) =!= col(ExposureEnd)) // This also removes rows where exposureStart = null
       .aggregateWeight(
       cumulativeExposureWindow,
@@ -57,7 +62,18 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
       dosageLevelIntervals,
       purchaseIntervals
     )
+<<<<<<< HEAD
       .map(Exposure.fromRow(_, nameCol = Value, startCol = ExposureStart, endCol = ExposureEnd))
+=======
+      .map(
+        Exposure.fromRow(
+          _,
+          nameCol = Value,
+          startCol = ExposureStart,
+          endCol = ExposureEnd
+        )
+      )
+>>>>>>> CNAM-359: Correct multiple bugs to retrieve pio data.
       .distinct()
   }
 }
