@@ -13,6 +13,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
   private val mockInstance = new LimitedExposurePeriodAdder(mock(classOf[DataFrame]))
 
   "getFirstAndLastPurchase" should "return the first and the last purchase of each potential exposure" in {
+
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
