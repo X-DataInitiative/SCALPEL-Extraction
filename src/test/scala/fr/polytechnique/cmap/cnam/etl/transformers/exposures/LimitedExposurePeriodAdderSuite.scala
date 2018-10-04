@@ -94,7 +94,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
     val result = input.withNextDate.getTracklosses()
 
     // Then
-    assertDFs(result, expected, true)
+    assertDFs(result, expected)
   }
 
   "getTrackLosses" should "return the correct tracklosses with parameter endThreshold = 120 days" in {
