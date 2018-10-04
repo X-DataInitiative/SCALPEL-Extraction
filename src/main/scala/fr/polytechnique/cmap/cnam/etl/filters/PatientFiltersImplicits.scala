@@ -78,7 +78,7 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
     applyContains(patientsToKeep)
   }
 
-  /** Removes all patients with no follow-up and patients with an outcome event before the start of their follow-up period
+  /** Removes all patients with an outcome event before the start of their follow-up period.
     * @param outcomes A dataset of outcomes
     * @param followUpPeriods A dataset containing the follow-up periods of the patients
     * @param outcomeName The name of the outcome to find
