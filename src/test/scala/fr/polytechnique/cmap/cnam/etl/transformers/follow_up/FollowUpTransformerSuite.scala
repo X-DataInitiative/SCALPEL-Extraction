@@ -18,6 +18,29 @@ class FollowUpTransformerSuite extends SharedContext {
       override val outcomeName: Option[String] = Some("cancer"))
     extends FollowUpTransformerConfig(delayMonths, firstTargetDisease, outcomeName)
 
+
+  "cleanFollowUps" should "keep followups with only start < stop" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    //Given
+    val followUpPeriods = Seq(
+      FollowUp("Patient_A", makeTS(2006, 6, 1), makeTS(2009, 12, 31), "any_reason"),
+      FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2006, 7, 1), "any_reason"),
+      FollowUp("Patient_C", makeTS(2016, 8, 1), makeTS(2009, 12, 31), "any_reason")
+    ).toDS()
+
+    val expected = Seq(
+      FollowUp("Patient_A", makeTS(2006, 6, 1), makeTS(2009, 12, 31), "any_reason")
+    ).toDS()
+
+    // When
+    import FollowUpTransformer.FollowUpDataset
+    val result = followUpPeriods.cleanFollowUps()
+
+    assertDSs(expected, result)
+  }
+
   "withFollowUpStart" should "add a column with the start of the follow-up period" in {
 
     val sqlCtx = sqlContext
