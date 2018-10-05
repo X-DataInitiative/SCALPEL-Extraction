@@ -19,10 +19,10 @@ import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransforme
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes._
-import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.functions._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
+import fr.polytechnique.cmap.cnam.util.{Path, RichDataFrame}
 
 
 object PioglitazoneMain extends Main {
@@ -136,7 +136,7 @@ object PioglitazoneMain extends Main {
       }
 
       val observations = {
-        // TODO: Observations only need and uses drugPurchases.
+        // TODO: Observations only need and use drugPurchases.
         val allEvents: Dataset[Event[AnyEvent]] = unionDatasets(
           drugPurchases.as[Event[AnyEvent]],
           diagnoses.as[Event[AnyEvent]]
@@ -223,9 +223,10 @@ object PioglitazoneMain extends Main {
           "cnam_paper_cohort",
           filteredPatientsAncestors.toList,
           OperationTypes.Patients,
-          cnamPaperBaseCohort.toDF,
+          RichDataFrame.renameTupleColumns(cnamPaperBaseCohort).toDF,
           Path(config.output.outputSavePath),
           config.output.saveMode
+
         )
     }
 

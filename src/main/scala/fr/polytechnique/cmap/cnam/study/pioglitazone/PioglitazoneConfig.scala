@@ -16,11 +16,11 @@ import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformerC
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes.CancerDefinition
 
 case class PioglitazoneConfig(
-    input: StudyConfig.InputPaths,
-    output: StudyConfig.OutputPaths,
-    exposures: PioglitazoneConfig.ExposuresConfig = PioglitazoneConfig.ExposuresConfig(),
-    outcomes: PioglitazoneConfig.OutcomesConfig = PioglitazoneConfig.OutcomesConfig(),
-    filters: PioglitazoneConfig.FiltersConfig = PioglitazoneConfig.FiltersConfig())
+  input: StudyConfig.InputPaths,
+  output: StudyConfig.OutputPaths,
+  exposures: PioglitazoneConfig.ExposuresConfig = PioglitazoneConfig.ExposuresConfig(),
+  outcomes: PioglitazoneConfig.OutcomesConfig = PioglitazoneConfig.OutcomesConfig(),
+  filters: PioglitazoneConfig.FiltersConfig = PioglitazoneConfig.FiltersConfig())
   extends StudyConfig {
 
   // The following config items are not overridable by the config file
@@ -86,9 +86,9 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
 
   /** Parameters needed for the Exposures transformer. */
   case class ExposuresConfig(
-      override val minPurchases: Int = 2,
-      override val startDelay: Period = 3.month,
-      override val purchasesWindow: Period = 6.months) extends ExposuresTransformerConfig(
+    override val minPurchases: Int = 2,
+    override val startDelay: Period = 3.month,
+    override val purchasesWindow: Period = 6.months) extends ExposuresTransformerConfig(
 
     minPurchases = minPurchases,
     startDelay = startDelay,
@@ -109,21 +109,21 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
 
   /** Parameters needed for the Outcomes transformer. */
   case class OutcomesConfig(
-      cancerDefinition: CancerDefinition = CancerDefinition.default)
+    cancerDefinition: CancerDefinition = CancerDefinition.default)
     extends OutcomesTransformerConfig
 
   /** Parameters needed for the Filters. */
   case class FiltersConfig(
     filterNeverSickPatients: Boolean = false,
     filterDiagnosedPatients: Boolean = true,
-    diagnosedPatientsThreshold: Int = 6,
     filterDelayedEntries: Boolean = true,
     delayedEntryThreshold: Int = 12)
 
   /**
     * Reads a configuration file and merges it with the default file.
+    *
     * @param path The path of the given file.
-    * @param env The environment in the config file (usually can be "cmap", "cnam" or "test").
+    * @param env  The environment in the config file (usually can be "cmap", "cnam" or "test").
     * @return An instance of PioglitazoneConfig containing all parameters.
     */
   def load(path: String, env: String): PioglitazoneConfig = {
