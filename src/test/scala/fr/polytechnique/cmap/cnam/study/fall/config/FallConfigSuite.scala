@@ -45,8 +45,8 @@ class FallConfigSuite extends FlatSpec{
                          |    min_purchases: 2           // 1+ (Usually 1 or 2)
                          |    start_delay: 0 months      // 0+ (Usually between 0 and 3). Represents the delay in months between a dispensation and its exposure start date.
                          |    purchases_window: 0 months // 0+ (Usually 0 or 6) Represents the window size in months. Ignored when min_purchases=1.
-                         |    end_threshold_gc: 90 days     // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
-                         |    end_threshold_ngc: 30 days     // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
+                         |    end_threshold_gc: 90 days  // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
+                         |    end_threshold_ngc: 30 days // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
                          |    end_delay: 30 days         // Number of periods that we add to the exposure end to delay it (lag).
                          |  }
                          |  patients {
@@ -58,6 +58,10 @@ class FallConfigSuite extends FlatSpec{
                          |  }
                          |  sites {
                          |    sites: ["BodySites"]
+                         |  }
+                         |  run_parameters {
+                         |    outcome: ["Acts", "Diagnoses", "Outcomes"] // pipeline of calculation of outcome, possible values : Acts, Diagnoses, and Outcomes
+                         |    exposure: ["Patients", "DrugPurchases", "Exposures"] // pipeline of the calculation of exposure, possible values : Patients, StartGapPatients, DrugPurchases, Exposures
                          |  }
                          |  """.trim.stripMargin
 
@@ -74,7 +78,8 @@ class FallConfigSuite extends FlatSpec{
       ),
       drugs = defaultConf.drugs.copy(
         level = PharmacologicalLevel
-      )
+      ),
+      runParameters = defaultConf.runParameters.copy(exposure = List("Patients", "DrugPurchases", "Exposures"))
     )
     //When
     pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(stringConfig), Paths.get(tempPath), true)

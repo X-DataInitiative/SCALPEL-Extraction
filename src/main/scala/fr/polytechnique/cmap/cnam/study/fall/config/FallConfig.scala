@@ -14,13 +14,14 @@ import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{DrugsConfig, Exp
 import fr.polytechnique.cmap.cnam.study.fall.{BodySite, BodySites}
 
 case class FallConfig(
-    input: StudyConfig.InputPaths,
-    output: StudyConfig.OutputPaths,
-    drugs: DrugsConfig = FallConfig.DrugsConfig(),
-    exposures: ExposureConfig = FallConfig.ExposureConfig(),
-    sites: SitesConfig = FallConfig.SitesConfig(),
-    patients: FallConfig.PatientsConfig = FallConfig.PatientsConfig(),
-    outcomes: FracturesConfig = FallConfig.FracturesConfig()) extends StudyConfig{
+  input: StudyConfig.InputPaths,
+  output: StudyConfig.OutputPaths,
+  drugs: DrugsConfig = FallConfig.DrugsConfig(),
+  exposures: ExposureConfig = FallConfig.ExposureConfig(),
+  sites: SitesConfig = FallConfig.SitesConfig(),
+  patients: FallConfig.PatientsConfig = FallConfig.PatientsConfig(),
+  outcomes: FracturesConfig = FallConfig.FracturesConfig(),
+  runParameters: FallConfig.RunConfig = FallConfig.RunConfig()) extends StudyConfig {
 
   val base: BaseConfig = FallConfig.BaseConfig
   val medicalActs: MedicalActsConfig = FallConfig.MedicalActsConfig
@@ -55,19 +56,19 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     fallFrame = fallFrame
   )
 
-  /** parameters needed for drugs extractor**/
+  /** parameters needed for drugs extractor **/
   case class DrugsConfig(
     level: DrugClassificationLevel = TherapeuticLevel,
     families: List[DrugConfig] = List(Antihypertenseurs, Antidepresseurs, Neuroleptiques, Hypnotiques))
 
-  /** Parameters needed for the Exposure Transformer**/
+  /** Parameters needed for the Exposure Transformer **/
   case class ExposureConfig(
-      override val minPurchases: Int = 1,
-      override val startDelay: Period = 0.months,
-      override val purchasesWindow: Period = 0.months,
-      override val endThresholdGc: Option[Period] = Some(90.days),
-      override val endThresholdNgc: Option[Period] = Some(30.days),
-      override val endDelay: Option[Period] = Some(30.days)) extends ExposuresTransformerConfig (
+    override val minPurchases: Int = 1,
+    override val startDelay: Period = 0.months,
+    override val purchasesWindow: Period = 0.months,
+    override val endThresholdGc: Option[Period] = Some(90.days),
+    override val endThresholdNgc: Option[Period] = Some(30.days),
+    override val endDelay: Option[Period] = Some(30.days)) extends ExposuresTransformerConfig(
 
     startDelay = startDelay,
     minPurchases = minPurchases,
@@ -89,10 +90,27 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     val fracturesCodes = BodySite.extractCIM10CodesFromSites(sites)
   }
 
+  /** Parameters if run the calculation of outcome or exposure **/
+  case class RunConfig(
+    outcome: List[String] = List("Acts", "Diagnoses", "Outcomes"),
+    exposure: List[String] = List("Patients", "StartGapPatients", "DrugPurchases", "Exposures")) {
+    //exposures
+    val patients: Boolean = exposure contains "Patients"
+    val drugPurchases: Boolean = exposure contains "DrugPurchases"
+    val startGapPatients: Boolean = List("DrugPurchases", "Patients", "StartGapPatients").forall(exposure.contains)
+    val exposures: Boolean = List("Patients", "DrugPurchases", "Exposures").forall(exposure.contains)
+    //outcomes
+    val diagnoses: Boolean = outcome contains "Diagnoses"
+    val acts: Boolean = outcome contains "Acts"
+    val outcomes: Boolean = List("Diagnoses", "Acts", "Outcomes").forall(outcome.contains)
+
+  }
+
   /**
     * Reads a configuration file and merges it with the default file.
+    *
     * @param path The path of the given file.
-    * @param env The environment in the config file (usually can be "cmap", "cnam" or "test").
+    * @param env  The environment in the config file (usually can be "cmap", "cnam" or "test").
     * @return An instance of PioglitazoneConfig containing all parameters.
     */
   def load(path: String, env: String): FallConfig = {

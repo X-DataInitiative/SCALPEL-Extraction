@@ -27,7 +27,7 @@ private[acts] object DcirMedicalActs {
 
     val foundCode: Option[String] = ccamCodes.find {
       val idx = r.fieldIndex(ColNames.CamCode)
-      !r.isNullAt(r.fieldIndex(ColNames.CamCode)) && r.getString(idx).startsWith(_)
+      !r.isNullAt(idx) && r.getString(idx).startsWith(_)
     }
 
     foundCode match {
