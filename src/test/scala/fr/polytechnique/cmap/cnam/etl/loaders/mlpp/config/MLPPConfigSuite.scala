@@ -3,8 +3,8 @@ package fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config
 import java.nio.file.Paths
 import com.typesafe.config.ConfigFactory
 import org.scalatest.FlatSpec
+import fr.polytechnique.cmap.cnam.etl.config.mlpp.MLPPLoaderConfig
 import fr.polytechnique.cmap.cnam.etl.loaders.mlpp.config.MLPPConfig._
-import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class MLPPConfigSuite extends FlatSpec {
@@ -12,12 +12,12 @@ class MLPPConfigSuite extends FlatSpec {
   it should "load the default MLPP config" in {
 
     //given
-    val input = InputPaths(
+    val input = MLPPLoaderConfig.InputPaths(
       patients = Some("src/test/resources/MLPP/patient"),
       outcomes = Some("src/test/resources/MLPP/outcome"),
       exposures = Some("src/test/resources/MLPP/exposure"))
 
-    val output = OutputPaths(Path("target/test/output/featuring"))
+    val output = MLPPLoaderConfig.OutputPaths("target/test/output/featuring")
 
     val extra = ExtraConfig(maxTimestamp = makeTS(2006, 8, 1))
 

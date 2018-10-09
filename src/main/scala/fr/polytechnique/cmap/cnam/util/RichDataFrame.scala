@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.util
 import scala.reflect.runtime.universe.{TypeTag, typeOf}
 import org.apache.spark.sql.functions.{col, regexp_replace, udf}
 import org.apache.spark.sql.types.{DataType, StringType, StructField, StructType}
-import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 
 
 class RichDataFrame(dataFrame: DataFrame) {
@@ -36,12 +36,26 @@ class RichDataFrame(dataFrame: DataFrame) {
       checkDuplicateRows
   }
 
-  def writeCSV(path: String): Unit = {
-    dataFrame.coalesce(1).write
-      .format("csv")
+  private def saveMode(mode: String): SaveMode = mode match {
+    case "overwrite" => SaveMode.Overwrite
+    case "append" => SaveMode.Append
+    case "errorIfExists" => SaveMode.ErrorIfExists
+    case "withTimestamp" => SaveMode.Overwrite
+  }
+
+  def writeCSV(path: String, mode: String = "errorIfExists"): Unit = {
+    dataFrame.coalesce(1)
+      .write
+      .mode(saveMode(mode))
       .option("delimiter", ",")
       .option("header", "true")
-      .save(path)
+      .csv(path)
+  }
+
+  def writeParquet(path: String, mode: String = "errorIfExists"): Unit = {
+    dataFrame.write
+      .mode(saveMode(mode))
+      .parquet(path)
   }
 
   def withIndices(columnNames: Seq[String]): DataFrame = {

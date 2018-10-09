@@ -1,5 +1,7 @@
 package fr.polytechnique.cmap.cnam.util
 
+import java.text.SimpleDateFormat
+import java.util.Date
 import org.scalatest.FlatSpec
 import org.apache.hadoop.fs.{Path => HDFSPath}
 
@@ -42,4 +44,19 @@ class PathSuite extends FlatSpec {
     assert(path1 == expected)
     assert(path2 == expected)
   }
+
+  "withTimestampSuffix" should "add a timestamp at the end of the path" in {
+    //Given
+    val path = Path("/first", "second", "third/")
+    val format = new SimpleDateFormat("_yyyy_MM_dd_HH_mm_ss")
+    val now = new Date()
+    val expected = s"/first/second/third${format.format(now)}"
+
+    //When
+    val result = path.withTimestampSuffix(now).toString
+
+    //Then
+    assert(result == expected)
+  }
+
 }
