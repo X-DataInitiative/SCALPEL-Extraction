@@ -2,6 +2,8 @@ package fr.polytechnique.cmap.cnam.etl.config.study
 
 import fr.polytechnique.cmap.cnam.etl.config.Config
 
+trait StudyConfig extends Config
+
 object StudyConfig {
 
   case class InputPaths(
@@ -16,8 +18,6 @@ object StudyConfig {
     dosages: Option[String] = None)
 
   case class OutputPaths(
-    root: String)
+    override val root: String, override val saveMode: String = "errorIfExists") extends Config.OutputPaths(root, saveMode)
 
 }
-
-trait StudyConfig extends Config

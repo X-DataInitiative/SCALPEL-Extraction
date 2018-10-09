@@ -116,12 +116,12 @@ class DiscreteExposureImplicits(exposures: Dataset[LaggedExposure]) {
     inputDF
       .select("patientID", "patientIDIndex", "gender", "age")
       .dropDuplicates(Seq("patientID"))
-      .writeCSV(params.output.patientsLookup)
+      .writeCSV(params.output.patientsLookup, params.output.saveMode)
 
     inputDF
       .select("exposureType", "exposureTypeIndex")
       .dropDuplicates(Seq("exposureType"))
-      .writeCSV(params.output.moleculeLookup)
+      .writeCSV(params.output.moleculeLookup, params.output.saveMode)
   }
 
 }
@@ -140,13 +140,13 @@ class DiscreteExposure(params: MLPPConfig) {
 
     Seq(exposures.makeMetadata(params.base.lagCount, bucketCount, params.base.bucketSize))
       .toDF
-      .writeCSV(params.output.metadata)
+      .writeCSV(params.output.metadata, params.output.saveMode)
   }
 
   def writeCensoring(exposures: Dataset[LaggedExposure]): Unit = {
     exposures
       .makeCensoring(bucketCount, params.base.featuresAsList)
-      .writeCSV(params.output.censoring)
+      .writeCSV(params.output.censoring, params.output.saveMode)
   }
 
 }

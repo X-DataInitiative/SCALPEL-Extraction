@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.util.reporting
 
+import org.apache.spark.sql.{AnalysisException, SQLContext}
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.Path
-import org.apache.spark.sql.SQLContext
 
 class OperationReporterSuite extends SharedContext {
 
@@ -34,14 +34,28 @@ class OperationReporterSuite extends SharedContext {
     // Given
     val data = Seq(("Patient_A", 1), ("Patient_A", 2), ("Patient_B", 3)).toDF("patientID", "other_col")
     val path = Path("target/test/output")
+    val pathWithTimestamp = Path("target/test/dummy/output")
     val expected = data
+    val expectedAppend = data.union(data)
 
     // When
-    OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path)
-    val result = spark.read.parquet(Path(path, "test", "data").toString)
+    var meta = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path, "overwrite")
+    val result = spark.read.parquet(meta.outputPath.get)
+    val exception = intercept[Exception] {
+      OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path)
+    }
+    meta = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path, "append")
+    val resultAppend = spark.read.parquet(meta.outputPath.get)
+    meta = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, pathWithTimestamp, "withTimestamp")
+    val resultWithTimestamp = spark.read.parquet(meta.outputPath.get)
+
 
     // Then
     assertDFs(result, expected)
+    assert(exception.isInstanceOf[AnalysisException])
+    assertDFs(resultAppend, expectedAppend)
+    assertDFs(resultWithTimestamp, expected)
+
   }
 
   it should "Write the patient ids correctly" in {

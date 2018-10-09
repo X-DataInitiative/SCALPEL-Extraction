@@ -49,7 +49,8 @@ object RosiglitazoneMain extends Main {
         List("DCIR", "MCO", "IR_BEN_R"),
         OperationTypes.Patients,
         patients.toDF(),
-        Path(config.output.root)
+        Path(config.output.outputSavePath),
+        config.output.saveMode
       )
     }
 
@@ -62,7 +63,8 @@ object RosiglitazoneMain extends Main {
           List("DCIR"),
           OperationTypes.Dispensations,
           drugPurchases.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -75,7 +77,8 @@ object RosiglitazoneMain extends Main {
           List("MCO", "IR_IMB_R"),
           OperationTypes.Diagnosis,
           diagnoses.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -91,7 +94,8 @@ object RosiglitazoneMain extends Main {
           List("diagnoses"),
           OperationTypes.Outcomes,
           outcomes.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -109,7 +113,8 @@ object RosiglitazoneMain extends Main {
             List("DCIR"),
             OperationTypes.AnyEvents,
             tracklosses.toDF,
-            Path(config.output.root)
+            Path(config.output.outputSavePath),
+            config.output.saveMode
           )
       }
 
@@ -135,7 +140,8 @@ object RosiglitazoneMain extends Main {
             List("drug_purchases", "outcomes", "trackloss"),
             OperationTypes.AnyEvents,
             cachedFollowups.toDF,
-            Path(config.output.root)
+            Path(config.output.outputSavePath),
+            config.output.saveMode
           )
       }
 
@@ -160,7 +166,8 @@ object RosiglitazoneMain extends Main {
               List("drug_purchases"),
               OperationTypes.Patients,
               delayedFreePatients.toDF,
-              Path(config.output.root)
+              Path(config.output.outputSavePath),
+              config.output.saveMode
             )
         }
         delayedFreePatients
@@ -182,7 +189,8 @@ object RosiglitazoneMain extends Main {
           filteredPatientsAncestors.toList,
           OperationTypes.Patients,
           filteredPatients.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -200,7 +208,8 @@ object RosiglitazoneMain extends Main {
           List("drug_purchases", "followup"),
           OperationTypes.Exposures,
           exposures.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 

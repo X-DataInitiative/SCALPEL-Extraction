@@ -54,7 +54,7 @@ class MLPPOutcomesImplicits(dataFrame: DataFrame) {
     dataFrame
       .select("diseaseType", "diseaseTypeIndex")
       .dropDuplicates(Seq("diseaseType"))
-      .writeCSV(params.output.outcomesLookup)
+      .writeCSV(params.output.outcomesLookup, params.output.saveMode)
   }
 }
 
@@ -76,8 +76,8 @@ class MLPPOutcomes(params: MLPPConfig) {
   def writeOutcomes(enhancedEvents: DataFrame): Unit = {
     val outcomes = makeOutcomes(enhancedEvents).persist()
     // write outcomes ("Y" matrices)
-    outcomes.makeOutcomes(params.base.featuresAsList, bucketCount).writeCSV(params.output.outcomes)
-    outcomes.makeStaticOutcomes.writeCSV(params.output.staticStaticOutcomes)
+    outcomes.makeOutcomes(params.base.featuresAsList, bucketCount).writeCSV(params.output.outcomes, params.output.saveMode)
+    outcomes.makeStaticOutcomes.writeCSV(params.output.staticStaticOutcomes, params.output.saveMode)
     outcomes.writeLookupFiles(params)
     outcomes.unpersist()
   }

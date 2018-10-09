@@ -56,7 +56,8 @@ object PioglitazoneMain extends Main {
           List("DCIR", "MCO", "IR_BEN_R"),
           OperationTypes.Patients,
           patients.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -68,7 +69,8 @@ object PioglitazoneMain extends Main {
           List("DCIR"),
           OperationTypes.Dispensations,
           drugPurchases.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -80,7 +82,8 @@ object PioglitazoneMain extends Main {
           List("MCO", "IR_IMB_R"),
           OperationTypes.Diagnosis,
           diagnoses.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -92,7 +95,8 @@ object PioglitazoneMain extends Main {
           List("DCIR", "MCO", "MCO_CE"),
           OperationTypes.MedicalActs,
           medicalActs.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -107,7 +111,8 @@ object PioglitazoneMain extends Main {
           List("acts", "diagnoses"),
           OperationTypes.Outcomes,
           outcomes.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -126,7 +131,8 @@ object PioglitazoneMain extends Main {
             List("DCIR"),
             OperationTypes.AnyEvents,
             tracklosses.toDF,
-            Path(config.output.root)
+            Path(config.output.outputSavePath),
+            config.output.saveMode
           )
       }
 
@@ -153,7 +159,8 @@ object PioglitazoneMain extends Main {
           List("drug_purchases", "outcomes", "trackloss"),
           OperationTypes.AnyEvents,
           followups.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -171,7 +178,8 @@ object PioglitazoneMain extends Main {
               List("drug_purchases"),
               OperationTypes.Patients,
               delayedFreePatients.toDF,
-              Path(config.output.root)
+              Path(config.output.outputSavePath),
+              config.output.saveMode
             )
         }
         delayedFreePatients
@@ -196,7 +204,8 @@ object PioglitazoneMain extends Main {
           filteredPatientsAncestors.toList,
           OperationTypes.Patients,
           filteredPatients.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -215,7 +224,8 @@ object PioglitazoneMain extends Main {
           List("drug_purchases", "followup"),
           OperationTypes.Exposures,
           exposures.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 

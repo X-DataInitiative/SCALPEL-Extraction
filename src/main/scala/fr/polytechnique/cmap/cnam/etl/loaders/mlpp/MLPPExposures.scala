@@ -43,8 +43,8 @@ class MLPPExposures(params: MLPPConfig) {
     import DiscreteExposure._
     val staticExposures: DataFrame = exposures.makeStaticExposures.persist()
     // write static exposures ("Z" matrix)
-    staticExposures.write.parquet(params.output.staticExposuresParquet)
-    staticExposures.writeCSV(params.output.staticExposuresCSV)
+    staticExposures.writeParquet(params.output.staticExposuresParquet, params.output.saveMode)
+    staticExposures.writeCSV(params.output.staticExposuresCSV, params.output.saveMode)
     staticExposures.unpersist()
 
     // Make MLPP ready features
@@ -52,8 +52,8 @@ class MLPPExposures(params: MLPPConfig) {
 
     val featuresDF = features.toDF().persist()
     // write sparse features ("X" matrix)
-    featuresDF.write.parquet(params.output.sparseFeaturesParquet)
-    featuresDF.writeCSV(params.output.sparseFeaturesCSV)
+    featuresDF.writeParquet(params.output.sparseFeaturesParquet, params.output.saveMode)
+    featuresDF.writeCSV(params.output.sparseFeaturesCSV, params.output.saveMode)
     featuresDF.unpersist()
 
     // write lookup tables
