@@ -188,7 +188,7 @@ object PioglitazoneMain extends Main {
         operationsMetadata += {
           OperationReporter
             .report(
-              "early_diagnosed_with_follow_up",
+              "diagnosed_before_follow_up_free",
               filteredPatientsAncestors.toList,
               OperationTypes.Patients,
               earlyDiagnosedPatients.toDF,
