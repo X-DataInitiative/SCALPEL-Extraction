@@ -114,7 +114,6 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
 
   /** Parameters needed for the Filters. */
   case class FiltersConfig(
-    filterNeverSickPatients: Boolean = false,
     filterDiagnosedPatients: Boolean = true,
     filterDelayedEntries: Boolean = true,
     delayedEntryThreshold: Int = 12)
