@@ -74,7 +74,20 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val diagnoses: Dataset[Event[Diagnosis]] = new Diagnoses(config.diagnoses).extract(sources).cache()
+    val medicalActs = new MedicalActs(config.medicalActs).extract(sources).cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "acts",
+          List("DCIR", "MCO", "MCO_CE"),
+          OperationTypes.MedicalActs,
+          medicalActs.toDF,
+          Path(config.output.outputSavePath),
+          config.output.saveMode
+        )
+    }
+
+    /*val diagnoses: Dataset[Event[Diagnosis]] = new Diagnoses(config.diagnoses).extract(sources).cache()
     operationsMetadata += {
       OperationReporter
         .report(
@@ -227,7 +240,7 @@ object PioglitazoneMain extends Main {
           Path(config.output.outputSavePath),
           config.output.saveMode
         )
-    }
+    }*/
 
     // Write Metadata
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
@@ -238,6 +251,6 @@ object PioglitazoneMain extends Main {
       close()
     }
 
-    Some(exposures)
+    None
   }
 }
