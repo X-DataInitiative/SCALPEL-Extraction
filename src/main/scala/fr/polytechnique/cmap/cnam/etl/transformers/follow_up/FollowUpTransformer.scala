@@ -61,7 +61,7 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
       .withFollowUpStart(config.delayMonths)
       .withTrackloss
       .withColumn(FirstTargetDiseaseDate, firstTargetDiseaseDate)
-      .withColumn(FollowUpEnd, minColumn(followUpEndModelCandidates:_*))
+      .withColumn(FollowUpEnd, minColumn(followUpEndModelCandidates:_*)) // TODO: add lit(studyStart) here to avoid having fups starting before study start ?
       .na.drop("any", Seq(FollowUpStart, FollowUpEnd))
       .withEndReason
       .select(outputColumns: _*)

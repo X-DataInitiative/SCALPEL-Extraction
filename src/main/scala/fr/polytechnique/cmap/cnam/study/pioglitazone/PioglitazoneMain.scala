@@ -17,10 +17,10 @@ import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer.FollowUpDataset
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes._
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
-import fr.polytechnique.cmap.cnam.util.functions._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
 import fr.polytechnique.cmap.cnam.util.{Path, RichDataFrame}
 
@@ -48,12 +48,78 @@ object PioglitazoneMain extends Main {
     import implicits.SourceReader
     val sources = Sources.sanitize(sqlContext.readSources(config.input))
 
-    val patients: Dataset[Patient] = new Patients(config.patients).extract(sources).cache()
+    // Extraction: get all events
+    val rawPatients: Dataset[Patient] = new Patients(config.patients).extract(sources)
     operationsMetadata += {
       OperationReporter
         .report(
-          "extract_patients",
+          "all_subjects",
           List("DCIR", "MCO", "IR_BEN_R"),
+          OperationTypes.Patients,
+          rawPatients.toDF,
+          Path(config.output.root)
+        )
+    }
+
+    val rawDrugPurchases: Dataset[Event[Molecule]] = new MoleculePurchases(config.molecules).extract(sources)
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "raw_drug_purchases",
+          List("DCIR"),
+          OperationTypes.Dispensations,
+          rawDrugPurchases.toDF,
+          Path(config.output.root)
+        )
+    }
+
+    val rawDiagnoses: Dataset[Event[Diagnosis]] = new Diagnoses(config.diagnoses).extract(sources)
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "raw_diagnoses",
+          List("MCO", "IR_IMB_R"),
+          OperationTypes.Diagnosis,
+          rawDiagnoses.toDF,
+          Path(config.output.root)
+        )
+    }
+
+    val rawMedicalActs = new MedicalActs(config.medicalActs).extract(sources)
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "raw_acts",
+          List("DCIR", "MCO", "MCO_CE"),
+          OperationTypes.MedicalActs,
+          rawMedicalActs.toDF,
+          Path(config.output.root)
+        )
+    }
+
+    val rawTracklosses = {
+      val tracklossConfig = TracklossesConfig(studyEnd = config.base.studyEnd)
+      new Tracklosses(tracklossConfig).extract(sources)
+    }
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "raw_trackloss",
+          List("DCIR"),
+          OperationTypes.AnyEvents,
+          rawTracklosses.toDF,
+          Path(config.output.root)
+        )
+    }
+
+    // Filtering: filter raw events to match study perimeter
+
+    val patients: Dataset[Patient] = rawPatients.cache() // TODO: age should be filtered here and not earlier, for now we keep it like this
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "initial_cohort",
+          List("all_subjects"),
           OperationTypes.Patients,
           patients.toDF,
           Path(config.output.outputSavePath),
@@ -61,12 +127,14 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val drugPurchases: Dataset[Event[Molecule]] = new MoleculePurchases(config.molecules).extract(sources).cache()
+    val valid_dates = $"start" >= config.base.studyStart && $"end" >= config.base.studyStart && $"start" <= config.base.studyEnd && $"end" <= config.base.studyEnd
+
+    val drugPurchases: Dataset[Event[Molecule]] = rawDrugPurchases.where(valid_dates).cache() // filter dates
     operationsMetadata += {
       OperationReporter
         .report(
           "drug_purchases",
-          List("DCIR"),
+          List("raw_drug_purchases"),
           OperationTypes.Dispensations,
           drugPurchases.toDF,
           Path(config.output.outputSavePath),
@@ -74,12 +142,12 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val diagnoses: Dataset[Event[Diagnosis]] = new Diagnoses(config.diagnoses).extract(sources).cache()
+    val diagnoses: Dataset[Event[Diagnosis]] = rawDiagnoses.where(valid_dates).cache() // filter dates
     operationsMetadata += {
       OperationReporter
         .report(
           "diagnoses",
-          List("MCO", "IR_IMB_R"),
+          List("raw_diagnoses"),
           OperationTypes.Diagnosis,
           diagnoses.toDF,
           Path(config.output.outputSavePath),
@@ -87,12 +155,12 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val medicalActs = new MedicalActs(config.medicalActs).extract(sources).cache()
+    val medicalActs = rawMedicalActs.where(valid_dates).cache() // filter dates
     operationsMetadata += {
       OperationReporter
         .report(
           "acts",
-          List("DCIR", "MCO", "MCO_CE"),
+          List("raw_acts"),
           OperationTypes.MedicalActs,
           medicalActs.toDF,
           Path(config.output.outputSavePath),
@@ -100,6 +168,21 @@ object PioglitazoneMain extends Main {
         )
     }
 
+    val tracklosses = rawTracklosses.where(valid_dates).cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "trackloss",
+          List("raw_trackloss"),
+          OperationTypes.AnyEvents,
+          rawTracklosses.toDF,
+          Path(config.output.root)
+        )
+    }
+
+    // Compute higher level events from filtered events
+
+    // TODO: outcomes should be renamed, maybe "diseases"
     val outcomes = {
       val outcomesTransformer = new PioglitazoneOutcomeTransformer(config.outcomes.cancerDefinition)
       outcomesTransformer.transform(diagnoses, medicalActs).cache()
@@ -116,36 +199,16 @@ object PioglitazoneMain extends Main {
         )
     }
 
-
     val followups = {
-      val tracklosses = {
-        val tracklossConfig = TracklossesConfig(studyEnd = config.base.studyEnd)
-        new Tracklosses(tracklossConfig).extract(sources).cache()
-      }
-
-      operationsMetadata += {
-        OperationReporter
-          .report(
-            "trackloss",
-            List("DCIR"),
-            OperationTypes.AnyEvents,
-            tracklosses.toDF,
-            Path(config.output.outputSavePath),
-            config.output.saveMode
-          )
-      }
-
       val observations = {
-        // TODO: Observations only need and use drugPurchases.
-        val allEvents: Dataset[Event[AnyEvent]] = unionDatasets(
-          drugPurchases.as[Event[AnyEvent]],
-          diagnoses.as[Event[AnyEvent]]
-        )
-        new ObservationPeriodTransformer(config.observationPeriod).transform(allEvents).cache()
+        new ObservationPeriodTransformer(config.observationPeriod)
+          .transform(drugPurchases.as[Event[AnyEvent]])
+          .cache()
       }
 
       val patientsWithObservations = patients
-        .joinWith(observations, patients.col("patientId") === observations.col("patientId"))
+        .joinWith(observations,
+                  patients.col("patientId") === observations.col("patientId"))
 
       new FollowUpTransformer(config.followUp)
         .transform(patientsWithObservations, drugPurchases, outcomes, tracklosses)
@@ -164,17 +227,20 @@ object PioglitazoneMain extends Main {
         )
     }
 
+    // TODO: ancestors ? What's this ? This name needs some clarifications
     val filteredPatientsAncestors = new ListBuffer[String]
     val cnamPaperBaseCohort = {
       val firstFilterResult = if (config.filters.filterDelayedEntries) {
         filteredPatientsAncestors += "drug_purchases"
         val delayedFreePatients = patients
-          .filterDelayedPatients(drugPurchases, config.base.studyStart, config.filters.delayedEntryThreshold).cache()
+          .filterDelayedPatients(drugPurchases, config.base.studyStart,
+                                 config.filters.delayedEntryThreshold)
+          .cache()
 
         operationsMetadata += {
           OperationReporter
             .report(
-              "early_diabetics",
+              "initial_cohort",
               List("drug_purchases"),
               OperationTypes.Patients,
               delayedFreePatients.toDF,
@@ -191,12 +257,14 @@ object PioglitazoneMain extends Main {
 
         filteredPatientsAncestors ++= List("outcomes", "followup")
         val earlyDiagnosedPatients = firstFilterResult
-          .removeEarlyDiagnosedPatients(outcomes, followups, config.outcomes.cancerDefinition.toString).cache()
+          .removeEarlyDiagnosedPatients(outcomes, followups,
+                                        config.outcomes.cancerDefinition.toString)
+          .cache()
 
         operationsMetadata += {
           OperationReporter
             .report(
-              "diagnosed_before_follow_up_free",
+              "initial_cohort_with_follow_up",
               filteredPatientsAncestors.toList,
               OperationTypes.Patients,
               earlyDiagnosedPatients.toDF,
@@ -209,11 +277,11 @@ object PioglitazoneMain extends Main {
         firstFilterResult
       }
 
-      import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer.FollowUpDataset
       val cleanFollowUps = followups.cleanFollowUps()
       filteredPatientsAncestors += "clean_follow_up"
       secondFilterResult.joinWith(
-        cleanFollowUps, cleanFollowUps.col("patientId") === patients.col("patientId")
+        cleanFollowUps,
+        cleanFollowUps.col("patientId") === patients.col("patientId")
       )
     }
 
@@ -230,7 +298,8 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val exposures = new ExposuresTransformer(config.exposures).transform(cnamPaperBaseCohort, drugPurchases)
+    val exposures = new ExposuresTransformer(config.exposures)
+      .transform(cnamPaperBaseCohort, drugPurchases)
     operationsMetadata += {
       OperationReporter
         .report(
@@ -244,7 +313,8 @@ object PioglitazoneMain extends Main {
     }
 
     // Write Metadata
-    val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
+    val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(),
+                                operationsMetadata.toList)
     val metadataJson: String = metadata.toJsonString()
 
     new PrintWriter("metadata_pioglitazone_" + format.format(startTimestamp) + ".json") {

@@ -13,16 +13,15 @@ object DrugEventsTransformerHelper {
            "INSULINE DETEMIR"   |
            "INSULINE GLULISINE" |
            "INSULINE PORCINE"   |
-           "INSULINE LISPRO (PROTAMINE)" => "INSULINE"
-      case "DULAGLUTIDE"   |
-           "CARBUTAMIDE"   |
-           "VILDAGLIPTINE" |
-           "ASSOCIATIONS"  |
+           "INSULINE LISPRO (PROTAMINE)" |
+           "ASSOCIATIONS" => "INSULINE"
+      case "ACARBOSE"      |
            "MIGLITOL"      |
+           "DULAGLUTIDE"   |
            "REPAGLINIDE"   |
            "LIRAGLUTIDE"   |
-           "ACARBOSE"      |
            "EXENATIDE"     |
+           "VILDAGLIPTINE" |
            "SAXAGLIPTINE"  |
            "SITAGLIPTINE"   => "OTHER"
       case "GLIMEPIRIDE"  |
@@ -31,6 +30,7 @@ object DrugEventsTransformerHelper {
            "GLICLAZIDE"   |
            "GLIPIZIDE"    |
            "SULFAMIDES"   |
+           "CARBUTAMIDE"  |
            "GLIBENCLAMIDE" => "SULFONYLUREA"
       case "METFORMINE"                  => "METFORMINE"
       case "PIOGLITAZONE"                => "PIOGLITAZONE"

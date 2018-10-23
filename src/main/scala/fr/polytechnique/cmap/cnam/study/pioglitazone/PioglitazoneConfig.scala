@@ -37,9 +37,9 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
 
   /** Base fixed parameters for this study. */
   final object BaseConfig extends BaseConfig(
-    ageReferenceDate = LocalDate.of(2007, 1, 1),
-    studyStart = LocalDate.of(2006, 1, 1),
-    studyEnd = LocalDate.of(2010, 1, 1)
+    ageReferenceDate = LocalDate.of(2012, 1, 1),
+    studyStart = LocalDate.of(2011, 1, 1),
+    studyEnd = LocalDate.of(2013  , 1, 1)
   )
 
   /** Fixed parameters needed for the Patients extractors. */
