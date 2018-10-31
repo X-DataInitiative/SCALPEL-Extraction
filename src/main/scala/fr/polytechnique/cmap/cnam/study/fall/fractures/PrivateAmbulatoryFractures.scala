@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.study.fall
+package fr.polytechnique.cmap.cnam.study.fall.fractures
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events._

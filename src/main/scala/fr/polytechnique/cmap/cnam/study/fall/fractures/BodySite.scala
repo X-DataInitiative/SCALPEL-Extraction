@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.study.fall
+package fr.polytechnique.cmap.cnam.study.fall.fractures
 
 
 sealed trait CodeType

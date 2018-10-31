@@ -3,8 +3,7 @@ package fr.polytechnique.cmap.cnam.study.fall.fractures
 import me.danielpes.spark.datetime.implicits._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Outcome}
-import fr.polytechnique.cmap.cnam.study.fall.FracturesTransformerImplicits._
-import fr.polytechnique.cmap.cnam.study.fall.PrivateAmbulatoryFractures
+import fr.polytechnique.cmap.cnam.study.fall.fractures.FracturesTransformerImplicits._
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class FracturesImplicitsSuite extends SharedContext{
@@ -15,6 +14,8 @@ class FracturesImplicitsSuite extends SharedContext{
     //Given
     val data = Seq(
       Outcome("patientA", "FemurExclusionCol", PrivateAmbulatoryFractures.outcomeName, makeTS(2007, 1, 1)),
+      Outcome("patientA", "FemurExclusionCol", LiberalFractures.outcomeName, makeTS(2007, 1, 1)),
+      Outcome("patientA", "FemurExclusionCol", LiberalFractures.outcomeName, makeTS(2007, 2, 1)),
       Outcome("patientA", "FemurExclusionCol", PrivateAmbulatoryFractures.outcomeName, makeTS(2008, 2, 1)),
       Outcome("patientA", "FemurExclusionCol", PrivateAmbulatoryFractures.outcomeName, makeTS(2007, 5, 1)),
       Outcome("patientA", "FemurExclusionCol", PrivateAmbulatoryFractures.outcomeName, makeTS(2007, 3, 1)),
@@ -34,9 +35,11 @@ class FracturesImplicitsSuite extends SharedContext{
 
     //When
     val result = data.groupConsecutiveFractures(3.months)
+    val resultNoGroup = data.groupConsecutiveFractures(0.months)
 
     //Then
     assertDSs(result, expected)
+    assertDSs(resultNoGroup, data)
   }
 
   it should " not group fractures when the fall frame is 0" in {

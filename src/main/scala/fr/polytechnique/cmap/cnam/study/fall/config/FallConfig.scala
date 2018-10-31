@@ -11,7 +11,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.drugs._
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{DrugsConfig, ExposureConfig, FracturesConfig, SitesConfig}
-import fr.polytechnique.cmap.cnam.study.fall.{BodySite, BodySites}
+import fr.polytechnique.cmap.cnam.study.fall.fractures.{BodySite, BodySites}
 
 case class FallConfig(
   input: StudyConfig.InputPaths,

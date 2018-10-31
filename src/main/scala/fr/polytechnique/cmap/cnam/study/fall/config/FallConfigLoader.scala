@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.study.fall.config
 
 import fr.polytechnique.cmap.cnam.etl.config.ConfigLoader
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassificationLevel, DrugConfig}
-import fr.polytechnique.cmap.cnam.study.fall.BodySite
+import fr.polytechnique.cmap.cnam.study.fall.fractures.BodySite
 import pureconfig.ConfigReader
 
 class FallConfigLoader extends ConfigLoader{

@@ -17,6 +17,7 @@ import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransforme
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.follow_up.FallStudyFollowUps
+import fr.polytechnique.cmap.cnam.study.fall.fractures.FracturesTransformer
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
