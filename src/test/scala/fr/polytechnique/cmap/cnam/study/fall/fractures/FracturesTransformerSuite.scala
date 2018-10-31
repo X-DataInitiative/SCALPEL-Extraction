@@ -7,7 +7,6 @@ import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.study.fall.FallMain.CCAMExceptions
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.FracturesConfig
-import fr.polytechnique.cmap.cnam.study.fall.{FracturesTransformer, PrivateAmbulatoryFractures, PublicAmbulatoryFractures}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 

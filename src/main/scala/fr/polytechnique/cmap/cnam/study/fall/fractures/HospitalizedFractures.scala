@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.study.fall
+package fr.polytechnique.cmap.cnam.study.fall.fractures
 
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer

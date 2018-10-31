@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.study.fall.fractures
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Outcome}
-import fr.polytechnique.cmap.cnam.study.fall.PrivateAmbulatoryFractures
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class PrivateAmbulatoryFracturesSuite extends SharedContext {

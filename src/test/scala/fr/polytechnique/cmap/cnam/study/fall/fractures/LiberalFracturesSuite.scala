@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.study.fall.fractures
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.study.fall.LiberalFractures
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class LiberalFracturesSuite extends SharedContext {
