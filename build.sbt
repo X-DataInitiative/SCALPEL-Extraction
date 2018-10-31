@@ -1,9 +1,11 @@
 name := "SNIIRAM-featuring"
 
-version := "1.1"
+git.baseVersion := "1.1"
 
 scalaVersion := "2.11.12"
 val sparkVersion = "2.3.0"
+
+enablePlugins(GitVersioning)
 
 logLevel in compile := Level.Warn
 parallelExecution in Test := false
