@@ -1,8 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
-import org.apache.spark.sql.DataFrame
 import me.danielpes.spark.datetime.Period
-import me.danielpes.spark.datetime.implicits._
+import org.apache.spark.sql.DataFrame
 
 trait ExposurePeriodAdder {
 
@@ -19,10 +18,10 @@ trait ExposurePeriodAdder {
 
 abstract class ExposurePeriodAdderImpl(data: DataFrame) {
   def withStartEnd(
-      minPurchases: Int,
-      startDelay: Period,
-      purchasesWindow: Period,
-      endThresholdGc: Option[Period],
-      endDelay: Option[Period],
-      endThresholdNgc: Option[Period]): DataFrame
+    minPurchases: Int,
+    startDelay: Period,
+    purchasesWindow: Period,
+    endThresholdGc: Option[Period],
+    endThresholdNgc: Option[Period],
+    endDelay: Option[Period]): DataFrame
 }
