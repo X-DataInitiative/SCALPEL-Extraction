@@ -63,7 +63,21 @@ class PatientsSuite extends SharedContext {
       ("Patient_04", 2, 4, 1895, Some(makeTS(2020, 3, 13)))
     ).toDF("NUM_ENQ", "BEN_SEX_COD", "BEN_NAI_MOI", "BEN_NAI_ANN", "BEN_DCD_DTE")
 
-    val sources = new Sources(dcir = Some(dcirDf), mco = Some(mcoDf), irBen = Some(irBenDf))
+    val mcoceDf:DataFrame = Seq(
+      ("Patient_05", 1, 79, makeTS(2014, 4, 18)),
+      ("Patient_01", 1, 68, makeTS(2014, 1, 9)),
+      ("Patient_01", 1, 68, makeTS(2014, 2, 11)),
+      ("Patient_01", 1, 69, makeTS(2014, 7, 18)),
+      ("Patient_01", 1, 69, makeTS(2014, 12, 12)),
+      ("Patient_01", 1, 69, makeTS(2014, 4, 15)),
+      ("Patient_01", 1, 69, makeTS(2014, 10, 27)),
+      ("Patient_01", 1, 69, makeTS(2014, 4, 4)),
+      ("Patient_01", 1, 69, makeTS(2014, 11, 6)),
+      ("Patient_01", 1, 69, makeTS(2014, 5, 2)),
+      ("Patient_01", 1, 69, makeTS(2014, 9, 26))
+    ).toDF("NUM_ENQ", "MCO_FASTC__COD_SEX", "MCO_FASTC__AGE_ANN", "EXE_SOI_DTD")
+
+    val sources = new Sources(dcir = Some(dcirDf), mco = Some(mcoDf), irBen = Some(irBenDf), mcoCe = Some(mcoceDf))
 
     // When
     val result = new Patients(config).extract(sources).toDF
@@ -71,7 +85,8 @@ class PatientsSuite extends SharedContext {
       ("Patient_01", 1, makeTS(1945, 1, 1), None),
       ("Patient_02", 1, makeTS(1956, 2, 1), Some(makeTS(2009, 3, 13))),
       ("Patient_03", 2, makeTS(1937, 3, 1), Some(makeTS(1980, 4,  1))),
-      ("Patient_04", 2, makeTS(1966, 2, 1), Some(makeTS(2009, 3, 13)))
+      ("Patient_04", 2, makeTS(1966, 2, 1), Some(makeTS(2009, 3, 13))),
+      ("Patient_05", 1, makeTS(1935, 4, 1), None)
     ).toDF("patientID", "gender", "birthDate", "deathDate")
 
     // Then

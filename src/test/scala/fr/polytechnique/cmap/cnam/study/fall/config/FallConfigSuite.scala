@@ -12,7 +12,7 @@ class FallConfigSuite extends FlatSpec{
   val inputPaths = InputPaths(
     dcir = Some("src/test/resources/test-input/DCIR.parquet"),
     mco = Some("src/test/resources/test-input/MCO.parquet"),
-    mcoCe = None,
+    mcoCe = Some("src/test/resources/test-input/MCO_CE.parquet"),
     irBen = Some("src/test/resources/test-input/IR_BEN_R.parquet"),
     irImb = Some("src/test/resources/test-input/IR_IMB_R.parquet"),
     irPha = Some("src/test/resources/test-input/IR_PHA_R_With_molecules.parquet")
