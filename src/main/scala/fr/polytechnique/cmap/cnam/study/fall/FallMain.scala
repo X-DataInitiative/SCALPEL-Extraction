@@ -43,7 +43,7 @@ object FallMain extends Main with FractureCodes {
       logger.info("Patients")
       val patients = new Patients(PatientsConfig(fallConfig.base.studyStart)).extract(sources).cache()
       operationsMetadata += {
-        OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R"), OperationTypes.Patients, patients.toDF, Path(fallConfig.output.outputSavePath), fallConfig.output.saveMode)
+        OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R", "MCO_CE"), OperationTypes.Patients, patients.toDF, Path(fallConfig.output.outputSavePath), fallConfig.output.saveMode)
       }
       Some(patients)
     } else None
