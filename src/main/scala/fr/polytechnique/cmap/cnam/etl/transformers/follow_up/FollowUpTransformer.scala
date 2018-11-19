@@ -17,7 +17,7 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
   val outputColumns = List(
     col(PatientID),
     col(FollowUpStart).as(Start),
-    col(FollowUpEnd).as(Stop),
+    col(FollowUpEnd).as(End),
     col(EndReason)
   )
 

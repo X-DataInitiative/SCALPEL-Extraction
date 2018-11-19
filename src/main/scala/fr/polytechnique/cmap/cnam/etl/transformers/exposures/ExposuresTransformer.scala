@@ -40,7 +40,7 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
       col("Patient.birthDate").as(BirthDate),
       col("Patient.deathDate").as(DeathDate),
       col("FollowUp.start").as(FollowUpStart),
-      col("FollowUp.stop").as(FollowUpEnd)
+      col("FollowUp.end").as(FollowUpEnd)
     )
 
     val input = renameTupleColumns(patients).select(inputCols: _*).join(dispensations, Seq(PatientID))
