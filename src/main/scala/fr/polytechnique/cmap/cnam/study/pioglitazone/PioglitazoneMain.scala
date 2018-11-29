@@ -1,6 +1,8 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import java.io.PrintWriter
+import java.sql.Timestamp
+
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql.{Dataset, SQLContext}
@@ -127,7 +129,11 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val valid_dates = $"start" >= config.base.studyStart && $"end" >= config.base.studyStart && $"start" <= config.base.studyEnd && $"end" <= config.base.studyEnd
+    val studyStart = Timestamp.valueOf(config.base.studyStart.atStartOfDay())
+    val studyEnd = Timestamp.valueOf(config.base.studyEnd.atStartOfDay())
+    val validStart = $"start".between(studyStart, studyEnd)
+    val validEnd = $"end".between(studyStart, studyEnd)
+    val valid_dates = (validStart || validStart.isNull) && (validEnd || validEnd.isNull)
 
     val drugPurchases: Dataset[Event[Molecule]] = rawDrugPurchases.where(valid_dates).cache() // filter dates
     operationsMetadata += {
@@ -277,8 +283,18 @@ object PioglitazoneMain extends Main {
         firstFilterResult
       }
 
-      val cleanFollowUps = followups.cleanFollowUps()
-      filteredPatientsAncestors += "clean_follow_up"
+      val cleanFollowUps = followups.cleanFollowUps()  // Keep only followups for which start < stop
+      operationsMetadata += {
+        OperationReporter
+          .report(
+            "clean_followup",
+            List("followup"),
+            OperationTypes.AnyEvents,
+            cleanFollowUps.toDF,
+            Path(config.output.root)
+          )
+      }
+      filteredPatientsAncestors += "clean_followup"
       secondFilterResult.joinWith(
         cleanFollowUps,
         cleanFollowUps.col("patientId") === patients.col("patientId")

@@ -20,11 +20,13 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
     col(FollowUpEnd).as(End),
     col(EndReason)
   )
+//
+//  val followUpEndModelCandidates = if(config.firstTargetDisease)  // TODO: wtf this if / else ?
+//    List(col(TracklossDate), col(DeathDate), col(ObservationEnd), col(FirstTargetDiseaseDate))  // TODO: remove FirstTargetDiseaseDate here?
+//  else
+//    List(col(TracklossDate), col(DeathDate), col(ObservationEnd))
 
-  val followUpEndModelCandidates = if(config.firstTargetDisease)
-    List(col(TracklossDate), col(DeathDate), col(ObservationEnd), col(FirstTargetDiseaseDate))
-  else
-    List(col(TracklossDate), col(DeathDate), col(ObservationEnd))
+  val followUpEndModelCandidates = List(col(TracklossDate), col(DeathDate), col(ObservationEnd))
 
   def transform(
       patients: Dataset[(Patient, ObservationPeriod)],
