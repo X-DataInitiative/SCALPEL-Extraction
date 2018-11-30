@@ -116,7 +116,8 @@ object PioglitazoneMain extends Main {
 
     // Filtering: filter raw events to match study perimeter
 
-    val patients: Dataset[Patient] = rawPatients.cache() // TODO: age should be filtered here and not earlier, for now we keep it like this
+    val patients: Dataset[Patient] = rawPatients
+      .cache() // TODO: age should be filtered here and not earlier, for now we keep it like this
     operationsMetadata += {
       OperationReporter
         .report(
@@ -213,8 +214,10 @@ object PioglitazoneMain extends Main {
       }
 
       val patientsWithObservations = patients
-        .joinWith(observations,
-                  patients.col("patientId") === observations.col("patientId"))
+        .joinWith(
+          observations,
+          patients.col("patientId") === observations.col("patientId")
+        )
 
       new FollowUpTransformer(config.followUp)
         .transform(patientsWithObservations, drugPurchases, outcomes, tracklosses)
@@ -239,8 +242,7 @@ object PioglitazoneMain extends Main {
       val firstFilterResult = if (config.filters.filterDelayedEntries) {
         filteredPatientsAncestors += "drug_purchases"
         val delayedFreePatients = patients
-          .filterDelayedPatients(drugPurchases, config.base.studyStart,
-                                 config.filters.delayedEntryThreshold)
+          .filterDelayedPatients(drugPurchases, config.base.studyStart,config.filters.delayedEntryThreshold)
           .cache()
 
         operationsMetadata += {
@@ -263,8 +265,7 @@ object PioglitazoneMain extends Main {
 
         filteredPatientsAncestors ++= List("outcomes", "followup")
         val earlyDiagnosedPatients = firstFilterResult
-          .removeEarlyDiagnosedPatients(outcomes, followups,
-                                        config.outcomes.cancerDefinition.toString)
+          .removeEarlyDiagnosedPatients(outcomes, followups,config.outcomes.cancerDefinition.toString)
           .cache()
 
         operationsMetadata += {
@@ -283,7 +284,7 @@ object PioglitazoneMain extends Main {
         firstFilterResult
       }
 
-      val cleanFollowUps = followups.cleanFollowUps()  // Keep only followups for which start < stop
+      val cleanFollowUps = followups.cleanFollowUps() // Keep only followups for which start < stop
       operationsMetadata += {
         OperationReporter
           .report(
@@ -329,8 +330,10 @@ object PioglitazoneMain extends Main {
     }
 
     // Write Metadata
-    val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(),
-                                operationsMetadata.toList)
+    val metadata = MainMetadata(
+      this.getClass.getName, startTimestamp, new java.util.Date(),
+      operationsMetadata.toList
+    )
     val metadataJson: String = metadata.toJsonString()
 
     new PrintWriter("metadata_pioglitazone_" + format.format(startTimestamp) + ".json") {

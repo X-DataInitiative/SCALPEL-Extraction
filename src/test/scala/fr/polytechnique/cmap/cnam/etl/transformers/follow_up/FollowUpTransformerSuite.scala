@@ -229,7 +229,7 @@ class FollowUpTransformerSuite extends SharedContext {
       Outcome("patient03", "fall", makeTS(2010, 1, 1))
     ).toDS
     val expected = Seq(
-      FollowUp("Regis", makeTS(2006, 3, 1), makeTS(2007, 9, 1), "Disease"),
+      FollowUp("Regis", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd"),
       FollowUp("pika", makeTS(2006, 3, 1), makeTS(2008, 10, 1), "Death"),
       FollowUp("patient03", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd")
     ).toDS
