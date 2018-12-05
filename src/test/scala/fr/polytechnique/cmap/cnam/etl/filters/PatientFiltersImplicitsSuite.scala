@@ -9,7 +9,7 @@ import org.apache.spark.sql.Dataset
 
 class PatientFiltersImplicitsSuite extends SharedContext {
 
-  "filterEarlyDiagnosedPatients" should "keep only patients who has an outcome after the begining of their followup" in {
+  "filterEarlyDiagnosedPatients" should "keep only patients who have an outcome after the begining of their followup" in {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
