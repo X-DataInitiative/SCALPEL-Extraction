@@ -59,7 +59,8 @@ object PioglitazoneMain extends Main {
           List("DCIR", "MCO", "IR_BEN_R"),
           OperationTypes.Patients,
           rawPatients.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -71,7 +72,8 @@ object PioglitazoneMain extends Main {
           List("DCIR"),
           OperationTypes.Dispensations,
           rawDrugPurchases.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -83,7 +85,8 @@ object PioglitazoneMain extends Main {
           List("MCO", "IR_IMB_R"),
           OperationTypes.Diagnosis,
           rawDiagnoses.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -95,7 +98,8 @@ object PioglitazoneMain extends Main {
           List("DCIR", "MCO", "MCO_CE"),
           OperationTypes.MedicalActs,
           rawMedicalActs.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -110,14 +114,14 @@ object PioglitazoneMain extends Main {
           List("DCIR"),
           OperationTypes.AnyEvents,
           rawTracklosses.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
     // Filtering: filter raw events to match study perimeter
 
-    val patients: Dataset[Patient] = rawPatients
-      .cache() // TODO: age should be filtered here and not earlier, for now we keep it like this
+    val patients: Dataset[Patient] = rawPatients.cache() // TODO: age should be filtered here and not earlier, for now we keep it like this
     operationsMetadata += {
       OperationReporter
         .report(
@@ -183,7 +187,8 @@ object PioglitazoneMain extends Main {
           List("raw_trackloss"),
           OperationTypes.AnyEvents,
           rawTracklosses.toDF,
-          Path(config.output.root)
+          Path(config.output.outputSavePath),
+          config.output.saveMode
         )
     }
 
@@ -275,7 +280,8 @@ object PioglitazoneMain extends Main {
               filteredPatientsAncestors.toList,
               OperationTypes.Patients,
               earlyDiagnosedPatients.toDF,
-              Path(config.output.root)
+              Path(config.output.outputSavePath),
+              config.output.saveMode
             )
         }
         earlyDiagnosedPatients
@@ -292,7 +298,8 @@ object PioglitazoneMain extends Main {
             List("followup"),
             OperationTypes.AnyEvents,
             cleanFollowUps.toDF,
-            Path(config.output.root)
+            Path(config.output.outputSavePath),
+            config.output.saveMode
           )
       }
       filteredPatientsAncestors += "clean_followup"
