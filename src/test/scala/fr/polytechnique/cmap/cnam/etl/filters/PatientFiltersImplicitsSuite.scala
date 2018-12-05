@@ -9,7 +9,7 @@ import org.apache.spark.sql.Dataset
 
 class PatientFiltersImplicitsSuite extends SharedContext {
 
-  "filterEarlyDiagnosedPatients" should "drop patients who had an outcome before follow-up start" in {
+  "filterEarlyDiagnosedPatients" should "keep only patients who have an outcome after the begining of their followup" in {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -18,7 +18,10 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     val patients: Dataset[Patient] = Seq(
       Patient("Patient_A", 0, makeTS(1950, 1, 1), None),
       Patient("Patient_B", 0, makeTS(1940, 1, 1), Some(makeTS(2007, 1, 1))),
-      Patient("Patient_C", 0, makeTS(1945, 1, 1), None)
+      Patient("Patient_C", 0, makeTS(1945, 1, 1), None),
+      Patient("Patient_D", 0, makeTS(1945, 1, 1), None),
+      Patient("Patient_E", 0, makeTS(1945, 1, 1), None),
+      Patient("Patient_F", 0, makeTS(1945, 1, 1), None)
     ).toDS
 
     val outcomes: Dataset[Event[Outcome]] = Seq(
@@ -28,13 +31,15 @@ class PatientFiltersImplicitsSuite extends SharedContext {
       Outcome("Patient_B", "outcome_b", makeTS(2006, 8, 1)),
       Outcome("Patient_C", "outcome_b", makeTS(2006, 6, 1)),
       Outcome("Patient_C", "outcome_a", makeTS(2006, 9, 1)),
-      Outcome("Patient_C", "outcome_b", makeTS(2006, 10, 1))
+      Outcome("Patient_C", "outcome_b", makeTS(2006, 10, 1)),
+      Outcome("Patient_E", "outcome_a", makeTS(2006, 5, 1))
     ).toDS
 
     val followUpPeriods = Seq(
       FollowUp("Patient_A", makeTS(2006, 6, 1), makeTS(2009, 12, 31), "any_reason"),
       FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2009, 12, 31), "any_reason"),
-      FollowUp("Patient_C", makeTS(2006, 8, 1), makeTS(2009, 12, 31), "any_reason")
+      FollowUp("Patient_C", makeTS(2006, 8, 1), makeTS(2009, 12, 31), "any_reason"),
+      FollowUp("Patient_E", makeTS(2006, 8, 1), makeTS(2009, 12, 31), "any_reason")
     ).toDS
 
     val expected = Seq(
@@ -44,6 +49,54 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     // When
     val instance = new PatientFiltersImplicits(patients)
     val result = instance.filterEarlyDiagnosedPatients(outcomes, followUpPeriods, "outcome_a")
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "removeEarlyDiagnosedPatients" should "drop who had an outcome before follow-up start" in {
+
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val patients: Dataset[Patient] = Seq(
+      Patient("Patient_A", 0, makeTS(1950, 1, 1), None),
+      Patient("Patient_B", 0, makeTS(1940, 1, 1), Some(makeTS(2007, 1, 1))),
+      Patient("Patient_C", 0, makeTS(1945, 1, 1), None),
+      Patient("Patient_D", 0, makeTS(1945, 1, 1), None),
+      Patient("Patient_E", 0, makeTS(1945, 1, 1), None),
+      Patient("Patient_F", 0, makeTS(1945, 1, 1), None)
+    ).toDS
+
+    val outcomes: Dataset[Event[Outcome]] = Seq(
+      Outcome("Patient_A", "outcome_a", makeTS(2006, 5, 1)),
+      Outcome("Patient_B", "outcome_a", makeTS(2006, 6, 1)),
+      Outcome("Patient_B", "outcome_a", makeTS(2006, 7, 1)),
+      Outcome("Patient_B", "outcome_b", makeTS(2006, 8, 1)),
+      Outcome("Patient_C", "outcome_b", makeTS(2006, 6, 1)),
+      Outcome("Patient_C", "outcome_a", makeTS(2006, 9, 1)),
+      Outcome("Patient_C", "outcome_b", makeTS(2006, 10, 1)),
+      Outcome("Patient_E", "outcome_a", makeTS(2006, 5, 1))
+    ).toDS
+
+    val followUpPeriods = Seq(
+      FollowUp("Patient_A", makeTS(2006, 6, 1), makeTS(2009, 12, 31), "any_reason"),
+      FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2009, 12, 31), "any_reason"),
+      FollowUp("Patient_C", makeTS(2006, 8, 1), makeTS(2009, 12, 31), "any_reason"),
+      FollowUp("Patient_F", makeTS(2006, 8, 1), makeTS(2009, 12, 31), "any_reason")
+    ).toDS
+
+    val expected = Seq(
+      Patient("Patient_C", 0, makeTS(1945, 1, 1), None),
+      Patient("Patient_D", 0, makeTS(1945, 1, 1), None),
+      Patient("Patient_E", 0, makeTS(1945, 1, 1), None),
+      Patient("Patient_F", 0, makeTS(1945, 1, 1), None)
+    ).toDS
+
+    // When
+    val instance = new PatientFiltersImplicits(patients)
+    val result = instance.removeEarlyDiagnosedPatients(outcomes, followUpPeriods, "outcome_a")
 
     // Then
     assertDSs(result, expected)

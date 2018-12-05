@@ -26,6 +26,12 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
     }
   }
 
+  private def applyRemoves(patientsToRemove: Set[String]) = {
+    patients.filter {
+      patient => !patientsToRemove.contains(patient.patientID)
+    }
+  }
+
   /** Converts a Dataset[Patient] to a local set. Useful for filtering patients from an event Dataset by using set.contains().
     * @return A local set containing the patients
     */
@@ -70,6 +76,46 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
       .toSet
 
     applyContains(patientsToKeep)
+  }
+
+  /** Removes all patients with an outcome event before the start of their follow-up period.
+    * @param outcomes A dataset of outcomes
+    * @param followUpPeriods A dataset containing the follow-up periods of the patients
+    * @param outcomeName The name of the outcome to find
+    * @return a Dataset of patients with the unwanted patients removed
+    */
+  def removeEarlyDiagnosedPatients(
+    outcomes: Dataset[Event[Outcome]],
+    followUpPeriods: Dataset[FollowUp],
+    outcomeName: String): Dataset[Patient] = {
+
+    val joined = outcomes.joinWith(
+      followUpPeriods, outcomes.col("patientID") === followUpPeriods.col("patientID")
+    )
+    val patientId = s"Event.${Event.Columns.PatientID}"
+    val followUpStart = "FollowUp.start"
+    val outcomeDate = s"Event.${Event.Columns.Start}"
+    val value = s"Event.${Event.Columns.Value}"
+
+    val window = Window.partitionBy(patientId)
+
+    val diseaseFilter: Column = min(
+      when(
+        col(value) === outcomeName &&
+          col(outcomeDate) < col(followUpStart), lit(0)
+      ).otherwise(lit(1))
+    ).over(window).cast(BooleanType)
+
+    val patientsToRemove: Set[String] = renameTupleColumns(joined)
+      .withColumn("filter", diseaseFilter)
+      .where(!col("filter"))
+      .select(patientId)
+      .distinct
+      .as[String]
+      .collect()
+      .toSet
+
+    applyRemoves(patientsToRemove)
   }
 
   /** Removes all patients who haven't got a dispensation event within N months after the study start.

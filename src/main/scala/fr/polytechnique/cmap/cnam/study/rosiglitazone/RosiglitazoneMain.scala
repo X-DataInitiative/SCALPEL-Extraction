@@ -177,10 +177,10 @@ object RosiglitazoneMain extends Main {
 
       if (config.filters.filterDiagnosedPatients) {
         filteredPatientsAncestors ++= List("outcomes", "followup")
-        firstFilterResult.filterEarlyDiagnosedPatients(outcomes, followups, config.outcomes.outcomeDefinition.toString)
+        firstFilterResult.removeEarlyDiagnosedPatients(outcomes, followups, config.outcomes.outcomeDefinition.toString)
       }
       else
-        patients
+        firstFilterResult
     }
     operationsMetadata += {
       OperationReporter

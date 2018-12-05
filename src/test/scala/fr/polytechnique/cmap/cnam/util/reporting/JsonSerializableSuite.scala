@@ -73,7 +73,6 @@ class JsonSerializableSuite extends FlatSpec with Locales {
     val result = input.toJsonString(pretify = false)
 
     // Then
-    println(result)
     assert(result == expected)
   }
 }

@@ -14,23 +14,16 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
 
   import Columns._
 
-  val outputColumns = List(
-    col(PatientID),
-    col(FollowUpStart).as(Start),
-    col(FollowUpEnd).as(End),
-    col(EndReason)
-  )
 
-  val followUpEndModelCandidates = if(config.firstTargetDisease)
-    List(col(TracklossDate), col(DeathDate), col(ObservationEnd), col(FirstTargetDiseaseDate))
-  else
-    List(col(TracklossDate), col(DeathDate), col(ObservationEnd))
+  val outputColumns = List(col(PatientID), col(FollowUpStart).as(Start), col(FollowUpEnd).as(End), col(EndReason))
+
+  val followUpEndModelCandidates = List(col(TracklossDate), col(DeathDate), col(ObservationEnd))
 
   def transform(
-      patients: Dataset[(Patient, ObservationPeriod)],
-      dispensations: Dataset[Event[Molecule]],
-      outcomes: Dataset[Event[Outcome]],
-      tracklosses: Dataset[Event[Trackloss]]): Dataset[FollowUp] = {
+    patients: Dataset[(Patient, ObservationPeriod)],
+    dispensations: Dataset[Event[Molecule]],
+    outcomes: Dataset[Event[Outcome]],
+    tracklosses: Dataset[Event[Trackloss]]): Dataset[FollowUp] = {
 
     import FollowUpTransformer._
 
@@ -46,13 +39,13 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
       .union(tracklosses.toDF)
 
     val input = renameTupleColumns(patients)
-      .select(inputCols:_*)
+      .select(inputCols: _*)
       .join(events, Seq(PatientID))
 
     val window = Window.partitionBy(PatientID)
 
     val firstTargetDiseaseDate = min(
-        when(col(Category) === Outcome.category && col(Value).contains(config.outcomeName.getOrElse(None)), col(Start))
+      when(col(Category) === Outcome.category && col(Value).contains(config.outcomeName.getOrElse(None)), col(Start))
     ).over(window)
 
     import input.sqlContext.implicits._
@@ -61,7 +54,7 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
       .withFollowUpStart(config.delayMonths)
       .withTrackloss
       .withColumn(FirstTargetDiseaseDate, firstTargetDiseaseDate)
-      .withColumn(FollowUpEnd,  minColumn(followUpEndModelCandidates:_*))
+      .withColumn(FollowUpEnd, minColumn(followUpEndModelCandidates: _*))
       .na.drop("any", Seq(FollowUpStart, FollowUpEnd))
       .withEndReason
       .select(outputColumns: _*)
@@ -71,6 +64,7 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
 }
 
 object FollowUpTransformer {
+
   import Columns._
 
   implicit class FollowUpDataFrame(data: DataFrame) {
@@ -107,5 +101,11 @@ object FollowUpTransformer {
 
       data.withColumn(EndReason, endReason)
     }
+
   }
+
+  implicit class FollowUpDataset(followups: Dataset[FollowUp]) {
+    def cleanFollowUps(): Dataset[FollowUp] = followups.filter(_.isValid)
+  }
+
 }
