@@ -59,13 +59,38 @@ class Patients(config: PatientsConfig) {
     val age = floor(months_between(lit(ageReferenceDate), birthDate) / 12)
     val filterPatientsByAge = age >= config.minAge && age < config.maxAge
 
-    patients.where(filterPatientsByAge)
+    val filteredPatients = patients.where(filterPatientsByAge)
       .select(
         patientID.as("patientID"),
         gender.as("gender"),
         birthDate.as("birthDate"),
         deathDate.as("deathDate")
-      ).as[Patient]
+      )
+
+    sources.mcoCe match {
+      case None => filteredPatients.as[Patient]
+      case Some(mcoce) =>
+        val mcocePatients = McocePatients
+          .extract(mcoce, config.minGender, config.maxGender, config.minYear, config.maxYear)
+          .toDF()
+          .as("mco_ce")
+
+        val allPatients = filteredPatients.as("patients")
+          .join(mcocePatients, col("patients.patientID") === col("mco_ce.patientID"), "full")
+
+        val idCol = coalesce(col("patients.patientID"), col("mco_ce.patientID"))
+          .alias("patientID")
+        val genderCol = coalesce(col("patients.gender"), col("mco_ce.gender"))
+          .alias("gender")
+        val birthDateCol = coalesce(col("patients.birthDate"), col("mco_ce.birthDate"))
+          .alias("birthDate")
+        val deathDateCol = coalesce(col("patients.deathDate"), col("mco_ce.deathDate"))
+          .alias("deathDate")
+
+        allPatients.select(idCol, genderCol, birthDateCol, deathDateCol)
+          .filter(col("patientID").isNotNull && col("gender").isNotNull && col("birthDate").isNotNull)
+          .as[Patient]
+    }
   }
 }
 
