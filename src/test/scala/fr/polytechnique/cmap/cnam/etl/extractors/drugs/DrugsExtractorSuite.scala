@@ -222,8 +222,8 @@ class DrugsExtractorSuite extends SharedContext{
       .withColumn("molecule_combination", lit(""))
     ), dcir = Some(inputDF))
 
-    val drugConfigAntidepresseurs: DrugConfig = Antidepresseurs
-    val drugConfigNeuroleptiques: DrugConfig = Neuroleptiques
+    val drugConfigAntidepresseurs: DrugClassConfig = Antidepresseurs
+    val drugConfigNeuroleptiques: DrugClassConfig = Neuroleptiques
     val drugConf = DrugsConfig(TherapeuticLevel, List(drugConfigAntidepresseurs, drugConfigNeuroleptiques))
     // When
     val result = new DrugsExtractor(drugConf).extract(source)
@@ -267,8 +267,8 @@ class DrugsExtractorSuite extends SharedContext{
         .withColumn("molecule_combination", lit(""))
     ), dcir = Some(inputDF))
 
-    val drugConfigAntidepresseurs: DrugConfig = Antidepresseurs
-    val drugConfigNeuroleptiques: DrugConfig = Neuroleptiques
+    val drugConfigAntidepresseurs: DrugClassConfig = Antidepresseurs
+    val drugConfigNeuroleptiques: DrugClassConfig = Neuroleptiques
     val drugConf = DrugsConfig(PharmacologicalLevel, List(drugConfigAntidepresseurs, drugConfigNeuroleptiques))
     // When
     val result = new DrugsExtractor(drugConf).extract(source)
@@ -313,8 +313,8 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "molecule_combination", "PHA_CND_TOP")
     ), dcir = Some(inputDF))
 
-    val drugConfigAntidepresseurs: DrugConfig = Antidepresseurs
-    val drugConfigNeuroleptiques: DrugConfig = Neuroleptiques
+    val drugConfigAntidepresseurs: DrugClassConfig = Antidepresseurs
+    val drugConfigNeuroleptiques: DrugClassConfig = Neuroleptiques
     val drugConf = DrugsConfig(MoleculeLevel, List(drugConfigAntidepresseurs, drugConfigNeuroleptiques))
     // When
     val result = new DrugsExtractor(drugConf).extract(source)
@@ -357,8 +357,8 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "molecule_combination", "PHA_CND_TOP")
     ), dcir = Some(inputDF))
 
-    val drugConfigAntidepresseurs: DrugConfig = Antidepresseurs
-    val drugConfigNeuroleptiques: DrugConfig = Neuroleptiques
+    val drugConfigAntidepresseurs: DrugClassConfig = Antidepresseurs
+    val drugConfigNeuroleptiques: DrugClassConfig = Neuroleptiques
     val drugConf = DrugsConfig(MoleculeCombinationLevel, List(drugConfigAntidepresseurs, drugConfigNeuroleptiques))
     // When
     val result = new DrugsExtractor(drugConf).extract(source)

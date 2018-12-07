@@ -59,7 +59,7 @@ object FallConfig extends FallConfigLoader with FractureCodes {
   /** parameters needed for drugs extractor **/
   case class DrugsConfig(
     level: DrugClassificationLevel = TherapeuticLevel,
-    families: List[DrugConfig] = List(Antihypertenseurs, Antidepresseurs, Neuroleptiques, Hypnotiques))
+    families: List[DrugClassConfig] = List(Antihypertenseurs, Antidepresseurs, Neuroleptiques, Hypnotiques))
 
   /** Parameters needed for the Exposure Transformer **/
   case class ExposureConfig(
