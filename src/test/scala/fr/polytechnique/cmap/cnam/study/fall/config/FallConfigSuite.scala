@@ -7,7 +7,7 @@ import org.scalatest.FlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.PharmacologicalLevel
 
-class FallConfigSuite extends FlatSpec{
+class FallConfigSuite extends FlatSpec {
 
   val inputPaths = InputPaths(
     dcir = Some("src/test/resources/test-input/DCIR.parquet"),
@@ -34,36 +34,37 @@ class FallConfigSuite extends FlatSpec{
     //Given
     val defaultConf = FallConfig.load("", "test")
     val tempPath = "target/test.conf"
-    val stringConfig = """
-                         | input {
-                         |   mco: "new/in/path"
-                         | }
-                         | output {
-                         |   root: "new/out/path"
-                         | }
-                         | exposures {
-                         |    min_purchases: 2           // 1+ (Usually 1 or 2)
-                         |    start_delay: 0 months      // 0+ (Usually between 0 and 3). Represents the delay in months between a dispensation and its exposure start date.
-                         |    purchases_window: 0 months // 0+ (Usually 0 or 6) Represents the window size in months. Ignored when min_purchases=1.
-                         |    end_threshold_gc: 90 days  // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
-                         |    end_threshold_ngc: 30 days // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
-                         |    end_delay: 30 days         // Number of periods that we add to the exposure end to delay it (lag).
-                         |  }
-                         |  patients {
-                         |  start_gap_in_months: 2
-                         |  }
-                         |  drugs {
-                         |    level: "Pharmacological"
-                         |    families: ["Antihypertenseurs", "Antidepresseurs", "Neuroleptiques", "Hypnotiques"]
-                         |  }
-                         |  sites {
-                         |    sites: ["BodySites"]
-                         |  }
-                         |  run_parameters {
-                         |    outcome: ["Acts", "Diagnoses", "Outcomes"] // pipeline of calculation of outcome, possible values : Acts, Diagnoses, and Outcomes
-                         |    exposure: ["Patients", "DrugPurchases", "Exposures"] // pipeline of the calculation of exposure, possible values : Patients, StartGapPatients, DrugPurchases, Exposures
-                         |  }
-                         |  """.trim.stripMargin
+    val stringConfig =
+      """
+        | input {
+        |   mco: "new/in/path"
+        | }
+        | output {
+        |   root: "new/out/path"
+        | }
+        | exposures {
+        |    min_purchases: 2           // 1+ (Usually 1 or 2)
+        |    start_delay: 0 months      // 0+ (Usually between 0 and 3). Represents the delay in months between a dispensation and its exposure start date.
+        |    purchases_window: 0 months // 0+ (Usually 0 or 6) Represents the window size in months. Ignored when min_purchases=1.
+        |    end_threshold_gc: 90 days  // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
+        |    end_threshold_ngc: 30 days // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
+        |    end_delay: 30 days         // Number of periods that we add to the exposure end to delay it (lag).
+        |  }
+        |  patients {
+        |  start_gap_in_months: 2
+        |  }
+        |  drugs {
+        |    level: "Pharmacological"
+        |    families: ["Antihypertenseurs", "Antidepresseurs", "Neuroleptiques", "Hypnotiques"]
+        |  }
+        |  sites {
+        |    sites: ["BodySites"]
+        |  }
+        |  run_parameters {
+        |    outcome: ["Acts", "Diagnoses", "Outcomes"] // pipeline of calculation of outcome, possible values : Acts, Diagnoses, and Outcomes
+        |    exposure: ["Patients", "DrugPurchases", "Exposures"] // pipeline of the calculation of exposure, possible values : Patients, StartGapPatients, DrugPurchases, Exposures
+        |  }
+        |  """.trim.stripMargin
 
     val expected = defaultConf.copy(
       input = defaultConf.input.copy(

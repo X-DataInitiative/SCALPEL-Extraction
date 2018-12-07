@@ -7,10 +7,10 @@ import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs._
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassConfig, DrugClassificationLevel, DrugConfig, TherapeuticLevel}
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
 import fr.polytechnique.cmap.cnam.study.fall.codes._
-import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{DrugsConfig, ExposureConfig, FracturesConfig, SitesConfig}
+import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{ExposureConfig, FracturesConfig, SitesConfig, DrugsConfig}
 import fr.polytechnique.cmap.cnam.study.fall.fractures.{BodySite, BodySites}
 
 case class FallConfig(
@@ -58,8 +58,13 @@ object FallConfig extends FallConfigLoader with FractureCodes {
 
   /** parameters needed for drugs extractor **/
   case class DrugsConfig(
-    level: DrugClassificationLevel = TherapeuticLevel,
-    families: List[DrugClassConfig] = List(Antihypertenseurs, Antidepresseurs, Neuroleptiques, Hypnotiques))
+    override val level: DrugClassificationLevel = TherapeuticLevel,
+    override val families: List[DrugClassConfig] = List(
+      Antihypertenseurs,
+      Antidepresseurs,
+      Neuroleptiques,
+      Hypnotiques
+    )) extends DrugConfig(level = level, families = families)
 
   /** Parameters needed for the Exposure Transformer **/
   case class ExposureConfig(
