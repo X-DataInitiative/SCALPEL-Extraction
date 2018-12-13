@@ -8,6 +8,7 @@ import me.danielpes.spark.datetime.Period
 import me.danielpes.spark.datetime.implicits._
 import pureconfig._
 import pureconfig.configurable.{localDateConfigConvert, localDateTimeConfigConvert}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugClassificationLevel
 
 trait ConfigLoader {
 
@@ -37,6 +38,10 @@ trait ConfigLoader {
       case "month" | "months" => n.months
     }
   }
+
+  //For reading DrugClassificationLevels
+  implicit val drugClassificationLevelReader: ConfigReader[DrugClassificationLevel] = ConfigReader[String].map(level =>
+    DrugClassificationLevel.fromString(level))
 
   /*
    * Internal method for loading and merging the user config file + the default config

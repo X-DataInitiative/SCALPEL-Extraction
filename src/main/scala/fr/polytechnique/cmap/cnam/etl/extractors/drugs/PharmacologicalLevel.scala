@@ -4,7 +4,7 @@ import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
 
 object PharmacologicalLevel extends DrugClassificationLevel {
 
-  override def apply(purchase: Purchase, families: List[DrugConfig]): List[Event[Drug]] = {
+  override def apply(purchase: Purchase, families: List[DrugClassConfig]): List[Event[Drug]] = {
 
     val filteredFamilies = families
       .flatMap(_.pharmacologicalClasses)

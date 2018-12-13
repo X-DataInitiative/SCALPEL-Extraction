@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.study.fall.codes
 
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugConfig, PharmacologicalClassConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassConfig, PharmacologicalClassConfig}
 
-object Hypnotiques extends DrugConfig {
+object Hypnotiques extends DrugClassConfig {
 
   val name = "Hypnotiques"
 
