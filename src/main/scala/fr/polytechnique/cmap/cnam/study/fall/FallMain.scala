@@ -8,6 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, Outcome}
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActs
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.Diagnoses
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugsExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.{HospitalStayConfig, HospitalStayExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
@@ -25,6 +26,17 @@ import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadat
 object FallMain extends Main with FractureCodes {
 
   override def appName: String = "fall study"
+
+  def computeHospitalStays(sources: Sources, fallConfig: FallConfig): mutable.Buffer[OperationMetadata] = {
+    val operationsMetadata = mutable.Buffer[OperationMetadata]()
+    if (fallConfig.runParameters.hospitalStays) {
+      val hospitalStays = new HospitalStayExtractor(HospitalStayConfig(fallConfig.base.studyStart, fallConfig.base.studyEnd)).extract(sources)
+      operationsMetadata += {
+        OperationReporter.report("extract_hospital_stays", List("MCO"), OperationTypes.HospitalStays, hospitalStays.toDF, Path(fallConfig.output.outputSavePath), fallConfig.output.saveMode)
+      }
+    }
+    operationsMetadata
+  }
 
   def computeExposures(sources: Sources, fallConfig: FallConfig): mutable.Buffer[OperationMetadata] = {
 
@@ -122,7 +134,7 @@ object FallMain extends Main with FractureCodes {
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
 
-    val operationsMetadata = computeOutcomes(sources, fallConfig) ++ computeExposures(sources, fallConfig)
+    val operationsMetadata = computeHospitalStays(sources, fallConfig) ++ computeOutcomes(sources, fallConfig) ++ computeExposures(sources, fallConfig)
 
     dcir.unpersist()
     mco.unpersist()

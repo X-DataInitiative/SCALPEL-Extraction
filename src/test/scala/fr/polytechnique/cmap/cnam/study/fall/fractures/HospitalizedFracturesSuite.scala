@@ -98,7 +98,7 @@ class HospitalizedFracturesSuite extends SharedContext{
     ).toDS
 
     val badStays = Seq(
-      HospitalStay("Pierre", "3")
+      HospitalStayID("Pierre", "3")
     ).toDS
 
     val expected = List(

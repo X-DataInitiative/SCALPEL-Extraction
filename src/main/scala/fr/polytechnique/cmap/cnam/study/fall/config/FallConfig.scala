@@ -98,10 +98,12 @@ object FallConfig extends FallConfigLoader with FractureCodes {
   /** Parameters if run the calculation of outcome or exposure **/
   case class RunConfig(
     outcome: List[String] = List("Acts", "Diagnoses", "Outcomes"),
-    exposure: List[String] = List("Patients", "StartGapPatients", "DrugPurchases", "Exposures")) {
+    exposure: List[String] = List("Patients", "StartGapPatients", "DrugPurchases", "Exposures"),
+    hospitalStay: List[String] = List("HospitalStay")) {
     //exposures
     val patients: Boolean = exposure contains "Patients"
     val drugPurchases: Boolean = exposure contains "DrugPurchases"
+    val hospitalStays: Boolean = hospitalStay contains "HospitalStay"
     val startGapPatients: Boolean = List("DrugPurchases", "Patients", "StartGapPatients").forall(exposure.contains)
     val exposures: Boolean = List("Patients", "DrugPurchases", "Exposures").forall(exposure.contains)
     //outcomes

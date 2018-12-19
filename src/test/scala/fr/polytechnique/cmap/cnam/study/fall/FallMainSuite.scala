@@ -76,4 +76,24 @@ class FallMainSuite extends SharedContext {
     assert(expectedOutputTypes.forall(resultOutputTypes.contains))
   }
 
+  "computeHospitalStays" should "return meta data" in {
+    //Given
+    val fallConfig = FallConfig.load("", "test")
+
+    import implicits.SourceReader
+    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input))
+    val expectedOutputPaths = List("target/test/output/extract_hospital_stays/data")
+    val expectedOutputTypes = List("hospital stays")
+
+    //When
+    val result = FallMain.computeHospitalStays(sources, fallConfig)
+    val resultOutputPaths = result.map(_.outputPath.getOrElse("")).toList
+    val resultOutputTypes = result.map(_.outputType.toString).toList
+
+    //Then
+    assert(expectedOutputPaths.forall(resultOutputPaths.contains))
+    assert(expectedOutputTypes.forall(resultOutputTypes.contains))
+  }
+
+
 }
