@@ -2,7 +2,6 @@ package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import java.io.PrintWriter
 import java.sql.Timestamp
-
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql.{Dataset, SQLContext}
@@ -10,6 +9,7 @@ import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActs
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.Diagnoses
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.{HospitalStayConfig, HospitalStayExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.Patients
 import fr.polytechnique.cmap.cnam.etl.extractors.tracklosses.{Tracklosses, TracklossesConfig}
@@ -117,6 +117,16 @@ object PioglitazoneMain extends Main {
           Path(config.output.outputSavePath),
           config.output.saveMode
         )
+    }
+
+    val rawHospitalStays = new HospitalStayExtractor(HospitalStayConfig(config.base.studyStart, config.base.studyEnd)).extract(sources)
+    operationsMetadata += {
+      OperationReporter.report("extract_hospital_stays",
+        List("MCO"),
+        OperationTypes.HospitalStays,
+        rawHospitalStays.toDF,
+        Path(config.output.outputSavePath),
+        config.output.saveMode)
     }
 
     // Filtering: filter raw events to match study perimeter
@@ -247,7 +257,7 @@ object PioglitazoneMain extends Main {
       val firstFilterResult = if (config.filters.filterDelayedEntries) {
         filteredPatientsAncestors += "drug_purchases"
         val delayedFreePatients = patients
-          .filterDelayedPatients(drugPurchases, config.base.studyStart,config.filters.delayedEntryThreshold)
+          .filterDelayedPatients(drugPurchases, config.base.studyStart, config.filters.delayedEntryThreshold)
           .cache()
 
         operationsMetadata += {
@@ -270,7 +280,7 @@ object PioglitazoneMain extends Main {
 
         filteredPatientsAncestors ++= List("outcomes", "followup")
         val earlyDiagnosedPatients = firstFilterResult
-          .removeEarlyDiagnosedPatients(outcomes, followups,config.outcomes.cancerDefinition.toString)
+          .removeEarlyDiagnosedPatients(outcomes, followups, config.outcomes.cancerDefinition.toString)
           .cache()
 
         operationsMetadata += {

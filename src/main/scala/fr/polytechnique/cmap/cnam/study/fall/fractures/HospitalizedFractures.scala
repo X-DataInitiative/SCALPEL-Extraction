@@ -11,7 +11,7 @@ import org.apache.spark.sql.functions._
  * https://datainitiative.atlassian.net/wiki/spaces/CFC/pages/61282101/General+fractures+Fall+study
  */
 
-case class HospitalStay(patientID: String, id: String)
+case class HospitalStayID(patientID: String, id: String)
 
 object HospitalizedFractures extends OutcomesTransformer with FractureCodes {
 
@@ -40,7 +40,7 @@ object HospitalizedFractures extends OutcomesTransformer with FractureCodes {
     */
   def filterHospitalStay(
       events: Dataset[Event[Diagnosis]],
-      incorrectGHMStays: Dataset[HospitalStay])
+      incorrectGHMStays: Dataset[HospitalStayID])
     : Dataset[Event[Diagnosis]] = {
 
     val spark: SparkSession = events.sparkSession
@@ -72,7 +72,7 @@ object HospitalizedFractures extends OutcomesTransformer with FractureCodes {
 
     val incorrectGHMStays = acts
       .filter(isBadGHM _)
-      .map(event => HospitalStay(event.patientID, event.groupID))
+      .map(event => HospitalStayID(event.patientID, event.groupID))
       .distinct()
 
     filterHospitalStay(correctCIM10Event, incorrectGHMStays)
