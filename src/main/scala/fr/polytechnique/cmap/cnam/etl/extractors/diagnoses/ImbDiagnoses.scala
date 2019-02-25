@@ -5,6 +5,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, ImbDiagnosis}
 import fr.polytechnique.cmap.cnam.util.datetime
 
+@deprecated("I said so")
 private[diagnoses] object ImbDiagnoses {
 
   final object ColNames {

@@ -5,6 +5,8 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
 import org.apache.spark.sql.Dataset
 
+
+@deprecated("I said so")
 class Diagnoses(config: DiagnosesConfig) {
 
   def extract(sources: Sources): Dataset[Event[Diagnosis]] = {

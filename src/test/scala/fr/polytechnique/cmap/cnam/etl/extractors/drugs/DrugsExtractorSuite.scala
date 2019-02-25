@@ -34,12 +34,12 @@ class DrugsExtractorSuite extends SharedContext{
       .withColumn("molecule_combination", lit(""))
     ), dcir = Some(inputDF))
 
-    val expected: Dataset[Purchase] = Seq(
-      Purchase("patient1", "9111111111111", "toto", makeTS(2014, 5, 1), "", 1),
-      Purchase("patient2", "3400935183644", "toto", makeTS(2014, 6, 1), "", 2),
-      Purchase("patient3", "3400935418487", "toto", makeTS(2014, 7, 1), "", 1),
-      Purchase("patient4", "3400935183644", "toto", makeTS(2014, 8, 1), "", 2),
-      Purchase("patient8", "3400936889651", "toto", makeTS(2014, 9, 1), "", 1)
+    val expected: Dataset[PurchaseDAO] = Seq(
+      PurchaseDAO("patient1", "9111111111111", "toto", makeTS(2014, 5, 1), "", 1),
+      PurchaseDAO("patient2", "3400935183644", "toto", makeTS(2014, 6, 1), "", 2),
+      PurchaseDAO("patient3", "3400935418487", "toto", makeTS(2014, 7, 1), "", 1),
+      PurchaseDAO("patient4", "3400935183644", "toto", makeTS(2014, 8, 1), "", 2),
+      PurchaseDAO("patient8", "3400936889651", "toto", makeTS(2014, 9, 1), "", 1)
     ).toDS()
 
     val drugConf = DrugConfig(TherapeuticLevel, List())

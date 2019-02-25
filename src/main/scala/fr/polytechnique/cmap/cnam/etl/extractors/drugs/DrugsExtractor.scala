@@ -6,11 +6,10 @@ import org.apache.spark.sql.types.{StringType, TimestampType}
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
-
+@deprecated("I said so")
 class DrugsExtractor(drugConfig: DrugConfig) extends java.io.Serializable{
 
-
-  def formatSource(sources : Sources): Dataset[Purchase] = {
+  def formatSource(sources : Sources): Dataset[PurchaseDAO] = {
 
     val neededColumns: List[Column] = List(
       col("NUM_ENQ").cast(StringType).as("patientID"),
@@ -32,15 +31,13 @@ class DrugsExtractor(drugConfig: DrugConfig) extends java.io.Serializable{
       .select(neededColumns: _*)
       .withColumn("conditioning", when(col("conditioning") === "GC", 1).otherwise(2))
       .na.drop(Seq("eventDate", "CIP13", "ATC5"))
-      .as[Purchase]
+      .as[PurchaseDAO]
   }
 
   def extract(sources : Sources): Dataset[Event[Drug]] = {
-
     val drugPurchases = formatSource(sources)
     val spark: SparkSession = drugPurchases.sparkSession
     import spark.implicits._
     drugPurchases.flatMap(purchase => drugConfig.level(purchase, drugConfig.families))
-
   }
 }

@@ -7,6 +7,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.EventRowExtractor
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
 
+@deprecated("I said so")
 trait McoEventRowExtractor extends EventRowExtractor with McoSource {
 
   protected type Extractor = Row => Option[String]
@@ -63,5 +64,4 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
         )
       }.distinct
   }
-
 }

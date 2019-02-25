@@ -5,6 +5,7 @@ import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.events._
 
+@deprecated("I said so")
 private[acts] object McoCEMedicalActs {
 
   final object ColNames {

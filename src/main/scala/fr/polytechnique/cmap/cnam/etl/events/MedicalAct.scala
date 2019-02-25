@@ -37,7 +37,6 @@ object DcirAct extends MedicalAct {
     val Liberal = "liberal"
     val DcirAct = "DCIR_act" // For legacy purpose, works with old DCIR schemas
   }
-
 }
 
 object McoCCAMAct extends MedicalAct {

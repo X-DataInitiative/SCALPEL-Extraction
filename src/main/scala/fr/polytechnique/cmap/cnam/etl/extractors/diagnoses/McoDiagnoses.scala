@@ -4,6 +4,7 @@ import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoEventRowExtractor
 
+@deprecated("I said so")
 private[diagnoses] case class McoDiagnoses(
   dpCodes: Seq[String],
   drCodes: Seq[String],

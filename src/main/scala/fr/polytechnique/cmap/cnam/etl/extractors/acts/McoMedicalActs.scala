@@ -4,6 +4,7 @@ import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.events.{MedicalAct, _}
 import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoEventRowExtractor
 
+@deprecated("probaby")
 private[acts] case class McoMedicalActs(cimCodes: Seq[String], ccamCodes: Seq[String]) extends McoEventRowExtractor {
 
   override def extractorCols: List[String] = List(ColNames.DP, ColNames.CCAM)
