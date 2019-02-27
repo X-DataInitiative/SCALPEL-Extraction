@@ -10,7 +10,7 @@ class McoPatientsSuite extends SharedContext {
 
   import fr.polytechnique.cmap.cnam.etl.extractors.patients.McoPatients.McoPatientsDataFrame
 
-  "getDeathDates" should "collect death dates correctly from flat MCO" in {
+    "getDeathDates" should "collect death dates correctly from flat MCO" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 

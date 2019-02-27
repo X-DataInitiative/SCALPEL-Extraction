@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.study.fall.codes
+package fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification
 
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassConfig, PharmacologicalClassConfig}
 

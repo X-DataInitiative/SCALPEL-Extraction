@@ -7,6 +7,7 @@ import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, MedicalAct}
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class DcirMedicalActsSuite extends SharedContext {
@@ -28,44 +29,42 @@ class DcirMedicalActsSuite extends SharedContext {
       StructField(ColNames.Date, DateType) :: Nil
   )
 
-  "medicalActFromRow" should "return a Medical Act event when it's found in the row" in {
+  "isInStudy" should "return true when a study code is found in the row" in {
 
     // Given
-    val codes = List("AAAA", "BBBB")
+    val codes = Set("AAAA", "BBBB")
     val inputArray = Array[Any]("Patient_A", "AAAA", null, null, null, makeTS(2010, 1, 1))
     val inputRow = new GenericRowWithSchema(inputArray, schema)
-    val expected = Some(DcirAct("Patient_A", DcirAct.groupID.Liberal, "AAAA", makeTS(2010, 1, 1)))
 
     // When
-    val result = DcirMedicalActs.medicalActFromRow(codes)(inputRow)
+    val result = NewDcirMedicalActExtractor.isInStudy(codes)(inputRow)
 
     // Then
-    assert(result == expected)
+    assert(result)
   }
 
-  it should "return None when no code is found in the row" in {
+  it should "return false when no code is found in the row" in {
 
     // Given
-    val codes = List("AAAA", "BBBB")
+    val codes = Set("AAAA", "BBBB")
     val inputArray = Array[Any]("Patient_A", "CCCC", 1D, 0D, 1D, makeTS(2010, 1, 1))
     val inputRow = new GenericRowWithSchema(inputArray, schema)
 
     // When
-    val result = DcirMedicalActs.medicalActFromRow(codes)(inputRow)
+    val result = NewDcirMedicalActExtractor.isInStudy(codes)(inputRow)
 
     // Then
-    assert(result.isEmpty)
+    assert(!result)
   }
 
-  it should "return a DCIR act if the event is in a older version of DCIR" in {
+  "builder" should "return a DCIR act if the event is in a older version of DCIR" in {
     // Given
-    val codes = List("AAAA", "BBBB")
     val inputArray = Array[Any]("Patient_A", "AAAA", makeTS(2010, 1, 1))
     val inputRow = new GenericRowWithSchema(inputArray, oldSchema)
-    val expected = Some(DcirAct("Patient_A", DcirAct.groupID.DcirAct, "AAAA", makeTS(2010, 1, 1)))
+    val expected = Seq(DcirAct("Patient_A", DcirAct.groupID.DcirAct, "AAAA", makeTS(2010, 1, 1)))
 
     // When
-    val result = DcirMedicalActs.medicalActFromRow(codes)(inputRow)
+    val result = NewDcirMedicalActExtractor.builder(inputRow)
 
     // Then
     assert(result == expected)
@@ -79,7 +78,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = 3D
 
     // When
-    val result = DcirMedicalActs.getGHS(input)
+    val result = NewDcirMedicalActExtractor.getGHS(input)
 
     // Then
     assert(result == expected)
@@ -93,7 +92,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = 3D
 
     // When
-    val result = DcirMedicalActs.getSector(input)
+    val result = NewDcirMedicalActExtractor.getSector(input)
 
     // Then
     assert(result == expected)
@@ -107,7 +106,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = 52D
 
     // When
-    val result = DcirMedicalActs.getInstitutionCode(input)
+    val result = NewDcirMedicalActExtractor.getInstitutionCode(input)
 
     // Then
     assert(result == expected)
@@ -123,26 +122,26 @@ class DcirMedicalActsSuite extends SharedContext {
     )
     val array = Array[Any](0D, 2D, 6D)
     val input = new GenericRowWithSchema(array, schema)
-    val expected = Success(Some(DcirAct.groupID.PrivateAmbulatory))
+    val expected = Success(DcirAct.groupID.PrivateAmbulatory)
 
     // When
-    val result = DcirMedicalActs.getGroupId(input)
+    val result = NewDcirMedicalActExtractor.getGroupId(input)
 
     // Then
     assert(result == expected)
 
   }
 
-  it should "return Success(None) if it is public related" in {
+  it should "return Success(PublicAmbulatory) if it is public related" in {
     // Given
     val schema = StructType(StructField(ColNames.Sector, StringType) :: Nil)
     val array = Array[Any](1D)
     val input = new GenericRowWithSchema(array, schema)
     // When
-    val result = DcirMedicalActs.getGroupId(input)
+    val result = NewDcirMedicalActExtractor.getGroupId(input)
 
     // Then
-    result.success.value shouldBe None
+    result.success.value shouldBe DcirAct.groupID.PublicAmbulatory
   }
 
   it should "return IllegalArgumentException if the information of source of act is unavailable in DCIR" in {
@@ -154,7 +153,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val array = Array[Any](0D, 2D, 6D)
     val input = new GenericRowWithSchema(array, schema)
     // When
-    val result = DcirMedicalActs.getGroupId(input)
+    val result = NewDcirMedicalActExtractor.getGroupId(input)
 
     // Then
     result.failure.exception shouldBe an [IllegalArgumentException]
@@ -166,7 +165,7 @@ class DcirMedicalActsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val codes = List("AAAA", "CCCC")
+    val codes = Set("AAAA", "CCCC")
 
     val input = Seq(
       ("Patient_A", "AAAA", makeTS(2010, 1, 1), None, None, None),
@@ -177,6 +176,8 @@ class DcirMedicalActsSuite extends SharedContext {
     ).toDF(ColNames.PatientID, ColNames.CamCode, ColNames.Date,
       ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector)
 
+    val sources = Sources(dcir = Some(input))
+
     val expected = Seq[Event[MedicalAct]](
       DcirAct("Patient_A", DcirAct.groupID.Liberal, "AAAA", makeTS(2010, 1, 1)),
       DcirAct("Patient_B", DcirAct.groupID.Liberal, "CCCC", makeTS(2010, 3, 1)),
@@ -184,7 +185,7 @@ class DcirMedicalActsSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = DcirMedicalActs.extract(input, codes)
+    val result = NewDcirMedicalActExtractor.extract(sources, codes)
 
     // Then
     assertDSs(result, expected)

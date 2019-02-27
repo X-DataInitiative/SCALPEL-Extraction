@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.drugs
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.Drug
-import fr.polytechnique.cmap.cnam.study.fall.codes.Antidepresseurs
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.Antidepresseurs
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class MoleculeSuite extends SharedContext {

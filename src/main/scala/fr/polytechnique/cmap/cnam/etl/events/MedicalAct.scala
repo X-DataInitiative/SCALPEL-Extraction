@@ -6,7 +6,7 @@ import org.apache.spark.sql.Row
 
 trait MedicalAct extends AnyEvent with EventBuilder {
 
-  val category: EventCategory[MedicalAct]
+  override val category: EventCategory[MedicalAct]
 
   def fromRow(
       r: Row,
@@ -14,7 +14,7 @@ trait MedicalAct extends AnyEvent with EventBuilder {
       groupIDCol: String = "groupID",
       codeCol: String = "code",
       dateCol: String = "eventDate"): Event[MedicalAct] = {
-    apply(
+    this.apply(
       r.getAs[String](patientIDCol),
       r.getAs[String](groupIDCol),
       r.getAs[String](codeCol),
@@ -28,7 +28,7 @@ trait MedicalAct extends AnyEvent with EventBuilder {
 }
 
 object DcirAct extends MedicalAct {
-  val category: EventCategory[MedicalAct] = "dcir_act"
+  override val category: EventCategory[MedicalAct] = "dcir_act"
 
   object groupID {
     val PrivateAmbulatory = "private_ambulatory"
@@ -36,6 +36,7 @@ object DcirAct extends MedicalAct {
     val PrivateHospital = "private_hospital"
     val Liberal = "liberal"
     val DcirAct = "DCIR_act" // For legacy purpose, works with old DCIR schemas
+    val Unknown = "Unknown_source"
   }
 
 }

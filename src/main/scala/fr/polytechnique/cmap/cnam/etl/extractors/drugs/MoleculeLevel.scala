@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.drugs
 
+import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
 
 object MoleculeLevel extends DrugClassificationLevel {
@@ -14,4 +15,6 @@ object MoleculeLevel extends DrugClassificationLevel {
     }
     else List.empty
   }
+
+  override def getClassification(families: Seq[DrugClassConfig])(row: Row): Seq[String] = ???
 }

@@ -30,18 +30,6 @@ trait McoSource extends ColumnNames {
     val EstimatedStayStart: ColName = "estimated_start"
   }
 
-  final val eventBuilder: Map[ColName, EventBuilder] = Map(
-    ColNames.DP -> MainDiagnosis,
-    ColNames.DR -> LinkedDiagnosis,
-    ColNames.DA -> AssociatedDiagnosis
-  )
-
-  val colNameFromConfig: Map[String, ColName] = Map(
-    "dp" -> ColNames.DP,
-    "dr" -> ColNames.DR,
-    "da" -> ColNames.DA
-  )
-
   implicit class McoDataFrame(df: DataFrame) {
 
     /**

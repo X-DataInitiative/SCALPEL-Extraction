@@ -23,6 +23,7 @@ private[acts] object DcirMedicalActs {
     dcir.flatMap(medicalActFromRow(ccamCodes))
   }
 
+
   def medicalActFromRow(ccamCodes: Seq[String])(r: Row): Option[Event[MedicalAct]] = {
 
     val foundCode: Option[String] = ccamCodes.find {
@@ -30,14 +31,11 @@ private[acts] object DcirMedicalActs {
       !r.isNullAt(idx) && r.getString(idx).startsWith(_)
     }
 
-    foundCode match {
-      case None => None
-      case Some(code) =>
-        val groupID = {
-          getGroupId(r) recover {
-            case _:IllegalArgumentException => Some(DcirAct.groupID.DcirAct)
-          }
-        }
+    foundCode.flatMap {
+      code =>
+
+        val groupID = {getGroupId(r) recover { case _:IllegalArgumentException => Some(DcirAct.groupID.DcirAct) }}
+
         groupID.get.map { groupIDValue =>
           DcirAct(
             patientID = r.getAs[String](ColNames.PatientID),
