@@ -118,7 +118,7 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     *
     * @param path The path of the given file.
     * @param env  The environment in the config file (usually can be "cmap", "cnam" or "test").
-    * @return An instance of PioglitazoneConfig containing all parameters.
+    * @return An instance of FallConfig containing all parameters.
     */
   def load(path: String, env: String): FallConfig = {
     val defaultPath = "config/fall/default.conf"

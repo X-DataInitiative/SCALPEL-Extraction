@@ -48,17 +48,21 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
     import input.sqlContext.implicits._
 
     input.toDF
-
-      .where(col(Start) <= col(FollowUpEnd)) // This ignores all purchases aftet the followup End
-      .withStartEnd(minPurchases, startDelay, purchasesWindow, endThresholdGc, endDelay, endThresholdNgc)
+      .where(col(Start) <= col(FollowUpEnd)) // This ignores all purchases after the followup End
+      .withStartEnd(minPurchases, startDelay, purchasesWindow, endThresholdGc, endThresholdNgc, endDelay)
       .where(col(ExposureStart) =!= col(ExposureEnd)) // This also removes rows where exposureStart = null
+      .withColumn(
+        "Correct_Exposure_End",
+        when(col(FollowUpEnd) < col(ExposureEnd), col(FollowUpEnd)).otherwise(col(ExposureEnd))
+      ).drop(ExposureEnd) // This makes sure that all the exposures end at the followup end date
+      .withColumnRenamed("Correct_Exposure_End", ExposureEnd)
       .aggregateWeight(
-      cumulativeExposureWindow,
-      cumulativeStartThreshold,
-      cumulativeEndThreshold,
-      dosageLevelIntervals,
-      purchaseIntervals
-    )
+        cumulativeExposureWindow,
+        cumulativeStartThreshold,
+        cumulativeEndThreshold,
+        dosageLevelIntervals,
+        purchaseIntervals
+      )
       .map(
         Exposure.fromRow(
           _,

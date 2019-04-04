@@ -31,17 +31,17 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
     ).toDF(PatientID, Value, Start, Weight)
 
     val expected = Seq(
-      ("A", "P", makeTS(2008, 1, 1), 1.0, "first", makeTS(2008, 2, 1)),
-      ("A", "P", makeTS(2008, 2, 1), 1.0, "last", makeTS(2008, 3, 1)),
-      ("A", "P", makeTS(2008, 5, 1), 1.0, "first", makeTS(2008, 6, 1)),
-      ("A", "P", makeTS(2008, 7, 1), 1.0, "last", makeTS(2008, 8, 1)),
-      ("A", "P", makeTS(2009, 1, 1), 1.0, "first", makeTS(2009, 2, 1)),
-      ("A", "P", makeTS(2009, 7, 1), 1.0, "first", makeTS(2009, 8, 1)),
-      ("A", "P", makeTS(2009, 8, 1), 1.0, "last", makeTS(2009, 9, 1)),
-      ("A", "S", makeTS(2008, 2, 1), 1.0, "first", makeTS(2008, 3, 1))
+      ("A", "P", makeTS(2008, 1, 1), 1.0, "first", makeTS(2008, 2, 11)),
+      ("A", "P", makeTS(2008, 2, 1), 1.0, "last", makeTS(2008, 3, 11)),
+      ("A", "P", makeTS(2008, 5, 1), 1.0, "first", makeTS(2008, 6, 11)),
+      ("A", "P", makeTS(2008, 7, 1), 1.0, "last", makeTS(2008, 8, 11)),
+      ("A", "P", makeTS(2009, 1, 1), 1.0, "first", makeTS(2009, 2, 11)),
+      ("A", "P", makeTS(2009, 7, 1), 1.0, "first", makeTS(2009, 8, 11)),
+      ("A", "P", makeTS(2009, 8, 1), 1.0, "last", makeTS(2009, 9, 11)),
+      ("A", "S", makeTS(2008, 2, 1), 1.0, "first", makeTS(2008, 3, 11))
     ).toDF(PatientID, Value, Start, Weight, "Status", "purchaseReach")
 
-    val result = mockInstance.getFirstAndLastPurchase(input, 1.month, 3.months)
+    val result = mockInstance.getFirstAndLastPurchase(input, 1.months, 3.month, 10.days)
 
     assertDFs(expected, result)
   }
@@ -93,15 +93,15 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
     ).toDF(PatientID, Value, Start, Weight)
 
     val expected = Seq(
-      ("A", "P", makeTS(2008, 1, 1), 1.0, makeTS(2008, 1, 1), makeTS(2008, 3, 1)),
-      ("A", "P", makeTS(2008, 5, 1), 1.0, makeTS(2008, 5, 1), makeTS(2008, 8, 1)),
-      ("A", "P", makeTS(2009, 1, 1), 1.0, makeTS(2009, 1, 1), makeTS(2009, 2, 1)),
-      ("A", "P", makeTS(2009, 7, 1), 1.0, makeTS(2009, 7, 1), makeTS(2009, 9, 1)),
-      ("A", "S", makeTS(2008, 2, 1), 1.0, makeTS(2008, 2, 1), makeTS(2008, 3, 1))
+      ("A", "P", makeTS(2008, 1, 1), 1.0, makeTS(2008, 1, 1), makeTS(2008, 3, 11)),
+      ("A", "P", makeTS(2008, 5, 1), 1.0, makeTS(2008, 5, 1), makeTS(2008, 8, 11)),
+      ("A", "P", makeTS(2009, 1, 1), 1.0, makeTS(2009, 1, 1), makeTS(2009, 2, 11)),
+      ("A", "P", makeTS(2009, 7, 1), 1.0, makeTS(2009, 7, 1), makeTS(2009, 9, 11)),
+      ("A", "S", makeTS(2008, 2, 1), 1.0, makeTS(2008, 2, 1), makeTS(2008, 3, 11))
     ).toDF(PatientID, Value, Start, Weight, ExposureStart, ExposureEnd)
 
     val result = new LimitedExposurePeriodAdder(input)
-      .withStartEnd(0, 0.months, 0.months, Some(1.months), Some(3.months), Some(0.months))
+      .withStartEnd(0, 0.months, 0.months, Some(1.months), Some(3.months), Some(10.days))
 
     assertDFs(expected, result)
   }

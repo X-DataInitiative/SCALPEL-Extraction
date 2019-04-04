@@ -8,15 +8,24 @@ import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 
 object FallStudyFollowUps {
   def transform(
-      patients: Dataset[Patient],
-      studyStart: Timestamp,
-      studyEnd: Timestamp,
-      startDelay: Int = 0): Dataset[(Patient, FollowUp)] = {
+    patients: Dataset[Patient],
+    studyStart: Timestamp,
+    studyEnd: Timestamp,
+    startDelay: Int = 0): Dataset[(Patient, FollowUp)] = {
 
     import patients.sparkSession.implicits._
+    val startDate = (studyStart + startDelay.months).get
     patients.map { patient =>
-      val endReason = if (patient.deathDate.isDefined) "death" else "study_end"
-      (patient, FollowUp(patient.patientID, (studyStart + startDelay.months).get, patient.deathDate.getOrElse(studyEnd), endReason))
+      val endReason = if ((patient.deathDate.isDefined) && (patient.deathDate.get.before(studyEnd))) {
+        "death"
+      } else {
+        "study_end"
+      }
+      val endDate = endReason match {
+        case "death" => patient.deathDate.get
+        case "study_end" => studyEnd
+      }
+      (patient, FollowUp(patient.patientID, startDate, endDate, endReason))
     }
   }
 }

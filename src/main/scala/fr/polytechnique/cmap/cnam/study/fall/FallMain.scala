@@ -30,9 +30,22 @@ object FallMain extends Main with FractureCodes {
   def computeHospitalStays(sources: Sources, fallConfig: FallConfig): mutable.Buffer[OperationMetadata] = {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
     if (fallConfig.runParameters.hospitalStays) {
-      val hospitalStays = new HospitalStayExtractor(HospitalStayConfig(fallConfig.base.studyStart, fallConfig.base.studyEnd)).extract(sources)
+      val hospitalStays = new HospitalStayExtractor(
+        HospitalStayConfig(
+          fallConfig.base.studyStart,
+          fallConfig.base.studyEnd
+        )
+      ).extract(sources)
       operationsMetadata += {
-        OperationReporter.report("extract_hospital_stays", List("MCO"), OperationTypes.HospitalStays, hospitalStays.toDF, Path(fallConfig.output.outputSavePath), fallConfig.output.saveMode)
+        OperationReporter
+          .report(
+            "extract_hospital_stays",
+            List("MCO"),
+            OperationTypes.HospitalStays,
+            hospitalStays.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
       }
     }
     operationsMetadata
@@ -43,41 +56,93 @@ object FallMain extends Main with FractureCodes {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
     val optionDrugPurchases = if (fallConfig.runParameters.drugPurchases) {
-      logger.info("Drug Purchases")
       val drugPurchases = new DrugsExtractor(fallConfig.drugs).extract(sources).cache()
       operationsMetadata += {
-        OperationReporter.report("drug_purchases", List("DCIR"), OperationTypes.Dispensations, drugPurchases.toDF, Path(fallConfig.output.outputSavePath), fallConfig.output.saveMode)
+        OperationReporter
+          .report(
+            "drug_purchases",
+            List("DCIR"),
+            OperationTypes.Dispensations,
+            drugPurchases.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
       }
       Some(drugPurchases)
-    } else None
+    } else {
+      None
+    }
 
     val optionPatients = if (fallConfig.runParameters.patients) {
-      logger.info("Patients")
       val patients = new Patients(PatientsConfig(fallConfig.base.studyStart)).extract(sources).cache()
       operationsMetadata += {
-        OperationReporter.report("extract_patients", List("DCIR", "MCO", "IR_BEN_R", "MCO_CE"), OperationTypes.Patients, patients.toDF, Path(fallConfig.output.outputSavePath), fallConfig.output.saveMode)
+        OperationReporter
+          .report(
+            "extract_patients",
+            List("DCIR", "MCO", "IR_BEN_R", "MCO_CE"),
+            OperationTypes.Patients,
+            patients.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
       }
       Some(patients)
-    } else None
+    } else {
+      None
+    }
 
     if (fallConfig.runParameters.startGapPatients) {
-      logger.info("Start Gap Patients")
       import PatientFilters._
-      val filteredPatients: Dataset[Patient] = optionPatients.get.filterNoStartGap(optionDrugPurchases.get, fallConfig.base.studyStart, fallConfig.patients.startGapInMonths)
+      val filteredPatients: Dataset[Patient] = optionPatients.get
+        .filterNoStartGap(optionDrugPurchases.get, fallConfig.base.studyStart, fallConfig.patients.startGapInMonths)
       operationsMetadata += {
-        OperationReporter.report("filter_patients", List("drug_purchases", "extract_patients"), OperationTypes.Patients, filteredPatients.toDF, Path(fallConfig.output.outputSavePath), fallConfig.output.saveMode)
+        OperationReporter
+          .report(
+            "filter_patients",
+            List("drug_purchases", "extract_patients"),
+            OperationTypes.Patients,
+            filteredPatients.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
       }
     }
 
     if (fallConfig.runParameters.exposures) {
-      logger.info("Exposures")
       val exposures = {
         val definition = fallConfig.exposures
-        val patientsWithFollowUp = FallStudyFollowUps.transform(optionPatients.get, fallConfig.base.studyStart, fallConfig.base.studyEnd, fallConfig.patients.followupStartDelay)
+        val patientsWithFollowUp = FallStudyFollowUps
+          .transform(
+            optionPatients.get,
+            fallConfig.base.studyStart,
+            fallConfig.base.studyEnd,
+            fallConfig.patients.followupStartDelay
+          )
+        import patientsWithFollowUp.sparkSession.sqlContext.implicits._
+        val followUps = patientsWithFollowUp.map(_._2)
+        operationsMetadata += {
+          OperationReporter
+            .report(
+              "follow_up",
+              List("extract_patients"),
+              OperationTypes.AnyEvents,
+              followUps.toDF,
+              Path(fallConfig.output.outputSavePath),
+              fallConfig.output.saveMode
+            )
+        }
         new ExposuresTransformer(definition).transform(patientsWithFollowUp, optionDrugPurchases.get)
       }
       operationsMetadata += {
-        OperationReporter.report("exposures", List("drug_purchases"), OperationTypes.Exposures, exposures.toDF, Path(fallConfig.output.outputSavePath), fallConfig.output.saveMode)
+        OperationReporter
+          .report(
+            "exposures",
+            List("drug_purchases"),
+            OperationTypes.Exposures,
+            exposures.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
       }
     }
 
@@ -89,33 +154,67 @@ object FallMain extends Main with FractureCodes {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
     val optionDiagnoses = if (fallConfig.runParameters.diagnoses) {
-      logger.info("diagnoses")
       val diagnoses = new Diagnoses(fallConfig.diagnoses).extract(sources).persist()
       operationsMetadata += {
-        OperationReporter.report("diagnoses", List("MCO", "IR_IMB_R"), OperationTypes.Diagnosis, diagnoses.toDF, Path(fallConfig.output.outputSavePath), fallConfig.output.saveMode)
+        OperationReporter
+          .report(
+            "diagnoses",
+            List("MCO", "IR_IMB_R"),
+            OperationTypes.Diagnosis,
+            diagnoses.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
       }
       Some(diagnoses)
-    } else None
+    } else {
+      None
+    }
 
     val (optionLiberalActs, optionActs) = if (fallConfig.runParameters.acts) {
-      logger.info("Medical Acts")
       val acts = new MedicalActs(fallConfig.medicalActs).extract(sources).persist()
       operationsMetadata += {
-        OperationReporter.report("acts", List("DCIR", "MCO", "MCO_CE"), OperationTypes.MedicalActs, acts.toDF, Path(fallConfig.output.outputSavePath), fallConfig.output.saveMode)
+        OperationReporter
+          .report(
+            "acts",
+            List("DCIR", "MCO", "MCO_CE"),
+            OperationTypes.MedicalActs,
+            acts.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
       }
-      logger.info("Liberal Medical Acts")
-      val liberalActs = acts.filter(act => act.groupID == DcirAct.groupID.Liberal && !CCAMExceptions.contains(act.value)).persist()
+      val liberalActs = acts
+        .filter(act => act.groupID == DcirAct.groupID.Liberal && !CCAMExceptions.contains(act.value)).persist()
       operationsMetadata += {
-        OperationReporter.report("liberal_acts", List("acts"), OperationTypes.MedicalActs, liberalActs.toDF, Path(fallConfig.output.outputSavePath), fallConfig.output.saveMode)
+        OperationReporter
+          .report(
+            "liberal_acts",
+            List("acts"),
+            OperationTypes.MedicalActs,
+            liberalActs.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
       }
       (Some(acts), Some(liberalActs))
-    } else (None, None)
+    } else {
+      (None, None)
+    }
 
     if (fallConfig.runParameters.outcomes) {
-      logger.info("Fractures")
-      val fractures: Dataset[Event[Outcome]] = new FracturesTransformer(fallConfig).transform(optionLiberalActs.get, optionActs.get, optionDiagnoses.get)
+      val fractures: Dataset[Event[Outcome]] = new FracturesTransformer(fallConfig)
+        .transform(optionLiberalActs.get, optionActs.get, optionDiagnoses.get)
       operationsMetadata += {
-        OperationReporter.report("fractures", List("acts"), OperationTypes.Outcomes, fractures.toDF, Path(fallConfig.output.outputSavePath), fallConfig.output.saveMode)
+        OperationReporter
+          .report(
+            "fractures",
+            List("acts"),
+            OperationTypes.Outcomes,
+            fractures.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
       }
     }
 
@@ -128,13 +227,15 @@ object FallMain extends Main with FractureCodes {
     val startTimestamp = new java.util.Date()
     val fallConfig = FallConfig.load(argsMap("conf"), argsMap("env"))
 
-    logger.info("Reading sources")
     import implicits.SourceReader
     val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input))
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
 
-    val operationsMetadata = computeHospitalStays(sources, fallConfig) ++ computeOutcomes(sources, fallConfig) ++ computeExposures(sources, fallConfig)
+    val operationsMetadata = computeHospitalStays(sources, fallConfig) ++ computeOutcomes(
+      sources,
+      fallConfig
+    ) ++ computeExposures(sources, fallConfig)
 
     dcir.unpersist()
     mco.unpersist()

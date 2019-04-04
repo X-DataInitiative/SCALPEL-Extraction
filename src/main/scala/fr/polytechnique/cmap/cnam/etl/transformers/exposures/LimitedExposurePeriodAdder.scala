@@ -27,7 +27,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       .drop("Status", "purchaseReach")
   }
 
-  def getFirstAndLastPurchase(drugPurchases: DataFrame, endThresholdGc: Period, endThresholdNgc: Period): DataFrame = {
+  def getFirstAndLastPurchase(drugPurchases: DataFrame, endThresholdGc: Period, endThresholdNgc: Period, endDelay: Period): DataFrame = {
     val status = coalesce(
       when(col("previousPurchaseDate").isNull, "first"),
       when(col("previousPurchaseReach") < col(Start), "first"),
@@ -40,8 +40,8 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
       .withColumn("previousPurchaseDate", lag(col(Start), 1).over(orderedWindow))
       .withColumn(
         "purchaseReach",
-        when(col("weight") === 1, col(Start).addPeriod(endThresholdGc))
-          .otherwise(col(Start).addPeriod(endThresholdNgc))
+        when(col("weight") === 1, col(Start).addPeriod(endThresholdGc).addPeriod(endDelay))
+          .otherwise(col(Start).addPeriod(endThresholdNgc).addPeriod(endDelay))
       )
       .withColumn("previousPurchaseReach", lag(col("purchaseReach"), 1).over(orderedWindow))
       .withColumn("Status", status)
@@ -66,7 +66,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
     * @param purchasesWindow : Not used.
     * @param endThresholdGc  : the period that defines the reach for Grand Condtionnement.
     * @param endThresholdNgc : the period that defines the reach for Non Grand Condtionnement.
-    * @param endDelay        : Not Used
+    * @param endDelay        : period added to the end of an exposure.
     * @return: A DataFrame of Exposures.
     */
   def withStartEnd(
@@ -80,7 +80,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
 
     val outputColumns = (data.columns.toList ++ List(ExposureStart, ExposureEnd)).map(col)
 
-    val firstLastPurchase = getFirstAndLastPurchase(data, endThresholdGc.get, endThresholdNgc.get)
+    val firstLastPurchase = getFirstAndLastPurchase(data, endThresholdGc.get, endThresholdNgc.get, endDelay.get)
 
     toExposure(firstLastPurchase).select(outputColumns: _*)
   }
