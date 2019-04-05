@@ -20,5 +20,6 @@ object DrugClassificationLevel{
       case "Therapeutic" => TherapeuticLevel
       case "Pharmacological" => PharmacologicalLevel
       case "MoleculeCombination" => MoleculeCombinationLevel
+      case "CIP13" => Cip13Level
   }
 }

@@ -8,6 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.acts.{NewDcirMedicalActExtracto
 import fr.polytechnique.cmap.cnam.etl.extractors.classifications.NewGhmExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses._
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.NewDrugExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.{HospitalStayConfig, HospitalStayExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
@@ -31,6 +32,34 @@ object BulkMain extends Main {
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
+    val drugs = new NewDrugExtractor(bulkConfig.drugs).extract(sources, Set.empty).cache()
+
+    operationsMetadata += {
+      OperationReporter.report(
+        "Drugs",
+        List("DCIR"),
+        OperationTypes.Dispensations,
+        drugs.toDF,
+        Path(bulkConfig.output.outputSavePath),
+        bulkConfig.output.saveMode
+      )
+    }
+
+    drugs.unpersist()
+
+    val hospitalStays = new HospitalStayExtractor(HospitalStayConfig()).extract(sources)
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "extract_hospital_stays",
+          List("MCO"),
+          OperationTypes.HospitalStays,
+          hospitalStays.toDF,
+          Path(bulkConfig.output.outputSavePath),
+          bulkConfig.output.saveMode
+        )
+    }
+
     val dcirMedicalAct = NewDcirMedicalActExtractor.extract(sources, Set.empty).cache()
 
     operationsMetadata += {
@@ -45,7 +74,7 @@ object BulkMain extends Main {
     }
 
     dcirMedicalAct.unpersist()
-/*
+
 
     val cimMedicalAct = NewMcoCimMedicalActExtractor.extract(sources, Set.empty).cache()
 
@@ -108,22 +137,6 @@ object BulkMain extends Main {
     }
 
     imbActs.unpersist()
-
-    val drugs = new NewDrugExtractor(bulkConfig.drugs).extract(sources, Set.empty).cache()
-
-    operationsMetadata += {
-      OperationReporter.report(
-        "Drugs",
-        List("DCIR"),
-        OperationTypes.Dispensations,
-        drugs.toDF,
-        Path(bulkConfig.output.outputSavePath),
-        bulkConfig.output.saveMode
-      )
-    }
-
-    drugs.unpersist()
-
 
     val classification = NewGhmExtractor.extract(sources, Set.empty).cache()
 
@@ -194,7 +207,7 @@ object BulkMain extends Main {
       )
     }
     patients.unpersist()
-*/
+
 
     // Write Metadata
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)

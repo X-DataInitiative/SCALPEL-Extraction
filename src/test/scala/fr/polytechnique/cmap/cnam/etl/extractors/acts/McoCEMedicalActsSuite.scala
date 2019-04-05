@@ -79,7 +79,4 @@ class McoCEMedicalActsSuite extends SharedContext {
     // Then
     assertDSs(expected, result)
   }
-
-
-
 }
