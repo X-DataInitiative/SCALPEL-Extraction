@@ -5,9 +5,6 @@ import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, Outcome}
-import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActs
-import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.Diagnoses
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugsExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.{HospitalStayConfig, HospitalStayExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
@@ -19,6 +16,7 @@ import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.follow_up.FallStudyFollowUps
 import fr.polytechnique.cmap.cnam.study.fall.fractures.FracturesTransformer
+import fr.polytechnique.cmap.cnam.study.fall.extractors._
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
@@ -154,7 +152,8 @@ object FallMain extends Main with FractureCodes {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
     val optionDiagnoses = if (fallConfig.runParameters.diagnoses) {
-      val diagnoses = new Diagnoses(fallConfig.diagnoses).extract(sources).persist()
+      logger.info("diagnoses")
+      val diagnoses = new DiagnosisExtractor(fallConfig.diagnoses).extract(sources).persist()
       operationsMetadata += {
         OperationReporter
           .report(
@@ -172,7 +171,8 @@ object FallMain extends Main with FractureCodes {
     }
 
     val (optionLiberalActs, optionActs) = if (fallConfig.runParameters.acts) {
-      val acts = new MedicalActs(fallConfig.medicalActs).extract(sources).persist()
+      logger.info("Medical Acts")
+      val acts = new ActsExtractor(fallConfig.medicalActs).extract(sources).persist()
       operationsMetadata += {
         OperationReporter
           .report(
@@ -184,6 +184,7 @@ object FallMain extends Main with FractureCodes {
             fallConfig.output.saveMode
           )
       }
+      logger.info("Liberal Medical Acts")
       val liberalActs = acts
         .filter(act => act.groupID == DcirAct.groupID.Liberal && !CCAMExceptions.contains(act.value)).persist()
       operationsMetadata += {
@@ -203,6 +204,7 @@ object FallMain extends Main with FractureCodes {
     }
 
     if (fallConfig.runParameters.outcomes) {
+      logger.info("Fractures")
       val fractures: Dataset[Event[Outcome]] = new FracturesTransformer(fallConfig)
         .transform(optionLiberalActs.get, optionActs.get, optionDiagnoses.get)
       operationsMetadata += {
