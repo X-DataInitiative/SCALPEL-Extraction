@@ -8,7 +8,7 @@ class HospitalStaySuite extends SharedContext {
   "apply" should "allow creation of hospital stay event" in {
 
     //given
-    val expected = Event("patientID", HospitalStay.category, "NA", "hospitalID", 0D,
+    val expected = Event("patientID", HospitalStay.category, "hospitalID", "hospitalID", 0D,
       makeTS(2018, 1, 1), Some(makeTS(2018, 3, 1)))
     //when
     val result = HospitalStay("patientID", "hospitalID",

@@ -44,5 +44,5 @@ trait NewMcoExtractor[EventType <: AnyEvent] extends Extractor[EventType] with M
     Seq(eventBuilder[EventType](patientId, groupId, code(row), weight, eventDate, endDate))
   }
 
-  lazy val code = (row: Row) => row.getAs[String](columnName)
+  def code = (row: Row) => row.getAs[String](columnName)
 }

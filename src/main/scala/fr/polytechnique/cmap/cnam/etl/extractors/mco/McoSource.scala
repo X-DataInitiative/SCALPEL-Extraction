@@ -24,6 +24,8 @@ trait McoSource extends ColumnNames {
     val StayLength: ColName = "MCO_B__SEJ_NBJ"
     val StayStartDate: ColName = "ENT_DAT"
     val StayEndDate: ColName = "SOR_DAT"
+    val StartDate: ColName = "EXE_SOI_DTD"
+    val EndDate: ColName = "EXE_SOI_DTF"
   }
 
   object NewColumns extends Serializable {

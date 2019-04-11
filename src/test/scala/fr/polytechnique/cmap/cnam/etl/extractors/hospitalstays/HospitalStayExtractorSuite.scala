@@ -13,25 +13,20 @@ class HospitalStayExtractorSuite extends SharedContext {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
-    val input = Seq(
-      ("20041", "830100392", makeTS(2012, 6, 7), makeTS(2012, 6, 7)),
-      ("20041", "830100392", makeTS(2013, 6, 1), makeTS(2013, 6, 12)),
-      ("20041", "830100392", makeTS(2014, 1, 28), makeTS(2014, 2, 3)),
-      ("20041", "830100392", makeTS(2014, 1, 28), makeTS(2014, 2, 3)),
-      ("2004100", "650780174", makeTS(2015, 12, 30), makeTS(2015, 12, 31)),
-      ("2004100", "750712184", makeTS(2017, 7, 3), makeTS(2017, 10, 5))
-    ).toDF("NUM_ENQ", "ETA_NUM", "EXE_SOI_DTD", "EXE_SOI_DTF")
-
-    val sources = Sources(mco = Some(input))
+    val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
+    val sources = Sources(mco = Some(mco))
 
     val expected: Dataset[Event[HospitalStay]] = Seq(
-      HospitalStay("20041", "830100392", makeTS(2014, 1, 28), makeTS(2014, 2, 3)),
-      HospitalStay("2004100", "650780174", makeTS(2015, 12, 30), makeTS(2015, 12, 31))
+      HospitalStay("Patient_02", "10000123_20000123_2007", makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
+      HospitalStay("Patient_02", "10000123_20000345_2007", makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
+      HospitalStay("Patient_02", "10000123_30000546_2008", makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
+      HospitalStay("Patient_02", "10000123_30000852_2008", makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
+      HospitalStay("Patient_02", "10000123_10000987_2006", makeTS(2006, 1, 1), makeTS(2006, 1, 10)),
+      HospitalStay("Patient_02", "10000123_10000543_2006", makeTS(2006, 1, 1), makeTS(2006, 1, 10))
     ).toDS()
 
     //When
-    val result: Dataset[Event[HospitalStay]] = new HospitalStayExtractor(
-      HospitalStayConfig(makeTS(2014, 1, 1), makeTS(2016, 1, 1))).extract(sources)
+    val result: Dataset[Event[HospitalStay]] = NewHospitalStaysExtractor.extract(sources, Set.empty)
 
     //Then
     assertDSs(expected, result)
