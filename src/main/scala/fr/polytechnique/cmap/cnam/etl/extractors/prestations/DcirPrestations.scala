@@ -4,7 +4,7 @@ import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirEventRowExtractor
 
-private[prestations] case class DcirPrestationSpecialities(
+private[prestations] case class DcirPrestations(
                                                             medicalSpeCodes: Seq[String],
                                                             nonMedicalSpeCodes: Seq[String]) extends DcirEventRowExtractor {
 
