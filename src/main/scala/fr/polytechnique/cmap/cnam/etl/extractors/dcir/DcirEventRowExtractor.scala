@@ -1,12 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.dcir
 
 import java.sql.Timestamp
-
-import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import org.apache.spark.sql._
+import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.EventRowExtractor
-
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
 
@@ -25,7 +23,7 @@ trait DcirEventRowExtractor extends EventRowExtractor with DcirSource {
   val inputCols: Seq[String] = Seq(
     ColNames.PatientID,
     ColNames.ExecPSNum,
-    ColNames.PrestaStart
+    ColNames.DcirEventStart
   ) ++ extractorCols
 
   override def extractPatientId(r: Row): String = {
@@ -36,20 +34,19 @@ trait DcirEventRowExtractor extends EventRowExtractor with DcirSource {
     r.getAs[String](ColNames.ExecPSNum)
   }
 
-  final val DefaultDateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
-  final val DefaultTimestamp: Timestamp = new Timestamp(DefaultDateFormat.parse("1600-01-01").getTime)
+  final val defaultDateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
+  final val defaultTimestamp: Timestamp = new Timestamp(defaultDateFormat.parse("1600-01-01").getTime)
 
   def getStart(r: Row): Timestamp= {
-    r.getAs[java.util.Date](ColNames.PrestaStart).toTimestamp
+    r.getAs[java.util.Date](ColNames.DcirEventStart).toTimestamp
   }
 
   override def extractStart(r: Row): Timestamp= {
-    val idx = r.fieldIndex(ColNames.PrestaStart)
+    val idx = r.fieldIndex(ColNames.DcirEventStart)
     val isDate = r.isNullAt(idx)
     isDate match {
-      case true => DefaultTimestamp
+      case true => defaultTimestamp
       case false => getStart(r)
-
     }
   }
 
