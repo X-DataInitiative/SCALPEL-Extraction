@@ -30,10 +30,6 @@ trait DcirEventRowExtractor extends EventRowExtractor with DcirSource {
     r.getAs[String](ColNames.PatientID)
   }
 
-  override def extractGroupId(r: Row): String = {
-    r.getAs[String](ColNames.ExecPSNum)
-  }
-
   final val defaultDateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
   final val defaultTimestamp: Timestamp = new Timestamp(defaultDateFormat.parse("1600-01-01").getTime)
 
