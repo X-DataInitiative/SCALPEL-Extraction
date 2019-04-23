@@ -1,12 +1,12 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.dcir
 
 import java.sql.Timestamp
+import scala.reflect.ClassTag
+import scala.reflect.runtime.universe.TypeTag
 import org.apache.spark.sql._
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.EventRowExtractor
-import scala.reflect.ClassTag
-import scala.reflect.runtime.universe.TypeTag
 
 trait DcirEventRowExtractor extends EventRowExtractor with DcirSource {
 

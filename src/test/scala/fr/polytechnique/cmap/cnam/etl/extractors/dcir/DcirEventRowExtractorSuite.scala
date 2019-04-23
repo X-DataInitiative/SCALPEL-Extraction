@@ -53,27 +53,10 @@ trait DcirEventRowExtractorSuite extends FlatSpec with DcirEventRowExtractor {
     assert(result == expected)
   }
 
-  "extractGroupId" should "return the extractGroupId (healthcare practionner ID for PrestationSpeciality)" in {
-
-    // Given
-    val schema = StructType(
-      StructField(ColNames.ExecPSNum, StringType) :: Nil
-    )
-    val values = Array[Any]("A10000001")
-    val row = new GenericRowWithSchema(values, schema)
-    val expected = "A10000001"
-
-    // When
-    val result = extractGroupId(row)
-
-    // Then
-    assert(result == expected)
-  }
-
   "extractStart" should "compute the start date of the event from the row" in {
 
     // Given
-    val schema = StructType(StructField(ColNames.PrestaStart, TimestampType) :: Nil)
+    val schema = StructType(StructField(ColNames.DcirEventStart, TimestampType) :: Nil)
     val row = new GenericRowWithSchema(Array(makeTS(2010, 1, 1)), schema)
     val expected = makeTS(2010, 1, 1)
 

@@ -18,14 +18,14 @@ class PrestationsSuite extends SharedContext {
     val sources = new Sources(
       dcir = Some(dcir)
     )
-    val expectedDcir = DcirPrestations(
+    val expectedDcir = DcirPrestationsExtractor(
       config.medicalSpeCodes, config.nonMedicalSpeCodes
     ).extract(dcir)
 
     // Then
-    assertDFs(
-      new Prestations(config).extract(sources).toDF,
-      unionDatasets(expectedDcir).toDF
+    assertDSs(
+      new Prestations(config).extract(sources),
+      unionDatasets(expectedDcir)
     )
   }
 }
