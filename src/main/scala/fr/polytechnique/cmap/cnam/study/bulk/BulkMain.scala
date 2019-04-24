@@ -36,7 +36,7 @@ object BulkMain extends Main {
 
     operationsMetadata += {
       OperationReporter.report(
-        "Drugs",
+        "DrugPurchases",
         List("DCIR"),
         OperationTypes.Dispensations,
         drugs.toDF,
@@ -51,7 +51,7 @@ object BulkMain extends Main {
     operationsMetadata += {
       OperationReporter
         .report(
-          "extract_hospital_stays",
+          "HospitalStays",
           List("MCO"),
           OperationTypes.HospitalStays,
           hospitalStays.toDF,
@@ -64,7 +64,7 @@ object BulkMain extends Main {
 
     operationsMetadata += {
       OperationReporter.report(
-        "DCIR-Medical-Act",
+        "DCIRMedicalAct",
         List("DCIR"),
         OperationTypes.MedicalActs,
         dcirMedicalAct.toDF,
@@ -112,7 +112,7 @@ object BulkMain extends Main {
 
     operationsMetadata += {
       OperationReporter.report(
-        "McoCeActs",
+        "McoCEMedicalActs",
         List("MCO_ACE"),
         OperationTypes.MedicalActs,
         liberalActs.toDF,
@@ -127,7 +127,7 @@ object BulkMain extends Main {
 
     operationsMetadata += {
       OperationReporter.report(
-        "Imb-Diagnostics",
+        "ImbDiagnoses",
         List("IR_IMB_R"),
         OperationTypes.MedicalActs,
         imbActs.toDF,
@@ -171,7 +171,7 @@ object BulkMain extends Main {
 
     operationsMetadata += {
       OperationReporter.report(
-        "Linked-Diagnostic",
+        "LinkedDiagnosis",
         List("MCO"),
         OperationTypes.Diagnosis,
         linkedDiag.toDF,
@@ -184,7 +184,7 @@ object BulkMain extends Main {
     val associatedDiag = NewAssociatedDiagnosisExtractor.extract(sources, Set.empty).cache()
     operationsMetadata += {
       OperationReporter.report(
-        "Associated-Diagnostic",
+        "AssociatedDiagnosis",
         List("MCO"),
         OperationTypes.Diagnosis,
         associatedDiag.toDF,
@@ -198,7 +198,7 @@ object BulkMain extends Main {
     val patients = new Patients(PatientsConfig(bulkConfig.base.studyStart)).extract(sources).cache()
     operationsMetadata += {
       OperationReporter.report(
-        "Base_population",
+        "BasePopulation",
         List("IR_BEN", "DCIR", "MCO", "MCO_CE"),
         OperationTypes.Patients,
         patients.toDF,
