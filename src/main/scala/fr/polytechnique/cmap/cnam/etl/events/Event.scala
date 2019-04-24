@@ -19,6 +19,14 @@ case class Event[+A <: AnyEvent](
   def checkValue(category: String, values: Seq[String]): Boolean = {
     this.category == category && values.contains(this.value)
   }
+
+  def checkValueStart(category: String, value: String): Boolean = {
+    this.category == category && this.value.startsWith(value)
+  }
+
+  def checkValueStart(category: String, values: Seq[String]): Boolean = {
+    this.category == category && values.exists(this.value.startsWith(_))
+  }
 }
 
 object Event {

@@ -39,21 +39,21 @@ object NarrowBladderCancer extends OutcomesTransformer with PioglitazoneStudyCod
     import collections.implicits._
 
     eventsInStay.exists { e =>
-      e.checkValue(DP, primaryDiagCode) ||
-      e.checkValue(DR, primaryDiagCode) ||
+      e.checkValueStart(DP, primaryDiagCode) ||
+      e.checkValueStart(DR, primaryDiagCode) ||
       eventsInStay.existAll(
-        e => e.checkValue(DAS, primaryDiagCode),
+        e => e.checkValueStart(DAS, primaryDiagCode),
         e =>
-          e.checkValue(DP, secondaryDiagCodes) ||
-          e.checkValue(DR, secondaryDiagCodes)
+          e.checkValueStart(DP, secondaryDiagCodes) ||
+          e.checkValueStart(DR, secondaryDiagCodes)
       )
     }
   }
 
   def checkMcoActsInStay(eventsInStay: Seq[Event[AnyEvent]]): Boolean = {
     eventsInStay.exists { e =>
-      e.checkValue(MCO_CIM_ACT, mcoCIM10ActCodes) ||
-      e.checkValue(MCO_CAM_ACT, mcoCCAMActCodes)
+      e.checkValueStart(MCO_CIM_ACT, mcoCIM10ActCodes) ||
+      e.checkValueStart(MCO_CAM_ACT, mcoCCAMActCodes)
     }
   }
 
