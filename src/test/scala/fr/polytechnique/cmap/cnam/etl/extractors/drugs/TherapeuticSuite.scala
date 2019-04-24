@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.drugs
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.Drug
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.Antidepresseurs
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.TherapeuticLevel
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class TherapeuticSuite extends SharedContext{

@@ -10,12 +10,6 @@ class Diagnoses(config: DiagnosesConfig) {
 
   def extract(sources: Sources): Dataset[Event[Diagnosis]] = {
 
-    val imbDiagnoses = ImbDiagnoses.extract(
-      sources.irImb.get,
-      config.imbCodes
-    )
-    val mcoDiagnoses = McoDiagnoses(config.dpCodes, config.drCodes, config.daCodes).extract(sources.mco.get)
-
-    unionDatasets(imbDiagnoses, mcoDiagnoses).distinct()
+    NewImbDiagnosisExtractor.extract(sources, config.imbCodes.toSet)
   }
 }

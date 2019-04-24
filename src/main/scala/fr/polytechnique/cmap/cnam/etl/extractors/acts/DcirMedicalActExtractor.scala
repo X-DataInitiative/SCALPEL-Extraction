@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 
-object NewDcirMedicalActExtractor extends Extractor[MedicalAct] {
+object DcirMedicalActExtractor extends Extractor[MedicalAct] {
 
   override def getInput(sources: Sources): DataFrame = sources.dcir.get
 
@@ -37,7 +37,7 @@ object NewDcirMedicalActExtractor extends Extractor[MedicalAct] {
 
   }
 
-  private final object ColNames {
+  final object ColNames {
     lazy val PatientID: String = "NUM_ENQ"
     lazy val CamCode: String = "ER_CAM_F__CAM_PRS_IDE"
     lazy val GHSCode: String = "ER_ETE_F__ETE_GHS_NUM"

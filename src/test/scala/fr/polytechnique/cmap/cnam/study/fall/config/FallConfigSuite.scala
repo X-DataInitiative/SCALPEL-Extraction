@@ -5,7 +5,7 @@ import com.typesafe.config.ConfigFactory
 import me.danielpes.spark.datetime.implicits._
 import org.scalatest.FlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.PharmacologicalLevel
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.PharmacologicalLevel
 
 class FallConfigSuite extends FlatSpec {
 

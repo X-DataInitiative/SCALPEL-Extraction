@@ -6,7 +6,7 @@ import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder}
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
-trait NewMcoExtractor[EventType <: AnyEvent] extends Extractor[EventType] with McoSource {
+trait McoExtractor[EventType <: AnyEvent] extends Extractor[EventType] with McoSource {
 
   def extractPatientId(r: Row): String = {
     r.getAs[String](ColNames.PatientID)

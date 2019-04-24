@@ -3,10 +3,10 @@ package fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays
 import java.sql.{Date, Timestamp}
 import org.apache.spark.sql.{DataFrame, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{EventBuilder, HospitalStay}
-import fr.polytechnique.cmap.cnam.etl.extractors.mco.NewMcoExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
-object NewHospitalStaysExtractor extends NewMcoExtractor[HospitalStay]{
+object HospitalStaysExtractor extends McoExtractor[HospitalStay]{
   override val columnName: String = ColNames.EndDate
   override val eventBuilder: EventBuilder = HospitalStay
 

@@ -23,7 +23,7 @@ class GHMClassificationsSuite extends SharedContext{
     val sources = Sources(mco = Some(mco))
 
     // When
-    val result = NewGhmExtractor.extract(sources, ghmCodes)
+    val result = GhmExtractor.extract(sources, ghmCodes)
 
     // Then
     assertDSs(result, expected)
@@ -48,7 +48,7 @@ class GHMClassificationsSuite extends SharedContext{
     val sources = Sources(mco = Some(mco))
 
     // When
-    val result = NewGhmExtractor.extract(sources, Set.empty)
+    val result = GhmExtractor.extract(sources, Set.empty)
 
     // Then
     assertDSs(result, expected)

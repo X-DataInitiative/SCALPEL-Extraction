@@ -26,7 +26,7 @@ class HospitalStayExtractorSuite extends SharedContext {
     ).toDS()
 
     //When
-    val result: Dataset[Event[HospitalStay]] = NewHospitalStaysExtractor.extract(sources, Set.empty)
+    val result: Dataset[Event[HospitalStay]] = HospitalStaysExtractor.extract(sources, Set.empty)
 
     //Then
     assertDSs(expected, result)

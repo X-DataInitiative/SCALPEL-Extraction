@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
 
 class ActsExtractor(config: MedicalActsConfig) {
   def extract(sources: Sources): Dataset[Event[MedicalAct]] = {
-    val dcirMedicalAct = NewDcirMedicalActExtractor.extract(sources, config.dcirCodes.toSet)
+    val dcirMedicalAct = DcirMedicalActExtractor.extract(sources, config.dcirCodes.toSet)
       .filter(act => act.groupID != "Unknown_source") // filter out unkown source acts
       .filter(act => act.groupID != "public_ambulatory") //filter out public amb
     val mcoCEMedicalActs = NewMcoCeActExtractor.extract(sources, config.mcoCECodes.toSet)

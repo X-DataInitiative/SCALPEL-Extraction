@@ -8,7 +8,7 @@ import me.danielpes.spark.datetime.Period
 import me.danielpes.spark.datetime.implicits._
 import pureconfig._
 import pureconfig.configurable.{localDateConfigConvert, localDateTimeConfigConvert}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugClassificationLevel
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.DrugClassificationLevel
 
 trait ConfigLoader {
 

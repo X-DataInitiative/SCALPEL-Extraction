@@ -22,7 +22,7 @@ class McoMedicalActsSuite extends SharedContext {
 
     val input = Sources(mco = Some(mco))
     // When
-    val result = NewMcoCimMedicalActExtractor.extract(input, cim10Codes)
+    val result = McoCimMedicalActExtractor.extract(input, cim10Codes)
 
     // Then
     assertDSs(result, expected)
@@ -45,7 +45,7 @@ class McoMedicalActsSuite extends SharedContext {
 
     val input = Sources(mco = Some(mco))
     // When
-    val result = NewMcoCimMedicalActExtractor.extract(input, Set.empty)
+    val result = McoCimMedicalActExtractor.extract(input, Set.empty)
 
     // Then
     assertDSs(result, expected)
@@ -66,7 +66,7 @@ class McoMedicalActsSuite extends SharedContext {
 
     val input = Sources(mco = Some(mco))
     // When
-    val result = NewMcoCcamActExtractor.extract(input, ccamCodes)
+    val result = McoCcamActExtractor.extract(input, ccamCodes)
 
     // Then
     assertDSs(result, expected)
@@ -89,7 +89,7 @@ class McoMedicalActsSuite extends SharedContext {
 
     val input = Sources(mco = Some(mco))
     // When
-    val result = NewMcoCcamActExtractor.extract(input, Set.empty)
+    val result = McoCcamActExtractor.extract(input, Set.empty)
 
     // Then
     assertDSs(result, expected)

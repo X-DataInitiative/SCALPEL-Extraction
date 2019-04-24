@@ -12,7 +12,7 @@ import fr.polytechnique.cmap.cnam.util.functions._
 
 class DcirMedicalActsSuite extends SharedContext {
 
-  import DcirMedicalActs.ColNames
+  import DcirMedicalActExtractor.ColNames
 
   val schema = StructType(
     StructField(ColNames.PatientID, StringType) ::
@@ -37,7 +37,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val inputRow = new GenericRowWithSchema(inputArray, schema)
 
     // When
-    val result = NewDcirMedicalActExtractor.isInStudy(codes)(inputRow)
+    val result = DcirMedicalActExtractor.isInStudy(codes)(inputRow)
 
     // Then
     assert(result)
@@ -51,7 +51,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val inputRow = new GenericRowWithSchema(inputArray, schema)
 
     // When
-    val result = NewDcirMedicalActExtractor.isInStudy(codes)(inputRow)
+    val result = DcirMedicalActExtractor.isInStudy(codes)(inputRow)
 
     // Then
     assert(!result)
@@ -64,7 +64,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = Seq(DcirAct("Patient_A", DcirAct.groupID.DcirAct, "AAAA", makeTS(2010, 1, 1)))
 
     // When
-    val result = NewDcirMedicalActExtractor.builder(inputRow)
+    val result = DcirMedicalActExtractor.builder(inputRow)
 
     // Then
     assert(result == expected)
@@ -78,7 +78,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = 3D
 
     // When
-    val result = NewDcirMedicalActExtractor.getGHS(input)
+    val result = DcirMedicalActExtractor.getGHS(input)
 
     // Then
     assert(result == expected)
@@ -92,7 +92,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = 3D
 
     // When
-    val result = NewDcirMedicalActExtractor.getSector(input)
+    val result = DcirMedicalActExtractor.getSector(input)
 
     // Then
     assert(result == expected)
@@ -106,7 +106,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = 52D
 
     // When
-    val result = NewDcirMedicalActExtractor.getInstitutionCode(input)
+    val result = DcirMedicalActExtractor.getInstitutionCode(input)
 
     // Then
     assert(result == expected)
@@ -125,7 +125,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = Success(DcirAct.groupID.PrivateAmbulatory)
 
     // When
-    val result = NewDcirMedicalActExtractor.getGroupId(input)
+    val result = DcirMedicalActExtractor.getGroupId(input)
 
     // Then
     assert(result == expected)
@@ -138,7 +138,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val array = Array[Any](1D)
     val input = new GenericRowWithSchema(array, schema)
     // When
-    val result = NewDcirMedicalActExtractor.getGroupId(input)
+    val result = DcirMedicalActExtractor.getGroupId(input)
 
     // Then
     result.success.value shouldBe DcirAct.groupID.PublicAmbulatory
@@ -153,7 +153,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val array = Array[Any](0D, 2D, 6D)
     val input = new GenericRowWithSchema(array, schema)
     // When
-    val result = NewDcirMedicalActExtractor.getGroupId(input)
+    val result = DcirMedicalActExtractor.getGroupId(input)
 
     // Then
     result.failure.exception shouldBe an [IllegalArgumentException]
@@ -185,7 +185,7 @@ class DcirMedicalActsSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = NewDcirMedicalActExtractor.extract(sources, codes)
+    val result = DcirMedicalActExtractor.extract(sources, codes)
 
     // Then
     assertDSs(result, expected)

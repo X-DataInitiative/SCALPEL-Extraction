@@ -9,9 +9,9 @@ import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
 class MedicalActs(config: MedicalActsConfig) {
 
   def extract(sources: Sources): Dataset[Event[MedicalAct]] = {
-    val dcirActs = NewDcirMedicalActExtractor.extract(sources, config.dcirCodes.toSet)
-    val ccamActs = NewMcoCcamActExtractor.extract(sources, config.mcoCCAMCodes.toSet)
-    val cimActs = NewMcoCimMedicalActExtractor.extract(sources, config.mcoCIMCodes.toSet)
+    val dcirActs = DcirMedicalActExtractor.extract(sources, config.dcirCodes.toSet)
+    val ccamActs = McoCcamActExtractor.extract(sources, config.mcoCCAMCodes.toSet)
+    val cimActs = McoCimMedicalActExtractor.extract(sources, config.mcoCIMCodes.toSet)
 
     unionDatasets(dcirActs, ccamActs, cimActs)
   }

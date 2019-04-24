@@ -4,11 +4,11 @@ import java.io.PrintWriter
 import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.extractors.acts.{NewDcirMedicalActExtractor, NewMcoCcamActExtractor, NewMcoCeActExtractor, NewMcoCimMedicalActExtractor}
-import fr.polytechnique.cmap.cnam.etl.extractors.classifications.NewGhmExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirMedicalActExtractor, McoCcamActExtractor, NewMcoCeActExtractor, McoCimMedicalActExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GhmExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses._
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.NewDrugExtractor
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.{HospitalStayConfig, HospitalStayExtractor, NewHospitalStaysExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
@@ -32,7 +32,7 @@ object BulkMain extends Main {
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
-    val drugs = new NewDrugExtractor(bulkConfig.drugs).extract(sources, Set.empty).cache()
+    val drugs = new DrugExtractor(bulkConfig.drugs).extract(sources, Set.empty).cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -47,7 +47,7 @@ object BulkMain extends Main {
 
     drugs.unpersist()
 
-    val hospitalStays = NewHospitalStaysExtractor.extract(sources, Set.empty).cache()
+    val hospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
     operationsMetadata += {
       OperationReporter
         .report(
@@ -60,7 +60,7 @@ object BulkMain extends Main {
         )
     }
 
-    val dcirMedicalAct = NewDcirMedicalActExtractor.extract(sources, Set.empty).cache()
+    val dcirMedicalAct = DcirMedicalActExtractor.extract(sources, Set.empty).cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -76,7 +76,7 @@ object BulkMain extends Main {
     dcirMedicalAct.unpersist()
 
 
-    val cimMedicalAct = NewMcoCimMedicalActExtractor.extract(sources, Set.empty).cache()
+    val cimMedicalAct = McoCimMedicalActExtractor.extract(sources, Set.empty).cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -92,7 +92,7 @@ object BulkMain extends Main {
     cimMedicalAct.unpersist()
 
 
-    val ccamMedicalAct = NewMcoCcamActExtractor.extract(sources, Set.empty).cache()
+    val ccamMedicalAct = McoCcamActExtractor.extract(sources, Set.empty).cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -138,7 +138,7 @@ object BulkMain extends Main {
 
     imbActs.unpersist()
 
-    val classification = NewGhmExtractor.extract(sources, Set.empty).cache()
+    val classification = GhmExtractor.extract(sources, Set.empty).cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -153,7 +153,7 @@ object BulkMain extends Main {
 
     classification.unpersist()
 
-    val mainDiag = NewMainDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val mainDiag = MainDiagnosisExtractor.extract(sources, Set.empty).cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -167,7 +167,7 @@ object BulkMain extends Main {
     }
     mainDiag.unpersist()
 
-    val linkedDiag = NewLinkedDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val linkedDiag = LinkedDiagnosisExtractor.extract(sources, Set.empty).cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -181,7 +181,7 @@ object BulkMain extends Main {
     }
     linkedDiag.unpersist()
 
-    val associatedDiag = NewAssociatedDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val associatedDiag = AssociatedDiagnosisExtractor.extract(sources, Set.empty).cache()
     operationsMetadata += {
       OperationReporter.report(
         "AssociatedDiagnosis",

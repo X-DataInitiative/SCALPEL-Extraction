@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.drugs
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.Drug
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.Antidepresseurs
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.MoleculeCombinationLevel
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class MoleculeCombinationSuite extends SharedContext{

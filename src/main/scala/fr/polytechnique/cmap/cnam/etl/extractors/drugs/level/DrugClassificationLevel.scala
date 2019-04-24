@@ -1,7 +1,8 @@
-package fr.polytechnique.cmap.cnam.etl.extractors.drugs
+package fr.polytechnique.cmap.cnam.etl.extractors.drugs.level
 
 import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs._
 
 trait DrugClassificationLevel extends Serializable {
 

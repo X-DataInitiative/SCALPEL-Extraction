@@ -8,7 +8,8 @@ import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassConfig, DrugClassificationLevel, DrugConfig, TherapeuticLevel}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.{DrugClassificationLevel, TherapeuticLevel}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassConfig, DrugConfig}
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{DrugsConfig, ExposureConfig, FracturesConfig, SitesConfig}

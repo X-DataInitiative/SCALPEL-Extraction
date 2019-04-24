@@ -3,7 +3,8 @@ package fr.polytechnique.cmap.cnam.study.bulk
 import java.time.LocalDate
 import fr.polytechnique.cmap.cnam.etl.config.{BaseConfig, ConfigLoader}
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{Cip13Level, DrugConfig, MoleculeCombinationLevel}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.Cip13Level
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
 
 case class BulkConfig(
   input: StudyConfig.InputPaths,

@@ -11,8 +11,7 @@ import fr.polytechnique.cmap.cnam.util.functions.makeTS
 class McoCEMedicalActsSuite extends SharedContext {
 
   "isInStudy" should "return true if row is in study" in {
-    import McoCEMedicalActs._
-
+    import NewMcoCeActExtractor.ColNames
     // Given
     val codes = Set("coloscopie")
     val schema = StructType(

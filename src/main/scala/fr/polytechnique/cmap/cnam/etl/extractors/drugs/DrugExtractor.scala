@@ -9,7 +9,7 @@ import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
-class NewDrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
+class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
 
   override def isInStudy(codes: Set[String])
     (row: Row): Boolean = drugConfig.level.isInFamily(drugConfig.families, row.getAs[String]("CIP13"))
