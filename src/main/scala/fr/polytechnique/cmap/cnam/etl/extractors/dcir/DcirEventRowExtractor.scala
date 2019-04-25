@@ -23,25 +23,33 @@ trait DcirEventRowExtractor extends EventRowExtractor with DcirSource {
   val inputCols: Seq[String] = Seq(
     ColNames.PatientID,
     ColNames.ExecPSNum,
-    ColNames.DcirEventStart
+    ColNames.DcirEventStart,
+    ColNames.DcirFluxDate
   ) ++ extractorCols
 
   override def extractPatientId(r: Row): String = {
     r.getAs[String](ColNames.PatientID)
   }
 
-  final val defaultDateFormat = new java.text.SimpleDateFormat("yyyy-MM-dd")
-  final val defaultTimestamp: Timestamp = new Timestamp(defaultDateFormat.parse("1600-01-01").getTime)
-
   def getStart(r: Row): Timestamp= {
     r.getAs[java.util.Date](ColNames.DcirEventStart).toTimestamp
   }
 
+  def getFluxDate(r: Row): Timestamp= {
+    r.getAs[java.util.Date](ColNames.DcirFluxDate).toTimestamp
+  }
+
   override def extractStart(r: Row): Timestamp= {
+    /**
+      * There are some events in the DCIR (~2.6E-2 %) that don't have a start date (EXE_SOI_DTD).
+      * They are mainly indemnities unrelated to a medical event.
+      * For these events, we approximate the start by the first date of integration
+      * in the SI (FLX_DIS_DTD).
+      */
     val idx = r.fieldIndex(ColNames.DcirEventStart)
     val isDate = r.isNullAt(idx)
     isDate match {
-      case true => defaultTimestamp
+      case true => getFluxDate(r)
       case false => getStart(r)
     }
   }

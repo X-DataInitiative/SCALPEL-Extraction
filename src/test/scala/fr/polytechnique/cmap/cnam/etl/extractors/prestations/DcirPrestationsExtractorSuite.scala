@@ -19,10 +19,10 @@ class DcirPrestationsExtractorSuite extends SharedContext {
     val input = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
 
     val expected = Seq[Event[PrestationSpeciality]](
-      MedicalPrestation("Patient_01", "A10000001", "42", makeTS(1600, 1, 1)),
+      MedicalPrestation("Patient_01", "A10000001", "42", makeTS(2006, 2, 1)),
       MedicalPrestation("Patient_01", "A10000001", "42", makeTS(2006, 1, 15)),
       MedicalPrestation("Patient_01", "A10000001", "42", makeTS(2006, 1, 30)),
-      NonMedicalPrestation("Patient_01", "A10000001", "42", makeTS(1600, 1, 1)),
+      NonMedicalPrestation("Patient_01", "A10000001", "42", makeTS(2006, 2, 1)),
       NonMedicalPrestation("Patient_01", "A10000001", "42", makeTS(2006, 1, 15)),
       NonMedicalPrestation("Patient_01", "A10000001", "42", makeTS(2006, 1, 30)),
       NonMedicalPrestation("Patient_02", "A10000005", "42", makeTS(2006, 1, 5)),

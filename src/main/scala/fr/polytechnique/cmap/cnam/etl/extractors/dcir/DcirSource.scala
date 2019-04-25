@@ -15,6 +15,7 @@ trait DcirSource extends ColumnNames {
     val NonMSpe: ColName = "PSE_ACT_NAT"
     val ExecPSNum: ColName = "PFS_EXE_NUM"
     val DcirEventStart: ColName = "EXE_SOI_DTD"
+    val DcirFluxDate: ColName = "FLX_DIS_DTD"
   }
 
   final val eventBuilder: Map[ColName, EventBuilder] = Map(
