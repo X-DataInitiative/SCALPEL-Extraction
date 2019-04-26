@@ -6,7 +6,7 @@ import fr.polytechnique.cmap.cnam.etl.events.{EventBuilder, HospitalStay}
 import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
-object HospitalStaysExtractor extends McoExtractor[HospitalStay]{
+object HospitalStaysExtractor extends McoExtractor[HospitalStay] {
   override val columnName: String = ColNames.EndDate
   override val eventBuilder: EventBuilder = HospitalStay
 
@@ -15,6 +15,7 @@ object HospitalStaysExtractor extends McoExtractor[HospitalStay]{
   override def extractStart(r: Row): Timestamp = new Timestamp(r.getAs[Date](ColNames.StartDate).getTime)
 
   override def isInStudy(codes: Set[String])(row: Row): Boolean = true
+
   override def code: Row => String = extractGroupId
 
   override def getInput(sources: Sources): DataFrame = sources.mco.get

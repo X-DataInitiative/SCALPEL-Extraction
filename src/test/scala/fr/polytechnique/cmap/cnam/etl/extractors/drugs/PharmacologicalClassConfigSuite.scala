@@ -1,7 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.drugs
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.Antidepresseurs
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.PharmacologicalClassConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families.Antidepresseurs
 
 class PharmacologicalClassConfigSuite extends SharedContext{
 

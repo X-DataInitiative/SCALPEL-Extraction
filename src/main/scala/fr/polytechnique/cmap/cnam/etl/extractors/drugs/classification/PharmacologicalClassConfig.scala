@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.extractors.drugs
+package fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification
 
 class PharmacologicalClassConfig(
   val name: String,
@@ -15,21 +15,22 @@ class PharmacologicalClassConfig(
     compare(atc5code, ATCCodes)
   }
 
+  def compare(atc5code: String, codeList: List[String]): Boolean = {
+    codeList.exists {
+      code =>
+        if (code.endsWith("*")) {
+          atc5code.startsWith(code.dropRight(1))
+        } else {
+          code == atc5code
+        }
+    }
+  }
+
   def isException(atc5code: String): Boolean = {
     compare(atc5code, ATCExceptions)
   }
 
   def isCIPException(cip13code: String): Boolean = {
     CIPExceptions.exists(_.equals(cip13code))
-  }
-
-  def compare(atc5code: String, codeList: List[String]): Boolean = {
-    codeList.exists{
-      code =>
-        if (code.endsWith("*"))
-           atc5code.startsWith(code.dropRight(1))
-        else
-           code == atc5code
-    }
   }
 }

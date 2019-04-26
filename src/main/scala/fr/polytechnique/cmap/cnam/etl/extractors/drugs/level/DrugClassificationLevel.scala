@@ -1,26 +1,22 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.drugs.level
 
 import org.apache.spark.sql.Row
-import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs._
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.DrugClassConfig
 
 trait DrugClassificationLevel extends Serializable {
 
-  def isInFamily(families: List[DrugClassConfig], cip13: String): Boolean =  families
-    .exists(family => family.cip13Codes.contains(cip13))
-
-  def apply(purchase: Purchase, families: List[DrugClassConfig]): List[Event[Drug]]
+  def isInFamily(families: List[DrugClassConfig], row: Row): Boolean
 
   def getClassification(families: Seq[DrugClassConfig])(row: Row): Seq[String]
 }
 
-object DrugClassificationLevel{
+object DrugClassificationLevel {
 
-  def fromString(level: String) : DrugClassificationLevel =
-    level match {
-      case "Therapeutic" => TherapeuticLevel
-      case "Pharmacological" => PharmacologicalLevel
-      case "MoleculeCombination" => MoleculeCombinationLevel
-      case "CIP13" => Cip13Level
-  }
+  def fromString(level: String): DrugClassificationLevel =
+    level.toLowerCase match {
+      case "therapeutic" => TherapeuticLevel
+      case "pharmacological" => PharmacologicalLevel
+      case "moleculecombination" => MoleculeCombinationLevel
+      case "cip13" => Cip13Level
+    }
 }

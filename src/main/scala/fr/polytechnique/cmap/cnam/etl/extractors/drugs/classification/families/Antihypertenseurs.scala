@@ -1,6 +1,6 @@
-package fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification
+package fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families
 
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassConfig, PharmacologicalClassConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.{DrugClassConfig, PharmacologicalClassConfig}
 
 object Antihypertenseurs extends DrugClassConfig {
 

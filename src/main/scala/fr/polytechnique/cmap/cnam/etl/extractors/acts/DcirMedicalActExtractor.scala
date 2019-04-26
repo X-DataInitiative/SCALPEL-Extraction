@@ -10,6 +10,8 @@ import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 
 object DcirMedicalActExtractor extends Extractor[MedicalAct] {
 
+  private final val PrivateInstitutionCodes = List(4, 5, 6, 7)
+
   override def getInput(sources: Sources): DataFrame = sources.dcir.get
 
   override def isInStudy(codes: Set[String])
@@ -37,17 +39,6 @@ object DcirMedicalActExtractor extends Extractor[MedicalAct] {
 
   }
 
-  final object ColNames {
-    lazy val PatientID: String = "NUM_ENQ"
-    lazy val CamCode: String = "ER_CAM_F__CAM_PRS_IDE"
-    lazy val GHSCode: String = "ER_ETE_F__ETE_GHS_NUM"
-    lazy val InstitutionCode: String = "ER_ETE_F__ETE_TYP_COD"
-    lazy val Sector: String = "ER_ETE_F__PRS_PPU_SEC"
-    lazy val Date: String = "EXE_SOI_DTD"
-  }
-
-  private final val PrivateInstitutionCodes = List(4, 5, 6, 7)
-
   /**
     * Get the information of the origin of DCIR act that is being extracted. It returns a
     * Failure[IllegalArgumentException] if the DCIR schema is old, a success if the DCIR schema contains an information.
@@ -57,12 +48,10 @@ object DcirMedicalActExtractor extends Extractor[MedicalAct] {
     */
   def getGroupId(r: Row): Try[String] = Try {
 
-    // First delete Public stuff
     if (!r.isNullAt(r.fieldIndex(ColNames.Sector)) && getSector(r) != 2) {
       DcirAct.groupID.PublicAmbulatory
     }
     else {
-      // If the value is at null, then it is liberal
       if (r.isNullAt(r.fieldIndex(ColNames.GHSCode))) {
         DcirAct.groupID.Liberal
       } else {
@@ -75,7 +64,7 @@ object DcirMedicalActExtractor extends Extractor[MedicalAct] {
         }
         else {
           DcirAct.groupID.Unknown
-        } // Non-liberal, non-Private ambulatory and non-public
+        }
       }
     }
   }
@@ -91,5 +80,14 @@ object DcirMedicalActExtractor extends Extractor[MedicalAct] {
   def getCode(r: Row): String = r.getAs[String](ColNames.CamCode)
 
   def getPatientID(r: Row): String = r.getAs[String](ColNames.PatientID)
+
+  final object ColNames {
+    lazy val PatientID: String = "NUM_ENQ"
+    lazy val CamCode: String = "ER_CAM_F__CAM_PRS_IDE"
+    lazy val GHSCode: String = "ER_ETE_F__ETE_GHS_NUM"
+    lazy val InstitutionCode: String = "ER_ETE_F__ETE_TYP_COD"
+    lazy val Sector: String = "ER_ETE_F__PRS_PPU_SEC"
+    lazy val Date: String = "EXE_SOI_DTD"
+  }
 
 }

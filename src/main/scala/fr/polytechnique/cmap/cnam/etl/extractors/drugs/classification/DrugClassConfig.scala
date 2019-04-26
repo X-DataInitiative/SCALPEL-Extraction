@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.etl.extractors.drugs
+package fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification
 
 import java.io.Serializable
 

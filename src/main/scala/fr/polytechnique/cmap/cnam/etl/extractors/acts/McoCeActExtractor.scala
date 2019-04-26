@@ -7,7 +7,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 
-object NewMcoCeActExtractor extends Extractor[MedicalAct] with McoCeSourceExtractor {
+object McoCeActExtractor extends Extractor[MedicalAct] with McoCeSourceExtractor {
   override def isInStudy(codes: Set[String])
     (row: Row): Boolean = codes.exists(getCode(row).startsWith(_))
 
@@ -26,12 +26,6 @@ object NewMcoCeActExtractor extends Extractor[MedicalAct] with McoCeSourceExtrac
 
 
 trait McoCeSourceExtractor {
-  final object ColNames extends Serializable {
-    final lazy val PatientID = "NUM_ENQ"
-    final lazy val CamCode = "MCO_FMSTC__CCAM_COD"
-    final lazy val Date = "EXE_SOI_DTD"
-    def allCols = List(PatientID, CamCode, Date)
-  }
 
   def getPatientID(row: Row): String = row.getAs[String](ColNames.PatientID)
 
@@ -40,5 +34,11 @@ trait McoCeSourceExtractor {
   def getCode(row: Row): String = row.getAs[String](ColNames.CamCode)
 
   def isNullAt(colName: String)(row: Row): Boolean = row.isNullAt(row.fieldIndex(colName))
+
+  final object ColNames extends Serializable {
+    final lazy val PatientID = "NUM_ENQ"
+    final lazy val CamCode = "MCO_FMSTC__CCAM_COD"
+    final lazy val Date = "EXE_SOI_DTD"
+  }
 
 }

@@ -2,29 +2,14 @@ package fr.polytechnique.cmap.cnam.etl.extractors.drugs
 
 import java.sql.Timestamp
 import scala.reflect.runtime.universe
+import org.apache.spark.sql._
 import org.apache.spark.sql.functions.{col, when}
 import org.apache.spark.sql.types.{StringType, TimestampType}
-import org.apache.spark.sql._
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
-
-  override def isInStudy(codes: Set[String])
-    (row: Row): Boolean = drugConfig.level.isInFamily(drugConfig.families, row.getAs[String]("CIP13"))
-
-  override def isInExtractorScope(row: Row): Boolean = true
-
-  override def builder(row: Row): Seq[Event[Drug]] = {
-    lazy val classification = drugConfig.level.getClassification(drugConfig.families)(row)
-
-    lazy val patientID = getPatientID(row)
-    lazy val conditioning = getConditioning(row)
-    lazy val date = getEventDate(row)
-
-    classification.map(code => Drug(patientID, code, conditioning, date))
-  }
 
   override def extract(
     sources: Sources,
@@ -45,6 +30,27 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
     }.flatMap(builder _).distinct()
 
   }
+
+  override def isInStudy(codes: Set[String])
+    (row: Row): Boolean = drugConfig.level.isInFamily(drugConfig.families, row)
+
+  override def isInExtractorScope(row: Row): Boolean = true
+
+  override def builder(row: Row): Seq[Event[Drug]] = {
+    lazy val classification = drugConfig.level.getClassification(drugConfig.families)(row)
+
+    lazy val patientID = getPatientID(row)
+    lazy val conditioning = getConditioning(row)
+    lazy val date = getEventDate(row)
+
+    classification.map(code => Drug(patientID, code, conditioning, date))
+  }
+
+  private def getPatientID(row: Row): String = row.getAs[String](ColNames.PatientId)
+
+  private def getConditioning(row: Row): Int = row.getAs[Int](ColNames.Conditioning)
+
+  private def getEventDate(row: Row): Timestamp = row.getAs[Timestamp](ColNames.Date)
 
   override def getInput(sources: Sources): DataFrame = {
     val neededColumns: List[Column] = List(
@@ -74,10 +80,4 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
     val Date = "eventDate"
     val Cip13 = "CIP13"
   }
-
-  private def getPatientID(row: Row): String = row.getAs[String](ColNames.PatientId)
-
-  private def getConditioning(row: Row): Int = row.getAs[Int](ColNames.Conditioning)
-
-  private def getEventDate(row: Row): Timestamp = row.getAs[Timestamp](ColNames.Date)
 }

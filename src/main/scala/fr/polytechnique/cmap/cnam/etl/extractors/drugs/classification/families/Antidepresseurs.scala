@@ -1,6 +1,6 @@
-package fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification
+package fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families
 
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassConfig, PharmacologicalClassConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.{DrugClassConfig, PharmacologicalClassConfig}
 
 object Antidepresseurs extends DrugClassConfig {
 
@@ -590,12 +590,12 @@ object Antidepresseurs extends DrugClassConfig {
   )
 
   val pharmacologicalClasses = List(
-      trycicliques,
-      isrs,
-      isrsN,
-      imaoAB,
-      imaoA,
-      autres
-    )
+    trycicliques,
+    isrs,
+    isrsN,
+    imaoAB,
+    imaoA,
+    autres
+  )
 
 }

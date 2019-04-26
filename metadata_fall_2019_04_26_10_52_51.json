@@ -1,0 +1,64 @@
+{
+  "class_name" : "fr.polytechnique.cmap.cnam.study.fall.FallMain$",
+  "start_timestamp" : "2019-04-26T10:52:51Z",
+  "end_timestamp" : "2019-04-26T10:52:59Z",
+  "operations" : [ {
+    "name" : "extract_hospital_stays",
+    "inputs" : [ "MCO" ],
+    "output_type" : "hospital stays",
+    "output_path" : "target/test/output/extract_hospital_stays/data",
+    "population_path" : "target/test/output/extract_hospital_stays/patients"
+  }, {
+    "name" : "diagnoses",
+    "inputs" : [ "MCO", "IR_IMB_R" ],
+    "output_type" : "diagnosis",
+    "output_path" : "target/test/output/diagnoses/data",
+    "population_path" : "target/test/output/diagnoses/patients"
+  }, {
+    "name" : "acts",
+    "inputs" : [ "DCIR", "MCO", "MCO_CE" ],
+    "output_type" : "acts",
+    "output_path" : "target/test/output/acts/data",
+    "population_path" : "target/test/output/acts/patients"
+  }, {
+    "name" : "liberal_acts",
+    "inputs" : [ "acts" ],
+    "output_type" : "acts",
+    "output_path" : "target/test/output/liberal_acts/data",
+    "population_path" : "target/test/output/liberal_acts/patients"
+  }, {
+    "name" : "fractures",
+    "inputs" : [ "acts" ],
+    "output_type" : "outcomes",
+    "output_path" : "target/test/output/fractures/data",
+    "population_path" : "target/test/output/fractures/patients"
+  }, {
+    "name" : "drug_purchases",
+    "inputs" : [ "DCIR" ],
+    "output_type" : "dispensations",
+    "output_path" : "target/test/output/drug_purchases/data",
+    "population_path" : "target/test/output/drug_purchases/patients"
+  }, {
+    "name" : "extract_patients",
+    "inputs" : [ "DCIR", "MCO", "IR_BEN_R", "MCO_CE" ],
+    "output_type" : "patients",
+    "output_path" : "target/test/output/extract_patients/data"
+  }, {
+    "name" : "filter_patients",
+    "inputs" : [ "drug_purchases", "extract_patients" ],
+    "output_type" : "patients",
+    "output_path" : "target/test/output/filter_patients/data"
+  }, {
+    "name" : "follow_up",
+    "inputs" : [ "extract_patients" ],
+    "output_type" : "events",
+    "output_path" : "target/test/output/follow_up/data",
+    "population_path" : "target/test/output/follow_up/patients"
+  }, {
+    "name" : "exposures",
+    "inputs" : [ "drug_purchases" ],
+    "output_type" : "exposures",
+    "output_path" : "target/test/output/exposures/data",
+    "population_path" : "target/test/output/exposures/patients"
+  } ]
+}

@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
-import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, MainDiagnosis, AssociatedDiagnosis, LinkedDiagnosis, EventBuilder}
+import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoExtractor
 
 object MainDiagnosisExtractor extends McoExtractor[Diagnosis] {

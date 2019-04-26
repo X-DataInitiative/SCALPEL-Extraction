@@ -1,6 +1,6 @@
-package fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification
+package fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families
 
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassConfig, PharmacologicalClassConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.{DrugClassConfig, PharmacologicalClassConfig}
 
 object Neuroleptiques extends DrugClassConfig {
 
@@ -603,7 +603,17 @@ object Neuroleptiques extends DrugClassConfig {
   val atypiques = new PharmacologicalClassConfig(
     name = "Neuroleptiques_Neuroleptiques_atypiques",
     ATCCodes = List("N05A*"),
-    ATCExceptions = List("N05AL06", "N05AN01", "N05AA", "N05AH02", "N05AH03", "N05AL05", "N05AX08", "N05AX12", "N05AA07")
+    ATCExceptions = List(
+      "N05AL06",
+      "N05AN01",
+      "N05AA",
+      "N05AH02",
+      "N05AH03",
+      "N05AL05",
+      "N05AX08",
+      "N05AX12",
+      "N05AA07"
+    )
   )
 
   val autres = new PharmacologicalClassConfig(

@@ -11,7 +11,7 @@ import fr.polytechnique.cmap.cnam.util.functions.makeTS
 class McoCEMedicalActsSuite extends SharedContext {
 
   "isInStudy" should "return true if row is in study" in {
-    import NewMcoCeActExtractor.ColNames
+    import McoCeActExtractor.ColNames
     // Given
     val codes = Set("coloscopie")
     val schema = StructType(
@@ -22,7 +22,7 @@ class McoCEMedicalActsSuite extends SharedContext {
     val input = new GenericRowWithSchema(data, schema)
 
     // When
-    val result = NewMcoCeActExtractor.isInStudy(codes)(input)
+    val result = McoCeActExtractor.isInStudy(codes)(input)
 
     // Then
     assert(result)
@@ -47,7 +47,7 @@ class McoCEMedicalActsSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = NewMcoCeActExtractor.extract(sources, Set("angi"))
+    val result = McoCeActExtractor.extract(sources, Set("angi"))
 
     // Then
     assertDSs(expected, result)
@@ -73,7 +73,7 @@ class McoCEMedicalActsSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = NewMcoCeActExtractor.extract(sources, Set.empty)
+    val result = McoCeActExtractor.extract(sources, Set.empty)
 
     // Then
     assertDSs(expected, result)

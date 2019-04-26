@@ -16,11 +16,11 @@ class DcirMedicalActsSuite extends SharedContext {
 
   val schema = StructType(
     StructField(ColNames.PatientID, StringType) ::
-    StructField(ColNames.CamCode, StringType) ::
-    StructField(ColNames.InstitutionCode, DoubleType) ::
-    StructField(ColNames.GHSCode, DoubleType) ::
-    StructField(ColNames.Sector, DoubleType) ::
-    StructField(ColNames.Date, DateType) :: Nil
+      StructField(ColNames.CamCode, StringType) ::
+      StructField(ColNames.InstitutionCode, DoubleType) ::
+      StructField(ColNames.GHSCode, DoubleType) ::
+      StructField(ColNames.Sector, DoubleType) ::
+      StructField(ColNames.Date, DateType) :: Nil
   )
 
   val oldSchema = StructType(
@@ -72,7 +72,7 @@ class DcirMedicalActsSuite extends SharedContext {
 
   "getGHS" should "return the value in the correct column" in {
     // Given
-    val schema = StructType(StructField(ColNames.GHSCode, DoubleType)::Nil)
+    val schema = StructType(StructField(ColNames.GHSCode, DoubleType) :: Nil)
     val inputArray = Array[Any](3D)
     val input = new GenericRowWithSchema(inputArray, schema)
     val expected = 3D
@@ -86,7 +86,7 @@ class DcirMedicalActsSuite extends SharedContext {
 
   "getSector" should "return the expected value" in {
     // Given
-    val schema = StructType(StructField(ColNames.Sector, DoubleType)::Nil)
+    val schema = StructType(StructField(ColNames.Sector, DoubleType) :: Nil)
     val inputArray = Array[Any](3D)
     val input = new GenericRowWithSchema(inputArray, schema)
     val expected = 3D
@@ -100,7 +100,7 @@ class DcirMedicalActsSuite extends SharedContext {
 
   "getInstitutionCode" should "return the value in the correct column" in {
     // Given
-    val schema = StructType(StructField(ColNames.InstitutionCode, DoubleType)::Nil)
+    val schema = StructType(StructField(ColNames.InstitutionCode, DoubleType) :: Nil)
     val inputArray = Array[Any](52D)
     val input = new GenericRowWithSchema(inputArray, schema)
     val expected = 52D
@@ -117,8 +117,8 @@ class DcirMedicalActsSuite extends SharedContext {
     // Given
     val schema = StructType(
       StructField(ColNames.GHSCode, DoubleType) ::
-      StructField(ColNames.Sector, StringType) ::
-      StructField(ColNames.InstitutionCode, DoubleType) :: Nil
+        StructField(ColNames.Sector, StringType) ::
+        StructField(ColNames.InstitutionCode, DoubleType) :: Nil
     )
     val array = Array[Any](0D, 2D, 6D)
     val input = new GenericRowWithSchema(array, schema)
@@ -144,11 +144,62 @@ class DcirMedicalActsSuite extends SharedContext {
     result.success.value shouldBe DcirAct.groupID.PublicAmbulatory
   }
 
+  it should "return Success(Liberal) if it is liberal act" in {
+    // Given
+    val schema = StructType(
+      StructField(ColNames.Sector, StringType) :: StructField(
+        ColNames.GHSCode,
+        StringType
+      ) :: Nil
+    )
+    val array = Array[Any](null, null)
+    val input = new GenericRowWithSchema(array, schema)
+    // When
+    val result = DcirMedicalActExtractor.getGroupId(input)
+
+    // Then
+    result.success.value shouldBe DcirAct.groupID.Liberal
+  }
+
+  it should "return Success(PrivateAmbulatory) if it is private ambulatory act" in {
+    // Given
+    val schema = StructType(
+      StructField(ColNames.Sector, StringType) :: StructField(
+        ColNames.GHSCode,
+        DoubleType
+      ) :: StructField(ColNames.InstitutionCode, DoubleType) :: Nil
+    )
+    val array = Array[Any](null, 0D, 4D)
+    val input = new GenericRowWithSchema(array, schema)
+    // When
+    val result = DcirMedicalActExtractor.getGroupId(input)
+
+    // Then
+    result.success.value shouldBe DcirAct.groupID.PrivateAmbulatory
+  }
+
+  it should "return Success(UnkownSource) if it is an act with unknown source" in {
+    // Given
+    val schema = StructType(
+      StructField(ColNames.Sector, StringType) :: StructField(
+        ColNames.GHSCode,
+        DoubleType
+      ) :: StructField(ColNames.InstitutionCode, DoubleType) :: Nil
+    )
+    val array = Array[Any](null, 1D, 4D)
+    val input = new GenericRowWithSchema(array, schema)
+    // When
+    val result = DcirMedicalActExtractor.getGroupId(input)
+
+    // Then
+    result.success.value shouldBe DcirAct.groupID.Unknown
+  }
+
   it should "return IllegalArgumentException if the information of source of act is unavailable in DCIR" in {
     // Given
     val schema = StructType(
       StructField(ColNames.GHSCode, DoubleType) ::
-        StructField(ColNames.Sector, StringType) ::Nil
+        StructField(ColNames.Sector, StringType) :: Nil
     )
     val array = Array[Any](0D, 2D, 6D)
     val input = new GenericRowWithSchema(array, schema)
@@ -156,10 +207,10 @@ class DcirMedicalActsSuite extends SharedContext {
     val result = DcirMedicalActExtractor.getGroupId(input)
 
     // Then
-    result.failure.exception shouldBe an [IllegalArgumentException]
+    result.failure.exception shouldBe an[IllegalArgumentException]
   }
 
-  "extract" should "return a Dataset of Medical Acts" in {
+  "extract" should "return a Dataset of DCIR Medical Acts" in {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -173,8 +224,10 @@ class DcirMedicalActsSuite extends SharedContext {
       ("Patient_B", "CCCC", makeTS(2010, 3, 1), None, None, None),
       ("Patient_B", "CCCC", makeTS(2010, 4, 1), Some(7D), Some(0D), Some(2D)),
       ("Patient_C", "BBBB", makeTS(2010, 5, 1), Some(1D), Some(0D), Some(2D))
-    ).toDF(ColNames.PatientID, ColNames.CamCode, ColNames.Date,
-      ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector)
+    ).toDF(
+      ColNames.PatientID, ColNames.CamCode, ColNames.Date,
+      ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector
+    )
 
     val sources = Sources(dcir = Some(input))
 

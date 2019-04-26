@@ -4,7 +4,7 @@ import java.io.PrintWriter
 import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirMedicalActExtractor, McoCcamActExtractor, NewMcoCeActExtractor, McoCimMedicalActExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirMedicalActExtractor, McoCcamActExtractor, McoCeActExtractor, McoCimMedicalActExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GhmExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses._
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugExtractor
@@ -108,7 +108,7 @@ object BulkMain extends Main {
     ccamMedicalAct.unpersist()
 
 
-    val liberalActs = NewMcoCeActExtractor.extract(sources, Set.empty).cache()
+    val liberalActs = McoCeActExtractor.extract(sources, Set.empty).cache()
 
     operationsMetadata += {
       OperationReporter.report(

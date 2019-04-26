@@ -36,7 +36,7 @@ object DcirAct extends MedicalAct {
     val PrivateHospital = "private_hospital"
     val Liberal = "liberal"
     val DcirAct = "DCIR_act" // For legacy purpose, works with old DCIR schemas
-    val Unknown = "Unknown_source"
+    val Unknown = "unknown_source"
   }
 
 }
