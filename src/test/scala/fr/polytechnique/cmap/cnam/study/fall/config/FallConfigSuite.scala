@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.study.fall.config
 
+import java.io.File
 import java.nio.file.Paths
 import com.typesafe.config.ConfigFactory
 import me.danielpes.spark.datetime.implicits._
@@ -86,6 +87,8 @@ class FallConfigSuite extends FlatSpec {
     pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(stringConfig), Paths.get(tempPath), true)
     val result = FallConfig.load(tempPath, "test")
     //Then
-    assert(result == expected)
+    try assert(result == expected)
+    finally
+      new File(tempPath).delete()
   }
 }
