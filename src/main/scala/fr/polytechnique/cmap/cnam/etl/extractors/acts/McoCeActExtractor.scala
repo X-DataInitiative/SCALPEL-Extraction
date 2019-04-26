@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import java.sql.{Date, Timestamp}
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.{DataFrame, Row, functions}
 import fr.polytechnique.cmap.cnam.etl.events.{Event, McoCEAct, MedicalAct}
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
@@ -21,7 +21,8 @@ object McoCeActExtractor extends Extractor[MedicalAct] with McoCeSourceExtractor
     Seq(McoCEAct(patientID, "ACE", code, date))
   }
 
-  override def getInput(sources: Sources): DataFrame = sources.mcoCe.get
+  override def getInput(sources: Sources): DataFrame =
+    sources.mcoCe.get.select(ColNames.all.map(functions.col): _*)
 }
 
 
@@ -39,6 +40,7 @@ trait McoCeSourceExtractor {
     final lazy val PatientID = "NUM_ENQ"
     final lazy val CamCode = "MCO_FMSTC__CCAM_COD"
     final lazy val Date = "EXE_SOI_DTD"
+    final lazy val all = List(PatientID, CamCode, Date)
   }
 
 }

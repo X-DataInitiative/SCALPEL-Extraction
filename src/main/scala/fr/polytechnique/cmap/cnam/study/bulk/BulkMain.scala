@@ -123,7 +123,7 @@ object BulkMain extends Main {
 
     liberalActs.unpersist()
 
-    val imbActs = NewImbDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val imbActs = ImbDiagnosisExtractor.extract(sources, Set.empty).cache()
 
     operationsMetadata += {
       OperationReporter.report(

@@ -30,7 +30,7 @@ class McoDiagnosesSuite extends SharedContext {
     val result = MainDiagnosisExtractor.extract(sources, dpCodes)
 
     // Then
-    assertDSs(result, expected, true)
+    assertDSs(result, expected)
   }
 
   it should "extract target LinkedDiagnosis" in {

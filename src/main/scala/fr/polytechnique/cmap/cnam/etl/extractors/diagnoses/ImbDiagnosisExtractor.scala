@@ -7,7 +7,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.datetime
 
-object NewImbDiagnosisExtractor extends Extractor[Diagnosis] with ImbSource {
+object ImbDiagnosisExtractor extends Extractor[Diagnosis] with ImbSource {
 
   override def isInExtractorScope(row: Row): Boolean = {
     lazy val idx = row.fieldIndex(ColNames.Code)

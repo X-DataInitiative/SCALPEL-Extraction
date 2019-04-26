@@ -1,4 +1,4 @@
-package fr.polytechnique.cmap.cnam.study.pioglitazone.extractors
+package fr.polytechnique.cmap.cnam.study.rosiglitazone.extractors
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event}
@@ -13,8 +13,7 @@ class Diagnoses(config: DiagnosesConfig) {
     val mainDiag = MainDiagnosisExtractor.extract(sources, config.dpCodes.toSet)
     val linkedDiag = LinkedDiagnosisExtractor.extract(sources, config.drCodes.toSet)
     val associatedDiag = AssociatedDiagnosisExtractor.extract(sources, config.daCodes.toSet)
-    val imbDiag = ImbDiagnosisExtractor.extract(sources, config.imbCodes.toSet)
-    functions.unionDatasets(mainDiag, linkedDiag, associatedDiag, imbDiag)
+    functions.unionDatasets(mainDiag, linkedDiag, associatedDiag)
   }
 
 }

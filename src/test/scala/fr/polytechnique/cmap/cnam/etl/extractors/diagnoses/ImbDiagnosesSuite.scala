@@ -17,7 +17,7 @@ class ImbDiagnosesSuite extends SharedContext {
 
     val sources = Sources(irImb = Some(imb))
     // When
-    val output = NewImbDiagnosisExtractor.extract(sources, Set("C67"))
+    val output = ImbDiagnosisExtractor.extract(sources, Set("C67"))
 
     // Then
     assertDSs(expected, output)
@@ -37,7 +37,7 @@ class ImbDiagnosesSuite extends SharedContext {
 
     val sources = Sources(irImb = Some(imb))
     // When
-    val output = NewImbDiagnosisExtractor.extract(sources, Set.empty)
+    val output = ImbDiagnosisExtractor.extract(sources, Set.empty)
 
     // Then
     assertDSs(expected, output)
