@@ -8,8 +8,6 @@ import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 
 trait McoSource extends ColumnNames {
 
-  def estimateStayStartTime(mco: DataFrame): DataFrame = mco.estimateStayStartTime
-
   final object ColNames extends Serializable {
     val PatientID: ColName = "NUM_ENQ"
     val DP: ColName = "MCO_B__DGN_PAL"

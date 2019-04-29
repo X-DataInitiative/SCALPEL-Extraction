@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import java.sql.Timestamp
 import scala.util.Try
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.{DataFrame, Row, functions}
 import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, MedicalAct}
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
@@ -12,7 +12,7 @@ object DcirMedicalActExtractor extends Extractor[MedicalAct] {
 
   private final val PrivateInstitutionCodes = List(4, 5, 6, 7)
 
-  override def getInput(sources: Sources): DataFrame = sources.dcir.get
+  override def getInput(sources: Sources): DataFrame = sources.dcir.get.select(ColNames.all.map(functions.col): _*)
 
   override def isInStudy(codes: Set[String])
     (row: Row): Boolean = codes.exists {
@@ -88,6 +88,7 @@ object DcirMedicalActExtractor extends Extractor[MedicalAct] {
     lazy val InstitutionCode: String = "ER_ETE_F__ETE_TYP_COD"
     lazy val Sector: String = "ER_ETE_F__PRS_PPU_SEC"
     lazy val Date: String = "EXE_SOI_DTD"
+    lazy val all = List(PatientID, CamCode, GHSCode, InstitutionCode, Sector, Date)
   }
 
 }
