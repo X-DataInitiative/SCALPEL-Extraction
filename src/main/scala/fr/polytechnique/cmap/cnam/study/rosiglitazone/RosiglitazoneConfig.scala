@@ -35,9 +35,9 @@ object RosiglitazoneConfig extends ConfigLoader with RosiglitazoneStudyCodes {
 
   /** Base fixed parameters for this study. */
   final object BaseConfig extends BaseConfig (
-    ageReferenceDate = LocalDate.of(2010, 1, 1),
-    studyStart = LocalDate.of(2009, 1, 1),
-    studyEnd = LocalDate.of(2011, 1, 1)
+    ageReferenceDate = LocalDate.of(2011, 1, 1),
+    studyStart = LocalDate.of(2010, 1, 1),
+    studyEnd = LocalDate.of(2015, 1, 1)
   )
 
   /** Fixed parameters needed for the Drugs extractors. */

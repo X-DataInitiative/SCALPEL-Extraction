@@ -1,43 +1,19 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
-import java.sql.Timestamp
 import scala.util.Try
-import org.apache.spark.sql.{DataFrame, Row, functions}
-import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, MedicalAct}
-import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.datetime.implicits._
+import org.apache.spark.sql.Row
+import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirExtractor
+import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, EventBuilder, MedicalAct}
 
-object DcirMedicalActExtractor extends Extractor[MedicalAct] {
+object DcirMedicalActExtractor extends DcirExtractor[MedicalAct] {
 
-  private final val PrivateInstitutionCodes = List(4, 5, 6, 7)
+  private final val PrivateInstitutionCodes = Set(4D, 5D, 6D, 7D)
+  override val columnName: String = ColNames.CamCode
+  override val eventBuilder: EventBuilder = DcirAct
 
-  override def getInput(sources: Sources): DataFrame = sources.dcir.get.select(ColNames.all.map(functions.col): _*)
-
-  override def isInStudy(codes: Set[String])
-    (row: Row): Boolean = codes.exists {
-    val idx = row.fieldIndex(ColNames.CamCode)
-    row.getString(idx).startsWith(_)
-  }
-
-  override def isInExtractorScope(row: Row): Boolean = !row.isNullAt(row.fieldIndex(ColNames.CamCode))
-
-  override def builder(row: Row): Seq[Event[MedicalAct]] = {
-    val groupID = {
-      getGroupId(row) recover { case _: IllegalArgumentException => DcirAct.groupID.DcirAct }
-    }
-
-    Seq(
-      DcirAct
-        .apply(
-          patientID = getPatientID(row),
-          groupID = groupID.get,
-          code = getCode(row),
-          date = getDate(row).getOrElse(new java.util.Date().toTimestamp)
-        )
-    )
-
-  }
+  override def extractGroupId(r: Row): String = {
+    getGroupId(r) recover { case _: IllegalArgumentException => DcirAct.groupID.DcirAct }
+  }.get
 
   /**
     * Get the information of the origin of DCIR act that is being extracted. It returns a
@@ -74,21 +50,5 @@ object DcirMedicalActExtractor extends Extractor[MedicalAct] {
   def getInstitutionCode(r: Row): Double = r.getAs[Double](ColNames.InstitutionCode)
 
   def getSector(r: Row): Double = r.getAs[Double](ColNames.Sector)
-
-  def getDate(r: Row): Try[Timestamp] = Try(r.getAs[java.util.Date](ColNames.Date).toTimestamp)
-
-  def getCode(r: Row): String = r.getAs[String](ColNames.CamCode)
-
-  def getPatientID(r: Row): String = r.getAs[String](ColNames.PatientID)
-
-  final object ColNames {
-    lazy val PatientID: String = "NUM_ENQ"
-    lazy val CamCode: String = "ER_CAM_F__CAM_PRS_IDE"
-    lazy val GHSCode: String = "ER_ETE_F__ETE_GHS_NUM"
-    lazy val InstitutionCode: String = "ER_ETE_F__ETE_TYP_COD"
-    lazy val Sector: String = "ER_ETE_F__PRS_PPU_SEC"
-    lazy val Date: String = "EXE_SOI_DTD"
-    lazy val all = List(PatientID, CamCode, GHSCode, InstitutionCode, Sector, Date)
-  }
 
 }
