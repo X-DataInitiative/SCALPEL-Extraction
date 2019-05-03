@@ -106,14 +106,14 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     //exposures
     val patients: Boolean = exposure contains "Patients"
     val drugPurchases: Boolean = exposure contains "DrugPurchases"
-    val hospitalStays: Boolean = hospitalStay contains "HospitalStay"
     val startGapPatients: Boolean = List("DrugPurchases", "Patients", "StartGapPatients").forall(exposure.contains)
     val exposures: Boolean = List("Patients", "DrugPurchases", "Exposures").forall(exposure.contains)
     //outcomes
     val diagnoses: Boolean = outcome contains "Diagnoses"
     val acts: Boolean = outcome contains "Acts"
     val outcomes: Boolean = List("Diagnoses", "Acts", "Outcomes").forall(outcome.contains)
-
+    // Hospital Stays
+    val hospitalStays: Boolean = hospitalStay contains "HospitalStay"
   }
 
   /**

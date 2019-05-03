@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.mco
 
 import java.sql.Timestamp
 import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.functions.col
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder}
 import fr.polytechnique.cmap.cnam.etl.extractors.{EventRowExtractor, Extractor}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
@@ -14,7 +15,7 @@ trait McoExtractor[EventType <: AnyEvent] extends Extractor[EventType] with McoS
 
   def code = (row: Row) => row.getAs[String](columnName)
 
-  def getInput(sources: Sources): DataFrame = sources.mco.get.estimateStayStartTime
+  def getInput(sources: Sources): DataFrame = sources.mco.get.select(ColNames.all.map(col): _*).estimateStayStartTime
 
   def isInStudy(codes: Set[String])
     (row: Row): Boolean = codes.exists(code(row).startsWith(_))

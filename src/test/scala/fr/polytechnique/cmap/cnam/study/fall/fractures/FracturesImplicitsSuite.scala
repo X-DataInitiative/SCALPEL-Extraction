@@ -15,7 +15,7 @@ class FracturesImplicitsSuite extends SharedContext{
     val data = Seq(
       Outcome("patientA", "FemurExclusionCol", PrivateAmbulatoryFractures.outcomeName, makeTS(2007, 1, 1)),
       Outcome("patientA", "FemurExclusionCol", LiberalFractures.outcomeName, makeTS(2007, 1, 1)),
-      Outcome("patientA", "FemurExclusionCol", LiberalFractures.outcomeName, makeTS(2007, 2, 1)),
+      Outcome("patientA", "FemurExclusionCol", PrivateAmbulatoryFractures.outcomeName, makeTS(2007, 2, 1)),
       Outcome("patientA", "FemurExclusionCol", PrivateAmbulatoryFractures.outcomeName, makeTS(2008, 2, 1)),
       Outcome("patientA", "FemurExclusionCol", PrivateAmbulatoryFractures.outcomeName, makeTS(2007, 5, 1)),
       Outcome("patientA", "FemurExclusionCol", PrivateAmbulatoryFractures.outcomeName, makeTS(2007, 3, 1)),
