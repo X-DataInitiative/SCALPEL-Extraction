@@ -16,7 +16,7 @@ class ConfigLoaderSuite extends FlatSpec {
     }
 
     // Given
-    val (defaultConfig, newConfig) = ("config/test/default.conf", "target/test/new.conf")
+    val (defaultConfig, newConfig) = ("config/test/default.conf", "target/new.conf")
 
     case class SomeObject(someKey: String, otherKey: Int)
     case class FinalObject(anotherKey: List[Int])
@@ -47,8 +47,8 @@ class ConfigLoaderSuite extends FlatSpec {
     // Then
     try assert(result == expected)
     finally {
-      new File(defaultConfig).delete()
       new File(newConfig).delete()
     }
   }
 }
+

@@ -58,35 +58,6 @@ class RichDataFrame(dataFrame: DataFrame) {
       .parquet(path)
   }
 
-  def withIndices(columnNames: Seq[String]): DataFrame = {
-    import dataFrame.sqlContext.implicits._
-    columnNames.foldLeft(dataFrame) {
-      (currentData, columnName) => {
-
-        // WARNING: The following code is dangerous, but there is no perfect solution.
-        //   It was tested with up to 30 million distinct values with 15 characters and 300
-        //   million total rows. If we have more than that, we may need to fall back to a join
-        //   option, which would take very much longer.
-        val labels = currentData
-          .select(col(columnName).cast(StringType))
-          .distinct
-          .map(_.getString(0))
-          .collect
-          .toSeq
-          .sorted
-
-        // It's transient to avoid serializing the full Map. Only the labels Seq will be
-        // serialized and each executor will compute their own Map. This is slower but allows more
-        // labels to be indexed.
-        @transient lazy val indexerFuc = labels.zipWithIndex.toMap.apply _
-
-        val indexer = udf(indexerFuc)
-
-        currentData.withColumn(columnName + "Index", indexer(col(columnName)))
-      }
-    }
-  }
-
   def avoidSpecialCharactersBeforePivot(column: String): DataFrame = {
     //replace ",; " to "_"
     val underscoreCol = regexp_replace(col(column), "[\\,,;, ]", "_")
