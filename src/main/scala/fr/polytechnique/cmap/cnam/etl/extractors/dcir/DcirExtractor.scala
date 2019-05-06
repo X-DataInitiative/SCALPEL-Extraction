@@ -38,4 +38,6 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
   }
 
   def extractStart(r: Row): Timestamp = r.getAs[java.util.Date](ColNames.Date).toTimestamp
+
+  def extractFluxDate(r: Row): Timestamp = r.getAs[java.util.Date](ColNames.DcirFluxDate).toTimestamp
 }

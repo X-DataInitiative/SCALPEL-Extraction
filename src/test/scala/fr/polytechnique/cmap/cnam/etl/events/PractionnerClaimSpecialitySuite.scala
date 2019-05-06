@@ -8,10 +8,10 @@ import org.apache.spark.sql.types._
 import org.mockito.Mockito.mock
 import org.scalatest.FlatSpec
 
-class PrestationSpecialitySuite extends FlatSpec {
+class PractitionerClaimSpecialitySuite extends FlatSpec {
 
-  object MockPrestationSpeciality extends PrestationSpeciality{
-    val category: EventCategory[PrestationSpeciality] = "mock_prestationSpeciality"
+  object MockPractionnerClaimSpeciality$ extends PractitionerClaimSpeciality {
+    val category: EventCategory[PractitionerClaimSpeciality] = "mock_prestationSpeciality"
   }
 
   val patientID: String = "patientID"
@@ -20,10 +20,10 @@ class PrestationSpecialitySuite extends FlatSpec {
   "apply" should "allow creation of a PrestationSpecialityBuilder event" in {
 
     // Given
-    val expected = Event[PrestationSpeciality](patientID, MockPrestationSpeciality.category, "A10000001", "42", 0.0, timestamp, None)
+    val expected = Event[PractitionerClaimSpeciality](patientID, MockPractionnerClaimSpeciality$.category, "A10000001", "42", 0.0, timestamp, None)
 
     // When
-    val result = MockPrestationSpeciality(patientID, "A10000001","42", timestamp)
+    val result = MockPractionnerClaimSpeciality$(patientID, "A10000001","42", timestamp)
 
     // Then
     assert(result == expected)
@@ -39,10 +39,10 @@ class PrestationSpecialitySuite extends FlatSpec {
       StructField("dat", TimestampType) :: Nil)
     val values = Array[Any]("Patient01", "A10000001", "42", makeTS(2010, 1, 1))
     val r = new GenericRowWithSchema(values, schema)
-    val expected = MockPrestationSpeciality("Patient01", "A10000001", "42", makeTS(2010, 1, 1))
+    val expected = MockPractionnerClaimSpeciality$("Patient01", "A10000001", "42", makeTS(2010, 1, 1))
 
     // When
-    val result = MockPrestationSpeciality.fromRow(r, "pID", "gId", "cod", "dat")
+    val result = MockPractionnerClaimSpeciality$.fromRow(r, "pID", "gId", "cod", "dat")
 
     // Then
     assert(result == expected)
