@@ -7,10 +7,13 @@ import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugClassConfig, DrugClassificationLevel, DrugConfig, TherapeuticLevel}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification._
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.{DrugClassificationLevel, TherapeuticLevel}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
 import fr.polytechnique.cmap.cnam.study.fall.codes._
-import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{ExposureConfig, FracturesConfig, SitesConfig, DrugsConfig}
+import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{DrugsConfig, ExposureConfig, FracturesConfig, SitesConfig}
 import fr.polytechnique.cmap.cnam.study.fall.fractures.{BodySite, BodySites}
 
 case class FallConfig(
@@ -103,14 +106,14 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     //exposures
     val patients: Boolean = exposure contains "Patients"
     val drugPurchases: Boolean = exposure contains "DrugPurchases"
-    val hospitalStays: Boolean = hospitalStay contains "HospitalStay"
     val startGapPatients: Boolean = List("DrugPurchases", "Patients", "StartGapPatients").forall(exposure.contains)
     val exposures: Boolean = List("Patients", "DrugPurchases", "Exposures").forall(exposure.contains)
     //outcomes
     val diagnoses: Boolean = outcome contains "Diagnoses"
     val acts: Boolean = outcome contains "Acts"
     val outcomes: Boolean = List("Diagnoses", "Acts", "Outcomes").forall(outcome.contains)
-
+    // Hospital Stays
+    val hospitalStays: Boolean = hospitalStay contains "HospitalStay"
   }
 
   /**

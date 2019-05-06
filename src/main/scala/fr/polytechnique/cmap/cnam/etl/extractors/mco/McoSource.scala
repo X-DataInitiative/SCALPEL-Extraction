@@ -3,7 +3,6 @@ package fr.polytechnique.cmap.cnam.etl.extractors.mco
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{LongType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame}
-import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 
@@ -24,23 +23,11 @@ trait McoSource extends ColumnNames {
     val StayLength: ColName = "MCO_B__SEJ_NBJ"
     val StayStartDate: ColName = "ENT_DAT"
     val StayEndDate: ColName = "SOR_DAT"
+    val StartDate: ColName = "EXE_SOI_DTD"
+    val EndDate: ColName = "EXE_SOI_DTF"
+    val all = List(PatientID, DP, DR, DA, CCAM, GHM, EtaNum, RsaNum, Year, StayEndMonth, StayEndYear, StayLength,
+      StayStartDate, StayEndDate, StartDate, EndDate)
   }
-
-  object NewColumns extends Serializable {
-    val EstimatedStayStart: ColName = "estimated_start"
-  }
-
-  final val eventBuilder: Map[ColName, EventBuilder] = Map(
-    ColNames.DP -> MainDiagnosis,
-    ColNames.DR -> LinkedDiagnosis,
-    ColNames.DA -> AssociatedDiagnosis
-  )
-
-  val colNameFromConfig: Map[String, ColName] = Map(
-    "dp" -> ColNames.DP,
-    "dr" -> ColNames.DR,
-    "da" -> ColNames.DA
-  )
 
   implicit class McoDataFrame(df: DataFrame) {
 
@@ -62,7 +49,7 @@ trait McoSource extends ColumnNames {
         unix_timestamp(
           concat_ws("-", ColNames.StayEndYear.toCol, ColNames.StayEndMonth.toCol, lit("01 00:00:00"))
         ).cast(LongType) - timeDelta
-      ).cast(TimestampType)
+        ).cast(TimestampType)
 
       val givenDate: Column = parseTimestamp(ColNames.StayStartDate.toCol, "ddMMyyyy")
 
@@ -73,5 +60,7 @@ trait McoSource extends ColumnNames {
     }
   }
 
-  def estimateStayStartTime(mco: DataFrame): DataFrame = mco.estimateStayStartTime
+  object NewColumns extends Serializable {
+    val EstimatedStayStart: ColName = "estimated_start"
+  }
 }

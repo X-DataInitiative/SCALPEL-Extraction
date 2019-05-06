@@ -7,9 +7,7 @@ import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActs
-import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.Diagnoses
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.{HospitalStayConfig, HospitalStayExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.Patients
 import fr.polytechnique.cmap.cnam.etl.extractors.tracklosses.{Tracklosses, TracklossesConfig}
@@ -21,6 +19,7 @@ import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransforme
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer.FollowUpDataset
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
+import fr.polytechnique.cmap.cnam.study.pioglitazone.extractors.{Diagnoses, MedicalActs}
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes._
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
@@ -51,7 +50,7 @@ object PioglitazoneMain extends Main {
     val sources = Sources.sanitize(sqlContext.readSources(config.input))
 
     // Extraction: get all events
-    val rawPatients: Dataset[Patient] = new Patients(config.patients).extract(sources)
+    val rawPatients: Dataset[Patient] = new Patients(config.patients).extract(sources).cache()
     operationsMetadata += {
       OperationReporter
         .report(
@@ -64,7 +63,7 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val rawDrugPurchases: Dataset[Event[Molecule]] = new MoleculePurchases(config.molecules).extract(sources)
+    val rawDrugPurchases: Dataset[Event[Molecule]] = new MoleculePurchases(config.molecules).extract(sources).cache()
     operationsMetadata += {
       OperationReporter
         .report(
@@ -77,7 +76,7 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val rawDiagnoses: Dataset[Event[Diagnosis]] = new Diagnoses(config.diagnoses).extract(sources)
+    val rawDiagnoses: Dataset[Event[Diagnosis]] = new Diagnoses(config.diagnoses).extract(sources).cache()
     operationsMetadata += {
       OperationReporter
         .report(
@@ -90,7 +89,7 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val rawMedicalActs = new MedicalActs(config.medicalActs).extract(sources)
+    val rawMedicalActs = new MedicalActs(config.medicalActs).extract(sources).cache()
     operationsMetadata += {
       OperationReporter
         .report(
@@ -105,7 +104,7 @@ object PioglitazoneMain extends Main {
 
     val rawTracklosses = {
       val tracklossConfig = TracklossesConfig(studyEnd = config.base.studyEnd)
-      new Tracklosses(tracklossConfig).extract(sources)
+      new Tracklosses(tracklossConfig).extract(sources).cache()
     }
     operationsMetadata += {
       OperationReporter
@@ -119,7 +118,7 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val rawHospitalStays = new HospitalStayExtractor(HospitalStayConfig(config.base.studyStart, config.base.studyEnd)).extract(sources)
+    val rawHospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
     operationsMetadata += {
       OperationReporter.report("extract_hospital_stays",
         List("MCO"),
