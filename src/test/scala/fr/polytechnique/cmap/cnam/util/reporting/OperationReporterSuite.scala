@@ -1,5 +1,7 @@
 package fr.polytechnique.cmap.cnam.util.reporting
 
+import java.io.File
+import scala.io.Source
 import org.apache.spark.sql.{AnalysisException, SQLContext}
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.Path
@@ -119,4 +121,30 @@ class OperationReporterSuite extends SharedContext {
     assert(resultMetadata == expectedMetadata)
     assertDFs(resultPatients, expectedPatients)
   }
+
+  it should "write meta data in a predefined place" in {
+    import sqlCtx.implicits._
+    // Given
+    val basePath = Path("target/test/output")
+    val data = Seq(("Patient_A", 1), ("Patient_A", 2), ("Patient_B", 3)).toDF("patientID", "other_col")
+    val optionMetadata: OperationMetadata = OperationReporter.report("test", List("input"), OperationTypes.Sources, data.toDF, basePath)
+    val expectedMetadata =  MainMetadata(this.getClass.getName, new java.util.Date(), new java.util.Date(), List(optionMetadata)).toJsonString()
+
+    // When
+    OperationReporter.writeMetaData(expectedMetadata, "metadata_env1.json", "env1")
+    OperationReporter.writeMetaData(expectedMetadata, "metadata_test.json", "test")
+    val metadataFileInEnv1 = new File("metadata_env1.json")
+    val metadataFileInTest = new File("metadata_test.json")
+    val metadata = Source.fromFile("metadata_env1.json").getLines().mkString("\n")
+
+    //Then
+    assert(metadataFileInEnv1.exists() && metadataFileInEnv1.isFile)
+    assert(expectedMetadata == metadata)
+    assert(!metadataFileInTest.exists())
+
+    metadataFileInEnv1.delete()
+
+  }
+
+
 }

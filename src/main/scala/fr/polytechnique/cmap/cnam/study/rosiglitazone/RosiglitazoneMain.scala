@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
-import java.io.PrintWriter
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql.{Dataset, SQLContext}
@@ -228,10 +227,7 @@ object RosiglitazoneMain extends Main {
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
     val metadataJson: String = metadata.toJsonString()
 
-    new PrintWriter("metadata_rosiglitazone_" + format.format(startTimestamp) + ".json") {
-      write(metadataJson)
-      close()
-    }
+    OperationReporter.writeMetaData(metadataJson, "metadata_rosiglitazone_" + format.format(startTimestamp) + ".json", argsMap("env"))
 
     //unpersist
     patients.unpersist()

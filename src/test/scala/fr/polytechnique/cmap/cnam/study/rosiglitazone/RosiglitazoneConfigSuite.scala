@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
+import java.io.File
 import java.nio.file.Paths
 import com.typesafe.config.ConfigFactory
 import me.danielpes.spark.datetime.implicits._
@@ -73,5 +74,6 @@ class RosiglitazoneConfigSuite extends FlatSpec {
 
     // Then
     assert(result == expected)
+    new File(tempPath).delete()
   }
 }
