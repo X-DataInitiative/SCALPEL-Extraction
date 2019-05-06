@@ -1,6 +1,6 @@
 name := "SNIIRAM-featuring"
 
-git.baseVersion := "1.1"
+git.baseVersion := "2.0"
 
 scalaVersion := "2.11.12"
 val sparkVersion = "2.3.0"
