@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.util.reporting
 
+import java.io.PrintWriter
 import org.apache.log4j.Logger
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.util.Path
@@ -8,9 +9,9 @@ import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 /**
   * Singleton responsible for reporting an operation execution.
   * Includes three main actions:
-  *   1) writing the operation output data,
-  *   2) writing the distinct patients present in the output data and
-  *   3) computing counts for both datasets
+  * 1) writing the operation output data,
+  * 2) writing the distinct patients present in the output data and
+  * 3) computing counts for both datasets
   *
   * Note: An operation can be any method that touches a DataFrame, including but not limited to: readers,
   * extractors, transformers and filters.
@@ -71,4 +72,21 @@ object OperationReporter {
         )
     }
   }
+
+  /**
+    * the method to output the meta data
+    *
+    * @param metaData meta data
+    * @param path     storage path of meta data
+    * @param env      running environment
+    */
+  def writeMetaData(metaData: String, path: String, env: String): Unit = {
+    if (env != "test") {
+      new PrintWriter(path) {
+        write(metaData)
+        close()
+      }
+    }
+  }
+
 }

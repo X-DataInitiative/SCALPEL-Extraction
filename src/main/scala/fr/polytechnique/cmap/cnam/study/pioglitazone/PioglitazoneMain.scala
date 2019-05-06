@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
-import java.io.PrintWriter
 import java.sql.Timestamp
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -352,10 +351,7 @@ object PioglitazoneMain extends Main {
     )
     val metadataJson: String = metadata.toJsonString()
 
-    new PrintWriter("metadata_pioglitazone_" + format.format(startTimestamp) + ".json") {
-      write(metadataJson)
-      close()
-    }
+    OperationReporter.writeMetaData(metadataJson, "metadata_pioglitazone_" + format.format(startTimestamp) + ".json", argsMap("env"))
 
     Some(exposures)
   }

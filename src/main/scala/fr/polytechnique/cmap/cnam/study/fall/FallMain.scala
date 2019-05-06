@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
-import java.io.PrintWriter
 import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
@@ -243,10 +242,7 @@ object FallMain extends Main with FractureCodes {
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
     val metadataJson: String = metadata.toJsonString()
 
-    new PrintWriter("metadata_fall_" + format.format(startTimestamp) + ".json") {
-      write(metadataJson)
-      close()
-    }
+    OperationReporter.writeMetaData(metadataJson, "metadata_fall_" + format.format(startTimestamp) + ".json", argsMap("env"))
 
     None
   }
