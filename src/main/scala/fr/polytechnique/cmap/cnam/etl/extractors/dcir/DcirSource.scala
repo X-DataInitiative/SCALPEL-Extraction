@@ -17,7 +17,9 @@ trait DcirSource extends ColumnNames {
     lazy val InstitutionCode: String = "ER_ETE_F__ETE_TYP_COD"
     lazy val Sector: String = "ER_ETE_F__PRS_PPU_SEC"
     lazy val Date: String = "EXE_SOI_DTD"
-    lazy val all = List(PatientID, CamCode, GHSCode, InstitutionCode, Sector, Date, MSpe, NonMSpe, ExecPSNum, DcirFluxDate)
+    lazy val NaturePrestation: ColName = "PRS_NAT_REF"
+    lazy val NgapCoefficient: ColName = "PRS_ACT_CFT"
+    lazy val all = List(PatientID, CamCode, GHSCode, InstitutionCode, Sector, Date, MSpe, NonMSpe, ExecPSNum, DcirFluxDate, NaturePrestation, NgapCoefficient)
 
   }
 

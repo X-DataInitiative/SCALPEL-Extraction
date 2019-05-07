@@ -123,7 +123,7 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     val optionNgap = if (dreesChronicConfig.runParameters.ngapActs) {
       logger.info("ngapActs")
-      val ngapActs = new NgapActs(dreesChronicConfig.ngapActs).extract(sources).persist()
+      val ngapActs = new DcirNgapActsExtractor(dreesChronicConfig.ngapActs).extract(sources).persist()
       operationsMetadata += {
         OperationReporter.report("ngapActs", List("DCIR"), OperationTypes.NgapActs, ngapActs.toDF, Path(dreesChronicConfig.output.outputSavePath), dreesChronicConfig.output.saveMode)
       }

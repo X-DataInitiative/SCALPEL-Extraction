@@ -11,7 +11,7 @@ import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.prestations.PractitionerClaimSpecialityConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.ngapacts.NgapActsConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.ngapacts.NgapActConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification._
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.{DrugClassificationLevel, PharmacologicalLevel}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
@@ -29,7 +29,7 @@ case class DreesChronicConfig(
   val medicalActs: MedicalActsConfig = DreesChronicConfig.MedicalActsConfig
   val diagnoses: DiagnosesConfig = DreesChronicConfig.DiagnosesConfig
   val practionnerClaimSpeciality: PractitionerClaimSpecialityConfig = DreesChronicConfig.PrestationsConfig
-  val ngapActs: NgapActsConfig = DreesChronicConfig.NgapActsConfig
+  val ngapActs: NgapActConfig = DreesChronicConfig.NgapActConfig$
 }
 
 object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
@@ -64,7 +64,7 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
     nonMedicalSpeCodes = nonSpeCodes
   )
 
-  final object NgapActsConfig extends  NgapActsConfig(
+  final object NgapActConfig$ extends  NgapActConfig(
     acts_categories = List(
       Amk,
       Ams

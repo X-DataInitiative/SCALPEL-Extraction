@@ -11,4 +11,5 @@ object OperationTypes {
   val Outcomes: OperationType = "outcomes"
   val HospitalStays: OperationType = "hospital stays"
   val PractitionnerClaimSpecialities: OperationType = "practionner claim specialities"
+  val NgapActs: OperationType = "ngap acts"
 }
