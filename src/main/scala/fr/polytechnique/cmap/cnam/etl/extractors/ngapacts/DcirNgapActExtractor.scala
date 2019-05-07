@@ -18,7 +18,7 @@ class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[
 
   override def getInput(sources: Sources): DataFrame = sources.dcir.get.select(
     ColNames.PatientID, ColNames.NaturePrestation, ColNames.NgapCoefficient,
-    ColNames.Date, ColNames.ExecPSNum
+    ColNames.Date, ColNames.ExecPSNum, ColNames.DcirFluxDate
   )
 
   override def isInExtractorScope(row: Row): Boolean = {

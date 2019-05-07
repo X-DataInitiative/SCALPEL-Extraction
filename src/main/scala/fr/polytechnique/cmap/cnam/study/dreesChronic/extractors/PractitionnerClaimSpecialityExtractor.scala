@@ -11,8 +11,8 @@ class PractitionnerClaimSpecialityExtractor(config: PractitionerClaimSpecialityC
 
   def extract(sources: Sources): Dataset[Event[PractitionerClaimSpeciality]] = {
 
-    val nonMedicalSpeciality = NonMedicalPractitionerClaimExtractor(sources, config.nonMedicalSpeCodes.toSet)
-    val medicalSpeciality = MedicalPractitionerClaimExtractor(sources, config.medicalSpeCodes.toSet)
+    val nonMedicalSpeciality = NonMedicalPractitionerClaimExtractor.extract(sources, config.nonMedicalSpeCodes.toSet)
+    val medicalSpeciality = MedicalPractitionerClaimExtractor.extract(sources, config.medicalSpeCodes.toSet)
 
     unionDatasets(nonMedicalSpeciality, medicalSpeciality)
 

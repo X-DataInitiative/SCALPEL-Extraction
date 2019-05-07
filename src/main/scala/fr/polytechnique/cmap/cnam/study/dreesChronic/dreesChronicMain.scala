@@ -105,7 +105,7 @@ object dreesChronicMain extends Main with BpcoCodes {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
     if (dreesChronicConfig.runParameters.practionnerClaimSpeciality) {
-      val prestations = new PractitionnerClaimSpecialityExtractor(dreesChronicConfig.practionnerClaimSpeciality).extract(sources).persist()
+      val prestations =  new PractitionnerClaimSpecialityExtractor(dreesChronicConfig.practionnerClaimSpeciality).extract(sources).persist()
       operationsMetadata += {
         OperationReporter.report(
           "practionner_specialities",
