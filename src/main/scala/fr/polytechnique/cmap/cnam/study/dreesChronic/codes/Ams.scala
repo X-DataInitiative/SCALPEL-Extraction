@@ -1,0 +1,10 @@
+package fr.polytechnique.cmap.cnam.study.dreesChronic.codes
+
+import fr.polytechnique.cmap.cnam.etl.extractors.ngapacts.NgapActsClassConfig
+
+ object Ams extends NgapActsClassConfig {
+   val naturePrestation: Int = 3125
+   val ngapCoefficients: Seq[String] = Seq(
+     "9.5"
+   )
+}
