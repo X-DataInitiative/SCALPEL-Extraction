@@ -25,7 +25,7 @@ object dreesChronicMain extends Main with BpcoCodes {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
     if (dreesChronicConfig.runParameters.hospitalStays) {
       val hospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
-
+      logger.info("Hospital Stays")
       operationsMetadata += {
         OperationReporter
           .report(
@@ -46,7 +46,7 @@ object dreesChronicMain extends Main with BpcoCodes {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
     val optionDrugPurchases = if (dreesChronicConfig.runParameters.drugPurchases) {
-      //logger.info("Drug Purchases")
+      logger.info("Drug Purchases")
       val drugPurchases = new DrugsExtractor(dreesChronicConfig.drugs).extract(sources).cache()
       operationsMetadata += {
         OperationReporter
@@ -65,6 +65,7 @@ object dreesChronicMain extends Main with BpcoCodes {
     }
 
     val optionPatients = if (dreesChronicConfig.runParameters.patients) {
+      logger.info("Patients")
       val patients = new Patients(PatientsConfig(dreesChronicConfig.base.studyStart)).extract(sources).cache()
       operationsMetadata += {
         OperationReporter.report(
@@ -81,6 +82,7 @@ object dreesChronicMain extends Main with BpcoCodes {
     }
 
     if (dreesChronicConfig.runParameters.startGapPatients) {
+      logger.info("Filtered Patients")
       import PatientFilters._
       val filteredPatients: Dataset[Patient] = optionPatients.get
         .filterNoStartGap(optionDrugPurchases.get, dreesChronicConfig.base.studyStart, dreesChronicConfig.patients.startGapInMonths)
@@ -105,6 +107,7 @@ object dreesChronicMain extends Main with BpcoCodes {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
     if (dreesChronicConfig.runParameters.practionnerClaimSpeciality) {
+      logger.info("Practionner Specialities")
       val prestations =  new PractitionnerClaimSpecialityExtractor(dreesChronicConfig.practionnerClaimSpeciality).extract(sources).persist()
       operationsMetadata += {
         OperationReporter.report(
@@ -122,7 +125,7 @@ object dreesChronicMain extends Main with BpcoCodes {
     }
 
     val optionNgap = if (dreesChronicConfig.runParameters.ngapActs) {
-      logger.info("ngapActs")
+      logger.info("NgapActs")
       val ngapActs = new DcirNgapActsExtractor(dreesChronicConfig.ngapActs).extract(sources).persist()
       operationsMetadata += {
         OperationReporter.report("ngapActs", List("DCIR"), OperationTypes.NgapActs, ngapActs.toDF, Path(dreesChronicConfig.output.outputSavePath), dreesChronicConfig.output.saveMode)
@@ -138,7 +141,7 @@ object dreesChronicMain extends Main with BpcoCodes {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
     if (dreesChronicConfig.runParameters.diagnoses) {
-      logger.info("diagnoses")
+      logger.info("Diagnoses")
       val diagnoses = new DiagnosisExtractor(dreesChronicConfig.diagnoses).extract(sources).persist()
       operationsMetadata += {
         OperationReporter.report(
