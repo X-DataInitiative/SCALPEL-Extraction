@@ -1,6 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.prestations
 
 import java.sql.Timestamp
+
 import scala.util.Try
 import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.etl.events._
@@ -21,6 +22,9 @@ object MedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerClaim
   override def extractGroupId(r: Row): String = {
     r.getAs[String](ColNames.ExecPSNum)
   }
+
+  override def isInStudy(codes: Set[String])
+    (row: Row): Boolean = codes.contains(code(row))
 }
 
 object NonMedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerClaimSpeciality] {
@@ -38,4 +42,7 @@ object NonMedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerCl
   override def extractGroupId(r: Row): String = {
     r.getAs[String](ColNames.ExecPSNum)
   }
+
+  override def isInStudy(codes: Set[String])
+    (row: Row): Boolean = codes.contains(code(row))
 }
