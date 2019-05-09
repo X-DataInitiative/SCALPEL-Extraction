@@ -1,6 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.dcir
 
 import java.sql.Timestamp
+
+import scala.util.Try
+
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder}
@@ -37,7 +40,15 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
     r.getAs[String](ColNames.PatientID)
   }
 
-  def extractStart(r: Row): Timestamp = r.getAs[java.util.Date](ColNames.Date).toTimestamp
+  // modification here because there are some unknown dates in our extractions
+  //def extractStart(r: Row): Timestamp = r.getAs[java.util.Date](ColNames.Date).toTimestamp
+
+  def extractStart(r: Row): Timestamp = {
+    Try(r.getAs[java.util.Date](ColNames.Date).toTimestamp) recover {
+      case _: NullPointerException => extractFluxDate(r)
+    }
+  }.get
+
 
   def extractFluxDate(r: Row): Timestamp = r.getAs[java.util.Date](ColNames.DcirFluxDate).toTimestamp
 }
