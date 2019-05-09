@@ -14,7 +14,7 @@ object DcirMedicalActExtractor extends DcirExtractor[MedicalAct] {
 
   override def getInput(sources: Sources): DataFrame = sources.dcir.get.select(
     ColNames.PatientID, ColNames.CamCode, ColNames.Date,
-    ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector
+    ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector, ColNames.DcirFluxDate
   )
 
   override def extractGroupId(r: Row): String = {
