@@ -15,11 +15,22 @@ trait Diagnosis extends AnyEvent with EventBuilder {
     Event(patientID, category, groupID, code, 0.0, date, None)
   }
 
-  def fromRow(r: Row, patientIDCol: String, codeCol: String, dateCol: String): Event[Diagnosis] = {
-    apply(r.getAs[String](patientIDCol), r.getAs[String](codeCol), r.getAs[Timestamp](dateCol))
+  def fromRow(r: Row,
+      patientIDCol: String,
+      codeCol: String,
+      dateCol: String): Event[Diagnosis] = {
+    apply(
+      r.getAs[String](patientIDCol),
+      r.getAs[String](codeCol),
+      r.getAs[Timestamp](dateCol)
+    )
   }
 
-  def fromRow(r: Row, patientIDCol: String = "patientID", groupIDCol: String = "groupID", codeCol: String = "code", dateCol: String = "eventDate"): Event[Diagnosis] = {
+  def fromRow(r: Row,
+      patientIDCol: String = "patientID",
+      groupIDCol: String = "groupID",
+      codeCol: String = "code",
+      dateCol: String = "eventDate"): Event[Diagnosis] = {
     apply(
       r.getAs[String](patientIDCol),
       r.getAs[String](groupIDCol),
