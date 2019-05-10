@@ -1,12 +1,12 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
 import java.sql.Timestamp
-import fr.polytechnique.cmap.cnam.etl.patients._
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.functions.makeTS
-import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.etl.patients._
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.util.datetime.implicits._
+import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class Patients(config: PatientsConfig) {
 
@@ -47,12 +47,18 @@ class Patients(config: PatientsConfig) {
     val birthDate: Column = coalesce(col("irBen.birthDate"), col("dcir.birthDate"))
 
     val deathDate: Column = coalesce(
-      when(validateDeathDate(col("irBen.deathDate"), birthDate, config.maxYear),
-        col("irBen.deathDate")),
-      when(validateDeathDate(col("dcir.deathDate"), birthDate, config.maxYear),
-        col("dcir.deathDate")),
-      when(validateDeathDate(col("mco.deathDate"), birthDate, config.maxYear),
-        col("mco.deathDate"))
+      when(
+        validateDeathDate(col("irBen.deathDate"), birthDate, config.maxYear),
+        col("irBen.deathDate")
+      ),
+      when(
+        validateDeathDate(col("dcir.deathDate"), birthDate, config.maxYear),
+        col("dcir.deathDate")
+      ),
+      when(
+        validateDeathDate(col("mco.deathDate"), birthDate, config.maxYear),
+        col("mco.deathDate")
+      )
     )
 
     val ageReferenceDate: Timestamp = config.ageReferenceDate

@@ -119,17 +119,20 @@ object PioglitazoneMain extends Main {
 
     val rawHospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
     operationsMetadata += {
-      OperationReporter.report("extract_hospital_stays",
+      OperationReporter.report(
+        "extract_hospital_stays",
         List("MCO"),
         OperationTypes.HospitalStays,
         rawHospitalStays.toDF,
         Path(config.output.outputSavePath),
-        config.output.saveMode)
+        config.output.saveMode
+      )
     }
 
     // Filtering: filter raw events to match study perimeter
 
-    val patients: Dataset[Patient] = rawPatients.cache() // TODO: age should be filtered here and not earlier, for now we keep it like this
+    val patients: Dataset[Patient] = rawPatients
+      .cache() // TODO: age should be filtered here and not earlier, for now we keep it like this
     operationsMetadata += {
       OperationReporter
         .report(
@@ -351,7 +354,8 @@ object PioglitazoneMain extends Main {
     )
     val metadataJson: String = metadata.toJsonString()
 
-    OperationReporter.writeMetaData(metadataJson, "metadata_pioglitazone_" + format.format(startTimestamp) + ".json", argsMap("env"))
+    OperationReporter
+      .writeMetaData(metadataJson, "metadata_pioglitazone_" + format.format(startTimestamp) + ".json", argsMap("env"))
 
     Some(exposures)
   }

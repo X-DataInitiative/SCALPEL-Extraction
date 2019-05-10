@@ -15,4 +15,5 @@ package object implicits {
       Sources.read(sqlContext, paths)
     }
   }
+
 }

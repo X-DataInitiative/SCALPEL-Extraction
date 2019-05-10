@@ -8,9 +8,6 @@ trait HospitalStay extends AnyEvent with EventBuilder {
 
   override val category: EventCategory[HospitalStay] = "hospital_stay"
 
-  def apply(patientID: String, hospitalID: String, start: Timestamp, end: Timestamp): Event[HospitalStay] =
-    apply(patientID, hospitalID, hospitalID, 0D, start, Some(end))
-
   def fromRow(
     r: Row,
     patientIDCol: String = PatientID,
@@ -23,6 +20,9 @@ trait HospitalStay extends AnyEvent with EventBuilder {
       r.getAs[Timestamp](startCol),
       r.getAs[Timestamp](endCol)
     )
+
+  def apply(patientID: String, hospitalID: String, start: Timestamp, end: Timestamp): Event[HospitalStay] =
+    apply(patientID, hospitalID, hospitalID, 0D, start, Some(end))
 }
 
 object HospitalStay extends HospitalStay

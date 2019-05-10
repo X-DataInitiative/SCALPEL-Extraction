@@ -9,17 +9,13 @@ trait Exposure extends AnyEvent with EventBuilder {
 
   val category: EventCategory[Exposure] = "exposure"
 
-  def apply(
-    patientID: String, molecule: String, weight: Double, start: Timestamp, end: Timestamp
-  ): Event[Exposure] = Event(patientID, category, groupID = "NA", molecule, weight, start, Some(end))
-
   def fromRow(
-      r: Row,
-      patientIDCol: String = "patientID",
-      nameCol: String = "name",
-      weightCol: String = "weight",
-      startCol: String = "start",
-      endCol: String = "end"): Event[Exposure] = {
+    r: Row,
+    patientIDCol: String = "patientID",
+    nameCol: String = "name",
+    weightCol: String = "weight",
+    startCol: String = "start",
+    endCol: String = "end"): Event[Exposure] = {
 
     Exposure(
       r.getAs[String](patientIDCol),
@@ -29,4 +25,8 @@ trait Exposure extends AnyEvent with EventBuilder {
       r.getAs[Timestamp](endCol)
     )
   }
+
+  def apply(
+    patientID: String, molecule: String, weight: Double, start: Timestamp, end: Timestamp
+  ): Event[Exposure] = Event(patientID, category, groupID = "NA", molecule, weight, start, Some(end))
 }

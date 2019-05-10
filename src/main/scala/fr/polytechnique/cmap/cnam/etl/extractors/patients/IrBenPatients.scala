@@ -35,8 +35,9 @@ private[patients] object IrBenPatients {
 
       val patients = result.select(col("patientID")).distinct()
 
-      if (result.count != patients.count)
+      if (result.count != patients.count) {
         throw new Exception("One or more patients have conflicting SEX CODE in IR_BEN_R")
+      }
 
       result
     }
@@ -52,16 +53,19 @@ private[patients] object IrBenPatients {
       val birthDate: Column = computeDateUsingMonthYear(col("BEN_NAI_MOI"), col("BEN_NAI_ANN")).as("birthDate")
 
       val result = data
-        .filter(col("BEN_NAI_MOI").between(1, 12) &&
-        col("BEN_NAI_ANN").between(minYear, maxYear))
+        .filter(
+          col("BEN_NAI_MOI").between(1, 12) &&
+            col("BEN_NAI_ANN").between(minYear, maxYear)
+        )
         .select(col("patientID"), birthDate)
         .distinct
         .cache
       val patients = result.select(col("patientID")).distinct
 
       // This check makes sure patients don't have conflicting birth dates.
-      if (result.count != patients.count)
+      if (result.count != patients.count) {
         throw new Exception("One or more patients have conflicting BIRTH DATES in IR_BEN_R")
+      }
 
       result
     }

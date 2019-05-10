@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.util
 
 import scala.reflect.runtime.universe.{TypeTag, typeOf}
-import org.apache.spark.sql.functions.{col, regexp_replace, udf}
-import org.apache.spark.sql.types.{DataType, StringType, StructField, StructType}
+import org.apache.spark.sql.functions.{col, regexp_replace}
+import org.apache.spark.sql.types.{DataType, StructField, StructType}
 import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 
 
@@ -19,10 +19,12 @@ class RichDataFrame(dataFrame: DataFrame) {
     def checkDuplicateRows: Boolean = {
       val dataFrameGroupedByRows = dataFrame.groupBy(
         dataFrame.columns.head,
-        dataFrame.columns.tail: _*).count()
+        dataFrame.columns.tail: _*
+      ).count()
       val otherGroupedByRows = other.groupBy(
         other.columns.head,
-        other.columns.tail: _*).count()
+        other.columns.tail: _*
+      ).count()
 
       dataFrameGroupedByRows.except(otherGroupedByRows).count() == 0 &&
         otherGroupedByRows.except(dataFrameGroupedByRows).count == 0
@@ -36,13 +38,6 @@ class RichDataFrame(dataFrame: DataFrame) {
       checkDuplicateRows
   }
 
-  private def saveMode(mode: String): SaveMode = mode match {
-    case "overwrite" => SaveMode.Overwrite
-    case "append" => SaveMode.Append
-    case "errorIfExists" => SaveMode.ErrorIfExists
-    case "withTimestamp" => SaveMode.Overwrite
-  }
-
   def writeCSV(path: String, mode: String = "errorIfExists"): Unit = {
     dataFrame.coalesce(1)
       .write
@@ -50,6 +45,13 @@ class RichDataFrame(dataFrame: DataFrame) {
       .option("delimiter", ",")
       .option("header", "true")
       .csv(path)
+  }
+
+  private def saveMode(mode: String): SaveMode = mode match {
+    case "overwrite" => SaveMode.Overwrite
+    case "append" => SaveMode.Append
+    case "errorIfExists" => SaveMode.ErrorIfExists
+    case "withTimestamp" => SaveMode.Overwrite
   }
 
   def writeParquet(path: String, mode: String = "errorIfExists"): Unit = {

@@ -15,11 +15,11 @@ import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformerC
 import fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes.OutcomeDefinition
 
 case class RosiglitazoneConfig(
-    input: StudyConfig.InputPaths,
-    output: StudyConfig.OutputPaths,
-    exposures: RosiglitazoneConfig.ExposuresConfig = RosiglitazoneConfig.ExposuresConfig(),
-    outcomes: RosiglitazoneConfig.OutcomesConfig = RosiglitazoneConfig.OutcomesConfig(),
-    filters: RosiglitazoneConfig.FiltersConfig = RosiglitazoneConfig.FiltersConfig())
+  input: StudyConfig.InputPaths,
+  output: StudyConfig.OutputPaths,
+  exposures: RosiglitazoneConfig.ExposuresConfig = RosiglitazoneConfig.ExposuresConfig(),
+  outcomes: RosiglitazoneConfig.OutcomesConfig = RosiglitazoneConfig.OutcomesConfig(),
+  filters: RosiglitazoneConfig.FiltersConfig = RosiglitazoneConfig.FiltersConfig())
   extends StudyConfig {
 
   // The following config items are not overridable by the config file
@@ -33,8 +33,64 @@ case class RosiglitazoneConfig(
 
 object RosiglitazoneConfig extends ConfigLoader with RosiglitazoneStudyCodes {
 
+  /**
+    * Reads a configuration file and merges it with the default file.
+    *
+    * @param path The path of the given file.
+    * @param env  The environment in the config file (usually can be "cmap", "cnam" or "test").
+    * @return An instance of RosiglitazoneConfig containing all parameters.
+    */
+  def load(path: String, env: String): RosiglitazoneConfig = {
+    val defaultPath = "config/rosiglitazone/default.conf"
+    loadConfigWithDefaults[RosiglitazoneConfig](path, defaultPath, env)
+  }
+
+  /** Fixed parameters needed for the FollowUp transformer. */
+  case class FollowUpConfig(
+    outcomeDefinition: OutcomeDefinition) extends FollowUpTransformerConfig(
+    delayMonths = 6,
+    firstTargetDisease = true,
+    outcomeName = Some(outcomeDefinition.outcomeName)
+  )
+
+  /** Parameters needed for the Exposures transformer. */
+  case class ExposuresConfig(
+    override val minPurchases: Int = 1,
+    override val startDelay: Period = 0.month,
+    override val purchasesWindow: Period = 0.months) extends ExposuresTransformerConfig(
+
+    minPurchases = minPurchases,
+    startDelay = startDelay,
+    purchasesWindow = purchasesWindow,
+
+    periodStrategy = ExposurePeriodStrategy.Unlimited,
+    endThresholdGc = None,
+    endThresholdNgc = None,
+    endDelay = None,
+
+    weightAggStrategy = WeightAggStrategy.NonCumulative,
+    cumulativeExposureWindow = None,
+    cumulativeStartThreshold = None,
+    cumulativeEndThreshold = None,
+    dosageLevelIntervals = None,
+    purchaseIntervals = None
+  )
+
+  /** Parameters needed for the Outcomes transformer. */
+  case class OutcomesConfig(
+    outcomeDefinition: OutcomeDefinition = OutcomeDefinition.default)
+    extends OutcomesTransformerConfig
+
+  /** Parameters needed for the Filters. */
+  case class FiltersConfig(
+    filterNeverSickPatients: Boolean = false,
+    filterDiagnosedPatients: Boolean = true,
+    diagnosedPatientsThreshold: Int = 6,
+    filterDelayedEntries: Boolean = true,
+    delayedEntryThreshold: Int = 12)
+
   /** Base fixed parameters for this study. */
-  final object BaseConfig extends BaseConfig (
+  final object BaseConfig extends BaseConfig(
     ageReferenceDate = LocalDate.of(2011, 1, 1),
     studyStart = LocalDate.of(2010, 1, 1),
     studyEnd = LocalDate.of(2015, 1, 1)
@@ -64,59 +120,4 @@ object RosiglitazoneConfig extends ConfigLoader with RosiglitazoneStudyCodes {
     studyStart = BaseConfig.studyStart,
     studyEnd = BaseConfig.studyEnd
   )
-
-  /** Fixed parameters needed for the FollowUp transformer. */
-  case class FollowUpConfig(
-      outcomeDefinition: OutcomeDefinition) extends FollowUpTransformerConfig(
-    delayMonths = 6,
-    firstTargetDisease = true,
-    outcomeName = Some(outcomeDefinition.outcomeName)
-  )
-
-  /** Parameters needed for the Exposures transformer. */
-  case class ExposuresConfig(
-      override val minPurchases: Int = 1,
-      override val startDelay: Period = 0.month,
-      override val purchasesWindow: Period = 0.months) extends ExposuresTransformerConfig(
-
-    minPurchases = minPurchases,
-    startDelay = startDelay,
-    purchasesWindow = purchasesWindow,
-
-    periodStrategy = ExposurePeriodStrategy.Unlimited,
-    endThresholdGc = None,
-    endThresholdNgc = None,
-    endDelay = None,
-
-    weightAggStrategy = WeightAggStrategy.NonCumulative,
-    cumulativeExposureWindow = None,
-    cumulativeStartThreshold = None,
-    cumulativeEndThreshold = None,
-    dosageLevelIntervals = None,
-    purchaseIntervals = None
-  )
-
-  /** Parameters needed for the Outcomes transformer. */
-  case class OutcomesConfig(
-      outcomeDefinition: OutcomeDefinition = OutcomeDefinition.default)
-    extends OutcomesTransformerConfig
-
-  /** Parameters needed for the Filters. */
-  case class FiltersConfig(
-    filterNeverSickPatients: Boolean = false,
-    filterDiagnosedPatients: Boolean = true,
-    diagnosedPatientsThreshold: Int = 6,
-    filterDelayedEntries: Boolean = true,
-    delayedEntryThreshold: Int = 12)
-
-  /**
-    * Reads a configuration file and merges it with the default file.
-    * @param path The path of the given file.
-    * @param env The environment in the config file (usually can be "cmap", "cnam" or "test").
-    * @return An instance of RosiglitazoneConfig containing all parameters.
-    */
-  def load(path: String, env: String): RosiglitazoneConfig = {
-    val defaultPath = "config/rosiglitazone/default.conf"
-    loadConfigWithDefaults[RosiglitazoneConfig](path, defaultPath, env)
-  }
 }

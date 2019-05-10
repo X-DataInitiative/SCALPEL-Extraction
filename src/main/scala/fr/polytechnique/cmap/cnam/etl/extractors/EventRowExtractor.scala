@@ -3,7 +3,8 @@ package fr.polytechnique.cmap.cnam.etl.extractors
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
 
-trait EventRowExtractor { self: ColumnNames =>
+trait EventRowExtractor {
+  self: ColumnNames =>
 
   def extractPatientId(r: Row): String
 

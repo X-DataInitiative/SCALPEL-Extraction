@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.molecules
 
+import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import org.apache.spark.sql.Dataset
 
 class MoleculePurchases(config: MoleculePurchasesConfig) {
 

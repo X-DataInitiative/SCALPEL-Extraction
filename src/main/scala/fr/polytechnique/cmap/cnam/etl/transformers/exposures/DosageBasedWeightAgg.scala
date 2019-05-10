@@ -5,7 +5,18 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 
 class DosageBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
+
   import Columns._
+
+  def aggregateWeight(
+    cumWindow: Option[Int] = None,
+    cumStartThreshold: Option[Int] = None,
+    cumEndThreshold: Option[Int] = None,
+    dosageLevelIntervals: Option[List[Int]],
+    purchaseIntervals: Option[List[Int]]): DataFrame = {
+
+    aggregateWeightImpl(dosageLevelIntervals.get)
+  }
 
   private def aggregateWeightImpl(dosageLevelIntervals: List[Int]): DataFrame = {
 
@@ -21,15 +32,5 @@ class DosageBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data) {
       .withColumn(Weight, sum(Weight).over(window.orderBy(ExposureStart)))
       .withColumn(Weight, getLevel(col(Weight)))
       .withColumn(ExposureStart, min(ExposureStart).over(finalWindow))
-  }
-
-  def aggregateWeight(
-      cumWindow: Option[Int] = None,
-      cumStartThreshold: Option[Int] = None,
-      cumEndThreshold: Option[Int] = None,
-      dosageLevelIntervals: Option[List[Int]],
-      purchaseIntervals: Option[List[Int]]): DataFrame = {
-
-    aggregateWeightImpl(dosageLevelIntervals.get)
   }
 }

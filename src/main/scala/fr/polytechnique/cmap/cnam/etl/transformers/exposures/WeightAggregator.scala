@@ -24,9 +24,9 @@ abstract class WeightAggregatorImpl(data: DataFrame) {
   // Note [2018/04]: Apparently, the first three parameters (cum*) are note being used by any
   //   strategy. This needs to be investigated.
   def aggregateWeight(
-      cumWindow: Option[Int] = None,
-      cumStartThreshold: Option[Int] = None,
-      cumEndThreshold: Option[Int] = None,
-      dosageLevelIntervals: Option[List[Int]] = None,
-      purchaseIntervals: Option[List[Int]] = None): DataFrame
+    cumWindow: Option[Int] = None,
+    cumStartThreshold: Option[Int] = None,
+    cumEndThreshold: Option[Int] = None,
+    dosageLevelIntervals: Option[List[Int]] = None,
+    purchaseIntervals: Option[List[Int]] = None): DataFrame
 }
