@@ -21,24 +21,32 @@ object ColumnUtilities {
   }
 
   def maxColumn(columns: Column*): Column = {
-    if(columns.size == 1) columns(0)
-    else columns.reduce {
-      (left: Column, right: Column) => when(
-        right.isNull, left
-      ).otherwise(
-        when(left >= right, left).otherwise(right)
-      )
+    if (columns.size == 1) {
+      columns(0)
+    } else {
+      columns.reduce {
+        (left: Column, right: Column) =>
+          when(
+            right.isNull, left
+          ).otherwise(
+            when(left >= right, left).otherwise(right)
+          )
+      }
     }
   }
 
   def minColumn(columns: Column*): Column = {
-    if(columns.size == 1) columns(0)
-    else columns.reduce {
-      (left: Column, right: Column) => when(
-        right.isNull, left
-      ).otherwise(
-        when(left <= right, left).otherwise(right)
-      )
+    if (columns.size == 1) {
+      columns(0)
+    } else {
+      columns.reduce {
+        (left: Column, right: Column) =>
+          when(
+            right.isNull, left
+          ).otherwise(
+            when(left <= right, left).otherwise(right)
+          )
+      }
     }
   }
 
@@ -57,4 +65,5 @@ object ColumnUtilities {
       when(bucketId <= lastBucket || bucketId.isNull, bucketId).otherwise(lastBucket)
     }
   }
+
 }

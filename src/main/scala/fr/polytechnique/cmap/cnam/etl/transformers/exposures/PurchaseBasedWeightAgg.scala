@@ -28,7 +28,7 @@ class PurchaseBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data)
     cumWindow: Option[Int],
     cumStartThreshold: Option[Int] = None,
     cumEndThreshold: Option[Int] = None,
-    dosageLevelIntervals: Option[List[Int]]= None,
+    dosageLevelIntervals: Option[List[Int]] = None,
     purchaseIntervals: Option[List[Int]]): DataFrame = {
 
     this.aggregateWeightImpl(purchaseIntervals.get)

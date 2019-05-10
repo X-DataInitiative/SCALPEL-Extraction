@@ -1,6 +1,5 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.dcir
 
-import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
 
 trait DcirSource extends ColumnNames {
@@ -17,7 +16,18 @@ trait DcirSource extends ColumnNames {
     lazy val InstitutionCode: String = "ER_ETE_F__ETE_TYP_COD"
     lazy val Sector: String = "ER_ETE_F__PRS_PPU_SEC"
     lazy val Date: String = "EXE_SOI_DTD"
-    lazy val all = List(PatientID, CamCode, GHSCode, InstitutionCode, Sector, Date, MSpe, NonMSpe, ExecPSNum, DcirFluxDate)
+    lazy val all = List(
+      PatientID,
+      CamCode,
+      GHSCode,
+      InstitutionCode,
+      Sector,
+      Date,
+      MSpe,
+      NonMSpe,
+      ExecPSNum,
+      DcirFluxDate
+    )
 
   }
 

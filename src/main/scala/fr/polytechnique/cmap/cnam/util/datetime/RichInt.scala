@@ -4,22 +4,29 @@ package fr.polytechnique.cmap.cnam.util.datetime
 
 private[datetime] class RichInt(val value: Int) extends AnyVal {
 
-  def years: Period = Period(years = value)
   def year: Period = this.years
 
-  def months: Period = Period(months = value)
+  def years: Period = Period(years = value)
+
   def month: Period = this.months
 
-  def days: Period = Period(days = value)
+  def months: Period = Period(months = value)
+
   def day: Period = this.days
 
-  def hours: Period = Period(hours = value)
+  def days: Period = Period(days = value)
+
   def hour: Period = this.hours
 
-  def minutes: Period = Period(minutes = value)
+  def hours: Period = Period(hours = value)
+
   def minute: Period = this.minutes
 
-  def seconds: Period = Period(seconds = value)
+  def minutes: Period = Period(minutes = value)
+
   def second: Period = this.seconds
+
+  def seconds: Period = Period(seconds = value)
+
   def s: Period = this.seconds
 }

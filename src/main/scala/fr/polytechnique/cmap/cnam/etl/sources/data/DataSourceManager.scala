@@ -8,11 +8,13 @@ import fr.polytechnique.cmap.cnam.etl.sources.SourceManager
 trait DataSourceManager extends SourceManager {
 
   val EXE_SOI_DTD: Column = col("EXE_SOI_DTD")
+
   /**
     * This method santize the sources based on the passed dates.
+    *
     * @param sourceData the data source that will be sanitized
     * @param studyStart the study start date
-    * @param studyEnd the study end date
+    * @param studyEnd   the study end date
     * @return a Dataframe with lines that respect the condition
     */
   def sanitizeDates(sourceData: DataFrame, studyStart: Timestamp, studyEnd: Timestamp): DataFrame = {

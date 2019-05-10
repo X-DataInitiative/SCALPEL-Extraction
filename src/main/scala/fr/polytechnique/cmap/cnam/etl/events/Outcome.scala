@@ -9,17 +9,14 @@ trait Outcome extends AnyEvent with EventBuilder {
 
   override val category: EventCategory[Outcome] = "outcome"
 
-  def apply(patientID: String, name: String, date: Timestamp): Event[Outcome] =
-    Event(patientID, category, groupID = "NA", name, 0.0, date, None)
-
   def apply(patientID: String, groupId: String, name: String, date: Timestamp): Event[Outcome] =
     Event(patientID, category, groupID = groupId, name, 0.0, date, None)
 
   def fromRow(
-      r: Row,
-      patientIDCol: String = "patientID",
-      nameCol: String = "name",
-      dateCol: String = "eventDate"): Event[Outcome] = {
+    r: Row,
+    patientIDCol: String = "patientID",
+    nameCol: String = "name",
+    dateCol: String = "eventDate"): Event[Outcome] = {
 
     Outcome(
       r.getAs[String](patientIDCol),
@@ -27,5 +24,8 @@ trait Outcome extends AnyEvent with EventBuilder {
       r.getAs[Timestamp](dateCol)
     )
   }
+
+  def apply(patientID: String, name: String, date: Timestamp): Event[Outcome] =
+    Event(patientID, category, groupID = "NA", name, 0.0, date, None)
 }
 

@@ -25,8 +25,10 @@ trait McoSource extends ColumnNames {
     val StayEndDate: ColName = "SOR_DAT"
     val StartDate: ColName = "EXE_SOI_DTD"
     val EndDate: ColName = "EXE_SOI_DTF"
-    val all = List(PatientID, DP, DR, DA, CCAM, GHM, EtaNum, RsaNum, Year, StayEndMonth, StayEndYear, StayLength,
-      StayStartDate, StayEndDate, StartDate, EndDate)
+    val all = List(
+      PatientID, DP, DR, DA, CCAM, GHM, EtaNum, RsaNum, Year, StayEndMonth, StayEndYear, StayLength,
+      StayStartDate, StayEndDate, StartDate, EndDate
+    )
   }
 
   implicit class McoDataFrame(df: DataFrame) {
@@ -63,4 +65,5 @@ trait McoSource extends ColumnNames {
   object NewColumns extends Serializable {
     val EstimatedStayStart: ColName = "estimated_start"
   }
+
 }

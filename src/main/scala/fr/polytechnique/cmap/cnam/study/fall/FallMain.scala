@@ -13,9 +13,9 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
+import fr.polytechnique.cmap.cnam.study.fall.extractors._
 import fr.polytechnique.cmap.cnam.study.fall.follow_up.FallStudyFollowUps
 import fr.polytechnique.cmap.cnam.study.fall.fractures.FracturesTransformer
-import fr.polytechnique.cmap.cnam.study.fall.extractors._
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
@@ -23,6 +23,36 @@ import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadat
 object FallMain extends Main with FractureCodes {
 
   override def appName: String = "fall study"
+
+  override def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
+
+    val format = new java.text.SimpleDateFormat("yyyy_MM_dd_HH_mm_ss")
+    val startTimestamp = new java.util.Date()
+    val fallConfig = FallConfig.load(argsMap("conf"), argsMap("env"))
+
+    import implicits.SourceReader
+    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input))
+    val dcir = sources.dcir.get.repartition(4000).persist()
+    val mco = sources.mco.get.repartition(4000).persist()
+
+    val operationsMetadata = computeHospitalStays(sources, fallConfig) ++ computeOutcomes(
+      sources,
+      fallConfig
+    ) ++ computeExposures(sources, fallConfig)
+
+    dcir.unpersist()
+    mco.unpersist()
+
+
+    // Write Metadata
+    val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
+    val metadataJson: String = metadata.toJsonString()
+
+    OperationReporter
+      .writeMetaData(metadataJson, "metadata_fall_" + format.format(startTimestamp) + ".json", argsMap("env"))
+
+    None
+  }
 
   def computeHospitalStays(sources: Sources, fallConfig: FallConfig): mutable.Buffer[OperationMetadata] = {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
@@ -216,34 +246,5 @@ object FallMain extends Main with FractureCodes {
     }
 
     operationsMetadata
-  }
-
-  override def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
-
-    val format = new java.text.SimpleDateFormat("yyyy_MM_dd_HH_mm_ss")
-    val startTimestamp = new java.util.Date()
-    val fallConfig = FallConfig.load(argsMap("conf"), argsMap("env"))
-
-    import implicits.SourceReader
-    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input))
-    val dcir = sources.dcir.get.repartition(4000).persist()
-    val mco = sources.mco.get.repartition(4000).persist()
-
-    val operationsMetadata = computeHospitalStays(sources, fallConfig) ++ computeOutcomes(
-      sources,
-      fallConfig
-    ) ++ computeExposures(sources, fallConfig)
-
-    dcir.unpersist()
-    mco.unpersist()
-
-
-    // Write Metadata
-    val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
-    val metadataJson: String = metadata.toJsonString()
-
-    OperationReporter.writeMetaData(metadataJson, "metadata_fall_" + format.format(startTimestamp) + ".json", argsMap("env"))
-
-    None
   }
 }

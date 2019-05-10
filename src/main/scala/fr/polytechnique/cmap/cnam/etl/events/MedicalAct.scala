@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.events
 
 import java.sql.Timestamp
-
 import org.apache.spark.sql.Row
 
 trait MedicalAct extends AnyEvent with EventBuilder {
@@ -9,11 +8,11 @@ trait MedicalAct extends AnyEvent with EventBuilder {
   override val category: EventCategory[MedicalAct]
 
   def fromRow(
-      r: Row,
-      patientIDCol: String = "patientID",
-      groupIDCol: String = "groupID",
-      codeCol: String = "code",
-      dateCol: String = "eventDate"): Event[MedicalAct] = {
+    r: Row,
+    patientIDCol: String = "patientID",
+    groupIDCol: String = "groupID",
+    codeCol: String = "code",
+    dateCol: String = "eventDate"): Event[MedicalAct] = {
     this.apply(
       r.getAs[String](patientIDCol),
       r.getAs[String](groupIDCol),
