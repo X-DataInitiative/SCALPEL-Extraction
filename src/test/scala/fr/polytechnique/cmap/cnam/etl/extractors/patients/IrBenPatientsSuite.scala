@@ -134,7 +134,7 @@ class IrBenPatientsSuite extends SharedContext {
 
     // Then
     assertDFs(result.toDF, expected)
- }
+  }
 
   it should "deal with actual data" in {
     val sqlCtx = sqlContext

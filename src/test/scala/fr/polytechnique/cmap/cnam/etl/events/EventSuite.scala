@@ -6,14 +6,16 @@ import org.scalatest.FlatSpec
 
 class EventSuite extends FlatSpec {
 
+  val patientID: String = "patientID"
+  val timestamp: Timestamp = mock(classOf[Timestamp])
+
   trait SomeEvent extends AnyEvent
+
+  trait AnotherEvent extends AnyEvent
+
   object SomeEvent extends SomeEvent {
     val category: EventCategory[SomeEvent] = "some_category"
   }
-  trait AnotherEvent extends AnyEvent
-
-  val patientID: String = "patientID"
-  val timestamp: Timestamp = mock(classOf[Timestamp])
 
   "apply" should "allow creation of new Events" in {
 
@@ -21,7 +23,15 @@ class EventSuite extends FlatSpec {
     val expected: Event[SomeEvent] = Event(patientID, "some_category", "some_group", "some_value", 0.0, timestamp, None)
 
     // When
-    val result: Event[SomeEvent] = Event(patientID, SomeEvent.category, "some_group", "some_value", 0.0, timestamp, None)
+    val result: Event[SomeEvent] = Event(
+      patientID,
+      SomeEvent.category,
+      "some_group",
+      "some_value",
+      0.0,
+      timestamp,
+      None
+    )
 
     // Then
     assert(result == expected)
@@ -35,7 +45,7 @@ class EventSuite extends FlatSpec {
 
   "checkValue" should "check if the event's value matches a given value for the given category" in {
     // Given
-    val someEvent = Event[SomeEvent](patientID, SomeEvent.category, "some_group", "some_value" ,0.0, timestamp, None)
+    val someEvent = Event[SomeEvent](patientID, SomeEvent.category, "some_group", "some_value", 0.0, timestamp, None)
 
     // When|Then
     assert(someEvent.checkValue(SomeEvent.category, "some_value"))
@@ -45,7 +55,7 @@ class EventSuite extends FlatSpec {
 
   "checkValue" should "check if the event's value is found in a list for a given category" in {
     // Given
-    val someEvent = Event[SomeEvent](patientID, SomeEvent.category, "some_group", "some_value" ,0.0, timestamp, None)
+    val someEvent = Event[SomeEvent](patientID, SomeEvent.category, "some_group", "some_value", 0.0, timestamp, None)
     val values: List[String] = List("some_value", "another_value")
 
     // When|Then
@@ -56,7 +66,7 @@ class EventSuite extends FlatSpec {
 
   "checkValueStart" should "check if the event's value start with a given value for the given category" in {
     // Given
-    val someEvent = Event[SomeEvent](patientID, SomeEvent.category, "some_group", "some_value" ,0.0, timestamp, None)
+    val someEvent = Event[SomeEvent](patientID, SomeEvent.category, "some_group", "some_value", 0.0, timestamp, None)
 
     // When|Then
     assert(someEvent.checkValueStart(SomeEvent.category, "some_val"))
@@ -66,7 +76,7 @@ class EventSuite extends FlatSpec {
 
   "checkValueStart" should "check if the event's value starts with a value in a list for a given category" in {
     // Given
-    val someEvent = Event[SomeEvent](patientID, SomeEvent.category, "some_group", "some_value" ,0.0, timestamp, None)
+    val someEvent = Event[SomeEvent](patientID, SomeEvent.category, "some_group", "some_value", 0.0, timestamp, None)
     val values: List[String] = List("some_value", "another_value")
 
     // When|Then

@@ -132,4 +132,5 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
     firstTargetDisease = true,
     outcomeName = Some("cancer")
   )
+
 }

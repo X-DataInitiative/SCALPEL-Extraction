@@ -12,4 +12,5 @@ object ExposurePeriodStrategy {
   case object Limited extends ExposurePeriodStrategy
 
   case object Unlimited extends ExposurePeriodStrategy
+
 }

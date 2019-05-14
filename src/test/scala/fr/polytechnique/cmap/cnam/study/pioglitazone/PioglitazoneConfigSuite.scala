@@ -2,10 +2,10 @@ package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import java.nio.file.{Files, Paths}
 import com.typesafe.config.ConfigFactory
+import me.danielpes.spark.datetime.implicits._
 import org.scalatest.FlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes.CancerDefinition
-import me.danielpes.spark.datetime.implicits._
 
 class PioglitazoneConfigSuite extends FlatSpec {
 
@@ -35,7 +35,8 @@ class PioglitazoneConfigSuite extends FlatSpec {
     // Given
     val default = PioglitazoneConfig(inputPaths, outputPaths)
     val tempPath = "test.conf"
-    val configContent = """
+    val configContent =
+      """
         | input {
         |   dcir: "new/in/path"
         | }

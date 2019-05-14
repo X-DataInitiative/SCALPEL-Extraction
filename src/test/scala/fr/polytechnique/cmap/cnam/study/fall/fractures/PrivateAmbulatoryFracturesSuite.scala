@@ -9,7 +9,7 @@ class PrivateAmbulatoryFracturesSuite extends SharedContext {
   "containsNonHospitalizedCcam" should "return true if the event value is in the list of codes" in {
     // Given
     val eventCode = "NBEP002"
-    val event = DcirAct("george", "stupidcode", eventCode, makeTS(2007,1,1))
+    val event = DcirAct("george", "stupidcode", eventCode, makeTS(2007, 1, 1))
 
     // When
     val result = PrivateAmbulatoryFractures.containsNonHospitalizedCcam(event)
@@ -21,7 +21,7 @@ class PrivateAmbulatoryFracturesSuite extends SharedContext {
   it should "return false otherwise" in {
     // Given
     val eventCode = "Weird Code"
-    val event = DcirAct("george", "stupidcode", eventCode, makeTS(2007,1,1))
+    val event = DcirAct("george", "stupidcode", eventCode, makeTS(2007, 1, 1))
 
     // When
     val result = PrivateAmbulatoryFractures.containsNonHospitalizedCcam(event)
@@ -32,7 +32,7 @@ class PrivateAmbulatoryFracturesSuite extends SharedContext {
 
   "isPrivateAmbulatory" should "return true for correct even" in {
     // Given
-    val event = DcirAct("george", DcirAct.groupID.PrivateAmbulatory, "stupidcode", makeTS(2007,1,1))
+    val event = DcirAct("george", DcirAct.groupID.PrivateAmbulatory, "stupidcode", makeTS(2007, 1, 1))
 
     // When
     val result = PrivateAmbulatoryFractures.isPrivateAmbulatory(event)
@@ -46,9 +46,9 @@ class PrivateAmbulatoryFracturesSuite extends SharedContext {
     import sqlCtx.implicits._
     // Given
     val input = Seq(
-      DcirAct("riri", DcirAct.groupID.PrivateAmbulatory, "NBEP002", makeTS(2007,1,1)),
-      DcirAct("fifi", DcirAct.groupID.PrivateAmbulatory, "stupidcode", makeTS(2007,1,1)),
-      DcirAct("loulou", DcirAct.groupID.PublicAmbulatory, "stupidcode", makeTS(2007,1,1))
+      DcirAct("riri", DcirAct.groupID.PrivateAmbulatory, "NBEP002", makeTS(2007, 1, 1)),
+      DcirAct("fifi", DcirAct.groupID.PrivateAmbulatory, "stupidcode", makeTS(2007, 1, 1)),
+      DcirAct("loulou", DcirAct.groupID.PublicAmbulatory, "stupidcode", makeTS(2007, 1, 1))
     ).toDS
 
     val expected = Seq(

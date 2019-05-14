@@ -1,16 +1,15 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
 import java.sql.Timestamp
-
-import fr.polytechnique.cmap.cnam.SharedContext
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
+import fr.polytechnique.cmap.cnam.SharedContext
 
 class McoPatientsSuite extends SharedContext {
 
   import fr.polytechnique.cmap.cnam.etl.extractors.patients.McoPatients.McoPatientsDataFrame
 
-    "getDeathDates" should "collect death dates correctly from flat MCO" in {
+  "getDeathDates" should "collect death dates correctly from flat MCO" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -75,5 +74,5 @@ class McoPatientsSuite extends SharedContext {
 
     // Then
     assertDFs(result.toDF, expected)
- }
+  }
 }

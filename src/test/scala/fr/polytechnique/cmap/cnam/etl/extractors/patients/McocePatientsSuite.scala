@@ -118,8 +118,10 @@ class McocePatientsSuite extends SharedContext {
 
 
     //When
-    val result = McocePatients.extract(sources.mcoCe.get, patientsConfig.minGender,
-      patientsConfig.maxGender, patientsConfig.minYear, patientsConfig.maxYear).toDF()
+    val result = McocePatients.extract(
+      sources.mcoCe.get, patientsConfig.minGender,
+      patientsConfig.maxGender, patientsConfig.minYear, patientsConfig.maxYear
+    ).toDF()
 
     //Then
     assertDFs(result, expected)

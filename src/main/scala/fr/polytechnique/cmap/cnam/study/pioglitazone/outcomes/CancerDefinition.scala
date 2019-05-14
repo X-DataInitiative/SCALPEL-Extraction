@@ -9,8 +9,12 @@ sealed trait CancerDefinition {
 }
 
 object CancerDefinition {
-  case object Broad extends CancerDefinition
-  case object Naive extends CancerDefinition
-  case object Narrow extends CancerDefinition
+
   val default: CancerDefinition = CancerDefinition.Naive
+
+  case object Broad extends CancerDefinition
+
+  case object Naive extends CancerDefinition
+
+  case object Narrow extends CancerDefinition
 }

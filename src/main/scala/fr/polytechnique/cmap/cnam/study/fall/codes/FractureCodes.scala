@@ -1,12 +1,9 @@
 package fr.polytechnique.cmap.cnam.study.fall.codes
 
-import fr.polytechnique.cmap.cnam.study.fall._
-
 /*
  * The codes needed for this study's outcomes are listed in Confluence.
  * Link: https://datainitiative.atlassian.net/wiki/display/CFC/Outcomes
  */
-
 
 
 trait FractureCodes {
@@ -86,9 +83,37 @@ trait FractureCodes {
   )
 
   val CCAMExceptions = Set(
-    "LAGA002", "LAGA003", "LAGA004", "LAGA005", "LDGA001", "LDGA002", "LEGA001", "LEGA002", "LFGA001", "LHGA004",
-    "LHGA006", "LHGA007", "LJGA001", "LJGA002", "MAGA001", "MDGA002", "MDGB001", "NAGA001", "NBGA007", "NDGA003",
-    "PAGA008", "PAGA009", "PAGA010", "PAGA011", "PAGB001", "PAGB002", "PAGB003", "PAGB004", "PAGH001", "PAKB001", "PAMP001"
+    "LAGA002",
+    "LAGA003",
+    "LAGA004",
+    "LAGA005",
+    "LDGA001",
+    "LDGA002",
+    "LEGA001",
+    "LEGA002",
+    "LFGA001",
+    "LHGA004",
+    "LHGA006",
+    "LHGA007",
+    "LJGA001",
+    "LJGA002",
+    "MAGA001",
+    "MDGA002",
+    "MDGB001",
+    "NAGA001",
+    "NBGA007",
+    "NDGA003",
+    "PAGA008",
+    "PAGA009",
+    "PAGA010",
+    "PAGA011",
+    "PAGB001",
+    "PAGB002",
+    "PAGB003",
+    "PAGB004",
+    "PAGH001",
+    "PAKB001",
+    "PAMP001"
   )
 }
 

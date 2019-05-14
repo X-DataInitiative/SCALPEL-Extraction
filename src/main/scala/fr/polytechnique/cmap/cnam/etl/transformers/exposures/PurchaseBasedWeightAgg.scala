@@ -8,6 +8,16 @@ class PurchaseBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data)
 
   import Columns._
 
+  def aggregateWeight(
+    cumWindow: Option[Int],
+    cumStartThreshold: Option[Int] = None,
+    cumEndThreshold: Option[Int] = None,
+    dosageLevelIntervals: Option[List[Int]] = None,
+    purchaseIntervals: Option[List[Int]]): DataFrame = {
+
+    this.aggregateWeightImpl(purchaseIntervals.get)
+  }
+
   private def aggregateWeightImpl(purchaseIntervals: List[Int]): DataFrame = {
 
     val window = Window.partitionBy(PatientID, Value)
@@ -22,16 +32,6 @@ class PurchaseBasedWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data)
       .withColumn(Weight, sum(lit(1.0)).over(window.orderBy(ExposureStart)))
       .withColumn(Weight, getLevel(col(Weight)))
       .withColumn(ExposureStart, min(ExposureStart).over(finalWindow))
-  }
-
-  def aggregateWeight(
-    cumWindow: Option[Int],
-    cumStartThreshold: Option[Int] = None,
-    cumEndThreshold: Option[Int] = None,
-    dosageLevelIntervals: Option[List[Int]] = None,
-    purchaseIntervals: Option[List[Int]]): DataFrame = {
-
-    this.aggregateWeightImpl(purchaseIntervals.get)
   }
 }
 

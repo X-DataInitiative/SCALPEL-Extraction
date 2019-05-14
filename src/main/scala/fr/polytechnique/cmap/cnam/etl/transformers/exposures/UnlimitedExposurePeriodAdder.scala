@@ -1,17 +1,17 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
+import me.danielpes.spark.datetime.Period
+import me.danielpes.spark.datetime.implicits._
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame}
-import me.danielpes.spark.datetime.Period
-import me.danielpes.spark.datetime.implicits._
 
 private class UnlimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriodAdderImpl(data) {
 
   import Columns._
 
-// TODO: This implementation is buggy for minpurchases of 3 or more
+  // TODO: This implementation is buggy for minpurchases of 3 or more
   def withStartEnd(
     minPurchases: Int = 2,
     startDelay: Period = 3.months,

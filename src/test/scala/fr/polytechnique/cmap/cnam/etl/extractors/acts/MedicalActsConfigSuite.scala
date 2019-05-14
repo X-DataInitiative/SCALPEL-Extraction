@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
-import fr.polytechnique.cmap.cnam.SharedContext
 import org.scalatest.Matchers.{a, convertToAnyShouldWrapper}
+import fr.polytechnique.cmap.cnam.SharedContext
 
 class MedicalActsConfigSuite extends SharedContext {
   "MedicalActsConfig" should "be of type MedicalActsConfig" in {

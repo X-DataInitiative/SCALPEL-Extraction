@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
-import org.apache.spark.sql.DataFrame
 import org.mockito.Mockito.mock
 import org.scalatest.FlatSpec
+import org.apache.spark.sql.DataFrame
 
 class ExposurePeriodAdderSuite extends FlatSpec {
 

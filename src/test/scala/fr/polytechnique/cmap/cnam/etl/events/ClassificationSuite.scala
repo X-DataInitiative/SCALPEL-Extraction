@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.events
 
 import org.scalatest.FlatSpecLike
-import fr.polytechnique.cmap.cnam.util.functions._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types.{StringType, StructField, StructType, TimestampType}
+import fr.polytechnique.cmap.cnam.util.functions._
 
 
 class ClassificationSuite extends FlatSpecLike {
@@ -29,7 +29,8 @@ class ClassificationSuite extends FlatSpecLike {
       StructField("patientID", StringType) ::
         StructField("groupID", StringType) ::
         StructField("name", StringType) ::
-        StructField("eventDate", TimestampType) :: Nil)
+        StructField("eventDate", TimestampType) :: Nil
+    )
 
     val values = Array[Any]("Stevie", "42", "GHMDA233", makeTS(2016, 1, 1))
 

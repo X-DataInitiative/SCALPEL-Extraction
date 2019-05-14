@@ -44,7 +44,7 @@ class PeriodSuite extends FlatSpec {
   "toMap" should "convert the fields into an ordered map" in {
     // Given
     val period = Period(1, 2, 3, 4, 5, 6, 7)
-    val expected = scala.collection.immutable.ListMap[String, Int] (
+    val expected = scala.collection.immutable.ListMap[String, Int](
       "years" -> 1,
       "months" -> 2,
       "days" -> 3,

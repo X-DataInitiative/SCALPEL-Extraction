@@ -5,7 +5,7 @@ import fr.polytechnique.cmap.cnam.etl.transformers.exposures.Columns._
 import fr.polytechnique.cmap.cnam.util.functions._
 
 
-class DosageBasedWeightAggSuite extends SharedContext{
+class DosageBasedWeightAggSuite extends SharedContext {
 
   private lazy val sqlCtx = sqlContext
 
@@ -40,7 +40,7 @@ class DosageBasedWeightAggSuite extends SharedContext{
     ).toDF(PatientID, Value, ExposureStart, Weight)
 
     // When
-    val dosageLevelIntervals = List(0,140,200,300)
+    val dosageLevelIntervals = List(0, 140, 200, 300)
     val instance = new DosageBasedWeightAgg(input)
     val result = instance.aggregateWeight(dosageLevelIntervals = Some(dosageLevelIntervals))
       .select(PatientID, Value, ExposureStart, Weight)
@@ -64,7 +64,7 @@ class DosageBasedWeightAggSuite extends SharedContext{
       ("Patient_B", "molecule", "SULFONYLUREA", makeTS(2008, 7, 6), makeTS(2008, 7, 6), 40),
       ("Patient_B", "molecule", "SULFONYLUREA", makeTS(2008, 2, 1), makeTS(2008, 2, 1), 140),
       ("Patient_B", "molecule", "SULFONYLUREA", makeTS(2008, 11, 1), makeTS(2008, 11, 1), 150)
-    ).toDF(PatientID, Category, Value, Start, ExposureStart,Weight)
+    ).toDF(PatientID, Category, Value, Start, ExposureStart, Weight)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", makeTS(2008, 1, 1), Some(1.0)),
@@ -99,7 +99,7 @@ class DosageBasedWeightAggSuite extends SharedContext{
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 8, 1), makeTS(2008, 8, 1), 100),
       ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 10, 1), makeTS(2008, 10, 1), 200)
 
-    ).toDF(PatientID, Category, Value, Start, ExposureStart,Weight)
+    ).toDF(PatientID, Category, Value, Start, ExposureStart, Weight)
 
     val expected = Seq(
       ("Patient_A", "PIOGLITAZONE", Some(makeTS(2008, 3, 1)), Some(1.0)),
@@ -109,7 +109,7 @@ class DosageBasedWeightAggSuite extends SharedContext{
     ).toDF(PatientID, Value, ExposureStart, Weight)
 
     // When
-    val dosageLevelIntervals = List(0,140,200,300)
+    val dosageLevelIntervals = List(0, 140, 200, 300)
     val instance = new DosageBasedWeightAgg(input)
     val result = instance.aggregateWeight(dosageLevelIntervals = Some(dosageLevelIntervals))
       .select(PatientID, Value, ExposureStart, Weight)

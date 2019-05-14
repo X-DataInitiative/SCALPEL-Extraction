@@ -120,4 +120,5 @@ object RosiglitazoneConfig extends ConfigLoader with RosiglitazoneStudyCodes {
     studyStart = BaseConfig.studyStart,
     studyEnd = BaseConfig.studyEnd
   )
+
 }

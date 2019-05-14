@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.sources.data
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class DataSourceManagerSuite extends SharedContext{
+class DataSourceManagerSuite extends SharedContext {
 
   object TestSourceSanitizer extends DataSourceManager
 

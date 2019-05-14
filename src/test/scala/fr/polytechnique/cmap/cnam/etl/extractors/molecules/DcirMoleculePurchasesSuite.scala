@@ -17,13 +17,13 @@ class DcirMoleculePurchasesSuite extends SharedContext {
     val maxBoxQuantity = 10
     val input: DataFrame = Seq(
       ("patient", "3541848", "3400935418487", -1, makeTS(2010, 1, 1)),
-      ("patient", "3541848", "3400935418487",  0, makeTS(2010, 2, 1)),
-      ("patient", "3541848", "3400935418487",  1, makeTS(2010, 3, 1)),
+      ("patient", "3541848", "3400935418487", 0, makeTS(2010, 2, 1)),
+      ("patient", "3541848", "3400935418487", 1, makeTS(2010, 3, 1)),
       ("patient", "3541848", "3400935418487", 15, makeTS(2010, 5, 1)),
       ("patient", "3541848", "3400935418487", 150, makeTS(2010, 6, 1))
     ).toDF("PatientID", "CIP07", "CIP13", "nBoxes", "eventDate")
     val expected: DataFrame = Seq(
-      ("patient", "3541848", "3400935418487",  1, makeTS(2010, 3, 1))
+      ("patient", "3541848", "3400935418487", 1, makeTS(2010, 3, 1))
     ).toDF("PatientID", "CIP07", "CIP13", "nBoxes", "eventDate")
 
     // When
@@ -106,6 +106,6 @@ class DcirMoleculePurchasesSuite extends SharedContext {
 
     // Then
     assertDFs(result.toDF, expected)
- }
- 
+  }
+
 }

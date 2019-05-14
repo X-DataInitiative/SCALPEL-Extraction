@@ -1,4 +1,5 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
+
 import fr.polytechnique.cmap.cnam.etl.events.Event
 
 
@@ -27,4 +28,5 @@ private[follow_up] object Columns {
   object EndReasons extends Enumeration {
     val Death, Disease, Trackloss, ObservationEnd = Value
   }
+
 }

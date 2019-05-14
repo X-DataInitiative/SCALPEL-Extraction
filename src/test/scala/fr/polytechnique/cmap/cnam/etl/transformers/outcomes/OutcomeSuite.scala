@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.outcomes
 
 import java.sql.Timestamp
-import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
-import org.apache.spark.sql.types._
 import org.mockito.Mockito.mock
 import org.scalatest.FlatSpec
+import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
+import org.apache.spark.sql.types._
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Outcome}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
@@ -29,7 +29,8 @@ class OutcomeSuite extends FlatSpec {
     val schema = StructType(
       StructField("pID", StringType) ::
         StructField("name", StringType) ::
-        StructField("date", TimestampType) :: Nil)
+        StructField("date", TimestampType) :: Nil
+    )
     val values = Array[Any]("Patient01", "bladder_cancer", makeTS(2010, 1, 1))
     val r = new GenericRowWithSchema(values, schema)
     val expected = Outcome("Patient01", "bladder_cancer", makeTS(2010, 1, 1))

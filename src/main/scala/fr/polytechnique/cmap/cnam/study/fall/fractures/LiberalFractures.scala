@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.study.fall.fractures
 
+import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events.{Event, MedicalAct, Outcome}
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer
-import org.apache.spark.sql.Dataset
 
 object LiberalFractures extends OutcomesTransformer {
 
@@ -12,9 +12,12 @@ object LiberalFractures extends OutcomesTransformer {
     import events.sqlContext.implicits._
 
     events
-      .map(event => {
-        val fractureSite = BodySite.getSiteFromCode(event.value, BodySites.sites, CodeType.CCAM)
-        Outcome(event.patientID, fractureSite, outcomeName, event.start)})
+      .map(
+        event => {
+          val fractureSite = BodySite.getSiteFromCode(event.value, BodySites.sites, CodeType.CCAM)
+          Outcome(event.patientID, fractureSite, outcomeName, event.start)
+        }
+      )
   }
 
 }

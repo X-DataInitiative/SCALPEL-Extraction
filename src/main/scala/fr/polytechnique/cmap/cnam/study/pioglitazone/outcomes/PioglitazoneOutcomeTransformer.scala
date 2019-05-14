@@ -13,7 +13,7 @@ class PioglitazoneOutcomeTransformer(definition: CancerDefinition) extends Outco
   }
 
   def transform(diagnoses: Dataset[Event[Diagnosis]], acts: Dataset[Event[MedicalAct]])
-    : Dataset[Event[Outcome]] = {
+  : Dataset[Event[Outcome]] = {
 
     definition match {
       case CancerDefinition.Broad => BroadBladderCancer.transform(diagnoses)

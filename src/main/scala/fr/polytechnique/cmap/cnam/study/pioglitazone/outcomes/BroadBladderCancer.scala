@@ -27,20 +27,28 @@ object BroadBladderCancer extends OutcomesTransformer with PioglitazoneStudyCode
     LinkedDiagnosis.category
   )
 
-  def isDirectDiagnosis(ev: Event[Diagnosis]): Boolean = {
-    directDiagnosisCategories.contains(ev.category) && ev.value == primaryDiagCode
-  }
-
   def isGroupDiagnosis(eventsGroup: Seq[Event[Diagnosis]]): Boolean = {
     eventsGroup.exists { ev =>
       ev.category == AssociatedDiagnosis.category && ev.value == primaryDiagCode
     } &&
-    eventsGroup.exists { ev =>
-      groupDiagnosisCategories.contains(ev.category) && secondaryDiagCodes.contains(ev.value)
-    }
+      eventsGroup.exists { ev =>
+        groupDiagnosisCategories.contains(ev.category) && secondaryDiagCodes.contains(ev.value)
+      }
+  }
+
+  def transform(extracted: Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
+
+    val directDiagnosisEvents: Dataset[Event[Diagnosis]] = extracted.filter(ev => isDirectDiagnosis(ev))
+
+    val groupOutcomes: Dataset[Event[Outcome]] = extracted.filter(ev => !isDirectDiagnosis(ev)).groupOutcomes
+
+    directDiagnosisEvents
+      .directOutcomes
+      .union(groupOutcomes)
   }
 
   implicit class BroadBladderCancerOutcome(ds: Dataset[Event[Diagnosis]]) {
+
     import ds.sqlContext.implicits._
 
     def directOutcomes: Dataset[Event[Outcome]] = {
@@ -61,14 +69,7 @@ object BroadBladderCancer extends OutcomesTransformer with PioglitazoneStudyCode
     }
   }
 
-  def transform(extracted: Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
-
-    val directDiagnosisEvents: Dataset[Event[Diagnosis]] = extracted.filter(ev => isDirectDiagnosis(ev))
-
-    val groupOutcomes: Dataset[Event[Outcome]] = extracted.filter(ev => !isDirectDiagnosis(ev)).groupOutcomes
-
-    directDiagnosisEvents
-      .directOutcomes
-      .union(groupOutcomes)
+  def isDirectDiagnosis(ev: Event[Diagnosis]): Boolean = {
+    directDiagnosisCategories.contains(ev.category) && ev.value == primaryDiagCode
   }
 }

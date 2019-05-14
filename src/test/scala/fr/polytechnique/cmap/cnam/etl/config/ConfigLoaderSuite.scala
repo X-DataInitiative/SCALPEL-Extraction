@@ -12,7 +12,8 @@ class ConfigLoaderSuite extends FlatSpec {
 
     def saveConfig(config: String, path: String): Unit = {
       pureconfig.saveConfigAsPropertyFile(
-        ConfigFactory.parseString(config.trim.stripMargin), Paths.get(path), true)
+        ConfigFactory.parseString(config.trim.stripMargin), Paths.get(path), true
+      )
     }
 
     // Given
@@ -22,11 +23,13 @@ class ConfigLoaderSuite extends FlatSpec {
     case class FinalObject(anotherKey: List[Int])
     case class TestConfig(someObject: SomeObject, finalObject: FinalObject) extends StudyConfig
 
-    saveConfig("""
-      | some_object.some_key = "overriden_value"
-      | final_object.another_key = [1, 1, 2]
-      | final_object.inexistent_key = "ignored_value"
-    """, newConfig)
+    saveConfig(
+      """
+        | some_object.some_key = "overriden_value"
+        | final_object.another_key = [1, 1, 2]
+        | final_object.inexistent_key = "ignored_value"
+      """, newConfig
+    )
 
     val expected =
       TestConfig(
