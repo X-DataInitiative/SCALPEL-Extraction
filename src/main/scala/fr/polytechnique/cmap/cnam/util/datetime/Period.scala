@@ -19,27 +19,6 @@ private[datetime] class Period(
 
   def minutes: Int = this.toMap.apply("minutes").toInt
 
-  def toMap: ListMap[String, Long] = {
-
-    val msCounts: List[(String, Long)] = List(
-      ("days", Period.MS_PER_DAY),
-      ("hours", Period.MS_PER_HOUR),
-      ("minutes", Period.MS_PER_MIN),
-      ("seconds", Period.MS_PER_SEC),
-      ("milliseconds", 1L)
-    )
-    val initialMap = ListMap(
-      "years" -> totalMonths / 12L,
-      "months" -> totalMonths % 12L
-    )
-    val (finalMap, _) = msCounts.foldLeft((initialMap, this.totalMilliseconds)) {
-      case ((newMap, remainder), (unitName, msPerUnit)) =>
-        (newMap + (unitName -> remainder / msPerUnit), remainder % msPerUnit)
-    }
-
-    finalMap
-  }
-
   def seconds: Int = this.toMap.apply("seconds").toInt
 
   def milliseconds: Long = this.toMap.apply("milliseconds")
@@ -65,6 +44,27 @@ private[datetime] class Period(
       case (k, v) if v != 0 => s"$v $k"
     }
     if (stringList.isEmpty) "Empty Period" else stringList.mkString(", ")
+  }
+
+  def toMap: ListMap[String, Long] = {
+
+    val msCounts: List[(String, Long)] = List(
+      ("days", Period.MS_PER_DAY),
+      ("hours", Period.MS_PER_HOUR),
+      ("minutes", Period.MS_PER_MIN),
+      ("seconds", Period.MS_PER_SEC),
+      ("milliseconds", 1L)
+    )
+    val initialMap = ListMap(
+      "years" -> totalMonths / 12L,
+      "months" -> totalMonths % 12L
+    )
+    val (finalMap, _) = msCounts.foldLeft((initialMap, this.totalMilliseconds)) {
+      case ((newMap, remainder), (unitName, msPerUnit)) =>
+        (newMap + (unitName -> remainder / msPerUnit), remainder % msPerUnit)
+    }
+
+    finalMap
   }
 }
 

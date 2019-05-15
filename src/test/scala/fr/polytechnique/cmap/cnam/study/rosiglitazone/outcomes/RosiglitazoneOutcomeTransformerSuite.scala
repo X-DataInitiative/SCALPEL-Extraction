@@ -22,24 +22,24 @@ class RosiglitazoneOutcomeTransformerSuite extends SharedContext {
     assert(heartFailureTransformer.outcomeName == heartFailure.outcomeName)
   }
 
-   "transform" should "return the correct Infarctus outcomes" in {
-     val sqlCtx = sqlContext
-     import sqlCtx.implicits._
+  "transform" should "return the correct Infarctus outcomes" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
 
-     // Given
-     object RosiglitazoneCodes extends RosiglitazoneStudyCodes
-     val infarctusCodes = RosiglitazoneCodes.infarctusDiagnosisCodes
-     val input: Dataset[Event[Diagnosis]] = Seq(
-       MainDiagnosis("A", infarctusCodes.head, makeTS(2010, 1, 1))
-     ).toDS
-     val expected: Dataset[Event[Outcome]] = Seq(
-       Outcome("A", OutcomeDefinition.Infarctus.outcomeName, makeTS(2010, 1, 1))
-     ).toDS
+    // Given
+    object RosiglitazoneCodes extends RosiglitazoneStudyCodes
+    val infarctusCodes = RosiglitazoneCodes.infarctusDiagnosisCodes
+    val input: Dataset[Event[Diagnosis]] = Seq(
+      MainDiagnosis("A", infarctusCodes.head, makeTS(2010, 1, 1))
+    ).toDS
+    val expected: Dataset[Event[Outcome]] = Seq(
+      Outcome("A", OutcomeDefinition.Infarctus.outcomeName, makeTS(2010, 1, 1))
+    ).toDS
 
-     // When
-     val result = new RosiglitazoneOutcomeTransformer(OutcomeDefinition.Infarctus).transform(input)
+    // When
+    val result = new RosiglitazoneOutcomeTransformer(OutcomeDefinition.Infarctus).transform(input)
 
-     // Then
-     assertDSs(result, expected)
-   }
+    // Then
+    assertDSs(result, expected)
+  }
 }

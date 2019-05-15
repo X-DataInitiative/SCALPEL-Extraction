@@ -9,11 +9,14 @@ sealed trait OutcomeDefinition {
 }
 
 object OutcomeDefinition {
+
+  val default: OutcomeDefinition = OutcomeDefinition.Infarctus
+
   case object Infarctus extends OutcomeDefinition {
     val outcomeName = "infarctus"
   }
+
   case object HeartFailure extends OutcomeDefinition {
     val outcomeName = "heart_failure"
   }
-  val default: OutcomeDefinition = OutcomeDefinition.Infarctus
 }

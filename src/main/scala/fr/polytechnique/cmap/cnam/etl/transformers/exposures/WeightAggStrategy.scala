@@ -18,4 +18,5 @@ object WeightAggStrategy {
   case object DosageBased extends WeightAggStrategy
 
   case object TimeBased extends WeightAggStrategy
+
 }

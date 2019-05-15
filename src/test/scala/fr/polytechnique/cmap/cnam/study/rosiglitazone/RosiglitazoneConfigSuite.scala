@@ -36,7 +36,8 @@ class RosiglitazoneConfigSuite extends FlatSpec {
     // Given
     val default = RosiglitazoneConfig(inputPaths, outputPaths)
     val tempPath = "test.conf"
-    val configContent = """
+    val configContent =
+      """
         | input {
         |   dcir: "new/in/path"
         | }

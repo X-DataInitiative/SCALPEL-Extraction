@@ -119,7 +119,7 @@ class ColumnUtilitiesSuite extends SharedContext {
 
     // Then
     assertDFs(result, expectedResult)
- }
+  }
 
   "maxColumn" should "correctly return a column with the maximum value among a set of Numeric columns" in {
     val sqlCtx = this.sqlContext
@@ -147,7 +147,7 @@ class ColumnUtilitiesSuite extends SharedContext {
 
     // Then
     assertDFs(result, expectedResult)
- }
+  }
 
   it should "correctly return a column with the maximum value among a set of Timestamp columns" in {
     val sqlCtx = this.sqlContext
@@ -179,7 +179,7 @@ class ColumnUtilitiesSuite extends SharedContext {
 
     // Then
     assertDFs(result, expectedResult)
- }
+  }
 
   "minColumn" should "correctly return a column with the minimum value among a set of Numeric columns" in {
     val sqlCtx = this.sqlContext
@@ -207,7 +207,7 @@ class ColumnUtilitiesSuite extends SharedContext {
 
     // Then
     assertDFs(result, expectedResult)
- }
+  }
 
   it should "correctly return a column with the minimum value among a set of Timestamp columns" in {
     val sqlCtx = this.sqlContext
@@ -239,7 +239,7 @@ class ColumnUtilitiesSuite extends SharedContext {
 
     // Then
     assertDFs(result, expectedResult)
- }
+  }
 
   "bucketize" should "bucketize (discretize) a timestamp column" in {
     val sqlCtx = sqlContext
@@ -276,7 +276,8 @@ class ColumnUtilitiesSuite extends SharedContext {
 
     // When
     import ColumnUtilities.BucketizableTimestampColumn
-    val result = input.withColumn("output",
+    val result = input.withColumn(
+      "output",
       col("input").bucketize(minTimestamp, maxTimestamp, bucketSize)
     )
 

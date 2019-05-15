@@ -47,17 +47,17 @@ class RichDataFrame(dataFrame: DataFrame) {
       .csv(path)
   }
 
+  def writeParquet(path: String, mode: String = "errorIfExists"): Unit = {
+    dataFrame.write
+      .mode(saveMode(mode))
+      .parquet(path)
+  }
+
   private def saveMode(mode: String): SaveMode = mode match {
     case "overwrite" => SaveMode.Overwrite
     case "append" => SaveMode.Append
     case "errorIfExists" => SaveMode.ErrorIfExists
     case "withTimestamp" => SaveMode.Overwrite
-  }
-
-  def writeParquet(path: String, mode: String = "errorIfExists"): Unit = {
-    dataFrame.write
-      .mode(saveMode(mode))
-      .parquet(path)
   }
 
   def avoidSpecialCharactersBeforePivot(column: String): DataFrame = {

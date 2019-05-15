@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.molecules
 
-import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
+import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class MoleculePurchasesSuite extends SharedContext {
 

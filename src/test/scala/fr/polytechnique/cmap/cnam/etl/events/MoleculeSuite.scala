@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.events
 
 import java.sql.Timestamp
-import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
-import org.apache.spark.sql.types._
 import org.mockito.Mockito.mock
 import org.scalatest.FlatSpec
+import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
+import org.apache.spark.sql.types._
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class MoleculeSuite extends FlatSpec {
@@ -29,7 +29,8 @@ class MoleculeSuite extends FlatSpec {
       StructField("pID", StringType) ::
         StructField("mol", StringType) ::
         StructField("weight", DoubleType) ::
-        StructField("date", TimestampType) :: Nil)
+        StructField("date", TimestampType) :: Nil
+    )
     val values = Array[Any]("Patient01", "pioglitazone", 100.0, makeTS(2010, 1, 1))
     val r = new GenericRowWithSchema(values, schema)
     val expected = Molecule("Patient01", "pioglitazone", 100.0, makeTS(2010, 1, 1))

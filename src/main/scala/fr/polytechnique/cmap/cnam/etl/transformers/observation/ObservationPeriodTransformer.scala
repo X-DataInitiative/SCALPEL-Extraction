@@ -8,7 +8,7 @@ import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 
-class ObservationPeriodTransformer (config: ObservationPeriodTransformerConfig) {
+class ObservationPeriodTransformer(config: ObservationPeriodTransformerConfig) {
 
   val outputColumns = List(
     col("patientID"),
@@ -16,7 +16,7 @@ class ObservationPeriodTransformer (config: ObservationPeriodTransformerConfig) 
     col("observationEnd").as("stop")
   )
 
-  def computeObservationStart(data: DataFrame): DataFrame =  {
+  def computeObservationStart(data: DataFrame): DataFrame = {
     val studyStart: Timestamp = config.studyStart
     val window = Window.partitionBy("patientID")
     val correctedStart = when(
@@ -33,6 +33,7 @@ class ObservationPeriodTransformer (config: ObservationPeriodTransformerConfig) 
 
   implicit class ObservationDataFrame(data: DataFrame) {
     def withObservationStart: DataFrame = computeObservationStart(data)
+
     def withObservationEnd: DataFrame = computeObservationEnd(data)
   }
 

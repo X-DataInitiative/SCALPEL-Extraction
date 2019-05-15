@@ -24,53 +24,19 @@ object NarrowBladderCancer extends OutcomesTransformer with PioglitazoneStudyCod
   private val MCO_CAM_ACT = McoCCAMAct.category
   private val DCIR_CAM_ACT = DcirAct.category
 
-  // Checks if all events in stay have the same dates
-  def checkDates(eventsInStay: Seq[Event[AnyEvent]]): Boolean = {
-    val areAllDatesEqual: Boolean = eventsInStay.forall(_.start == eventsInStay.head.start)
-    if(!areAllDatesEqual) {
-      val groupID = eventsInStay.head.groupID
-      Logger.getLogger(getClass).warn(s"The dates for the GroupID: $groupID are not consistent")
-    }
-    areAllDatesEqual
-  }
+  def transform(
+    diagnoses: Dataset[Event[Diagnosis]],
+    acts: Dataset[Event[MedicalAct]]): Dataset[Event[Outcome]] = {
 
-  def checkDiagnosesInStay(eventsInStay: Seq[Event[AnyEvent]]): Boolean = {
+    import acts.sqlContext.implicits._
 
-    import collections.implicits._
+    val events = unionDatasets(diagnoses.as[Event[AnyEvent]], acts.as[Event[AnyEvent]])
 
-    eventsInStay.exists { e =>
-      e.checkValueStart(DP, primaryDiagCode) ||
-      e.checkValueStart(DR, primaryDiagCode) ||
-      eventsInStay.existAll(
-        e => e.checkValueStart(DAS, primaryDiagCode),
-        e =>
-          e.checkValueStart(DP, secondaryDiagCodes) ||
-          e.checkValueStart(DR, secondaryDiagCodes)
-      )
-    }
-  }
-
-  def checkMcoActsInStay(eventsInStay: Seq[Event[AnyEvent]]): Boolean = {
-    eventsInStay.exists { e =>
-      e.checkValueStart(MCO_CIM_ACT, mcoCIM10ActCodes) ||
-      e.checkValueStart(MCO_CAM_ACT, mcoCCAMActCodes)
-    }
-  }
-
-  def checkDcirActs(dcirCamEvents: Seq[Event[AnyEvent]], stayDate: java.util.Date): Boolean = {
-    import datetime.implicits._
-    val filteredDcirEvents = dcirCamEvents.filter(_.checkValue(DCIR_CAM_ACT, dcirCCAMActCodes))
-    filteredDcirEvents.exists {
-      dcirEvent => dcirEvent.start.between(stayDate - 3.months, stayDate + 3.months)
-    }
-  }
-
-  def checkHospitalStay(eventsInStay: Seq[Event[AnyEvent]], dcirCamEvents: Seq[Event[AnyEvent]]): Boolean = {
-    eventsInStay.nonEmpty &&
-    checkDates(eventsInStay) &&
-    checkDiagnosesInStay(eventsInStay) && (
-      checkMcoActsInStay(eventsInStay) || checkDcirActs(dcirCamEvents, eventsInStay.head.start)
-    )
+    events
+      .groupByKey(_.patientID)
+      .flatMapGroups {
+        case (_, eventsPerPatient: Iterator[Event[AnyEvent]]) => findOutcomes(eventsPerPatient)
+      }
   }
 
   def findOutcomes(eventsOfPatient: Iterator[Event[AnyEvent]]): Seq[Event[Outcome]] = {
@@ -88,18 +54,52 @@ object NarrowBladderCancer extends OutcomesTransformer with PioglitazoneStudyCod
     }.toStream
   }
 
-  def transform(
-      diagnoses: Dataset[Event[Diagnosis]],
-      acts: Dataset[Event[MedicalAct]]): Dataset[Event[Outcome]] = {
+  def checkHospitalStay(eventsInStay: Seq[Event[AnyEvent]], dcirCamEvents: Seq[Event[AnyEvent]]): Boolean = {
+    eventsInStay.nonEmpty &&
+      checkDates(eventsInStay) &&
+      checkDiagnosesInStay(eventsInStay) && (
+      checkMcoActsInStay(eventsInStay) || checkDcirActs(dcirCamEvents, eventsInStay.head.start)
+      )
+  }
 
-    import acts.sqlContext.implicits._
+  // Checks if all events in stay have the same dates
+  def checkDates(eventsInStay: Seq[Event[AnyEvent]]): Boolean = {
+    val areAllDatesEqual: Boolean = eventsInStay.forall(_.start == eventsInStay.head.start)
+    if (!areAllDatesEqual) {
+      val groupID = eventsInStay.head.groupID
+      Logger.getLogger(getClass).warn(s"The dates for the GroupID: $groupID are not consistent")
+    }
+    areAllDatesEqual
+  }
 
-    val events = unionDatasets(diagnoses.as[Event[AnyEvent]], acts.as[Event[AnyEvent]])
+  def checkDiagnosesInStay(eventsInStay: Seq[Event[AnyEvent]]): Boolean = {
 
-    events
-      .groupByKey(_.patientID)
-      .flatMapGroups {
-        case (_, eventsPerPatient: Iterator[Event[AnyEvent]]) => findOutcomes(eventsPerPatient)
-      }
+    import collections.implicits._
+
+    eventsInStay.exists { e =>
+      e.checkValueStart(DP, primaryDiagCode) ||
+        e.checkValueStart(DR, primaryDiagCode) ||
+        eventsInStay.existAll(
+          e => e.checkValueStart(DAS, primaryDiagCode),
+          e =>
+            e.checkValueStart(DP, secondaryDiagCodes) ||
+              e.checkValueStart(DR, secondaryDiagCodes)
+        )
+    }
+  }
+
+  def checkMcoActsInStay(eventsInStay: Seq[Event[AnyEvent]]): Boolean = {
+    eventsInStay.exists { e =>
+      e.checkValueStart(MCO_CIM_ACT, mcoCIM10ActCodes) ||
+        e.checkValueStart(MCO_CAM_ACT, mcoCCAMActCodes)
+    }
+  }
+
+  def checkDcirActs(dcirCamEvents: Seq[Event[AnyEvent]], stayDate: java.util.Date): Boolean = {
+    import datetime.implicits._
+    val filteredDcirEvents = dcirCamEvents.filter(_.checkValue(DCIR_CAM_ACT, dcirCCAMActCodes))
+    filteredDcirEvents.exists {
+      dcirEvent => dcirEvent.start.between(stayDate - 3.months, stayDate + 3.months)
+    }
   }
 }

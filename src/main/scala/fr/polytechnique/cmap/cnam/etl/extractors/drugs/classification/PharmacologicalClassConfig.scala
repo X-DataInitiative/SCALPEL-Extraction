@@ -15,6 +15,10 @@ class PharmacologicalClassConfig(
     compare(atc5code, ATCCodes)
   }
 
+  def isException(atc5code: String): Boolean = {
+    compare(atc5code, ATCExceptions)
+  }
+
   def compare(atc5code: String, codeList: List[String]): Boolean = {
     codeList.exists {
       code =>
@@ -24,10 +28,6 @@ class PharmacologicalClassConfig(
           code == atc5code
         }
     }
-  }
-
-  def isException(atc5code: String): Boolean = {
-    compare(atc5code, ATCExceptions)
   }
 
   def isCIPException(cip13code: String): Boolean = {

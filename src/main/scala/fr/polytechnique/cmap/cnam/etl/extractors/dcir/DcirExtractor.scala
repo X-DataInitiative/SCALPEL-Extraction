@@ -19,8 +19,6 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
   def isInStudy(codes: Set[String])
     (row: Row): Boolean = codes.exists(code(row).startsWith(_))
 
-  def code = (row: Row) => row.getAs[String](columnName)
-
   def isInExtractorScope(row: Row): Boolean = !row.isNullAt(row.fieldIndex(columnName))
 
   def builder(row: Row): Seq[Event[EventType]] = {
@@ -32,6 +30,8 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
 
     Seq(eventBuilder[EventType](patientId, groupId, code(row), weight, eventDate, endDate))
   }
+
+  def code = (row: Row) => row.getAs[String](columnName)
 
   def extractPatientId(r: Row): String = {
     r.getAs[String](ColNames.PatientID)

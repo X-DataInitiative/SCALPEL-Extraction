@@ -17,14 +17,15 @@ object HeartFailure extends OutcomesTransformer with RosiglitazoneStudyCodes {
   private val diagHeartFailure = diagCodeHeartFailure
   private val diagHeartComplication = diagCodeHeartComplication
 
-  def checkHeartFailure(events: Seq[Event[Diagnosis]]): Boolean = {
-    import collections.implicits._
+  def transform(extracted: Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
 
-    events.exists (ev => ev.checkValue(DP, diagHeartFailure)) ||
-      events.existAll(
-        ev => ev.checkValue(DP, diagHeartComplication),
-        ev => ev.checkValue(DR, diagHeartFailure) || ev.checkValue(DAS, diagHeartFailure)
-      )
+    import extracted.sqlContext.implicits._
+
+    extracted
+      .groupByKey(ev => (ev.patientID, ev.start))
+      .flatMapGroups {
+        case (_, groupedEvents) => findOutcomesPerHospitalization(groupedEvents.toStream)
+      }
   }
 
   def findOutcomesPerHospitalization(events: Seq[Event[Diagnosis]]): Seq[Event[Outcome]] = {
@@ -37,14 +38,13 @@ object HeartFailure extends OutcomesTransformer with RosiglitazoneStudyCodes {
       .toStream
   }
 
-  def transform(extracted : Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
+  def checkHeartFailure(events: Seq[Event[Diagnosis]]): Boolean = {
+    import collections.implicits._
 
-    import extracted.sqlContext.implicits._
-
-    extracted
-      .groupByKey(ev => (ev.patientID, ev.start))
-      .flatMapGroups{
-        case (_, groupedEvents) => findOutcomesPerHospitalization(groupedEvents.toStream)
-      }
+    events.exists(ev => ev.checkValue(DP, diagHeartFailure)) ||
+      events.existAll(
+        ev => ev.checkValue(DP, diagHeartComplication),
+        ev => ev.checkValue(DR, diagHeartFailure) || ev.checkValue(DAS, diagHeartFailure)
+      )
   }
 }

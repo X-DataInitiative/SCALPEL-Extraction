@@ -17,30 +17,30 @@ class FracturesTransformer(config: FallConfig) extends OutcomesTransformer with 
 
   override val outcomeName: String = "all_fall"
 
-    def transform(
-       liberalActs: Dataset[Event[MedicalAct]],
-       acts: Dataset[Event[MedicalAct]],
-       diagnoses: Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
+  def transform(
+    liberalActs: Dataset[Event[MedicalAct]],
+    acts: Dataset[Event[MedicalAct]],
+    diagnoses: Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
 
-      // Hospitalized fractures
-      val hospitralizedFractures = HospitalizedFractures.transform(diagnoses, acts, config.sites.sites)
+    // Hospitalized fractures
+    val hospitralizedFractures = HospitalizedFractures.transform(diagnoses, acts, config.sites.sites)
 
-      // Liberal Fractures
-      val liberalFractures = LiberalFractures.transform(liberalActs)
+    // Liberal Fractures
+    val liberalFractures = LiberalFractures.transform(liberalActs)
 
-      // Public Ambulatory Fractures
-      val publicAmbulatoryFractures = PublicAmbulatoryFractures.transform(acts)
+    // Public Ambulatory Fractures
+    val publicAmbulatoryFractures = PublicAmbulatoryFractures.transform(acts)
 
-      // Private Ambulatory Fractures
-      val privateAmbulatoryFractures = PrivateAmbulatoryFractures.transform(acts)
+    // Private Ambulatory Fractures
+    val privateAmbulatoryFractures = PrivateAmbulatoryFractures.transform(acts)
 
-      unionDatasets(
-        hospitralizedFractures,
-        liberalFractures,
-        publicAmbulatoryFractures,
-        privateAmbulatoryFractures
-      ).groupConsecutiveFractures(config.outcomes.fallFrame)
-    }
+    unionDatasets(
+      hospitralizedFractures,
+      liberalFractures,
+      publicAmbulatoryFractures,
+      privateAmbulatoryFractures
+    ).groupConsecutiveFractures(config.outcomes.fallFrame)
+  }
 
 }
 

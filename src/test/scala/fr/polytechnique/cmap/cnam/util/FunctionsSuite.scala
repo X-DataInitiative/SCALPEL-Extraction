@@ -25,8 +25,9 @@ class FunctionsSuite extends FlatSpecLike {
   it should "return None if the input string is empty or null" in {
 
     // Given
-    val input1: String = """
-                         """
+    val input1: String =
+      """
+      """
     val input2: String = null
     val expected: Option[Timestamp] = None
 
@@ -71,8 +72,9 @@ class FunctionsSuite extends FlatSpecLike {
   it should "return None if the input string is empty or null" in {
 
     // Given
-    val input1: String = """
-                         """
+    val input1: String =
+      """
+      """
     val input2: String = null
     val expected: Option[java.sql.Date] = None
 

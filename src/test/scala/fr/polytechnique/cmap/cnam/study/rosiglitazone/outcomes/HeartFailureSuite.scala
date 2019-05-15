@@ -4,7 +4,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class HeartFailureSuite extends SharedContext{
+class HeartFailureSuite extends SharedContext {
 
   "transform" should "return only found I50 found in main diagnosis" in {
 
@@ -74,7 +74,7 @@ class HeartFailureSuite extends SharedContext{
       MainDiagnosis("PatientB", "J81", makeTS(2010, 2, 1)),
       AssociatedDiagnosis("PatientB", "I50", makeTS(2010, 2, 1))
     )
-    val input3 =  Seq[Event[Diagnosis]](
+    val input3 = Seq[Event[Diagnosis]](
       MainDiagnosis("PatientD", "ABC", makeTS(2010, 1, 1)),
       LinkedDiagnosis("PatientA", "ZZZ", makeTS(2010, 2, 1))
     )

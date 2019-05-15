@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.drugs.level
 
-import fr.polytechnique.cmap.cnam.SharedContext
 import org.scalatest.Matchers.{a, convertToAnyShouldWrapper}
+import fr.polytechnique.cmap.cnam.SharedContext
 
-class DrugClassficationLevelSuite extends SharedContext{
+class DrugClassficationLevelSuite extends SharedContext {
   "fromString" should "return the correct level given a string" in {
 
     DrugClassificationLevel.fromString("Therapeutic") shouldBe a[TherapeuticLevel.type]

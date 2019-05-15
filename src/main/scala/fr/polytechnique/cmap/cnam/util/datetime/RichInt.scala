@@ -26,7 +26,7 @@ private[datetime] class RichInt(val value: Int) extends AnyVal {
 
   def second: Period = this.seconds
 
-  def seconds: Period = Period(seconds = value)
-
   def s: Period = this.seconds
+
+  def seconds: Period = Period(seconds = value)
 }

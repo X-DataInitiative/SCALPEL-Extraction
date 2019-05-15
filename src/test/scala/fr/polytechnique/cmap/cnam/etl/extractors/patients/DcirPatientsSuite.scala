@@ -37,7 +37,7 @@ class DcirPatientsSuite extends SharedContext {
 
     // Then
     assertDFs(result, expectedResult)
- }
+  }
 
   "groupByIdAndAge" should "return a DataFrame with data aggregated by patient ID and age" in {
     val sqlCtx = sqlContext
@@ -60,8 +60,10 @@ class DcirPatientsSuite extends SharedContext {
         None),
       ("Patient_02", 47, 4L, 4L, Date.valueOf("2006-01-05"), Date.valueOf("2006-01-30"),
         Some(Date.valueOf("2009-03-13")))
-    ).toDF("patientID", "age", "genderCount", "genderSum", "minEventDate", "maxEventDate",
-      "deathDate")
+    ).toDF(
+      "patientID", "age", "genderCount", "genderSum", "minEventDate", "maxEventDate",
+      "deathDate"
+    )
 
     // When
     val result = input.groupByIdAndAge
@@ -80,8 +82,10 @@ class DcirPatientsSuite extends SharedContext {
         Date.valueOf("2006-01-30"), None),
       ("Patient_02", 47, 4, 4, "1959", Date.valueOf("2006-01-05"),
         Date.valueOf("2006-01-30"), Some(Date.valueOf("2009-03-13")))
-    ).toDF("patientID", "age", "genderCount", "genderSum", "birthYear", "minEventDate",
-      "maxEventDate", "deathDate")
+    ).toDF(
+      "patientID", "age", "genderCount", "genderSum", "birthYear", "minEventDate",
+      "maxEventDate", "deathDate"
+    )
 
     val expected: DataFrame = Seq(
       Patient(

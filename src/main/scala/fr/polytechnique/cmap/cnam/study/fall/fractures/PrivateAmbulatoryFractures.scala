@@ -14,6 +14,20 @@ object PrivateAmbulatoryFractures extends OutcomesTransformer with FractureCodes
 
   override val outcomeName: String = "private_ambulatory_fall"
 
+  def transform(events: Dataset[Event[MedicalAct]]): Dataset[Event[Outcome]] = {
+    import events.sqlContext.implicits._
+
+    events
+      .filter(isPrivateAmbulatory _)
+      .filter(containsNonHospitalizedCcam _)
+      .map(
+        event => {
+          val fractureSite = BodySite.getSiteFromCode(event.value, BodySites.sites, CodeType.CCAM)
+          Outcome(event.patientID, fractureSite, outcomeName, event.start)
+        }
+      )
+  }
+
   def isPrivateAmbulatory(event: Event[MedicalAct]): Boolean = {
     event.groupID == DcirAct.groupID.PrivateAmbulatory
   }
@@ -22,17 +36,6 @@ object PrivateAmbulatoryFractures extends OutcomesTransformer with FractureCodes
     NonHospitalizedFracturesCcam.exists {
       code => event.value.startsWith(code)
     }
-  }
-
-  def transform(events: Dataset[Event[MedicalAct]]): Dataset[Event[Outcome]] = {
-    import events.sqlContext.implicits._
-
-    events
-      .filter(isPrivateAmbulatory _)
-      .filter(containsNonHospitalizedCcam _)
-      .map(event => {
-        val fractureSite = BodySite.getSiteFromCode(event.value, BodySites.sites, CodeType.CCAM)
-        Outcome(event.patientID, fractureSite, outcomeName, event.start)})
   }
 
 }
