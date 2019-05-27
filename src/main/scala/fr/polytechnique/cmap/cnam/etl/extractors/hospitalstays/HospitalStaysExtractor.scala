@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 object HospitalStaysExtractor extends McoExtractor[HospitalStay] {
   override val columnName: String = ColNames.EndDate
-  override val eventBuilder: EventBuilder = HospitalStay
+  override val category: String  = HospitalStay.category
 
   override def extractEnd(r: Row): Option[Timestamp] = Some(new Timestamp(r.getAs[Date](ColNames.EndDate).getTime))
 
