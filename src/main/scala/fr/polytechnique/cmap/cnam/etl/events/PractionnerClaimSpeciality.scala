@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.events
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
 
-trait PractitionerClaimSpeciality extends AnyEvent with EventBuilder {
+trait PractitionerClaimSpeciality extends AnyEvent  {
 
   val category: EventCategory[PractitionerClaimSpeciality]
 

@@ -10,7 +10,8 @@ object DcirMedicalActExtractor extends DcirExtractor[MedicalAct] {
 
   private final val PrivateInstitutionCodes = Set(4D, 5D, 6D, 7D)
   override val columnName: String = ColNames.CamCode
-  override val eventBuilder: EventBuilder = DcirAct
+  // override val eventBuilder: EventBuilder = DcirAct
+  override val category = DcirAct.category
 
   override def getInput(sources: Sources): DataFrame = sources.dcir.get.select(
     ColNames.PatientID, ColNames.CamCode, ColNames.Date,

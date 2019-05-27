@@ -4,7 +4,7 @@ import java.sql.Timestamp
 import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.etl.events.Event.Columns._
 
-trait HospitalStay extends AnyEvent with EventBuilder {
+trait HospitalStay extends AnyEvent  {
 
   override val category: EventCategory[HospitalStay] = "hospital_stay"
 
@@ -22,7 +22,7 @@ trait HospitalStay extends AnyEvent with EventBuilder {
     )
 
   def apply(patientID: String, hospitalID: String, start: Timestamp, end: Timestamp): Event[HospitalStay] =
-    apply(patientID, hospitalID, hospitalID, 0D, start, Some(end))
+    Event(patientID, category, hospitalID, hospitalID, 0D  , start, Some(end))
 }
 
 object HospitalStay extends HospitalStay
