@@ -16,18 +16,24 @@ class EventExtractorForAllTypesSuite extends SharedContext with MCOSourceInfo wi
   // println(showString.invoke(df, 10.asInstanceOf[Object], 20.asInstanceOf[Object], false.asInstanceOf[Object]).asInstanceOf[String])
 
   "DCIR.parquet extraction" should "DCIRSourceExtractor of DcirAct" in {
-    val sqlCtx = sqlContext; import sqlCtx.implicits._
-    val pcol = col(PatientCols.CamCode)
-    val dcir = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
-      .withColumn(PatientCols.CamCode, when(pcol.isNull, "ABCD123").otherwise(pcol))
-    val result = new DCIRSourceExtractor().extract(dcir, List(new DCIRMedicalActEventExtractor(List("ABCD123"))))
-    val expected = List(
-      DcirAct("Patient_01", "liberal", "ABCD123", makeTS(2006, 1, 15) ),
-      DcirAct("Patient_01", "liberal", "ABCD123", makeTS(2006, 1, 30)),
-      DcirAct("Patient_02", "liberal", "ABCD123", makeTS(2006, 1, 5)),
-      DcirAct("Patient_02", "liberal", "ABCD123", makeTS(2006, 1, 15)),
-      DcirAct("Patient_02", "liberal", "ABCD123", makeTS(2006, 1, 30)),
-      DcirAct("Patient_02", "liberal", "ABCD123", makeTS(2006, 1, 30))
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+    val codes = List("AAAA", "CCCC")
+    val dcir = Seq(
+      ("Patient_A", "AAAA", makeTS(2010, 1, 1), None, None, None),
+      ("Patient_A", "BBBB", makeTS(2010, 2, 1), Some(1D), Some(0D), Some(1D)),
+      ("Patient_B", "CCCC", makeTS(2010, 3, 1), None, None, None),
+      ("Patient_B", "CCCC", makeTS(2010, 4, 1), Some(7D), Some(0D), Some(2D)),
+      ("Patient_C", "BBBB", makeTS(2010, 5, 1), Some(1D), Some(0D), Some(2D))
+    ).toDF(
+      PatientCols.PatientID, PatientCols.CamCode, PatientCols.Date,
+      PatientCols.InstitutionCode, PatientCols.GHSCode, PatientCols.Sector
+    )
+    val result = new DCIRSourceExtractor().extract(dcir, List(new DCIRMedicalActEventExtractor(codes)))
+    val expected = Seq[Event[MedicalAct]](
+      DcirAct("Patient_A", DcirAct.groupID.Liberal, "AAAA", makeTS(2010, 1, 1)),
+      DcirAct("Patient_B", DcirAct.groupID.Liberal, "CCCC", makeTS(2010, 3, 1)),
+      DcirAct("Patient_B", DcirAct.groupID.PrivateAmbulatory, "CCCC", makeTS(2010, 4, 1))
     ).toDS
     assertDSs(expected, result)
   }
