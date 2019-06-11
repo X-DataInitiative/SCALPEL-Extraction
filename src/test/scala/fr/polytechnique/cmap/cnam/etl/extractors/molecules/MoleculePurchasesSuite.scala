@@ -27,9 +27,7 @@ class MoleculePurchasesSuite extends SharedContext {
       irPha = Some(irPha),
       dosages = Some(dosages)
     )
-    val expected = DcirMoleculePurchases.extract(
-      dcir, irPha, dosages, config.drugClasses, config.maxBoxQuantity
-    ).toDF
+    val expected = new DcirMoleculePurchases(config).extract(sources, config.drugClasses.toSet).toDF
 
     // When
     val result = new MoleculePurchases(config).extract(sources).toDF
