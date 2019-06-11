@@ -34,17 +34,18 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
     * @return a Dataset of patients with the unwanted patients removed
     */
   def filterEarlyDiagnosedPatients(
-    outcomes: Dataset[Event[Outcome]],
-    followUpPeriods: Dataset[FollowUp],
-    outcomeName: String): Dataset[Patient] = {
+      outcomes: Dataset[Event[Outcome]],
+      followUpPeriods: Dataset[Event[FollowUp]],
+      outcomeName: String): Dataset[Patient] = {
+
+    val patientId = s"_1.${Event.Columns.PatientID}"
+    val followUpStart = "_2.start"
+    val outcomeDate = s"_1.${Event.Columns.Start}"
+    val value = s"_1.${Event.Columns.Value}"
 
     val joined = outcomes.joinWith(
       followUpPeriods, outcomes.col("patientID") === followUpPeriods.col("patientID")
     )
-    val patientId = s"Event.${Event.Columns.PatientID}"
-    val followUpStart = "FollowUp.start"
-    val outcomeDate = s"Event.${Event.Columns.Start}"
-    val value = s"Event.${Event.Columns.Value}"
 
     val window = Window.partitionBy(patientId)
 
@@ -55,8 +56,7 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
       ).otherwise(lit(1))
     ).over(window).cast(BooleanType)
 
-    val patientsToKeep: Set[String] = renameTupleColumns(joined)
-      .withColumn("filter", diseaseFilter)
+    val patientsToKeep: Set[String] = joined.withColumn("filter", diseaseFilter)
       .where(col("filter"))
       .select(patientId)
       .distinct
@@ -76,16 +76,17 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
     */
   def removeEarlyDiagnosedPatients(
     outcomes: Dataset[Event[Outcome]],
-    followUpPeriods: Dataset[FollowUp],
+    followUpPeriods: Dataset[Event[FollowUp]],
     outcomeName: String): Dataset[Patient] = {
+
+    val patientId = s"_1.${Event.Columns.PatientID}"
+    val followUpStart = "_2.start"
+    val outcomeDate = s"_1.${Event.Columns.Start}"
+    val value = s"_1.${Event.Columns.Value}"
 
     val joined = outcomes.joinWith(
       followUpPeriods, outcomes.col("patientID") === followUpPeriods.col("patientID")
     )
-    val patientId = s"Event.${Event.Columns.PatientID}"
-    val followUpStart = "FollowUp.start"
-    val outcomeDate = s"Event.${Event.Columns.Start}"
-    val value = s"Event.${Event.Columns.Value}"
 
     val window = Window.partitionBy(patientId)
 
@@ -96,8 +97,7 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
       ).otherwise(lit(1))
     ).over(window).cast(BooleanType)
 
-    val patientsToRemove: Set[String] = renameTupleColumns(joined)
-      .withColumn("filter", diseaseFilter)
+    val patientsToRemove: Set[String] = joined.withColumn("filter", diseaseFilter)
       .where(!col("filter"))
       .select(patientId)
       .distinct

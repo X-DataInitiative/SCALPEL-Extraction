@@ -1,22 +1,36 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
 
-import org.apache.spark.sql.functions.lit
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.events.{Exposure, Molecule}
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.util.functions._
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriod
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-
 class FollowUpTransformerSuite extends SharedContext {
+  ///* Handy for debugging datasets */
+  /*
+  val showString = classOf[org.apache.spark.sql.DataFrame].getDeclaredMethod("showString", classOf[Int], classOf[Int], classOf[Boolean])
+  showString.setAccessible(true)
+  */
+  // println(showString.invoke(df, 10.asInstanceOf[Object], 20.asInstanceOf[Object], false.asInstanceOf[Object]).asInstanceOf[String])
 
   case class FollowUpTestConfig(
-    override val delayMonths: Int = 2,
-    override val firstTargetDisease: Boolean = true,
-    override val outcomeName: Option[String] = Some("cancer"))
-    extends FollowUpTransformerConfig(delayMonths, firstTargetDisease, outcomeName)
-
+      override val patients: Option[Dataset[(Patient, Event[ObservationPeriod])]] = None,
+      override val dispensations: Option[Dataset[Event[Molecule]]] = None,
+      override val outcomes: Option[Dataset[Event[Outcome]]] = None,
+      override val tracklosses: Option[Dataset[Event[Trackloss]]] = None,
+      override val delayMonths: Int = 2,
+      override val firstTargetDisease: Boolean = true,
+      override val outcomeName: Option[String] = Some("cancer"))
+    extends FollowUpTransformerConfig(
+      patients, dispensations, outcomes, tracklosses,
+      delayMonths, firstTargetDisease, outcomeName)
 
   "cleanFollowUps" should "keep followups with only start < stop" in {
     val sqlCtx = sqlContext
@@ -200,7 +214,60 @@ class FollowUpTransformerSuite extends SharedContext {
     assertDFs(result, expected)
   }
 
-  "transform" should "return a Dataset[FollowUp] with the follow-up events of each patient with Cox model" in {
+  "transform" should "return a Dataset[Event[FollowUp]] with the follow-up events of each patient with Cox model" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val patients = Seq(
+      (Patient("Regis", 1, makeTS(1989, 10, 1), None), ObservationPeriod(
+        "Regis",
+        makeTS(2006, 1, 1),
+        makeTS(2009, 1, 1)
+      )),
+      (Patient("pika", 1, makeTS(1980, 10, 1), Some(makeTS(2008, 10, 1))), ObservationPeriod(
+        "pika",
+        makeTS(2006, 1, 1),
+        makeTS(2009, 1, 1)
+      )),
+      (Patient("patient03", 1, makeTS(1980, 10, 1), Some(makeTS(2010, 10, 1))), ObservationPeriod(
+        "pika",
+        makeTS(2006, 1, 1),
+        makeTS(2009, 1, 1)
+      ))
+    ).toDS
+
+    val prescriptions = Seq(
+      Molecule("Regis", "doliprane", 200.00, makeTS(2007, 1, 1)),
+      Molecule("Regis", "doliprane", 200.00, makeTS(2007, 2, 1)),
+      Molecule("Regis", "doliprane", 200.00, makeTS(2007, 3, 1)),
+      Molecule("pika", "doliprane", 200.00, makeTS(2007, 5, 1)),
+      Molecule("patient03", "doliprane", 200.00, makeTS(2007, 5, 1))
+    ).toDS
+
+    val outcomes = Seq(
+      Outcome("Regis", "bladder_cancer", makeTS(2007, 9, 1)),
+      Outcome("Regis", "bladder_cancer", makeTS(2008, 4, 1)),
+      Outcome("pika", "cancer", makeTS(2010, 1, 1)),
+      Outcome("patient03", "fall", makeTS(2010, 1, 1))
+    ).toDS
+
+    val tracklosses = Seq.empty[Event[Trackloss]].toDS
+
+    val expected = Seq(
+      FollowUp("Regis", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd"),
+      FollowUp("pika", makeTS(2006, 3, 1), makeTS(2008, 10, 1), "Death"),
+      FollowUp("patient03", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd")
+    ).toDS
+    val result = new FollowUpTransformer(FollowUpTestConfig(
+        Some(patients), Some(prescriptions), Some(outcomes), Some(tracklosses)
+    )).transform()
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "transform" should "return a Dataset[Event[FollowUp]] with the follow-up events of each patient with Tick model" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -244,71 +311,16 @@ class FollowUpTransformerSuite extends SharedContext {
       FollowUp("pika", makeTS(2006, 3, 1), makeTS(2008, 10, 1), "Death"),
       FollowUp("patient03", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd")
     ).toDS
-    val transformer = new FollowUpTransformer(FollowUpTestConfig())
 
-    // When
-    val result = transformer.transform(patients, prescriptions, outcomes, tracklosses)
-
-    // Then
-
-    assertDSs(result, expected)
-  }
-
-  "transform" should "return a Dataset[FollowUp] with the follow-up events of each patient with Tick model" in {
-    val sqlCtx = sqlContext
-    import sqlCtx.implicits._
-
-    // Given
-    val patients = Seq(
-      (Patient("Regis", 1, makeTS(1989, 10, 1), None), ObservationPeriod(
-        "Regis",
-        makeTS(2006, 1, 1),
-        makeTS(2009, 1, 1)
-      )),
-      (Patient("pika", 1, makeTS(1980, 10, 1), Some(makeTS(2008, 10, 1))), ObservationPeriod(
-        "pika",
-        makeTS(2006, 1, 1),
-        makeTS(2009, 1, 1)
-      )),
-      (Patient("patient03", 1, makeTS(1980, 10, 1), Some(makeTS(2010, 10, 1))), ObservationPeriod(
-        "pika",
-        makeTS(2006, 1, 1),
-        makeTS(2009, 1, 1)
-      ))
-    ).toDS
-
-    val prescriptions = Seq(
-      Molecule("Regis", "doliprane", 200.00, makeTS(2007, 1, 1)),
-      Molecule("Regis", "doliprane", 200.00, makeTS(2007, 2, 1)),
-      Molecule("Regis", "doliprane", 200.00, makeTS(2007, 3, 1)),
-      Molecule("pika", "doliprane", 200.00, makeTS(2007, 5, 1)),
-      Molecule("patient03", "doliprane", 200.00, makeTS(2007, 5, 1))
-    ).toDS
-
-    val tracklosses = Seq.empty[Event[Trackloss]].toDS
-
-    val outcomes = Seq(
-      Outcome("Regis", "bladder_cancer", makeTS(2007, 9, 1)),
-      Outcome("Regis", "bladder_cancer", makeTS(2008, 4, 1)),
-      Outcome("pika", "cancer", makeTS(2010, 1, 1)),
-      Outcome("patient03", "fall", makeTS(2010, 1, 1))
-    ).toDS
-    val expected = Seq(
-      FollowUp("Regis", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd"),
-      FollowUp("pika", makeTS(2006, 3, 1), makeTS(2008, 10, 1), "Death"),
-      FollowUp("patient03", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd")
-    ).toDS
-
-    val transformer = new FollowUpTransformer(FollowUpTestConfig(firstTargetDisease = false))
-
-    // When
-    val result = transformer.transform(patients, prescriptions, outcomes, tracklosses)
+    val result = new FollowUpTransformer(FollowUpTestConfig(
+      Some(patients), Some(prescriptions), Some(outcomes), Some(tracklosses),
+      firstTargetDisease = false)).transform()
 
     // Then
     assertDSs(result, expected)
   }
 
-  "transform" should "return a Dataset[FollowUp] with the follow-up events of each patient with LCSCCS model" in {
+  "transform" should "return a Dataset[Event[FollowUp]] with the follow-up events of each patient with LCSCCS model" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -348,10 +360,12 @@ class FollowUpTransformerSuite extends SharedContext {
       FollowUp("patient03", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd")
     ).toDS
 
-    val transformer = new FollowUpTransformer(FollowUpTestConfig(firstTargetDisease = false))
+    val transformer = new FollowUpTransformer(FollowUpTestConfig(
+      Some(patients), Some(prescriptions), Some(outcomes), Some(tracklosses),
+      firstTargetDisease = false))
 
     // When
-    val result = transformer.transform(patients, prescriptions, outcomes, tracklosses)
+    val result = transformer.transform()
 
     // Then
     assertDSs(result, expected)

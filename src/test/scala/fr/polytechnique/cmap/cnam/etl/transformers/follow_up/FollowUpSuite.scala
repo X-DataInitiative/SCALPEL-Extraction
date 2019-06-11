@@ -19,7 +19,7 @@ class FollowUpSuite extends SharedContext {
       FollowUp("Patient_A", makeTS(2006, 6, 1), makeTS(2009, 12, 31), "any_reason")
     )
 
-    val result = followUpPeriods.filter(_.isValid)
+    val result = followUpPeriods.filter(_.isDateValid)
 
     result shouldEqual expected
   }

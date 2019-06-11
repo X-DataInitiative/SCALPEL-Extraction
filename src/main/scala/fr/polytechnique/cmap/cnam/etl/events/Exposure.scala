@@ -5,7 +5,7 @@ import org.apache.spark.sql.Row
 
 object Exposure extends Exposure
 
-trait Exposure extends AnyEvent  {
+trait Exposure extends AnyEvent {
 
   val category: EventCategory[Exposure] = "exposure"
 

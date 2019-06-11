@@ -5,7 +5,7 @@ import org.apache.spark.sql.Row
 
 object Drug extends Drug
 
-trait Drug extends Dispensation  {
+trait Drug extends Dispensation {
 
   override val category: EventCategory[Drug] = "drug"
 

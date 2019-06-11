@@ -26,6 +26,7 @@ class DrugsExtractorSuite extends SharedContext {
       ("patient8", Some("3400936889651"), Some(makeTS(2014, 9, 1)))
     ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
 
+// <<<<<<< Updated upstream
     val expected: Dataset[Event[Drug]] = Seq(
       Drug("patient1", "9111111111111", 1, makeTS(2014, 5, 1)),
       Drug("patient2", "3400935183644", 1, makeTS(2014, 6, 1)),
@@ -52,6 +53,30 @@ class DrugsExtractorSuite extends SharedContext {
     val result = new DrugExtractor(drugConf).extract(source, Set.empty)
 
     // Then
+// =======
+//     val source = new Sources(irPha = Some(Seq(
+//       (Some("9111111111111"), "toto", "GC"),
+//       (Some("3400935183644"), "toto", "NGC"),
+//       (Some("3400935418487"), "toto", "GC"),
+//       (Some("3400936889651"), "toto", "GC")
+//     ).toDF("PHA_CIP_C13", "PHA_ATC_C07","PHA_CND_TOP")
+//       .withColumn("molecule_combination", lit(""))
+//     ), dcir = Some(inputDF))
+
+//     val expected: Dataset[DrugPurchaseDAO] = Seq(
+//       DrugPurchaseDAO("patient1", "9111111111111", "toto", makeTS(2014, 5, 1), "", 1),
+//       DrugPurchaseDAO("patient2", "3400935183644", "toto", makeTS(2014, 6, 1), "", 2),
+//       DrugPurchaseDAO("patient3", "3400935418487", "toto", makeTS(2014, 7, 1), "", 1),
+//       DrugPurchaseDAO("patient4", "3400935183644", "toto", makeTS(2014, 8, 1), "", 2),
+//       DrugPurchaseDAO("patient8", "3400936889651", "toto", makeTS(2014, 9, 1), "", 1)
+//     ).toDS()
+
+//     val drugConf = DrugConfig(TherapeuticLevel, List())
+//     //When
+//     val result = new DrugsExtractor(drugConf).formatSource(source)
+
+//     //Then
+// >>>>>>> Stashed changes
     assertDSs(result, expected)
   }
 

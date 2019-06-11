@@ -5,6 +5,7 @@ import fr.polytechnique.cmap.cnam.etl.events.ImbDiagnosis
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
+@deprecated("replaced by IMBEventExtractor")
 class ImbDiagnosesSuite extends SharedContext {
 
   "extract" should "extract diagnosis events from raw data" in {

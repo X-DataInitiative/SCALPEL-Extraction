@@ -27,6 +27,13 @@ case class Event[+A <: AnyEvent](
   def checkValueStart(category: String, values: Seq[String]): Boolean = {
     this.category == category && values.exists(this.value.startsWith(_))
   }
+
+  def isDateValid: Boolean = {
+    if(this.end.isEmpty)
+      true
+    else
+      this.start.before(this.end.get)
+  }
 }
 
 object Event {

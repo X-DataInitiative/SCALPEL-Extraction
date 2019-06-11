@@ -1,20 +1,26 @@
 package fr.polytechnique.cmap.cnam.study.fall.config
 
 import java.time.LocalDate
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
 import me.danielpes.spark.datetime.Period
 import me.danielpes.spark.datetime.implicits._
 import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
+import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs._
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level._
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification._
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.{DrugClassificationLevel, TherapeuticLevel}
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up._
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{DrugsConfig, ExposureConfig, FracturesConfig, SitesConfig}
 import fr.polytechnique.cmap.cnam.study.fall.fractures.{BodySite, BodySites}
+import pureconfig._
 
 case class FallConfig(
   input: StudyConfig.InputPaths,
@@ -68,26 +74,30 @@ object FallConfig extends FallConfigLoader with FractureCodes {
 
   /** Parameters needed for the Exposure Transformer **/
   case class ExposureConfig(
+    override val patients: Option[Dataset[(Patient, Event[FollowUp])]] = None,
+    override val dispensations: Option[Dataset[Event[Drug]]] = None,
     override val minPurchases: Int = 1,
     override val startDelay: Period = 0.months,
     override val purchasesWindow: Period = 0.months,
     override val endThresholdGc: Option[Period] = Some(90.days),
     override val endThresholdNgc: Option[Period] = Some(30.days),
     override val endDelay: Option[Period] = Some(30.days)) extends ExposuresTransformerConfig(
+      patients = patients,
+      dispensations = dispensations,
 
-    startDelay = startDelay,
-    minPurchases = minPurchases,
-    purchasesWindow = purchasesWindow,
-    periodStrategy = ExposurePeriodStrategy.Limited,
-    endThresholdGc = endThresholdGc,
-    endThresholdNgc = endThresholdNgc,
-    endDelay = endDelay,
-    weightAggStrategy = WeightAggStrategy.NonCumulative,
-    cumulativeExposureWindow = Some(0),
-    cumulativeStartThreshold = Some(0),
-    cumulativeEndThreshold = Some(0),
-    dosageLevelIntervals = Some(List()),
-    purchaseIntervals = Some(List())
+      startDelay = startDelay,
+      minPurchases = minPurchases,
+      purchasesWindow = purchasesWindow,
+      periodStrategy = ExposurePeriodStrategy.Limited,
+      endThresholdGc = endThresholdGc,
+      endThresholdNgc = endThresholdNgc,
+      endDelay = endDelay,
+      weightAggStrategy = WeightAggStrategy.NonCumulative,
+      cumulativeExposureWindow = Some(0),
+      cumulativeStartThreshold = Some(0),
+      cumulativeEndThreshold = Some(0),
+      dosageLevelIntervals = Some(List()),
+      purchaseIntervals = Some(List())
   )
 
   /** Parameters needed for the diagnosesConfig **/

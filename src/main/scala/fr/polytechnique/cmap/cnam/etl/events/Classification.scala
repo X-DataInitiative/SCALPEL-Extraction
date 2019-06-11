@@ -3,8 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.events
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
 
-
-trait Classification extends AnyEvent  {
+trait Classification extends AnyEvent {
 
   val category: EventCategory[Classification]
 

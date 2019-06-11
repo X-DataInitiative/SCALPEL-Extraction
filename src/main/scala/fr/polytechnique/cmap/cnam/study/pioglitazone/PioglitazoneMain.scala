@@ -13,6 +13,9 @@ import fr.polytechnique.cmap.cnam.etl.extractors.tracklosses.{Tracklosses, Track
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.transformers.observation._
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
@@ -222,10 +225,11 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val followups = {
+    val followups : Dataset[Event[FollowUp]] = {
       val observations = {
-        new ObservationPeriodTransformer(config.observationPeriod)
-          .transform(drugPurchases.as[Event[AnyEvent]])
+        new ObservationPeriodTransformer(config.observationPeriod.copy(
+           events = Some(drugPurchases.as[Event[AnyEvent]])))
+          .transform()
           .cache()
       }
 
@@ -235,9 +239,14 @@ object PioglitazoneMain extends Main {
           patients.col("patientId") === observations.col("patientId")
         )
 
-      new FollowUpTransformer(config.followUp)
-        .transform(patientsWithObservations, drugPurchases, outcomes, tracklosses)
-        .cache()
+      val followup_config = config.followUp.copy(
+        patients = Some(patientsWithObservations), dispensations = Some(drugPurchases),
+        outcomes = Some(outcomes), tracklosses = Some(tracklosses)
+      )
+
+      val fs : Dataset[Event[FollowUp]] = new FollowUpTransformer(followup_config).transform()
+      fs.cache()
+      fs
     }
 
     operationsMetadata += {
@@ -280,7 +289,7 @@ object PioglitazoneMain extends Main {
       val secondFilterResult = if (config.filters.filterDiagnosedPatients) {
 
         filteredPatientsAncestors ++= List("outcomes", "followup")
-        val earlyDiagnosedPatients = firstFilterResult
+        val earlyDiagnosedPatients : Dataset[Patient] = firstFilterResult
           .removeEarlyDiagnosedPatients(outcomes, followups, config.outcomes.cancerDefinition.toString)
           .cache()
 
@@ -333,8 +342,10 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val exposures = new ExposuresTransformer(config.exposures)
-      .transform(cnamPaperBaseCohort, drugPurchases)
+    val exposures_config = config.exposures.copy(
+      patients = Some(cnamPaperBaseCohort), dispensations = Some(drugPurchases)
+    )
+    val exposures = new ExposuresTransformer(exposures_config).transform()
     operationsMetadata += {
       OperationReporter
         .report(

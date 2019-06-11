@@ -9,10 +9,10 @@ import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class EventExtractorForAllTypesSuite extends SharedContext with MCOSourceInfo with DCIRSourceInfo {
   ///* Handy for debugging datasets */
-  // /*
+  /*
   val showString = classOf[org.apache.spark.sql.DataFrame].getDeclaredMethod("showString", classOf[Int], classOf[Int], classOf[Boolean])
   showString.setAccessible(true)
-  // */
+  */
   // println(showString.invoke(df, 10.asInstanceOf[Object], 20.asInstanceOf[Object], false.asInstanceOf[Object]).asInstanceOf[String])
 
   "DCIR.parquet extraction" should "DCIRSourceExtractor of DcirAct" in {

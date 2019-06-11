@@ -2,13 +2,15 @@ package fr.polytechnique.cmap.cnam.etl.transformers.observation
 
 import java.sql.Timestamp
 import org.apache.spark.sql.expressions.Window
+import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.etl.transformers._
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 
-class ObservationPeriodTransformer(config: ObservationPeriodTransformerConfig) {
+class ObservationPeriodTransformer (config: ObservationPeriodTransformerConfig) extends Serializable {
 
   val outputColumns = List(
     col("patientID"),
@@ -37,7 +39,13 @@ class ObservationPeriodTransformer(config: ObservationPeriodTransformerConfig) {
     def withObservationEnd: DataFrame = computeObservationEnd(data)
   }
 
-  def transform(events: Dataset[Event[AnyEvent]]): Dataset[ObservationPeriod] = {
+  def transform(): Dataset[Event[ObservationPeriod]] = {
+
+
+    val events = config.events match {
+      case Some(d) => d
+      case None => throw new RuntimeException("NO")
+    }
 
     import events.sqlContext.implicits._
 
@@ -46,6 +54,6 @@ class ObservationPeriodTransformer(config: ObservationPeriodTransformerConfig) {
       .withObservationEnd
       .select(outputColumns: _*)
       .dropDuplicates(Seq("patientID"))
-      .as[ObservationPeriod]
+      .map(ObservationPeriod.fromRow(_))
   }
 }

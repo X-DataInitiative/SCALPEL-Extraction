@@ -2,13 +2,14 @@ package fr.polytechnique.cmap.cnam.study.fall.exposures
 
 import java.sql.Timestamp
 import me.danielpes.spark.datetime.implicits._
+import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
 
 object FallStudyExposures {
 
-  def fallMainExposuresDefinition(studyStart: Timestamp): ExposuresTransformerConfig = {
+  def fallMainExposuresDefinition(studyStart: Timestamp): ExposuresTransformerConfig[Drug] = {
 
-    ExposuresTransformerConfig(
+    ExposuresTransformerConfig[Drug](
       startDelay = 0.months,
       minPurchases = 1,
       purchasesWindow = 0.months,
