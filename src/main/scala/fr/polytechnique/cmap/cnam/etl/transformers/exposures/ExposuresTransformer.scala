@@ -5,11 +5,12 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.etl.events.{Dispensation, Event, Exposure}
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.transformers._
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 
-class ExposuresTransformer(config: ExposuresTransformerConfig)
-  extends ExposurePeriodAdder with WeightAggregator {
+class ExposuresTransformer[Disp <: Dispensation](config: ExposuresTransformerConfig[Disp])
+  extends Serializable with ExposurePeriodAdder with WeightAggregator {
 
   import Columns._
 
@@ -29,19 +30,25 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
   val dosageLevelIntervals: Option[List[Int]] = config.dosageLevelIntervals
   val purchaseIntervals: Option[List[Int]] = config.purchaseIntervals
 
-  def transform[Disp <: Dispensation](
-    patients: Dataset[(Patient, FollowUp)],
-    dispensations: Dataset[Event[Disp]])
-  : Dataset[Event[Exposure]] = {
+  def transform() : Dataset[Event[Exposure]] = {
 
     val inputCols = Seq(
       col("Patient.patientID").as(PatientID),
       col("Patient.gender").as(Gender),
       col("Patient.birthDate").as(BirthDate),
       col("Patient.deathDate").as(DeathDate),
-      col("FollowUp.start").as(FollowUpStart),
-      col("FollowUp.end").as(FollowUpEnd)
+      col("Event.start").as(FollowUpStart),
+      col("Event.end").as(FollowUpEnd)
     )
+
+    val patients = config.patients match {
+      case Some(p) => p
+      case None => throw new RuntimeException("NO")
+    }
+    val dispensations = config.dispensations match {
+      case Some(d) => d
+      case None => throw new RuntimeException("NO")
+    }
 
     val input = renameTupleColumns(patients).select(inputCols: _*).join(dispensations, Seq(PatientID))
 

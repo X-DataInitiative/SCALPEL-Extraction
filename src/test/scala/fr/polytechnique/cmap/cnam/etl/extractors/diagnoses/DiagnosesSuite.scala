@@ -5,6 +5,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
 
+@deprecated("replaced by MCOSourceExtractor/IMBEventExtractor")
 class DiagnosesSuite extends SharedContext {
 
   "extract" should "call the adequate private extractors" in {

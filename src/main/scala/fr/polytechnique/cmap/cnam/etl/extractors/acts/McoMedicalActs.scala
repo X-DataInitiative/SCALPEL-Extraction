@@ -10,8 +10,8 @@ private[acts] case class McoMedicalActs(cimCodes: Seq[String], ccamCodes: Seq[St
   override def extractorCols: List[String] = List(ColNames.DP, ColNames.CCAM)
 
   override def extractors: List[McoRowExtractor] = List(
-    McoRowExtractor(ColNames.DP, cimCodes, McoCIM10Act),
-    McoRowExtractor(ColNames.CCAM, ccamCodes, McoCCAMAct)
+    McoRowExtractor(ColNames.DP, cimCodes, McoCIM10Act.category),
+    McoRowExtractor(ColNames.CCAM, ccamCodes, McoCCAMAct.category)
   )
 
   def extract(mco: DataFrame): Dataset[Event[MedicalAct]] = super.extract[MedicalAct](mco)

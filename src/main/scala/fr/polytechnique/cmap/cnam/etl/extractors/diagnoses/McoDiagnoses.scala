@@ -11,9 +11,9 @@ private[diagnoses] case class McoDiagnoses(
   daCodes: Seq[String]) extends McoEventRowExtractor {
 
   override def extractors: List[McoRowExtractor] = List(
-    McoRowExtractor(ColNames.DP, dpCodes, MainDiagnosis),
-    McoRowExtractor(ColNames.DR, drCodes, LinkedDiagnosis),
-    McoRowExtractor(ColNames.DA, daCodes, AssociatedDiagnosis)
+    McoRowExtractor(ColNames.DP, dpCodes, MainDiagnosis.category),
+    McoRowExtractor(ColNames.DR, drCodes, LinkedDiagnosis.category),
+    McoRowExtractor(ColNames.DA, daCodes, AssociatedDiagnosis.category)
   )
 
   override def extractorCols: List[String] = List(ColNames.DA, ColNames.DP, ColNames.DR)

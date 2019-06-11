@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.events
 
 import java.sql.Timestamp
 
+@deprecated("Pretty sure this is unnecesarry")
 trait EventBuilder extends Serializable { self: AnyEvent =>
 
   def apply[T <: AnyEvent](

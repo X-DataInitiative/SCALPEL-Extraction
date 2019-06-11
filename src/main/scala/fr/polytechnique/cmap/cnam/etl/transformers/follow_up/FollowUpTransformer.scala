@@ -1,38 +1,53 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
 
 import org.apache.spark.sql.expressions.Window
+import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.transformers._
 import fr.polytechnique.cmap.cnam.etl.transformers.observation._
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
 import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 
-class FollowUpTransformer(config: FollowUpTransformerConfig) {
+class FollowUpTransformer(config: FollowUpTransformerConfig) extends Serializable {
 
   import Columns._
-
 
   val outputColumns = List(col(PatientID), col(FollowUpStart).as(Start), col(FollowUpEnd).as(End), col(EndReason))
 
   val followUpEndModelCandidates = List(col(TracklossDate), col(DeathDate), col(ObservationEnd))
 
-  def transform(
-    patients: Dataset[(Patient, ObservationPeriod)],
-    dispensations: Dataset[Event[Molecule]],
-    outcomes: Dataset[Event[Outcome]],
-    tracklosses: Dataset[Event[Trackloss]]): Dataset[FollowUp] = {
+  def transform(): Dataset[Event[FollowUp]] = {
 
     import FollowUpTransformer._
 
     val inputCols = Seq(
       col("Patient.patientID").as(PatientID),
       col("Patient.deathDate").as(DeathDate),
-      col("ObservationPeriod.start").as(ObservationStart),
-      col("ObservationPeriod.stop").as(ObservationEnd)
+      col("Event.start").as(ObservationStart),
+      col("Event.end").as(ObservationEnd)
     )
+
+    val patients = config.patients match {
+      case Some(p) => p
+      case None => throw new RuntimeException("NO")
+    }
+    val dispensations = config.dispensations match {
+      case Some(d) => d
+      case None => throw new RuntimeException("NO")
+    }
+    val outcomes = config.outcomes match {
+      case Some(p) => p
+      case None => throw new RuntimeException("NO")
+    }
+    val tracklosses = config.tracklosses match {
+      case Some(d) => d
+      case None => throw new RuntimeException("NO")
+    }
+
 
     val events = dispensations.toDF
       .union(outcomes.toDF)
@@ -59,7 +74,7 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
       .withEndReason
       .select(outputColumns: _*)
       .dropDuplicates(Seq(PatientID))
-      .as[FollowUp]
+      .map(FollowUp.fromRow(_))
   }
 }
 
@@ -104,8 +119,8 @@ object FollowUpTransformer {
 
   }
 
-  implicit class FollowUpDataset(followups: Dataset[FollowUp]) {
-    def cleanFollowUps(): Dataset[FollowUp] = followups.filter(_.isValid)
+  implicit class FollowUpDataset(followups: Dataset[Event[FollowUp]]) {
+    def cleanFollowUps(): Dataset[Event[FollowUp]] = followups.filter(_.isValid)
   }
 
 }

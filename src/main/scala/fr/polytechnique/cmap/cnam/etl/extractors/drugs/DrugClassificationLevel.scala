@@ -5,7 +5,7 @@ import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
 trait DrugClassificationLevel extends Serializable {
   def isInFamily(families: List[DrugClassConfig], cip13: String): Boolean =  families
     .exists(family => family.cip13Codes.contains(cip13))
-  def apply(purchase: PurchaseDAO, families: List[DrugClassConfig]): List[Event[Drug]]
+  def apply(purchase: DrugPurchaseDAO, families: List[DrugClassConfig]): List[Event[Drug]]
 }
 
 object DrugClassificationLevel{
@@ -18,7 +18,7 @@ object DrugClassificationLevel{
 }
 
 object TherapeuticLevel extends DrugClassificationLevel {
-  override def apply(purchase: PurchaseDAO, families: List[DrugClassConfig]): List[Event[Drug]] = {
+  override def apply(purchase: DrugPurchaseDAO, families: List[DrugClassConfig]): List[Event[Drug]] = {
     val filteredFamilies = families
       .filter(family => isInFamily(List(family), purchase.CIP13))
       .map(_.name)
@@ -27,7 +27,7 @@ object TherapeuticLevel extends DrugClassificationLevel {
 }
 
 object MoleculeLevel extends DrugClassificationLevel {
-  override def apply(purchase: PurchaseDAO, families: List[DrugClassConfig]): List[Event[Drug]] = {
+  override def apply(purchase: DrugPurchaseDAO, families: List[DrugClassConfig]): List[Event[Drug]] = {
     if(isInFamily(families, purchase.CIP13)) {
       val molecules = purchase.molecules
         .split("_")
@@ -39,7 +39,7 @@ object MoleculeLevel extends DrugClassificationLevel {
 }
 
 object MoleculeCombinationLevel extends DrugClassificationLevel {
-  override def apply(purchase: PurchaseDAO, families: List[DrugClassConfig]): List[Event[Drug]] = {
+  override def apply(purchase: DrugPurchaseDAO, families: List[DrugClassConfig]): List[Event[Drug]] = {
     if(isInFamily(families, purchase.CIP13))
       List(Drug(purchase.patientID, purchase.molecules, purchase.conditioning, purchase.eventDate))
     else List.empty
@@ -47,7 +47,7 @@ object MoleculeCombinationLevel extends DrugClassificationLevel {
 }
 
 object PharmacologicalLevel extends DrugClassificationLevel {
-  override def apply(purchase: PurchaseDAO, families: List[DrugClassConfig]): List[Event[Drug]] = {
+  override def apply(purchase: DrugPurchaseDAO, families: List[DrugClassConfig]): List[Event[Drug]] = {
     val filteredFamilies = families
       .flatMap(_.pharmacologicalClasses)
       .filter(family => family.isCorrect(purchase.ATC5, ""))

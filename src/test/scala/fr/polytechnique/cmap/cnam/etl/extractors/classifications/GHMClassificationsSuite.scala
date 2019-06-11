@@ -4,6 +4,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Classification, Event, GHMClassification}
 import fr.polytechnique.cmap.cnam.util.functions._
 
+@deprecated("replaced")
 class GHMClassificationsSuite extends SharedContext{
 
   "extract" should "return correct GHM" in {

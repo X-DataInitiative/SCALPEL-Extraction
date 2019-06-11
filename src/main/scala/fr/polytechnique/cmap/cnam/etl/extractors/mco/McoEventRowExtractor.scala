@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.mco
 import java.sql.Timestamp
 import org.apache.spark.sql._
 import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.events.EventCategory
 import fr.polytechnique.cmap.cnam.etl.extractors.EventRowExtractor
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
@@ -12,7 +13,7 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
 
   protected type Extractor = Row => Option[String]
 
-  protected case class McoRowExtractor(colName: ColName, codes: Seq[String], builder: EventBuilder) {
+  protected case class McoRowExtractor(colName: ColName, codes: Seq[String], category : String) {
     def extract: Extractor = (r: Row) => extractCode(r: Row, colName: ColName, codes: Seq[String])
   }
 
@@ -59,7 +60,7 @@ trait McoEventRowExtractor extends EventRowExtractor with McoSource {
         extractors.flatMap(
           extractor => extractor.extract(r).map(
             code =>
-              extractor.builder[A](patientId, groupId, code, weight, eventDate, endDate)
+              Event[A](patientId, extractor.category, groupId, code, weight, eventDate, endDate)
           )
         )
       }.distinct

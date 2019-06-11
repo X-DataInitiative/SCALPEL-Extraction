@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
 
+@deprecated("deleted")
 trait EventRowExtractor { self: ColumnNames =>
 
   def extractPatientId(r: Row): String

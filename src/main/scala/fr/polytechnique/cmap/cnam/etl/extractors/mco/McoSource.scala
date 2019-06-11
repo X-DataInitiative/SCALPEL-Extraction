@@ -31,7 +31,7 @@ trait McoSource extends ColumnNames {
     val EstimatedStayStart = "estimated_start"
   }
 
-  final val eventBuilder: Map[ColName, EventBuilder] = Map(
+  final val eventBuilder: Map[ColName, Diagnosis] = Map(
     ColNames.DP -> MainDiagnosis,
     ColNames.DR -> LinkedDiagnosis,
     ColNames.DA -> AssociatedDiagnosis

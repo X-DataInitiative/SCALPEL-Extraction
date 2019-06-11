@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.ExtractorConfig
   *   or an object (if hardcoded) extending this class.
   * Important: It cannot be used directly by a study, because it's not compatible with pureconfig.
   */
-@deprecated("I said so")
+
 class DiagnosesConfig(
     val dpCodes: List[String],
     val drCodes: List[String],

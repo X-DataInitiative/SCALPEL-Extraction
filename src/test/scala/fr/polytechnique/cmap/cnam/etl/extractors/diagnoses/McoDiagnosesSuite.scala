@@ -4,6 +4,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
+@deprecated("replaced by MCOSourceExtractor")
 class McoDiagnosesSuite extends SharedContext {
 
   "extract" should "extract diagnosis events from raw data" in {

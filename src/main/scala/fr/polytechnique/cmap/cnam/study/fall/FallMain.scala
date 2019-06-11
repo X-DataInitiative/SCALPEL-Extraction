@@ -4,7 +4,7 @@ import java.io.PrintWriter
 import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, Outcome}
+import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActs
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.Diagnoses
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugsExtractor
@@ -110,7 +110,6 @@ object FallMain extends Main with FractureCodes {
 
     if (fallConfig.runParameters.exposures) {
       val exposures = {
-        val definition = fallConfig.exposures
         val patientsWithFollowUp = FallStudyFollowUps
           .transform(
             optionPatients.get,
@@ -131,7 +130,10 @@ object FallMain extends Main with FractureCodes {
               fallConfig.output.saveMode
             )
         }
-        new ExposuresTransformer(definition).transform(patientsWithFollowUp, optionDrugPurchases.get)
+        val definition : FallConfig.ExposureConfig = fallConfig.exposures.copy(
+          patients = Some(patientsWithFollowUp), dispensations = Some(optionDrugPurchases.get)
+        )
+        new ExposuresTransformer(definition).transform()
       }
       operationsMetadata += {
         OperationReporter

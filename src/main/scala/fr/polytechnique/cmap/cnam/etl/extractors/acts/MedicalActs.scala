@@ -1,31 +1,28 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
-import java.sql.Timestamp
-import scala.util.Try
-import org.apache.spark.sql._
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.TimestampType
-import fr.polytechnique.cmap.cnam._
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.extractors.mco._
+import fr.polytechnique.cmap.cnam.etl.extractors._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
+import org.apache.spark.sql._
 
-@deprecated("I said so")
-class MedicalActs(config: MedicalActsConfig) {
+class MedicalActs(config: MedicalActsConfig) extends Serializable with MCOSourceInfo with DCIRSourceInfo {
 
   def extract(sources: Sources): Dataset[Event[MedicalAct]] = {
-    val dcirActs = DcirMedicalActs.extract(sources.dcir.get, config.dcirCodes)
 
-    val mcoActs = McoMedicalActs(
-      config.mcoCIMCodes,
-      config.mcoCCAMCodes
-    ).extract(
-      sources.mco.get
+    val dcirActs = new DCIRSourceExtractor().extract(
+      sources.dcir.get,
+      List(new DCIRMedicalActEventExtractor(config.dcirCodes))
     )
 
-    lazy val mcoCEActs = McoCEMedicalActs.extract(
+    val mcoActs : Dataset[Event[MedicalAct]] = new MCOSourceExtractor().extract(
+      sources.mco.get, List(
+        new MCOMedicalActEventExtractor(MCOCols.DP, config.mcoCIMCodes, McoCIM10Act),
+        new MCOMedicalActEventExtractor(MCOCols.CCAM, config.mcoCCAMCodes, McoCCAMAct)
+      )
+    )
+
+    lazy val mcoCEActs = McoCEMedicalActs.extract( // todo finish
       sources.mcoCe.get,
       config.mcoCECodes
     )

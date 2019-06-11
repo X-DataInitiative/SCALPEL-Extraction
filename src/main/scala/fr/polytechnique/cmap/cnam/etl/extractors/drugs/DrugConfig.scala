@@ -20,7 +20,7 @@ class PharmacologicalClassConfig(
   val ATCCodes: List[String],
   val ATCExceptions: List[String] = List(),
   val CIPExceptions: List[String] = List()
-) extends java.io.Serializable {
+) extends Serializable {
 
   def isCorrect(atc5code: String, cip13code: String): Boolean = {
     isCorrectATC(atc5code) && !isException(atc5code) && !isCIPException(cip13code)

@@ -8,13 +8,13 @@ import fr.polytechnique.cmap.cnam.etl.extractors.ExtractorConfig
   * (if mutable) or an object (if hardcoded) extending this class.
   * Important: It cannot be used directly by a study, because it's not compatible with pureconfig.
   */
-@deprecated("probaby")
+
 class MedicalActsConfig(
   val dcirCodes: List[String],
   val mcoCIMCodes: List[String],
   val mcoCECodes: List[String],
   val mcoCCAMCodes: List[String]) extends ExtractorConfig
-@deprecated("probaby")
+
 object MedicalActsConfig {
 
   def apply(

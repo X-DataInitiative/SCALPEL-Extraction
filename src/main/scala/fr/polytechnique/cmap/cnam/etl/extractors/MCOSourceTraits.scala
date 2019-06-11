@@ -1,31 +1,11 @@
-package fr.polytechnique.cmap.cnam.etl.extractors.acts
+package fr.polytechnique.cmap.cnam.etl.extractors
 
-import java.sql.Timestamp
-import org.apache.spark.sql._
-import fr.polytechnique.cmap.cnam._
-import fr.polytechnique.cmap.cnam.etl.extractors.mco._
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
-
+import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{LongType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame}
-import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
-import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 
-import fr.polytechnique.cmap.cnam.etl.extractors.Columns
-
-trait MedicalActsInfo {
-  final lazy val PrivateInstitutionCodes = List(4, 5, 6, 7)
-  final object PatientCols extends Columns {
-    final val PatientID : String = "NUM_ENQ"
-    final val CamCode : String = "ER_CAM_F__CAM_PRS_IDE"
-    final val GHSCode : String = "ER_ETE_F__ETE_GHS_NUM"
-    final val InstitutionCode : String = "ER_ETE_F__ETE_TYP_COD"
-    final val Sector : String = "ER_ETE_F__PRS_PPU_SEC"
-    final val Date : String = "EXE_SOI_DTD"
-  }
+trait MCOSourceInfo {
 
   final object MCOCols extends Columns {
     final val PatientID : String  = "NUM_ENQ"
@@ -40,7 +20,7 @@ trait MedicalActsInfo {
   }
 
   final object MCOColsFull extends Columns  {
-    final val GHM : String = "MCO_B__GRG_GHM"
+    final lazy val GHM : String = "MCO_B__GRG_GHM"
     final val StayEndMonth : String = "MCO_B__SOR_MOI"
     final val StayEndYear : String = "MCO_B__SOR_ANN"
     final val StayLength : String = "MCO_B__SEJ_NBJ"
@@ -52,12 +32,7 @@ trait MedicalActsInfo {
     final val CamCode : String = "MCO_FMSTC__CCAM_COD"
     final val Date : String = "EXE_SOI_DTD"
   }
-  final object ImbDiagnosesCols {
-    final lazy val PatientID = "NUM_ENQ"
-    final lazy val Encoding = "MED_NCL_IDT"
-    final lazy val Code = "MED_MTF_COD"
-    final lazy val Date = "IMB_ALD_DTD"
-  }
+
 
   implicit class StringToColumn(colName: String) {
     def toCol: Column = col(colName)

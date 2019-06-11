@@ -1,21 +1,28 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
-import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event}
+import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, _}
+import fr.polytechnique.cmap.cnam.etl.extractors._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.unionDatasets
 import org.apache.spark.sql.Dataset
 
 
-@deprecated("I said so")
-class Diagnoses(config: DiagnosesConfig) {
+class Diagnoses(config: DiagnosesConfig) extends Serializable with MCOSourceInfo {
 
   def extract(sources: Sources): Dataset[Event[Diagnosis]] = {
 
-    val imbDiagnoses = ImbDiagnoses.extract(
+    val imbDiagnoses : Dataset[Event[Diagnosis]] = new IMBSourceExtractor().extract(
       sources.irImb.get,
-      config.imbCodes
+      List(new IMBEventExtractor(config.imbCodes))
     )
-    val mcoDiagnoses = McoDiagnoses(config.dpCodes, config.drCodes, config.daCodes).extract(sources.mco.get)
+
+    val mcoDiagnoses : Dataset[Event[Diagnosis]] = new MCOSourceExtractor().extract(
+      sources.mco.get, List(
+        new MCODiagnosisEventExtractor(MCOCols.DP, config.dpCodes, MainDiagnosis),
+        new MCODiagnosisEventExtractor(MCOCols.DR, config.drCodes, LinkedDiagnosis),
+        new MCODiagnosisEventExtractor(MCOCols.DA, config.daCodes, AssociatedDiagnosis)
+      )
+    )
 
     unionDatasets(imbDiagnoses, mcoDiagnoses).distinct()
   }

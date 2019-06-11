@@ -5,7 +5,6 @@ import org.apache.spark.sql.Column
 import org.apache.spark.sql.functions.col
 
 
-// to replace
 trait Columns extends Serializable {
   def isEmpty(x: String) = x == null || x.trim.isEmpty
   def validate(is : Boolean, f : Field, field_value : String) : String = {

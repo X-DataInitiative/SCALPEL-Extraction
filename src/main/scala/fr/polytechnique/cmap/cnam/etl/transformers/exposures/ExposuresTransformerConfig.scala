@@ -1,8 +1,13 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
+import fr.polytechnique.cmap.cnam.etl.events.{Dispensation, Event, Exposure}
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.transformers._
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import me.danielpes.spark.datetime.Period
 import me.danielpes.spark.datetime.implicits._
-import fr.polytechnique.cmap.cnam.etl.transformers.TransformerConfig
 
 /**
   * A class to represent the exposure we want to generate from the data
@@ -35,7 +40,9 @@ import fr.polytechnique.cmap.cnam.etl.transformers.TransformerConfig
   *
   * purchaseIntervals         List of consumption levels in mg / put only 0 when we want all the weights to 1
   */
-class ExposuresTransformerConfig(
+class ExposuresTransformerConfig[Disp <: Dispensation](
+  val patients: Option[Dataset[(Patient, Event[FollowUp])]] = None,
+  val dispensations: Option[Dataset[Event[Disp]]] = None,
   val startDelay: Period,
   val minPurchases: Int,
   val purchasesWindow: Period,
@@ -53,9 +60,12 @@ class ExposuresTransformerConfig(
   val dosageLevelIntervals: Option[List[Int]],
   val purchaseIntervals: Option[List[Int]]) extends TransformerConfig
 
-object ExposuresTransformerConfig {
+object ExposuresTransformerConfig{
 
-  def apply(
+  def apply[Disp <: Dispensation] (
+      patients: Option[Dataset[(Patient, Event[FollowUp])]] = None,
+      dispensations: Option[Dataset[Event[Disp]]] = None,
+
       startDelay: Period = 3.months,
       minPurchases: Int = 2,
       purchasesWindow: Period = 6.months,
@@ -71,9 +81,12 @@ object ExposuresTransformerConfig {
       cumulativeEndThreshold: Option[Int] = Some(4),
       dosageLevelIntervals: Option[List[Int]] = Some(List(0, 100, 200, 300, 400, 500)),
       purchaseIntervals: Option[List[Int]] = Some(List(0, 3, 5)))
-    : ExposuresTransformerConfig = {
+    : ExposuresTransformerConfig[Disp] = {
 
-    new ExposuresTransformerConfig (
+    new ExposuresTransformerConfig[Disp] (
+      patients,
+      dispensations,
+
       startDelay,
       minPurchases,
       purchasesWindow,
@@ -92,4 +105,3 @@ object ExposuresTransformerConfig {
     )
   }
 }
-

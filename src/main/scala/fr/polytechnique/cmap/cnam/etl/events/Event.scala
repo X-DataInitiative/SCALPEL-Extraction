@@ -1,6 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.events
 
 import java.sql.Timestamp
+import org.apache.spark.sql.functions._
 
 // Check AnyEvent.scala for available event types
 case class Event[+A <: AnyEvent](
@@ -18,6 +19,14 @@ case class Event[+A <: AnyEvent](
 
   def checkValue(category: String, values: Seq[String]): Boolean = {
     this.category == category && values.contains(this.value)
+  }
+  def isValid() : Boolean = {
+
+    end match {
+      case Some(d) => start.before(d)
+      case None => false
+    }
+
   }
 }
 

@@ -2,6 +2,9 @@ package fr.polytechnique.cmap.cnam.etl.transformers.observation
 
 import java.sql.Timestamp
 import java.time.LocalDate
+import org.apache.spark.sql.Dataset
+import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.transformers._
 import fr.polytechnique.cmap.cnam.etl.transformers.TransformerConfig
 
 /**
@@ -11,13 +14,15 @@ import fr.polytechnique.cmap.cnam.etl.transformers.TransformerConfig
   * Important: It cannot be used directly by a study, because it's not compatible with pureconfig.
   */
 class ObservationPeriodTransformerConfig(
+    val events: Option[Dataset[Event[AnyEvent]]] = None,
     val studyStart: LocalDate,
     val studyEnd: LocalDate) extends TransformerConfig
 
 object ObservationPeriodTransformerConfig {
 
-  def apply(studyStart: Timestamp, studyEnd: Timestamp): ObservationPeriodTransformerConfig = {
+  def apply(events: Option[Dataset[Event[AnyEvent]]] = None, studyStart: Timestamp, studyEnd: Timestamp): ObservationPeriodTransformerConfig = {
     new ObservationPeriodTransformerConfig(
+      events,
       studyStart.toLocalDateTime.toLocalDate,
       studyEnd.toLocalDateTime.toLocalDate
     )

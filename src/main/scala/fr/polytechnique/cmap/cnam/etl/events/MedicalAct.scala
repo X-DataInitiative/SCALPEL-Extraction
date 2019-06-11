@@ -4,7 +4,7 @@ import java.sql.Timestamp
 
 import org.apache.spark.sql.Row
 
-trait MedicalAct extends AnyEvent with EventBuilder {
+trait MedicalAct extends AnyEvent {
 
   val category: EventCategory[MedicalAct]
 
