@@ -7,9 +7,6 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 class MoleculePurchases(config: MoleculePurchasesConfig) {
 
   def extract(sources: Sources): Dataset[Event[Molecule]] = {
-    DcirMoleculePurchases.extract(
-      sources.dcir.get, sources.irPha.get, sources.dosages.get,
-      config.drugClasses, config.maxBoxQuantity
-    )
+    new DcirMoleculePurchases(config).extract(sources, config.drugClasses.toSet)
   }
 }

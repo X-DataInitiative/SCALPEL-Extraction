@@ -10,7 +10,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.ExtractorConfig
   */
 class MoleculePurchasesConfig(
   val drugClasses: List[String],
-  val maxBoxQuantity: Int) extends ExtractorConfig
+  val maxBoxQuantity: Int) extends ExtractorConfig with Serializable
 
 object MoleculePurchasesConfig {
 

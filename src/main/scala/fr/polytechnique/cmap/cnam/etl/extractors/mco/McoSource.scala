@@ -29,6 +29,9 @@ trait McoSource extends ColumnNames {
       PatientID, DP, DR, DA, CCAM, GHM, EtaNum, RsaNum, Year, StayEndMonth, StayEndYear, StayLength,
       StayStartDate, StayEndDate, StartDate, EndDate
     )
+    val hospitalStayPart = List(
+      PatientID, EtaNum, RsaNum, Year, StartDate, EndDate
+    )
   }
 
   implicit class McoDataFrame(df: DataFrame) {
