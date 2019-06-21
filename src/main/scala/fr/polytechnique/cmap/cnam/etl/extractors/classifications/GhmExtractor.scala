@@ -5,5 +5,5 @@ import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoExtractor
 
 object GhmExtractor extends McoExtractor[Classification] {
   final override val columnName: String = ColNames.GHM
-  override val eventBuilder: EventBuilder = GHMClassification
+  override val category: String = GHMClassification.category
 }

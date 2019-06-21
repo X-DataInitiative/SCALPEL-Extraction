@@ -5,10 +5,10 @@ import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoExtractor
 
 object McoCcamActExtractor extends McoExtractor[MedicalAct] {
   final override val columnName: String = ColNames.CCAM
-  override val eventBuilder: EventBuilder = McoCCAMAct
+  override val category = McoCCAMAct.category
 }
 
 object McoCimMedicalActExtractor extends McoExtractor[MedicalAct] {
   final override val columnName: String = ColNames.DP
-  override val eventBuilder: EventBuilder = McoCIM10Act
+  override val category = McoCIM10Act.category
 }

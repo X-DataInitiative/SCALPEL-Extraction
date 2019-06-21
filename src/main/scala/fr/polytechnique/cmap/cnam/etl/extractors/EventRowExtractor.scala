@@ -4,7 +4,6 @@ import java.sql.Timestamp
 import org.apache.spark.sql.Row
 
 trait EventRowExtractor {
-  self: ColumnNames =>
 
   def extractPatientId(r: Row): String
 
