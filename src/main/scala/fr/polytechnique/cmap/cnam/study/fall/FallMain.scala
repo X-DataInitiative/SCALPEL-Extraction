@@ -195,7 +195,7 @@ object FallMain extends Main with FractureCodes {
       None
     }
 
-    val (optionLiberalActs, optionActs) = if (fallConfig.runParameters.acts) {
+    val (optionActs, optionLiberalActs) = if (fallConfig.runParameters.acts) {
       logger.info("Medical Acts")
       val acts = new ActsExtractor(fallConfig.medicalActs).extract(sources).persist()
       operationsMetadata += {

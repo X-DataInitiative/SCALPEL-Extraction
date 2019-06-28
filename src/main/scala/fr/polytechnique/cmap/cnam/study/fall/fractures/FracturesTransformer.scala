@@ -23,7 +23,7 @@ class FracturesTransformer(config: FallConfig) extends OutcomesTransformer with 
     diagnoses: Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
 
     // Hospitalized fractures
-    val hospitralizedFractures = HospitalizedFractures.transform(diagnoses, acts, config.sites.sites)
+    val hospitalizedFractures = HospitalizedFractures.transform(diagnoses, acts, config.sites.sites)
 
     // Liberal Fractures
     val liberalFractures = LiberalFractures.transform(liberalActs)
@@ -35,7 +35,7 @@ class FracturesTransformer(config: FallConfig) extends OutcomesTransformer with 
     val privateAmbulatoryFractures = PrivateAmbulatoryFractures.transform(acts)
 
     unionDatasets(
-      hospitralizedFractures,
+      hospitalizedFractures,
       liberalFractures,
       publicAmbulatoryFractures,
       privateAmbulatoryFractures

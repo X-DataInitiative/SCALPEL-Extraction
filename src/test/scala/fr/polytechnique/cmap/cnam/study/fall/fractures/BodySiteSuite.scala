@@ -137,10 +137,10 @@ class BodySiteSuite extends SharedContext {
     val input2 = "noone"
     //When
     val result1 = BodySite.getSiteFromCode(input1, List(BodySites), CodeType.CIM10)
-    val expected1 = "clavicule"
+    val expected1 = "Clavicule"
 
     val result2 = BodySite.getSiteFromCode(input2, List(BodySites), CodeType.CIM10)
-    val expected2 = ""
+    val expected2 = "undefined"
 
     //Then
     assert(result1 == expected1)
@@ -157,7 +157,7 @@ class BodySiteSuite extends SharedContext {
     val expected1 = "MembreSuperieurProximal"
 
     val result2 = BodySite.getSiteFromCode(input2, List(BodySites), CodeType.CCAM)
-    val expected2 = ""
+    val expected2 = "undefined"
 
     //Then
     assert(result1 == expected1)
@@ -171,7 +171,7 @@ class BodySiteSuite extends SharedContext {
 
     //When
     val result = BodySite.getSiteFromCode(input1, List(), CodeType.CCAM)
-    val expected = ""
+    val expected = "undefined"
 
     //Then
     assert(result == expected)

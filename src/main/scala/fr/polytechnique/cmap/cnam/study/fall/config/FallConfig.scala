@@ -28,7 +28,7 @@ case class FallConfig(
 
   val base: BaseConfig = FallConfig.BaseConfig
   val medicalActs: MedicalActsConfig = FallConfig.MedicalActsConfig
-  val diagnoses: DiagnosesConfig = DiagnosesConfig(sites.fracturesCodes, sites.fracturesCodes)
+  val diagnoses: DiagnosesConfig = DiagnosesConfig(sites.fracturesCodes, sites.fracturesCodes, daCodes = sites.fracturesCodes)
 }
 
 object FallConfig extends FallConfigLoader with FractureCodes {
@@ -115,7 +115,7 @@ object FallConfig extends FallConfigLoader with FractureCodes {
 
   /** Base fixed parameters for this study. */
   final object BaseConfig extends BaseConfig(
-    ageReferenceDate = LocalDate.of(2014, 1, 1),
+    ageReferenceDate = LocalDate.of(2011, 1, 1),
     studyStart = LocalDate.of(2014, 1, 1),
     studyEnd = LocalDate.of(2017, 1, 1)
   )
@@ -124,7 +124,7 @@ object FallConfig extends FallConfigLoader with FractureCodes {
   final object MedicalActsConfig extends MedicalActsConfig(
     dcirCodes = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList,
     mcoCECodes = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList,
-    mcoCCAMCodes = List(),
+    mcoCCAMCodes = CCAMExceptions.toList,
     mcoCIMCodes = List()
   )
 }
