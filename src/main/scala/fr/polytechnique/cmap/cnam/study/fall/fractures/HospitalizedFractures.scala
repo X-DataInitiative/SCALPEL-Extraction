@@ -24,7 +24,6 @@ object HospitalizedFractures extends OutcomesTransformer with FractureCodes {
     import diagnoses.sqlContext.implicits._
     val ghmCodes = BodySite.extractCIM10CodesFromSites(ghmSites)
     val correctCIM10Event = diagnoses
-      .filter(isMainOrDASDiagnosis _)
       .filter(diagnosis => isFractureDiagnosis(diagnosis, ghmCodes))
 
     val incorrectGHMStays = acts
