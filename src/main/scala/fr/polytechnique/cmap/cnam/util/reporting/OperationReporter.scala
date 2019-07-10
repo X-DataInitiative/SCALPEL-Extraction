@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.util.reporting
 
 import java.io.PrintWriter
 import org.apache.log4j.Logger
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 
@@ -41,25 +41,25 @@ object OperationReporter {
     saveMode: String = "errorIfExists",
     patientIdColName: String = "patientID"): OperationMetadata = {
 
-    logger.info(s"""=> Reporting operation "$operationName" of output type "$outputType"""")
-
     val dataPath: Path = Path(basePath, operationName, "data")
-    val patientsPath: Path = Path(basePath, operationName, "patients")
+    val dataPathStr = dataPath.toString
+    logger.info(s"""=> Reporting operation "$operationName" of output type "$outputType" to "$dataPathStr"""")
 
-    val baseMetadata = OperationMetadata(operationName, operationInputs, outputType, None, None)
+    val patientsPath: Path = Path(basePath, operationName, "patients")
+    val baseMetadata = OperationMetadata(operationName, operationInputs, outputType)
 
     outputType match {
       case OperationTypes.Patients =>
         data.writeParquet(dataPath.toString, saveMode)
         baseMetadata.copy(
-          outputPath = Some(dataPath.toString)
+          outputPath = dataPath.toString
         )
 
       case OperationTypes.Sources =>
         val patients = data.select(patientIdColName).distinct
         patients.writeParquet(patientsPath.toString, saveMode)
         baseMetadata.copy(
-          populationPath = Some(patientsPath.toString)
+          populationPath = patientsPath.toString
         )
 
       case _ =>
@@ -67,8 +67,41 @@ object OperationReporter {
         val patients = data.select(patientIdColName).distinct
         patients.writeParquet(patientsPath.toString, saveMode)
         baseMetadata.copy(
-          outputPath = Some(dataPath.toString),
-          populationPath = Some(patientsPath.toString)
+          outputPath = dataPath.toString,
+          populationPath = patientsPath.toString
+        )
+    }
+  }
+
+  def reportAsDataSet[A](
+    operationName: String,
+    operationInputs: List[String],
+    outputType: OperationType,
+    data: Dataset[A],
+    basePath: Path,
+    saveMode: String = "errorIfExists",
+    patientIdColName: String = "patientID"): OperationMetadata = {
+
+    val dataPath: Path = Path(basePath, operationName, "data")
+    val dataPathStr = dataPath.toString
+    logger.info(s"""=> Reporting operation "$operationName" of output type "$outputType" to "$dataPathStr"""")
+
+    val patientsPath: Path = Path(basePath, operationName, "patients")
+    val baseMetadata = OperationMetadata(operationName, operationInputs, outputType)
+
+    outputType match {
+      case OperationTypes.Patients =>
+        data.write.mode(saveModeFrom(saveMode)).parquet(dataPath.toString)
+        baseMetadata.copy(
+          outputPath = dataPath.toString
+        )
+      case _ =>
+        data.write.mode(saveModeFrom(saveMode)).parquet(dataPath.toString)
+        val patients = data.select(patientIdColName).distinct
+        patients.write.mode(saveMode).parquet(patientsPath.toString)
+        baseMetadata.copy(
+          outputPath = dataPath.toString,
+          populationPath = patientsPath.toString
         )
     }
   }
@@ -89,4 +122,10 @@ object OperationReporter {
     }
   }
 
+  private def saveModeFrom(mode: String): SaveMode = mode match {
+    case "overwrite" => SaveMode.Overwrite
+    case "append" => SaveMode.Append
+    case "errorIfExists" => SaveMode.ErrorIfExists
+    case "withTimestamp" => SaveMode.Overwrite
+  }
 }
