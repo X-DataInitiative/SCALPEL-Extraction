@@ -43,7 +43,6 @@ object FallMain extends Main with FractureCodes {
     dcir.unpersist()
     mco.unpersist()
 
-
     // Write Metadata
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
     val metadataJson: String = metadata.toJsonString()
