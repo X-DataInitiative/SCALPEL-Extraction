@@ -12,8 +12,9 @@ class DiagnosisExtractor(config: DiagnosesConfig) {
 
     val mainDiag = MainDiagnosisExtractor.extract(sources, config.dpCodes.toSet)
     val linkedDiag = LinkedDiagnosisExtractor.extract(sources, config.drCodes.toSet)
+    val dasDiag = AssociatedDiagnosisExtractor.extract(sources, config.daCodes.toSet)
 
-    unionDatasets(mainDiag, linkedDiag)
+    unionDatasets(mainDiag, linkedDiag, dasDiag)
   }
 
 }

@@ -31,7 +31,7 @@ object BodySite {
 
   def getSiteFromCode(code: String, sites: List[BodySite], codeType: CodeType): String = {
     if (sites.isEmpty) {
-      return ""
+      return "undefined"
     }
 
     val ghmSite = codeType match {
@@ -93,7 +93,7 @@ trait ForkSite extends BodySite with Serializable {
 }
 
 object Clavicule extends LeafSite {
-  override val ghm = "clavicule"
+  override val ghm = "Clavicule"
   override val codesCIM10 = List("S420")
   override val codesCCAM = List("MADP001")
 }
@@ -146,7 +146,7 @@ object Poignet extends LeafSite {
 }
 
 object CoudeAvantbras extends LeafSite {
-  override val ghm: String = "CoudeAvantbras"
+  override val ghm: String = "CoudeAvantBras"
   override val codesCIM10 = List("S424", "S520", "S521", "S522", "S523", "S524")
 }
 
@@ -200,12 +200,12 @@ object BassinRachis extends ForkSite {
 }
 
 object Ribs extends LeafSite {
-  override val ghm: String = "ribs"
+  override val ghm: String = "Ribs"
   override val codesCIM10: List[String] = List("S222", "S223", "S224", "S225")
 }
 
 object Rachis extends LeafSite {
-  override val ghm: String = "rachis"
+  override val ghm: String = "Rachis"
   override val codesCIM10: List[String] = List("S120", "S121", "S122", "S127", "S220", "S221", "S320", "T08", "M485")
 }
 
@@ -241,7 +241,7 @@ object Face extends LeafSite {
 }
 
 object RestOfBody extends LeafSite {
-  override val ghm: String = "restOfBody"
+  override val ghm: String = "RestOfBody"
   override val codesCIM10: List[String] = List("M80.-5", "M80.-8", "M80.-9", "M80.-0")
 }
 
