@@ -30,7 +30,7 @@ object DcirMedicalActExtractor extends DcirExtractor[MedicalAct] {
     */
   def getGroupId(r: Row): Try[String] = Try {
 
-    if (!r.isNullAt(r.fieldIndex(ColNames.Sector)) && getSector(r) != 2) {
+    if (!r.isNullAt(r.fieldIndex(ColNames.Sector)) && getSector(r) == 1) {
       DcirAct.groupID.PublicAmbulatory
     }
     else {
