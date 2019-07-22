@@ -19,8 +19,8 @@ class OperationReporterSuite extends SharedContext {
     val expected = OperationMetadata(
       "test", List("input"),
       OperationTypes.AnyEvents,
-      Some(Path(path, "test", "data").toString),
-      Some(Path(path, "test", "patients").toString)
+      Path(path, "test", "data").toString,
+      Path(path, "test", "patients").toString
     )
 
     // When
@@ -43,15 +43,15 @@ class OperationReporterSuite extends SharedContext {
 
     // When
     var meta = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path, "overwrite")
-    val result = spark.read.parquet(meta.outputPath.get)
+    val result = spark.read.parquet(meta.outputPath)
     val exception = intercept[Exception] {
       OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path)
     }
     meta = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path, "append")
-    val resultAppend = spark.read.parquet(meta.outputPath.get)
+    val resultAppend = spark.read.parquet(meta.outputPath)
     meta = OperationReporter
       .report("test", List("input"), OperationTypes.AnyEvents, data.toDF, pathWithTimestamp, "withTimestamp")
-    val resultWithTimestamp = spark.read.parquet(meta.outputPath.get)
+    val resultWithTimestamp = spark.read.parquet(meta.outputPath)
 
 
     // Then
@@ -87,8 +87,7 @@ class OperationReporterSuite extends SharedContext {
     val expectedMetadata = OperationMetadata(
       "test", List("input"),
       OperationTypes.Patients,
-      Some(Path(basePath, "test", "data").toString),
-      None
+      Path(basePath, "test", "data").toString
     )
     val expectedData = Seq(("Patient_A", 1), ("Patient_B", 2)).toDF("patientID", "other_col")
 
@@ -111,8 +110,8 @@ class OperationReporterSuite extends SharedContext {
     val expectedMetadata = OperationMetadata(
       "test", List("input"),
       OperationTypes.Sources,
-      None,
-      Some(Path(basePath, "test", "patients").toString)
+      "",
+      Path(basePath, "test", "patients").toString
     )
     val expectedPatients = Seq("Patient_A", "Patient_B").toDF("patientID")
 

@@ -17,7 +17,5 @@ object Config {
         root.toString
       }
     }
-
   }
-
 }
