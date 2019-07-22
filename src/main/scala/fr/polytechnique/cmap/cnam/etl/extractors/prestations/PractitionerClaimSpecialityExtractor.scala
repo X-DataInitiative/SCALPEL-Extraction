@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirExtractor
 
 object MedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerClaimSpeciality] {
   override val columnName: String = ColNames.MSpe
-  override val eventBuilder: EventBuilder = MedicalPractitionerClaim
+  override val category = MedicalPractitionerClaim.category
 
   override def code: Row => String = (row: Row) => row.getAs[Integer](columnName).toString
 
@@ -25,7 +25,7 @@ object MedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerClaim
 
 object NonMedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerClaimSpeciality] {
   override val columnName: String = ColNames.NonMSpe
-  override val eventBuilder: EventBuilder = NonMedicalPractitionerClaim
+  override val category = NonMedicalPractitionerClaim.category
 
   override def code: Row => String = (row: Row) => row.getAs[Integer](columnName).toString
 

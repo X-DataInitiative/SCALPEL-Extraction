@@ -12,7 +12,7 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
 
   val columnName: String
 
-  val eventBuilder: EventBuilder
+  val category :String
 
   def getInput(sources: Sources): DataFrame = sources.dcir.get.select(ColNames.all.map(col): _*)
 
@@ -28,7 +28,7 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
     lazy val endDate = extractEnd(row)
     lazy val weight = extractWeight(row)
 
-    Seq(eventBuilder[EventType](patientId, groupId, code(row), weight, eventDate, endDate))
+    Seq(Event[EventType](patientId, category, groupId, code(row), weight, eventDate, endDate))
   }
 
   def code = (row: Row) => row.getAs[String](columnName)

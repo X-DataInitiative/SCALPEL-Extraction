@@ -7,11 +7,6 @@ import fr.polytechnique.cmap.cnam.util.functions._
 
 class ObservationPeriodTransformerSuite extends SharedContext {
 
-  val testConfig = new ObservationPeriodTransformerConfig(
-    studyStart = LocalDate.of(2006, 1, 1),
-    studyEnd = LocalDate.of(2010, 1, 1)
-  )
-
   "withObservationStart" should "add a column with the start of the observation period" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -35,6 +30,10 @@ class ObservationPeriodTransformerSuite extends SharedContext {
       ("Patient_B", "disease", "Hello World!", makeTS(2007, 1, 1), makeTS(2009, 1, 1))
     ).toDF("patientID", "category", "eventId", "start", "observationStart")
 
+    val testConfig = new ObservationPeriodTransformerConfig(
+      studyStart = LocalDate.of(2006, 1, 1),
+      studyEnd = LocalDate.of(2010, 1, 1)
+    )
     val transformer = new ObservationPeriodTransformer(testConfig)
 
     // When
@@ -64,10 +63,13 @@ class ObservationPeriodTransformerSuite extends SharedContext {
       ObservationPeriod("Patient_B", makeTS(2009, 1, 1), makeTS(2010, 1, 1))
     ).toDS
 
-    val transformer = new ObservationPeriodTransformer(testConfig)
+    val testConfig = new ObservationPeriodTransformerConfig(
+      events = Some(events),
+      studyStart = LocalDate.of(2006, 1, 1),
+      studyEnd = LocalDate.of(2010, 1, 1)
+    )
 
-    // When
-    val result = transformer.transform(events)
+    val result = new ObservationPeriodTransformer(testConfig).transform()
 
     // Then
     assertDSs(result, expected)

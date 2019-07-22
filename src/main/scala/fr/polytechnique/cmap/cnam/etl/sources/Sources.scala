@@ -78,4 +78,11 @@ object Sources {
       dosages = dosagesPath.map(DosagesSource.read(sqlContext, _))
     )
   }
+
+  implicit class SourceReader(sqlContext: SQLContext) {
+
+    def readSources(paths: InputPaths): Sources = {
+      Sources.read(sqlContext, paths)
+    }
+  }
 }

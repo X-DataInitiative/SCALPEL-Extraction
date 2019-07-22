@@ -69,7 +69,6 @@ object FallMainTransform extends Main with FractureCodes {
 
     if (fallConfig.runParameters.exposures) {
       val exposures = {
-        val definition = fallConfig.exposures
         val patientsWithFollowUp = FallStudyFollowUps.transform(
           patients,
           fallConfig.base.studyStart,
@@ -89,7 +88,10 @@ object FallMainTransform extends Main with FractureCodes {
         meta += {
           followUpReport.name -> followUpReport
         }
-        new ExposuresTransformer(definition).transform(patientsWithFollowUp, drugPurchases).cache()
+        val definition : FallConfig.ExposureConfig = fallConfig.exposures.copy(
+          patients = Some(patientsWithFollowUp), dispensations = Some(drugPurchases)
+        )
+        new ExposuresTransformer(definition).transform().cache()
       }
       val exposuresReport = OperationReporter.reportAsDataSet(
         "exposures",

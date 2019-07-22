@@ -5,17 +5,17 @@ import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoExtractor
 
 object MainDiagnosisExtractor extends McoExtractor[Diagnosis] {
   final override val columnName: String = ColNames.DP
-  override val eventBuilder: EventBuilder = MainDiagnosis
+  override val category = MainDiagnosis.category
 }
 
 
 object AssociatedDiagnosisExtractor extends McoExtractor[Diagnosis] {
   final override val columnName: String = ColNames.DA
-  override val eventBuilder: EventBuilder = AssociatedDiagnosis
+  override val category = AssociatedDiagnosis.category
 }
 
 
 object LinkedDiagnosisExtractor extends McoExtractor[Diagnosis] {
   final override val columnName: String = ColNames.DR
-  override val eventBuilder: EventBuilder = LinkedDiagnosis
+  override val category = LinkedDiagnosis.category
 }

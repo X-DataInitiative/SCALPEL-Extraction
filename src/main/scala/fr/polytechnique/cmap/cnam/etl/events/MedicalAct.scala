@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.events
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
 
-trait MedicalAct extends AnyEvent with EventBuilder {
+trait MedicalAct extends AnyEvent {
 
   override val category: EventCategory[MedicalAct]
 

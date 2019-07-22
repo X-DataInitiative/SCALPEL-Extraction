@@ -3,9 +3,8 @@ package fr.polytechnique.cmap.cnam.etl.events
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
 
-object Exposure extends Exposure
+trait Exposure extends AnyEvent {
 
-trait Exposure extends AnyEvent with EventBuilder {
 
   val category: EventCategory[Exposure] = "exposure"
 
@@ -30,3 +29,5 @@ trait Exposure extends AnyEvent with EventBuilder {
     patientID: String, molecule: String, weight: Double, start: Timestamp, end: Timestamp
   ): Event[Exposure] = Event(patientID, category, groupID = "NA", molecule, weight, start, Some(end))
 }
+
+object Exposure extends Exposure

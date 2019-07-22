@@ -3,9 +3,8 @@ package fr.polytechnique.cmap.cnam.etl.events
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
 
-object Drug extends Drug
 
-trait Drug extends Dispensation with EventBuilder {
+trait Drug extends Dispensation {
 
   override val category: EventCategory[Drug] = "drug"
 
@@ -27,3 +26,5 @@ trait Drug extends Dispensation with EventBuilder {
   def apply(patientID: String, name: String, dosage: Double, date: Timestamp): Event[Drug] =
     Event(patientID, category, groupID = "NA", name, dosage, date, None)
 }
+
+object Drug extends Drug

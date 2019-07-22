@@ -5,7 +5,7 @@ import org.apache.spark.sql.Row
 
 object Outcome extends Outcome
 
-trait Outcome extends AnyEvent with EventBuilder {
+trait Outcome extends AnyEvent {
 
   override val category: EventCategory[Outcome] = "outcome"
 

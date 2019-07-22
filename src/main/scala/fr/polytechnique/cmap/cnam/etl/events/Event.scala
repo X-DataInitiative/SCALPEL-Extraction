@@ -1,6 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.events
 
 import java.sql.Timestamp
+import org.apache.spark.sql.functions._
 
 // Check AnyEvent.scala for available event types
 case class Event[+A <: AnyEvent](
@@ -27,10 +28,16 @@ case class Event[+A <: AnyEvent](
   def checkValueStart(category: String, values: Seq[String]): Boolean = {
     this.category == category && values.exists(this.value.startsWith(_))
   }
+
+  def isValid() : Boolean = {
+    end match {
+      case Some(d) => start.before(d)
+      case None => false
+    }
+  }
 }
 
 object Event {
-
   object Columns {
     val PatientID = "patientID"
     val Category = "category"
@@ -40,6 +47,4 @@ object Event {
     val Start = "start"
     val End = "end"
   }
-
 }
-

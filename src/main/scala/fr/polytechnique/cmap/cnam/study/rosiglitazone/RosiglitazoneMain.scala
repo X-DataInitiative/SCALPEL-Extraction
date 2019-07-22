@@ -1,9 +1,16 @@
 package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
+import me.danielpes.spark.datetime.Period
+import java.io.PrintWriter
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.Dataset
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
+import fr.polytechnique.cmap.cnam.etl.transformers.observation._
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up._
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Diagnosis, Event, Molecule}
 import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
@@ -113,7 +120,7 @@ object RosiglitazoneMain extends Main {
     }
 
     // Extract Follow-up
-    val followups = {
+    val followups : Dataset[Event[FollowUp]] = {
       //Extract Trackloss
       val tracklosses = {
         val tracklossConfig = TracklossesConfig(studyEnd = config.base.studyEnd)
@@ -131,20 +138,27 @@ object RosiglitazoneMain extends Main {
           )
       }
 
-      val observations = {
+      val observations : Dataset[Event[ObservationPeriod]] = {
         val allEvents: Dataset[Event[AnyEvent]] = unionDatasets(
           drugPurchases.as[Event[AnyEvent]],
           diagnoses.as[Event[AnyEvent]]
         )
-        new ObservationPeriodTransformer(config.observationPeriod).transform(allEvents).cache()
+        val os : Dataset[Event[ObservationPeriod]] = new ObservationPeriodTransformer(
+          config.observationPeriod.copy(events = Some(allEvents))).transform()
+        os.cache()
+        os
       }
 
       val patientsWithObservations = patients
         .joinWith(observations, patients.col("patientId") === observations.col("patientId"))
 
-      val cachedFollowups = new FollowUpTransformer(config.followUp)
-        .transform(patientsWithObservations, drugPurchases, outcomes, tracklosses)
-        .cache()
+
+      val followup_config = config.followUp.copy(
+        patients = Some(patientsWithObservations), dispensations = Some(drugPurchases),
+        outcomes = Some(outcomes), tracklosses = Some(tracklosses)
+      )
+      val cachedFollowups = new FollowUpTransformer(followup_config)
+        .transform().cache()
 
       operationsMetadata += {
         OperationReporter
@@ -212,9 +226,8 @@ object RosiglitazoneMain extends Main {
     // Extract Exposures
     val exposures = {
       val patientsWithFollowups = patients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
-      val exposureConfig = ExposuresTransformerConfig()
-      new ExposuresTransformer(exposureConfig)
-        .transform(patientsWithFollowups, drugPurchases)
+      val exposureConfig = ExposuresTransformerConfig(Some(patientsWithFollowups), Some(drugPurchases))
+      new ExposuresTransformer(exposureConfig).transform()
     }
     operationsMetadata += {
       OperationReporter

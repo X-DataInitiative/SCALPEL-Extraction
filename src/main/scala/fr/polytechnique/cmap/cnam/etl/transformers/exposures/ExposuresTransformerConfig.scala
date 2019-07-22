@@ -1,8 +1,13 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
+import fr.polytechnique.cmap.cnam.etl.events.{Dispensation, Event, Exposure}
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.transformers._
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import me.danielpes.spark.datetime.Period
 import me.danielpes.spark.datetime.implicits._
-import fr.polytechnique.cmap.cnam.etl.transformers.TransformerConfig
 
 /**
   * A class to represent the exposure we want to generate from the data
@@ -35,7 +40,9 @@ import fr.polytechnique.cmap.cnam.etl.transformers.TransformerConfig
   *
   * purchaseIntervals         List of consumption levels in mg / put only 0 when we want all the weights to 1
   */
-class ExposuresTransformerConfig(
+class ExposuresTransformerConfig[Disp <: Dispensation](
+  val patients: Option[Dataset[(Patient, Event[FollowUp])]] = None,
+  val dispensations: Option[Dataset[Event[Disp]]] = None,
   val startDelay: Period,
   val minPurchases: Int,
   val purchasesWindow: Period,
@@ -53,27 +60,30 @@ class ExposuresTransformerConfig(
   val dosageLevelIntervals: Option[List[Int]],
   val purchaseIntervals: Option[List[Int]]) extends TransformerConfig
 
-object ExposuresTransformerConfig {
+object ExposuresTransformerConfig{
 
-  def apply(
-    startDelay: Period = 3.months,
-    minPurchases: Int = 2,
-    purchasesWindow: Period = 6.months,
+  def apply[Disp <: Dispensation] (
+      patients: Option[Dataset[(Patient, Event[FollowUp])]] = None,
+      dispensations: Option[Dataset[Event[Disp]]] = None,
+      startDelay: Period = 3.months,
+      minPurchases: Int = 2,
+      purchasesWindow: Period = 6.months,
+      periodStrategy: ExposurePeriodStrategy = ExposurePeriodStrategy.Unlimited,
+      endThresholdGc: Option[Period] = Some(3.months),
+      endThresholdNgc: Option[Period] = Some(1.months),
+      endDelay: Option[Period] = Some(0.months),
+      weightAggStrategy: WeightAggStrategy = WeightAggStrategy.NonCumulative,
+      cumulativeExposureWindow: Option[Int] = Some(1),
+      cumulativeStartThreshold: Option[Int] = Some(6),
+      cumulativeEndThreshold: Option[Int] = Some(4),
+      dosageLevelIntervals: Option[List[Int]] = Some(List(0, 100, 200, 300, 400, 500)),
+      purchaseIntervals: Option[List[Int]] = Some(List(0, 3, 5)))
+    : ExposuresTransformerConfig[Disp] = {
 
-    periodStrategy: ExposurePeriodStrategy = ExposurePeriodStrategy.Unlimited,
-    endThresholdGc: Option[Period] = Some(3.months),
-    endThresholdNgc: Option[Period] = Some(1.months),
-    endDelay: Option[Period] = Some(0.months),
+    new ExposuresTransformerConfig[Disp] (
+      patients,
+      dispensations,
 
-    weightAggStrategy: WeightAggStrategy = WeightAggStrategy.NonCumulative,
-    cumulativeExposureWindow: Option[Int] = Some(1),
-    cumulativeStartThreshold: Option[Int] = Some(6),
-    cumulativeEndThreshold: Option[Int] = Some(4),
-    dosageLevelIntervals: Option[List[Int]] = Some(List(0, 100, 200, 300, 400, 500)),
-    purchaseIntervals: Option[List[Int]] = Some(List(0, 3, 5)))
-  : ExposuresTransformerConfig = {
-
-    new ExposuresTransformerConfig(
       startDelay,
       minPurchases,
       purchasesWindow,
@@ -92,4 +102,3 @@ object ExposuresTransformerConfig {
     )
   }
 }
-
