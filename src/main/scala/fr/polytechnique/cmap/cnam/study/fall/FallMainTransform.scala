@@ -33,7 +33,7 @@ object FallMainTransform extends Main with FractureCodes {
     val metadataJson: String = metadata.toJsonString()
 
     OperationReporter
-      .writeMetaData(metadataJson, "metadata_fall_" + format.format(startTimestamp) + ".json", argsMap("env"))
+      .writeMetaData(metadataJson, "metadata_fall.json", argsMap("env"))
     None
   }
 

@@ -35,10 +35,7 @@ object FallMain extends Main with FractureCodes {
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
 
-    val operationsMetadata = computeHospitalStays(sources, fallConfig) ++ computeOutcomes(
-      sources,
-      fallConfig
-    ) ++ computeExposures(sources, fallConfig)
+    val operationsMetadata = computeExposures(sources, fallConfig)
 
     dcir.unpersist()
     mco.unpersist()
@@ -153,6 +150,33 @@ object FallMain extends Main with FractureCodes {
               fallConfig.output.saveMode
             )
         }
+        val controlDrugPurchases = ControlDrugs.extract(sources).cache()
+        operationsMetadata += {
+          OperationReporter
+            .report(
+              "control_drugs_purchases",
+              List("DCIR"),
+              OperationTypes.Dispensations,
+              controlDrugPurchases.toDF,
+              Path(fallConfig.output.outputSavePath),
+              fallConfig.output.saveMode
+            )
+        }
+
+        val controlDrugExposures = new ExposuresTransformer(definition)
+          .transform(patientsWithFollowUp, controlDrugPurchases)
+        operationsMetadata += {
+          OperationReporter
+            .report(
+              "control_drugs_exposures",
+              List("control_drugs_purchases", "follow_up"),
+              OperationTypes.Exposures,
+              controlDrugExposures.toDF,
+              Path(fallConfig.output.outputSavePath),
+              fallConfig.output.saveMode
+            )
+        }
+
         new ExposuresTransformer(definition).transform(patientsWithFollowUp, optionDrugPurchases.get)
       }
       operationsMetadata += {
@@ -244,6 +268,76 @@ object FallMain extends Main with FractureCodes {
       }
     }
 
+    operationsMetadata
+  }
+
+  def computeControls(sources: Sources, fallConfig: FallConfig): mutable.Buffer[OperationMetadata] = {
+    val operationsMetadata = mutable.Buffer[OperationMetadata]()
+
+    val opioids = OpioidsExtractor.extract(sources).cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "Opioids",
+          List("DCIR"),
+          OperationTypes.Dispensations,
+          opioids.toDF,
+          Path(fallConfig.output.outputSavePath),
+          fallConfig.output.saveMode
+        )
+    }
+
+    val ipp = IPPExtractor.extract(sources).cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "IPP",
+          List("DCIR"),
+          OperationTypes.Dispensations,
+          ipp.toDF,
+          Path(fallConfig.output.outputSavePath),
+          fallConfig.output.saveMode
+        )
+    }
+
+    val cardiac = CardiacExtractor.extract(sources).cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "Cardiac",
+          List("DCIR"),
+          OperationTypes.Dispensations,
+          cardiac.toDF,
+          Path(fallConfig.output.outputSavePath),
+          fallConfig.output.saveMode
+        )
+    }
+
+    val epileptics = EpilepticsExtractor.extract(sources).cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "Epileptics",
+          List("MCO", "IMB"),
+          OperationTypes.Diagnosis,
+          epileptics.toDF,
+          Path(fallConfig.output.outputSavePath),
+          fallConfig.output.saveMode
+        )
+    }
+
+    val hta = HTAExtractor.extract(sources).cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "HTA",
+          List("DCIR"),
+          OperationTypes.Dispensations,
+          hta.toDF,
+          Path(fallConfig.output.outputSavePath),
+          fallConfig.output.saveMode
+        )
+    }
     operationsMetadata
   }
 }
