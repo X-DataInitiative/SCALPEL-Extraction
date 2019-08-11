@@ -1,8 +1,7 @@
 package fr.polytechnique.cmap.cnam.study.bulk
 
 import java.io.PrintWriter
-import scala.collection.mutable
-import org.apache.spark.sql.{Dataset, SQLContext}
+
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirMedicalActExtractor, McoCcamActExtractor, McoCeActExtractor, McoCimMedicalActExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GhmExtractor
@@ -12,15 +11,19 @@ import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtr
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.study.dreesChronic.extractors.PractitionnerClaimSpecialityExtractor
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
+import org.apache.spark.sql.{Dataset, SQLContext}
+
+import scala.collection.mutable
 
 object BulkMain extends Main {
   override def appName: String = "BulkMain"
 
   override def run(
-    sqlContext: SQLContext,
-    argsMap: Map[String, String]): Option[Dataset[_]] = {
+                    sqlContext: SQLContext,
+                    argsMap: Map[String, String]): Option[Dataset[_]] = {
 
 
     val format = new java.text.SimpleDateFormat("yyyy_MM_dd_HH_mm_ss")
@@ -60,8 +63,20 @@ object BulkMain extends Main {
         )
     }
 
-    val dcirMedicalAct = DcirMedicalActExtractor.extract(sources, Set.empty).cache()
+    val prestations = new PractitionnerClaimSpecialityExtractor(bulkConfig.practionnerClaimSpeciality).extract(sources).cache()
 
+    operationsMetadata += {
+      OperationReporter.report(
+        "practionner_specialities",
+        List("DCIR"),
+        OperationTypes.PractitionnerClaimSpecialities,
+        prestations.toDF,
+        Path(bulkConfig.output.outputSavePath),
+        bulkConfig.output.saveMode
+      )
+    }
+
+    val dcirMedicalAct = DcirMedicalActExtractor.extract(sources, Set.empty).cache()
     operationsMetadata += {
       OperationReporter.report(
         "DCIRMedicalAct",
