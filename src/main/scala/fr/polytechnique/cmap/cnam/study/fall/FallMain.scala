@@ -317,7 +317,7 @@ object FallMain extends Main with FractureCodes {
     operationsMetadata += {
       OperationReporter
         .report(
-          "Epileptics",
+          "epileptics",
           List("MCO", "IMB"),
           OperationTypes.Diagnosis,
           epileptics.toDF,

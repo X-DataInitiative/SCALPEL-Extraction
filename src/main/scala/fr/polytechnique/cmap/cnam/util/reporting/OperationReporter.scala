@@ -1,11 +1,10 @@
 package fr.polytechnique.cmap.cnam.util.reporting
 
 import java.io.PrintWriter
-
-import fr.polytechnique.cmap.cnam.util.Path
-import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 import org.apache.log4j.Logger
 import org.apache.spark.sql.{DataFrame, Dataset, SaveMode}
+import fr.polytechnique.cmap.cnam.util.Path
+import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 
 /**
   * Singleton responsible for reporting an operation execution.
@@ -34,13 +33,13 @@ object OperationReporter {
     * @return an instance of OperationMetadata
     */
   def report(
-              operationName: String,
-              operationInputs: List[String],
-              outputType: OperationType,
-              data: DataFrame,
-              basePath: Path,
-              saveMode: String = "errorIfExists",
-              patientIdColName: String = "patientID"): OperationMetadata = {
+    operationName: String,
+    operationInputs: List[String],
+    outputType: OperationType,
+    data: DataFrame,
+    basePath: Path,
+    saveMode: String = "errorIfExists",
+    patientIdColName: String = "patientID"): OperationMetadata = {
 
     val dataPath: Path = Path(basePath, operationName, "data")
     val dataPathStr = dataPath.toString
@@ -75,13 +74,13 @@ object OperationReporter {
   }
 
   def reportAsDataSet[A](
-                          operationName: String,
-                          operationInputs: List[String],
-                          outputType: OperationType,
-                          data: Dataset[A],
-                          basePath: Path,
-                          saveMode: String = "errorIfExists",
-                          patientIdColName: String = "patientID"): OperationMetadata = {
+    operationName: String,
+    operationInputs: List[String],
+    outputType: OperationType,
+    data: Dataset[A],
+    basePath: Path,
+    saveMode: String = "errorIfExists",
+    patientIdColName: String = "patientID"): OperationMetadata = {
 
     val dataPath: Path = Path(basePath, operationName, "data")
     val dataPathStr = dataPath.toString

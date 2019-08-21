@@ -1,5 +1,7 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
+import scala.collection.mutable
+import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.DcirAct
 import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
@@ -12,9 +14,6 @@ import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.extractors._
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.reporting._
-import org.apache.spark.sql.{Dataset, SQLContext}
-
-import scala.collection.mutable
 
 object FallMainExtract extends Main with FractureCodes {
 
@@ -28,6 +27,7 @@ object FallMainExtract extends Main with FractureCodes {
     val mco = sources.mco.get.repartition(4000).persist()
     val meta = mutable.HashMap[String, OperationMetadata]()
     computeHospitalStays(meta, sources, fallConfig)
+    computeControls(meta, sources, fallConfig)
     computeOutcomes(meta, sources, fallConfig)
     computeExposures(meta, sources, fallConfig)
     OperationMetadata.serialize(argsMap("meta_bin"), meta)
@@ -70,6 +70,19 @@ object FallMainExtract extends Main with FractureCodes {
               List("DCIR"),
               OperationTypes.Dispensations,
               drugPurchases,
+              Path(fallConfig.output.outputSavePath),
+              fallConfig.output.saveMode
+            )
+      }
+      val controlDrugPurchases = ControlDrugs.extract(sources).cache()
+      meta += {
+        "control_drugs_purchases" ->
+          OperationReporter
+            .reportAsDataSet(
+              "control_drugs_purchases",
+              List("DCIR"),
+              OperationTypes.Dispensations,
+              controlDrugPurchases,
               Path(fallConfig.output.outputSavePath),
               fallConfig.output.saveMode
             )
@@ -143,5 +156,82 @@ object FallMainExtract extends Main with FractureCodes {
       }
     }
     meta
+  }
+
+  def computeControls(
+    meta: mutable.HashMap[String, OperationMetadata],
+    sources: Sources,
+    fallConfig: FallConfig): mutable.Buffer[OperationMetadata] = {
+    val operationsMetadata = mutable.Buffer[OperationMetadata]()
+
+    val opioids = OpioidsExtractor.extract(sources).cache()
+    meta += {
+      "opioids" -> {
+        OperationReporter
+          .report(
+            "opioids",
+            List("DCIR"),
+            OperationTypes.Dispensations,
+            opioids.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
+      }
+    }
+
+    val ipp = IPPExtractor.extract(sources).cache()
+    meta += {
+      "IPP" -> OperationReporter
+        .report(
+          "IPP",
+          List("DCIR"),
+          OperationTypes.Dispensations,
+          ipp.toDF,
+          Path(fallConfig.output.outputSavePath),
+          fallConfig.output.saveMode
+        )
+    }
+
+    val cardiac = CardiacExtractor.extract(sources).cache()
+    meta += {
+      "cardiac" -> OperationReporter
+        .report(
+          "cardiac",
+          List("DCIR"),
+          OperationTypes.Dispensations,
+          cardiac.toDF,
+          Path(fallConfig.output.outputSavePath),
+          fallConfig.output.saveMode
+        )
+    }
+
+    val epileptics = EpilepticsExtractor.extract(sources).cache()
+    meta += {
+      "epileptics" ->
+        OperationReporter
+          .report(
+            "epileptics",
+            List("MCO", "IMB"),
+            OperationTypes.Diagnosis,
+            epileptics.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
+    }
+
+    val hta = HTAExtractor.extract(sources).cache()
+    meta += {
+      "HTA" ->
+        OperationReporter
+          .report(
+            "HTA",
+            List("DCIR"),
+            OperationTypes.Dispensations,
+            hta.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
+    }
+    operationsMetadata
   }
 }

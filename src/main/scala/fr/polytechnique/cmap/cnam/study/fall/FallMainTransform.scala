@@ -1,5 +1,7 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
+import scala.collection.mutable
+import org.apache.spark.sql.{Dataset, SQLContext, SparkSession}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
@@ -12,9 +14,6 @@ import fr.polytechnique.cmap.cnam.study.fall.fractures.FracturesTransformer
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting._
-import org.apache.spark.sql.{Dataset, SQLContext, SparkSession}
-
-import scala.collection.mutable
 
 object FallMainTransform extends Main with FractureCodes {
 
@@ -29,7 +28,12 @@ object FallMainTransform extends Main with FractureCodes {
     transformOutcomes(operationsMetadata, fallConfig)
 
     // Write Metadata
-    val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.values.toList)
+    val metadata = MainMetadata(
+      this.getClass.getName,
+      startTimestamp,
+      new java.util.Date(),
+      operationsMetadata.values.toList
+    )
     val metadataJson: String = metadata.toJsonString()
 
     OperationReporter
@@ -38,7 +42,7 @@ object FallMainTransform extends Main with FractureCodes {
   }
 
   def transformExposures(meta: mutable.Map[String, OperationMetadata], fallConfig: FallConfig):
-      mutable.Map[String, OperationMetadata] = {
+  mutable.Map[String, OperationMetadata] = {
 
     val spark = SparkSession.builder.getOrCreate()
     import spark.implicits._
@@ -47,6 +51,8 @@ object FallMainTransform extends Main with FractureCodes {
       .as[Patient].cache()
     val drugPurchases: Dataset[Event[Drug]]
     = spark.read.parquet(meta.get("drug_purchases").get.outputPath)
+      .as[Event[Drug]].cache()
+    val controlDrugPurchases = spark.read.parquet(meta.get("control_drugs_purchases").get.outputPath)
       .as[Event[Drug]].cache()
 
     if (fallConfig.runParameters.startGapPatients) {
@@ -89,6 +95,20 @@ object FallMainTransform extends Main with FractureCodes {
         meta += {
           followUpReport.name -> followUpReport
         }
+        val controlDrugExposures = new ExposuresTransformer(definition)
+          .transform(patientsWithFollowUp, controlDrugPurchases)
+        meta += {
+          "control_drugs_exposures" ->
+            OperationReporter
+              .report(
+                "control_drugs_exposures",
+                List("control_drugs_purchases", "follow_up"),
+                OperationTypes.Exposures,
+                controlDrugExposures.toDF,
+                Path(fallConfig.output.outputSavePath),
+                fallConfig.output.saveMode
+              )
+        }
         new ExposuresTransformer(definition).transform(patientsWithFollowUp, drugPurchases).cache()
       }
       val exposuresReport = OperationReporter.reportAsDataSet(
@@ -107,7 +127,7 @@ object FallMainTransform extends Main with FractureCodes {
   }
 
   def transformOutcomes(meta: mutable.Map[String, OperationMetadata], fallConfig: FallConfig):
-      mutable.Map[String, OperationMetadata] = {
+  mutable.Map[String, OperationMetadata] = {
 
     val spark = SparkSession.builder.getOrCreate()
     import spark.implicits._
