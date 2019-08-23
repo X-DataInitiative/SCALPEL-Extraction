@@ -1,5 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
+import java.sql.Timestamp
 import scala.util.Try
 import org.apache.spark.sql.{DataFrame, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, EventBuilder, MedicalAct}
@@ -14,7 +15,7 @@ object DcirMedicalActExtractor extends DcirExtractor[MedicalAct] {
 
   override def getInput(sources: Sources): DataFrame = sources.dcir.get.select(
     ColNames.PatientID, ColNames.CamCode, ColNames.Date,
-    ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector
+    ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector, ColNames.DcirFluxDate
   )
 
   override def extractGroupId(r: Row): String = {
@@ -50,6 +51,12 @@ object DcirMedicalActExtractor extends DcirExtractor[MedicalAct] {
       }
     }
   }
+
+  override def extractStart(r: Row): Timestamp = {
+    Try(super.extractStart(r)) recover {
+      case _: NullPointerException => extractFluxDate(r)
+    }
+  }.get
 
   def getGHS(r: Row): Double = r.getAs[Double](ColNames.GHSCode)
 
