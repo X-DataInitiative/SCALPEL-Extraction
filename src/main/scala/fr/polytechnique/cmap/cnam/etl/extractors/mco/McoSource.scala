@@ -14,6 +14,7 @@ trait McoSource extends ColumnNames {
     val DR: ColName = "MCO_B__DGN_REL"
     val DA: ColName = "MCO_D__ASS_DGN"
     val CCAM: ColName = "MCO_A__CDC_ACT"
+    val CCAMDelayDate: ColName = "MCO_A__ENT_DAT_DEL"
     val GHM: ColName = "MCO_B__GRG_GHM"
     val EtaNum: ColName = "ETA_NUM"
     val RsaNum: ColName = "RSA_NUM"
@@ -26,7 +27,7 @@ trait McoSource extends ColumnNames {
     val StartDate: ColName = "EXE_SOI_DTD"
     val EndDate: ColName = "EXE_SOI_DTF"
     val all = List(
-      PatientID, DP, DR, DA, CCAM, GHM, EtaNum, RsaNum, Year, StayEndMonth, StayEndYear, StayLength,
+      PatientID, DP, DR, DA, CCAM, CCAMDelayDate, GHM, EtaNum, RsaNum, Year, StayEndMonth, StayEndYear, StayLength,
       StayStartDate, StayEndDate, StartDate, EndDate
     )
     val hospitalStayPart = List(

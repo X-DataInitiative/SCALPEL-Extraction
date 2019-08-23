@@ -19,7 +19,8 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
   def isInStudy(codes: Set[String])
     (row: Row): Boolean = codes.exists(code(row).startsWith(_))
 
-  def isInExtractorScope(row: Row): Boolean = !row.isNullAt(row.fieldIndex(columnName))
+  def isInExtractorScope(row: Row): Boolean = !row.isNullAt(row.fieldIndex(columnName)) && !row
+    .isNullAt(row.fieldIndex(ColNames.Date))
 
   def builder(row: Row): Seq[Event[EventType]] = {
     lazy val patientId = extractPatientId(row)

@@ -32,6 +32,21 @@ object BulkMain extends Main {
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
+    val ccamMedicalAct = McoCcamActExtractor.extract(sources, Set.empty).cache()
+
+    operationsMetadata += {
+      OperationReporter.report(
+        "CCAM-Medical-Acts",
+        List("MCO"),
+        OperationTypes.MedicalActs,
+        ccamMedicalAct.toDF,
+        Path(bulkConfig.output.outputSavePath),
+        bulkConfig.output.saveMode
+      )
+    }
+
+    ccamMedicalAct.unpersist()
+
     val drugs = new DrugExtractor(bulkConfig.drugs).extract(sources, Set.empty).cache()
 
     operationsMetadata += {
@@ -90,22 +105,6 @@ object BulkMain extends Main {
     }
 
     cimMedicalAct.unpersist()
-
-
-    val ccamMedicalAct = McoCcamActExtractor.extract(sources, Set.empty).cache()
-
-    operationsMetadata += {
-      OperationReporter.report(
-        "CCAM-Medical-Acts",
-        List("MCO"),
-        OperationTypes.MedicalActs,
-        ccamMedicalAct.toDF,
-        Path(bulkConfig.output.outputSavePath),
-        bulkConfig.output.saveMode
-      )
-    }
-
-    ccamMedicalAct.unpersist()
 
 
     val liberalActs = McoCeActExtractor.extract(sources, Set.empty).cache()
