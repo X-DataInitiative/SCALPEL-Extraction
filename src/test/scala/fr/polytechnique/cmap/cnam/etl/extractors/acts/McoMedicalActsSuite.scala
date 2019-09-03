@@ -84,7 +84,8 @@ class McoMedicalActsSuite extends SharedContext {
       McoCCAMAct("Patient_02", "10000123_30000546_2008", "AAAA123", makeTS(2008, 3, 8)),
       McoCCAMAct("Patient_02", "10000123_20000345_2007", "BBBB123", makeTS(2007, 1, 29)),
       McoCCAMAct("Patient_02", "10000123_10000543_2006", "BBBB123", makeTS(2005, 12, 24)),
-      McoCCAMAct("Patient_02", "10000123_30000852_2008", "BBBB123", makeTS(2008, 3, 15))
+      McoCCAMAct("Patient_02", "10000123_30000852_2008", "BBBB123", makeTS(2008, 3, 15)),
+      McoCCAMAct("Patient_02", "10000123_30000852_2008", "QAGA004", makeTS(2008, 3, 15))
     ).toDS
 
     val input = Sources(mco = Some(mco))

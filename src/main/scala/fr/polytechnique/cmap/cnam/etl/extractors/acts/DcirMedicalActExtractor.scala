@@ -21,6 +21,8 @@ object DcirMedicalActExtractor extends DcirExtractor[MedicalAct] {
     getGroupId(r) recover { case _: IllegalArgumentException => DcirAct.groupID.DcirAct }
   }.get
 
+  override def extractWeight(r: Row): Double = 1.0
+
   /**
     * Get the information of the origin of DCIR act that is being extracted. It returns a
     * Failure[IllegalArgumentException] if the DCIR schema is old, a success if the DCIR schema contains an information.

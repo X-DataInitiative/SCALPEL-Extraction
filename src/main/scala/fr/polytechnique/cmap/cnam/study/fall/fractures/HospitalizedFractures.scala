@@ -1,10 +1,11 @@
 package fr.polytechnique.cmap.cnam.study.fall.fractures
 
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{Dataset, SparkSession}
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes.FractureCodes
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.expressions.Window
 
 /*
  * The rules for this Outcome definition can be found on the following page:
@@ -31,12 +32,16 @@ object HospitalizedFractures extends OutcomesTransformer with FractureCodes {
       .map(event => HospitalStayID(event.patientID, event.groupID))
       .distinct()
 
+    val windowsSpec = Window.partitionBy(Event.Columns.PatientID,Event.Columns.GroupID,Event.Columns.Category,Event.Columns.Value,Event.Columns.Start,Event.Columns.End)
+
     filterHospitalStay(correctCIM10Event, incorrectGHMStays)
+      .withColumn("maxweight", max(Event.Columns.Weight) over windowsSpec).filter(col("maxweight") === col(Event.Columns.Weight)).drop("maxweight").toDF().as[Event[Diagnosis]]
       .map(
         event => Outcome(
           event.patientID,
           BodySite.getSiteFromCode(event.value, ghmSites, CodeType.CIM10),
           outcomeName,
+          event.weight,
           event.start
         )
       )

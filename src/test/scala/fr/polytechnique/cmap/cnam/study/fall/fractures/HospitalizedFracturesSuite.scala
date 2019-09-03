@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.study.fall.fractures
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.events.{Outcome, _}
 import fr.polytechnique.cmap.cnam.util.functions._
 
 
@@ -134,6 +134,66 @@ class HospitalizedFracturesSuite extends SharedContext {
 
     // When
     val result = HospitalizedFractures.transform(diagnoses, medicalActs, List(AllSites))
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "transform" should "return correct weight" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val diagnoses = Seq(
+      MainDiagnosis("Pierre", "3", "S02.42", 2.0, makeTS(2017, 7, 18)),
+      MainDiagnosis("Jean", "2", "S02.42", 3.0, makeTS(2017, 7, 18)),
+      MainDiagnosis("Kevin", "4", "S02.42", 4.0, makeTS(2017, 7, 18)),
+      MainDiagnosis("Paul", "1", "S42.54678", 2.0, makeTS(2017, 7, 20)),
+      MainDiagnosis("Paul", "7", "hemorroides", 2.0, makeTS(2017, 1, 2)),
+      AssociatedDiagnosis("Jacques", "8", "qu'est-ce-que tu fais là?", 2.0, makeTS(2017, 7, 18))
+    ).toDS
+
+    val medicalActs = Seq(
+      McoCCAMAct("Paul", "1", "LJGA001", makeTS(2017, 7, 20))
+    ).toDS
+
+    val expected = Seq(
+      Outcome("Pierre", "AllSites", "hospitalized_fall", 2.0, makeTS(2017, 7, 18)),
+      Outcome("Jean", "AllSites", "hospitalized_fall", 3.0, makeTS(2017, 7, 18)),
+      Outcome("Kevin", "AllSites", "hospitalized_fall", 4.0, makeTS(2017, 7, 18))
+    ).toDS
+
+    // When
+    val result = HospitalizedFractures.transform(diagnoses, medicalActs, List(AllSites))
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "transform" should "return max weight" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val diagnoses = Seq(
+      MainDiagnosis("Pierre", "3", "S02.42", 2.0, makeTS(2017, 7, 18)),
+      MainDiagnosis("Jean", "4", "S02.42", 3.0, makeTS(2017, 7, 18)),
+      MainDiagnosis("Jean", "4", "S02.42", 4.0, makeTS(2017, 7, 18)),
+      MainDiagnosis("Paul", "1", "S42.54678", 2.0, makeTS(2017, 7, 20)),
+      MainDiagnosis("Paul", "7", "hemorroides", 2.0, makeTS(2017, 1, 2)),
+      AssociatedDiagnosis("Jacques", "8", "qu'est-ce-que tu fais là?", 2.0, makeTS(2017, 7, 18))
+    ).toDS
+
+    val medicalActs = Seq(
+      McoCCAMAct("Paul", "1", "LJGA001", makeTS(2017, 7, 20))
+    ).toDS
+
+    val expected = Seq(
+      Outcome("Pierre", "AllSites", "hospitalized_fall", 2.0, makeTS(2017, 7, 18)),
+      Outcome("Jean", "AllSites", "hospitalized_fall", 4.0, makeTS(2017, 7, 18))
+    ).toDS
+
+    // When
+    val result = HospitalizedFractures.transform(diagnoses, medicalActs, List(AllSites))
+    result.show()
     // Then
     assertDSs(result, expected)
   }

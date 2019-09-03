@@ -17,12 +17,14 @@ class McoDiagnosesSuite extends SharedContext {
     val sources = Sources(mco = Some(mco))
 
     val expected = Seq[Event[Diagnosis]](
-      MainDiagnosis("Patient_02", "10000123_20000123_2007", "C670", makeTS(2007, 1, 29)),
-      MainDiagnosis("Patient_02", "10000123_20000345_2007", "C671", makeTS(2007, 1, 29)),
-      MainDiagnosis("Patient_02", "10000123_10000987_2006", "C670", makeTS(2005, 12, 29)),
-      MainDiagnosis("Patient_02", "10000123_10000543_2006", "C671", makeTS(2005, 12, 24)),
-      MainDiagnosis("Patient_02", "10000123_30000546_2008", "C670", makeTS(2008, 3, 8)),
-      MainDiagnosis("Patient_02", "10000123_30000852_2008", "C671", makeTS(2008, 3, 15))
+      MainDiagnosis("Patient_02", "10000123_20000123_2007", "C670", 2.0, makeTS(2007, 1, 29)),
+      MainDiagnosis("Patient_02", "10000123_20000345_2007", "C671", 2.0, makeTS(2007, 1, 29)),
+      MainDiagnosis("Patient_02", "10000123_10000987_2006", "C670", 2.0, makeTS(2005, 12, 29)),
+      MainDiagnosis("Patient_02", "10000123_10000543_2006", "C671", 2.0, makeTS(2005, 12, 24)),
+      MainDiagnosis("Patient_02", "10000123_30000546_2008", "C670", 2.0, makeTS(2008, 3, 8)),
+      MainDiagnosis("Patient_02", "10000123_30000852_2008", "C671", 2.0, makeTS(2008, 3, 15)),
+      MainDiagnosis("Patient_02", "10000123_30000852_2008", "C671", 4.0, makeTS(2008, 3, 15)),
+      MainDiagnosis("Patient_02", "10000123_30000852_2008", "C671", 3.0, makeTS(2008, 3, 15))
     ).toDS
 
 
@@ -64,8 +66,8 @@ class McoDiagnosesSuite extends SharedContext {
     val sources = Sources(mco = Some(mco))
 
     val expected = Seq[Event[Diagnosis]](
-      AssociatedDiagnosis("Patient_02", "10000123_20000123_2007", "C66.5", makeTS(2007, 1, 29)),
-      AssociatedDiagnosis("Patient_02", "10000123_10000543_2006", "C66.9", makeTS(2005, 12, 24))
+      AssociatedDiagnosis("Patient_02", "10000123_20000123_2007", "C66.5", 2.0, makeTS(2007, 1, 29)),
+      AssociatedDiagnosis("Patient_02", "10000123_10000543_2006", "C66.9", 2.0, makeTS(2005, 12, 24))
     ).toDS
 
     // When
