@@ -35,7 +35,9 @@ object FallMain extends Main with FractureCodes {
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
 
-    val operationsMetadata = computeExposures(sources, fallConfig)
+    val operationsMetadata = computeControls(sources, fallConfig) ++
+      computeExposures(sources, fallConfig) ++
+      computeOutcomes(sources, fallConfig)
 
     dcir.unpersist()
     mco.unpersist()
