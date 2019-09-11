@@ -9,8 +9,8 @@ import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.Cip13Level
 import fr.polytechnique.cmap.cnam.etl.extractors.prestations.PractitionerClaimSpecialityConfig
 
 case class BulkConfig(
-                       input: StudyConfig.InputPaths,
-                       output: StudyConfig.OutputPaths) extends StudyConfig {
+  input: StudyConfig.InputPaths,
+  output: StudyConfig.OutputPaths) extends StudyConfig {
   val drugs: DrugConfig = BulkConfig.DrugsConfig
   val practionnerClaimSpeciality: PractitionerClaimSpecialityConfig = BulkConfig.PrestationsConfig
   val base: BaseConfig = BulkConfig.BaseConfig

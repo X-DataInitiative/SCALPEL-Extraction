@@ -10,7 +10,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.{Cip13Level, Molecu
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class DrugsExtractorSuite extends SharedContext{
+class DrugsExtractorSuite extends SharedContext {
 
   "extract" should "return all drugs when empty family list is passed" in {
 
@@ -34,14 +34,17 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient8", "3400936889651", 1, makeTS(2014, 9, 1))
     ).toDS
 
-    val source = new Sources(irPha = Some(Seq(
-      (Some("9111111111111"), "toto", "GC"),
-      (Some("3400935183644"), "toto", "GC"),
-      (Some("3400935418487"), "toto", "GC"),
-      (Some("3400936889651"), "toto", "GC")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
-      .withColumn("molecule_combination", lit(""))
-    ), dcir = Some(inputDF))
+    val source = new Sources(
+      irPha = Some(
+        Seq(
+          (Some("9111111111111"), "toto", "GC"),
+          (Some("3400935183644"), "toto", "GC"),
+          (Some("3400935418487"), "toto", "GC"),
+          (Some("3400936889651"), "toto", "GC")
+        ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
+          .withColumn("molecule_combination", lit(""))
+      ), dcir = Some(inputDF)
+    )
 
     val drugConf = DrugConfig(Cip13Level, List.empty)
 
@@ -74,14 +77,17 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient8", "Antidepresseurs", 1, makeTS(2014, 9, 1))
     ).toDS
 
-    val source = new Sources(irPha = Some(Seq(
-      (Some("9111111111111"), "toto", "GC"),
-      (Some("3400935183644"), "toto", "GC"),
-      (Some("3400935418487"), "toto", "GC"),
-      (Some("3400936889651"), "toto", "GC")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
-      .withColumn("molecule_combination", lit(""))
-    ), dcir = Some(inputDF))
+    val source = new Sources(
+      irPha = Some(
+        Seq(
+          (Some("9111111111111"), "toto", "GC"),
+          (Some("3400935183644"), "toto", "GC"),
+          (Some("3400935418487"), "toto", "GC"),
+          (Some("3400936889651"), "toto", "GC")
+        ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
+          .withColumn("molecule_combination", lit(""))
+      ), dcir = Some(inputDF)
+    )
 
     val drugConf = DrugConfig(TherapeuticLevel, List(Antidepresseurs))
 
@@ -108,13 +114,16 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient2", "Neuroleptiques", 2, makeTS(2014, 6, 1))
     ).toDS
 
-    val source = new Sources(irPha = Some(Seq(
-      (Some("9111111111111"), "toto", "NGC"),
-      (Some("3400935183644"), "toto", "NGC"),
-      (Some("3400930023648"), "toto", "NGC")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
-      .withColumn("molecule_combination", lit(""))
-    ), dcir = Some(inputDF))
+    val source = new Sources(
+      irPha = Some(
+        Seq(
+          (Some("9111111111111"), "toto", "NGC"),
+          (Some("3400935183644"), "toto", "NGC"),
+          (Some("3400930023648"), "toto", "NGC")
+        ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
+          .withColumn("molecule_combination", lit(""))
+      ), dcir = Some(inputDF)
+    )
 
     val drugConf = DrugConfig(TherapeuticLevel, List(Neuroleptiques))
     // When
@@ -140,12 +149,15 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient2", "Hypnotiques", 1, makeTS(2014, 7, 1))
     ).toDS
 
-    val source = new Sources(irPha = Some(Seq(
-      (Some("3400930081143"), "toto", "NGC"),
-      (Some("3400936099777"), "toto", "GC")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
-      .withColumn("molecule_combination", lit(""))
-    ), dcir = Some(inputDF))
+    val source = new Sources(
+      irPha = Some(
+        Seq(
+          (Some("3400930081143"), "toto", "NGC"),
+          (Some("3400936099777"), "toto", "GC")
+        ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
+          .withColumn("molecule_combination", lit(""))
+      ), dcir = Some(inputDF)
+    )
 
     val drugConf = DrugConfig(TherapeuticLevel, List(Hypnotiques))
     // When
@@ -171,12 +183,15 @@ class DrugsExtractorSuite extends SharedContext{
     ).toDS
 
 
-    val source = new Sources(irPha = Some(Seq(
-      (Some("3400937354004"), "toto", "GC"),
-      (Some("3400936099777"), "toto", "GC")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
-      .withColumn("molecule_combination", lit(""))
-    ), dcir = Some(inputDF))
+    val source = new Sources(
+      irPha = Some(
+        Seq(
+          (Some("3400937354004"), "toto", "GC"),
+          (Some("3400936099777"), "toto", "GC")
+        ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
+          .withColumn("molecule_combination", lit(""))
+      ), dcir = Some(inputDF)
+    )
 
     val drugConf = DrugConfig(TherapeuticLevel, List(Antihypertenseurs))
 
@@ -212,15 +227,18 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient2", "Neuroleptiques", 1, makeTS(2014, 6, 1))
     ).toDS
 
-    val source = new Sources(irPha = Some(Seq(
-      (Some("9111111111111"), "toto", "GC"),
-      (Some("3400935183644"), "N06AA04", "GC"),
-      (Some("3400935418487"), "A10BB09", "GC"),
-      (Some("3400936889651"), "N06AB03", "GC"),
-      (Some("3400930023648"), "N05AX12", "GC")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
-      .withColumn("molecule_combination", lit(""))
-    ), dcir = Some(inputDF))
+    val source = new Sources(
+      irPha = Some(
+        Seq(
+          (Some("9111111111111"), "toto", "GC"),
+          (Some("3400935183644"), "N06AA04", "GC"),
+          (Some("3400935418487"), "A10BB09", "GC"),
+          (Some("3400936889651"), "N06AB03", "GC"),
+          (Some("3400930023648"), "N05AX12", "GC")
+        ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
+          .withColumn("molecule_combination", lit(""))
+      ), dcir = Some(inputDF)
+    )
 
     val drugConfigAntidepresseurs: DrugClassConfig = Antidepresseurs
     val drugConfigNeuroleptiques: DrugClassConfig = Neuroleptiques
@@ -257,15 +275,18 @@ class DrugsExtractorSuite extends SharedContext{
       Drug("patient2", "Neuroleptiques_Autres_neuroleptiques", 1, makeTS(2014, 6, 1))
     ).toDS
 
-    val source = new Sources(irPha = Some(Seq(
-      (Some("9111111111111"), "toto", "GC"),
-      (Some("3400935183644"), "N06AA04", "GC"),
-      (Some("3400935418487"), "A10BB09", "GC"),
-      (Some("3400936889651"), "N06AB03", "GC"),
-      (Some("3400930023648"), "N05AX12", "GC")
-    ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
-        .withColumn("molecule_combination", lit(""))
-    ), dcir = Some(inputDF))
+    val source = new Sources(
+      irPha = Some(
+        Seq(
+          (Some("9111111111111"), "toto", "GC"),
+          (Some("3400935183644"), "N06AA04", "GC"),
+          (Some("3400935418487"), "A10BB09", "GC"),
+          (Some("3400936889651"), "N06AB03", "GC"),
+          (Some("3400930023648"), "N05AX12", "GC")
+        ).toDF("PHA_CIP_C13", "PHA_ATC_C07", "PHA_CND_TOP")
+          .withColumn("molecule_combination", lit(""))
+      ), dcir = Some(inputDF)
+    )
 
     val drugConfigAntidepresseurs: DrugClassConfig = Antidepresseurs
     val drugConfigNeuroleptiques: DrugClassConfig = Neuroleptiques

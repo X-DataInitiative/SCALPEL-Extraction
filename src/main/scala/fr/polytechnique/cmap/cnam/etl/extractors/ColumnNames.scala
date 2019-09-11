@@ -10,4 +10,5 @@ trait ColumnNames {
   implicit class RichColName(colName: ColName) {
     def toCol: Column = col(colName)
   }
+
 }

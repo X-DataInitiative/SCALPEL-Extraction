@@ -8,7 +8,7 @@ import org.apache.spark.sql.{Column, DataFrame}
   * This filtering is explained here
   * https://datainitiative.atlassian.net/wiki/pages/viewpage.action?pageId=40304642
   */
-object McoSource extends DataSourceManager with McoSourceSanitizer{
+object McoSource extends DataSourceManager with McoSourceSanitizer {
   // MCO & MCO_CE shared columns
   val ETA_NUM: Column = col("ETA_NUM")
   val NIR_RET: Column = col("NIR_RET")

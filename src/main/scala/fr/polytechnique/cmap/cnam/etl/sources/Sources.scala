@@ -17,29 +17,6 @@ case class Sources(
 
 object Sources {
 
-  def read(
-    sqlContext: SQLContext,
-    dcirPath: Option[String] = None,
-    mcoPath: Option[String] = None,
-    mcoCePath: Option[String] = None,
-    hadPath: Option[String] = None,
-    ssrPath: Option[String] = None,
-    irBenPath: Option[String] = None,
-    irImbPath: Option[String] = None,
-    irPhaPath: Option[String] = None,
-    dosagesPath: Option[String] = None): Sources = {
-
-    Sources(
-      dcir = dcirPath.map(DcirSource.read(sqlContext, _)),
-      mco = mcoPath.map(McoSource.read(sqlContext, _)),
-      mcoCe = mcoCePath.map(McoCeSource.read(sqlContext, _)),
-      irBen = irBenPath.map(IrBenSource.read(sqlContext, _)),
-      irImb = irImbPath.map(IrImbSource.read(sqlContext, _)),
-      irPha = irPhaPath.map(IrPhaSource.read(sqlContext, _)),
-      dosages = dosagesPath.map(DosagesSource.read(sqlContext, _))
-    )
-  }
-
   def sanitize(sources: Sources): Sources = {
     sources.copy(
       dcir = sources.dcir.map(DcirSource.sanitize),
@@ -76,6 +53,29 @@ object Sources {
       irImbPath = paths.irImb,
       irPhaPath = paths.irPha,
       dosagesPath = paths.dosages
+    )
+  }
+
+  def read(
+    sqlContext: SQLContext,
+    dcirPath: Option[String] = None,
+    mcoPath: Option[String] = None,
+    mcoCePath: Option[String] = None,
+    hadPath: Option[String] = None,
+    ssrPath: Option[String] = None,
+    irBenPath: Option[String] = None,
+    irImbPath: Option[String] = None,
+    irPhaPath: Option[String] = None,
+    dosagesPath: Option[String] = None): Sources = {
+
+    Sources(
+      dcir = dcirPath.map(DcirSource.read(sqlContext, _)),
+      mco = mcoPath.map(McoSource.read(sqlContext, _)),
+      mcoCe = mcoCePath.map(McoCeSource.read(sqlContext, _)),
+      irBen = irBenPath.map(IrBenSource.read(sqlContext, _)),
+      irImb = irImbPath.map(IrImbSource.read(sqlContext, _)),
+      irPha = irPhaPath.map(IrPhaSource.read(sqlContext, _)),
+      dosages = dosagesPath.map(DosagesSource.read(sqlContext, _))
     )
   }
 }

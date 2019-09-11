@@ -5,7 +5,7 @@ import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.util.functions._
 
 
-class HospitalizedFracturesSuite extends SharedContext{
+class HospitalizedFracturesSuite extends SharedContext {
 
   "isInCodeList" should "return yes if there is a code with the right start" in {
     // Given

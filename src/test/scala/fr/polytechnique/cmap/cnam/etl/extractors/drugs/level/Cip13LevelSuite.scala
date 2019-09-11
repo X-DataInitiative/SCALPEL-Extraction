@@ -11,8 +11,10 @@ class Cip13LevelSuite extends SharedContext {
   private val family = new DrugClassConfig {
     override val name: String = "mock"
     override val cip13Codes: Set[String] = Set("3400930820629")
-    override val pharmacologicalClasses: List[PharmacologicalClassConfig] = List(Mockito
-      .mock(classOf[PharmacologicalClassConfig]))
+    override val pharmacologicalClasses: List[PharmacologicalClassConfig] = List(
+      Mockito
+        .mock(classOf[PharmacologicalClassConfig])
+    )
   }
 
   "isInFamily" should "return false when the Row doesn't belong to the family" in {

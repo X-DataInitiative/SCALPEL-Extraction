@@ -48,13 +48,13 @@ class FracturesTransformerSuite extends SharedContext {
 
     val expectedOutcomes = Seq(
       //hospitalization
-      Outcome("emile", "ribs", "hospitalized_fall", makeTS(2017, 7, 18)),
+      Outcome("emile", "Ribs", "hospitalized_fall", makeTS(2017, 7, 18)),
       //private ambulatory
       Outcome("riri", "FemurExclusionCol", PrivateAmbulatoryFractures.outcomeName, makeTS(2007, 1, 1)),
       //public ambulatory
       Outcome("georgette", "MembreSuperieurDistal", PublicAmbulatoryFractures.outcomeName, makeTS(2010, 2, 6)),
       //liberal
-      Outcome("Pierre", "clavicule", "Liberal", makeTS(2017, 7, 18)),
+      Outcome("Pierre", "Clavicule", "Liberal", makeTS(2017, 7, 18)),
       Outcome("Ben", "MembreSuperieurDistal", "Liberal", makeTS(2017, 7, 18)),
       Outcome("Sam", "CraneFace", "Liberal", makeTS(2015, 7, 18))
 

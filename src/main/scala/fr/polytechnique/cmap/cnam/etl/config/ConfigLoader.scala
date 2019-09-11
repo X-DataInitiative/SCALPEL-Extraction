@@ -40,8 +40,10 @@ trait ConfigLoader {
   }
 
   //For reading DrugClassificationLevels
-  implicit val drugClassificationLevelReader: ConfigReader[DrugClassificationLevel] = ConfigReader[String].map(level =>
-    DrugClassificationLevel.fromString(level))
+  implicit val drugClassificationLevelReader: ConfigReader[DrugClassificationLevel] = ConfigReader[String].map(
+    level =>
+      DrugClassificationLevel.fromString(level)
+  )
 
   /*
    * Internal method for loading and merging the user config file + the default config

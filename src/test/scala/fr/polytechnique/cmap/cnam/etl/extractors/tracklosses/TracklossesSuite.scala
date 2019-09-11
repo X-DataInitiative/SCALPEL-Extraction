@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.tracklosses
 
+import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.Trackloss
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
-import org.apache.spark.sql.DataFrame
 
 class TracklossesSuite extends SharedContext {
 
@@ -14,15 +14,15 @@ class TracklossesSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_01", makeTS(2006,  1,  5)),
-      ("Patient_01", makeTS(2006, 11,  5)),
-      ("Patient_01", makeTS(2007,  2,  5))
+      ("Patient_01", makeTS(2006, 1, 5)),
+      ("Patient_01", makeTS(2006, 11, 5)),
+      ("Patient_01", makeTS(2007, 2, 5))
     ).toDF("patientID", "eventDate")
 
     val expected = Seq(
-      ("Patient_01", makeTS(2006,  1,  5), 10),
-      ("Patient_01", makeTS(2006, 11,  5), 3),
-      ("Patient_01", makeTS(2007,  2,  5), 34)
+      ("Patient_01", makeTS(2006, 1, 5), 10),
+      ("Patient_01", makeTS(2006, 11, 5), 3),
+      ("Patient_01", makeTS(2007, 2, 5), 34)
     ).toDF("patientID", "eventDate", "interval")
 
     // When
@@ -39,14 +39,14 @@ class TracklossesSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("Patient_01", makeTS(2006,  1,  5), 10),
-      ("Patient_01", makeTS(2006, 11,  5), 3),
-      ("Patient_01", makeTS(2007,  2,  5), 34)
+      ("Patient_01", makeTS(2006, 1, 5), 10),
+      ("Patient_01", makeTS(2006, 11, 5), 3),
+      ("Patient_01", makeTS(2007, 2, 5), 34)
     ).toDF("patientID", "eventDate", "interval")
 
-    val expected =  Seq(
-      ("Patient_01", makeTS(2006,  1,  5), 10),
-      ("Patient_01", makeTS(2007,  2,  5), 34)
+    val expected = Seq(
+      ("Patient_01", makeTS(2006, 1, 5), 10),
+      ("Patient_01", makeTS(2007, 2, 5), 34)
     ).toDF("patientID", "eventDate", "interval")
 
     // When
@@ -67,9 +67,9 @@ class TracklossesSuite extends SharedContext {
       ("Patient_01", makeTS(2007, 2, 5), 34)
     ).toDF("patientID", "eventDate", "interval")
 
-    val expected =  Seq(
-      ("Patient_01", makeTS(2006, 1, 5), 10,  makeTS(2006, 3, 5)),
-      ("Patient_01", makeTS(2007, 2, 5), 34,  makeTS(2007, 4, 5))
+    val expected = Seq(
+      ("Patient_01", makeTS(2006, 1, 5), 10, makeTS(2006, 3, 5)),
+      ("Patient_01", makeTS(2007, 2, 5), 34, makeTS(2007, 4, 5))
     ).toDF("patientID", "eventDate", "interval", "tracklossDate")
 
     // When
@@ -98,5 +98,5 @@ class TracklossesSuite extends SharedContext {
 
     // Then
     assertDFs(result.toDF(), expected)
- }
+  }
 }

@@ -39,8 +39,10 @@ private[patients] object McocePatients {
         .cast(IntegerType)
         .as("gender")
 
-      val birthDateCol = estimateBirthDateCol(max("min_event_date"), min("max_event_date"),
-        first("birth_year")).as("birthDate")
+      val birthDateCol = estimateBirthDateCol(
+        max("min_event_date"), min("max_event_date"),
+        first("birth_year")
+      ).as("birthDate")
 
       mce.groupBy("patientID")
         .agg(
@@ -57,13 +59,17 @@ private[patients] object McocePatients {
     minYear: Int,
     maxYear: Int): Dataset[Patient] = {
 
-    val sexCol = when(col("MCO_FASTC__COD_SEX").cast(IntegerType)
-      .between(minGender, maxGender), col("MCO_FASTC__COD_SEX"))
+    val sexCol = when(
+      col("MCO_FASTC__COD_SEX").cast(IntegerType)
+        .between(minGender, maxGender), col("MCO_FASTC__COD_SEX")
+    )
       .cast(IntegerType)
       .as("sex")
 
-    val eventDateCol = when(year(col("EXE_SOI_DTD"))
-      .between(minYear, maxYear), col("EXE_SOI_DTD"))
+    val eventDateCol = when(
+      year(col("EXE_SOI_DTD"))
+        .between(minYear, maxYear), col("EXE_SOI_DTD")
+    )
       .cast(TimestampType)
       .as("event_date")
 

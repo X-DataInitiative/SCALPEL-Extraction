@@ -29,6 +29,6 @@ class NonCumulativeWeightAggSuite extends SharedContext {
 
     // Then
     assertDFs(expected, result)
- }
+  }
 
 }

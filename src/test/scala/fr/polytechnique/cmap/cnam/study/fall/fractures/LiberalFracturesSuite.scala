@@ -18,10 +18,10 @@ class LiberalFracturesSuite extends SharedContext {
       DcirAct("Sam", "3", "4561", makeTS(2015, 7, 18))
     ).toDF.as[Event[MedicalAct]]
     val expected = Seq(
-      Outcome("Pierre", "clavicule", "Liberal", makeTS(2017, 7, 18)),
+      Outcome("Pierre", "Clavicule", "Liberal", makeTS(2017, 7, 18)),
       Outcome("Ben", "MembreSuperieurDistal", "Liberal", makeTS(2017, 7, 18)),
       Outcome("Sam", "CraneFace", "Liberal", makeTS(2015, 7, 18)),
-      Outcome("Sam", "", "Liberal", makeTS(2015, 7, 18))
+      Outcome("Sam", "undefined", "Liberal", makeTS(2015, 7, 18))
     ).toDF.as[Event[Outcome]]
 
     //When

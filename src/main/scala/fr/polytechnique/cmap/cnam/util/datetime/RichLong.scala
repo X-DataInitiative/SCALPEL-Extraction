@@ -4,7 +4,9 @@ package fr.polytechnique.cmap.cnam.util.datetime
 
 private[datetime] class RichLong(val value: Long) extends AnyVal {
 
-  def milliseconds: Period = Period(milliseconds = value)
   def millisecond: Period = this.milliseconds
+
+  def milliseconds: Period = Period(milliseconds = value)
+
   def ms: Period = this.milliseconds
 }

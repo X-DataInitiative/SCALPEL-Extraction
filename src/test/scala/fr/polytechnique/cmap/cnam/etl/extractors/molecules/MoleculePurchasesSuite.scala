@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.molecules
 
-import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
+import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class MoleculePurchasesSuite extends SharedContext {
 
@@ -27,9 +27,7 @@ class MoleculePurchasesSuite extends SharedContext {
       irPha = Some(irPha),
       dosages = Some(dosages)
     )
-    val expected = DcirMoleculePurchases.extract(
-      dcir, irPha, dosages, config.drugClasses, config.maxBoxQuantity
-    ).toDF
+    val expected = new DcirMoleculePurchases(config).extract(sources, config.drugClasses.toSet).toDF
 
     // When
     val result = new MoleculePurchases(config).extract(sources).toDF

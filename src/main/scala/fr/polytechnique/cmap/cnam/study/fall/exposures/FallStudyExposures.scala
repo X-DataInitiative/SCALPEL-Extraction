@@ -23,6 +23,7 @@ object FallStudyExposures {
       cumulativeStartThreshold = Some(0),
       cumulativeEndThreshold = Some(0),
       dosageLevelIntervals = Some(List()),
-      purchaseIntervals = Some(List()))
+      purchaseIntervals = Some(List())
+    )
   }
 }

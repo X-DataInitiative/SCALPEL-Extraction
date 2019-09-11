@@ -42,5 +42,5 @@ class PurchaseBasedWeightAggSuite extends SharedContext {
 
     // Then
     assertDFs(expected, result)
- }
+  }
 }

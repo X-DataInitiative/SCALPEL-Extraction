@@ -80,4 +80,5 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
     val Date = "eventDate"
     val Cip13 = "CIP13"
   }
+
 }

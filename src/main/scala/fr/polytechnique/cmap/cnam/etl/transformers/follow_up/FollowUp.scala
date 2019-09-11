@@ -7,10 +7,12 @@ case class FollowUp(patientID: String, start: Timestamp, end: Timestamp, endReas
 }
 
 object FollowUp {
+
   object Columns {
     final val PatientID = "patientID"
     final val Start = "start"
     final val End = "end"
     final val EndReason = "endReason"
   }
+
 }

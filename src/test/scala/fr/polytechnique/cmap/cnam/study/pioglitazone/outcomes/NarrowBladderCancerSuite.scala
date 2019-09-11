@@ -44,11 +44,11 @@ class NarrowBladderCancerSuite extends SharedContext {
     // Given
     val dpEvent: List[Event[AnyEvent]] = List(
       MainDiagnosis(patientID, hospitalStayID, "C67", date), // true
-      MainDiagnosis(patientID, hospitalStayID, "AAA", date)  // false
+      MainDiagnosis(patientID, hospitalStayID, "AAA", date) // false
     )
     val drEvent: List[Event[AnyEvent]] = List(
       LinkedDiagnosis(patientID, hospitalStayID, "C67", date), // true
-      LinkedDiagnosis(patientID, hospitalStayID, "AAA", date)  // false
+      LinkedDiagnosis(patientID, hospitalStayID, "AAA", date) // false
     )
     val dasWithDp: List[Event[AnyEvent]] = List(
       AssociatedDiagnosis(patientID, hospitalStayID, "C67", date),
@@ -93,11 +93,11 @@ class NarrowBladderCancerSuite extends SharedContext {
     // Given
     val cimAct: List[Event[AnyEvent]] = List(
       McoCIM10Act(patientID, hospitalStayID, "Z510", date), // true
-      McoCIM10Act(patientID, hospitalStayID, "AAAA", date)  // false
+      McoCIM10Act(patientID, hospitalStayID, "AAAA", date) // false
     )
     val camAct: List[Event[AnyEvent]] = List(
       McoCCAMAct(patientID, hospitalStayID, "JDFA001", date), // true
-      McoCCAMAct(patientID, hospitalStayID, "AAAAAAA", date)  // false
+      McoCCAMAct(patientID, hospitalStayID, "AAAAAAA", date) // false
     )
 
     // When|Then
@@ -123,7 +123,7 @@ class NarrowBladderCancerSuite extends SharedContext {
     val events: List[Event[AnyEvent]] = List(
       DcirAct(patientID, dcirGroupID, "YYYY045", date - 5.month), // false
       DcirAct(patientID, dcirGroupID, "YYYY045", date + 1.month), // true
-      DcirAct(patientID, dcirGroupID, "AAAAAAA", date + 1.month)  // false
+      DcirAct(patientID, dcirGroupID, "AAAAAAA", date + 1.month) // false
     )
 
     // When|Then

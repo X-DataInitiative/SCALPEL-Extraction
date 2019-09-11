@@ -27,8 +27,8 @@ class DrugSuite extends SharedContext {
 
     // Given
     val sqlCtx = sqlContext
-    import util.functions.makeTS
     import sqlCtx.implicits._
+    import util.functions.makeTS
 
     val inputDF = Seq(
       ("patientId", "drugName", 0.1, makeTS(2014, 5, 5))

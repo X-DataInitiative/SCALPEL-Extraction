@@ -6,7 +6,7 @@ import fr.polytechnique.cmap.cnam.etl.events.{Event, Outcome}
 import fr.polytechnique.cmap.cnam.study.fall.fractures.FracturesTransformerImplicits._
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class FracturesImplicitsSuite extends SharedContext{
+class FracturesImplicitsSuite extends SharedContext {
   "groupConsecutiveFractures" should "group fractures when the start date is in the same frame" in {
 
     val sqlCtx = sqlContext

@@ -10,7 +10,8 @@ private[patients] object McoPatients {
     col("NUM_ENQ").as("patientID"),
     col("MCO_B__SOR_MOD").as("SOR_MOD"),
     col("SOR_MOI"),
-    col("SOR_ANN"))
+    col("SOR_ANN")
+  )
 
   val outputColumns: List[Column] = List(
     col("patientID"),

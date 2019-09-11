@@ -1,50 +1,40 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.molecules
 
+import java.sql.Timestamp
+import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DoubleType, StringType, TimestampType}
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import org.apache.spark.sql.{Column, DataFrame, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Molecule}
+import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.DrugEventsTransformerHelper
 
-private[molecules] object DcirMoleculePurchases {
+class DcirMoleculePurchases(config: MoleculePurchasesConfig) extends Extractor[Molecule] {
 
-  implicit class DrugsDataFrame(df: DataFrame) {
+  override def isInStudy(codes: Set[String])(row: Row): Boolean =
+    codes.contains(row.getAs[String](Columns.Category))
 
-    def filterBoxQuantities(maxQuantity: Int): DataFrame = {
-      df.where(col("nBoxes") > 0 and col("nBoxes") <= maxQuantity)
-    }
+  override def isInExtractorScope(row: Row): Boolean = !row.isNullAt(row.fieldIndex(Columns.EventDate)) &&
+    row.getAs[Int](Columns.NBoxes) > 0
 
-    def addMoleculesInfo(molecules: DataFrame): DataFrame = {
-      val moleculesDF = broadcast(molecules)
-      val joinedByCIP07 = df
-        .where(col("CIP07").isNotNull)
-        .drop("CIP13")
-        .join(moleculesDF, "CIP07")
 
-      val joinedByCIP13 = df
-        .where(col("CIP07").isNull)
-        .drop("CIP07")
-        .join(moleculesDF, "CIP13")
-        .select(joinedByCIP07.columns.map(col): _*)
+  override def builder(row: Row): Seq[Event[Molecule]] = Seq(
+    Molecule(
+      getPatientID(row),
+      getValue(row),
+      getWeight(row),
+      getEventDate(row)
+    )
+  )
 
-      joinedByCIP07.union(joinedByCIP13)
-    }
-  }
-
-  def extract(
-      dcir: DataFrame,
-      irPha: DataFrame,
-      dosages: DataFrame,
-      drugClasses: List[String],
-      maxBoxQuantity: Int): Dataset[Event[Molecule]] = {
-
-    val sparkSession = dcir.sparkSession
-
+  override def getInput(sources: Sources): DataFrame = {
     val dcirInputColumns: List[Column] = List(
       col("NUM_ENQ").cast(StringType).as("patientID"),
       col("ER_PHA_F__PHA_PRS_IDE").cast(StringType).as("CIP07"),
       col("ER_PHA_F__PHA_PRS_C13").cast(StringType).as("CIP13"),
-      col("ER_PHA_F__PHA_ACT_QSN").as("nBoxes"), // The DCIR parquet must contain this version of the column
+      // The DCIR parquet must contain this version of the column
+      col("ER_PHA_F__PHA_ACT_QSN").as("nBoxes"),
       col("EXE_SOI_DTD").cast(TimestampType).as("eventDate")
     )
 
@@ -60,41 +50,61 @@ private[molecules] object DcirMoleculePurchases {
       col("TOTAL_MG_PER_UNIT").cast(DoubleType).as("dosage")
     )
 
-    val groupCols: List[Column] = List(col("patientID"), col("moleculeName"), col("eventDate"))
+    val groupCols: List[Column] = List(col("patientID"),
+      col("moleculeName"),
+      col("eventDate")
+    )
 
+    val irPha = sources.irPha.get
+    val dosages = sources.dosages.get
     val moleculeMappingUDF = udf(DrugEventsTransformerHelper.moleculeMapping)
+    val molecules = irPha.select(irPhaInputColumns: _*)
+      .join(dosages.select(dosagesInputColumns: _*), Columns.CIP07)
+      .withColumn(Columns.MoleculeName, moleculeMappingUDF(col(Columns.MoleculeName)))
 
-    val moleculesInfo = irPha.select(irPhaInputColumns: _*)
-      .where(col("category").isin(drugClasses: _*)) // Only anti-diabetics
-      .join(broadcast(dosages.select(dosagesInputColumns: _*)), "CIP07")
-      .withColumn("moleculeName", moleculeMappingUDF(col("moleculeName")))
-      .persist()
-
-    val CIP07List = sparkSession.sparkContext.broadcast(
-      moleculesInfo.select("CIP07").distinct.where(col("CIP07").isNotNull).collect.map(_.getString(0))
-    )
-    val CIP13List = sparkSession.sparkContext.broadcast(
-      moleculesInfo.select("CIP13").distinct.where(col("CIP13").isNotNull).collect.map(_.getString(0))
-    )
-
-    val validatedDcir: DataFrame = dcir
+    val df = sources.dcir.get
       .select(dcirInputColumns: _*)
-      .where(col("eventDate").isNotNull)
-      .filterBoxQuantities(maxBoxQuantity)
-      .na.drop("all", Seq("CIP07", "CIP13"))
-      .where(col("CIP07").isin(CIP07List.value: _*) || col("CIP13").isin(CIP13List.value: _*))
-      .persist()
+      .withColumn(Columns.NBoxes, when(col(Columns.NBoxes) < 0, 0)
+        .when(col(Columns.NBoxes) > config.maxBoxQuantity, 0)
+        .otherwise(col(Columns.NBoxes))
+      )
+    // get CIP07 drug
+    val joinedByCIP07 = df
+      .where(col(Columns.CIP07).isNotNull)
+      .drop(Columns.CIP13)
+      .join(molecules, Columns.CIP07)
 
-    import sparkSession.implicits._
-    val result = validatedDcir
-      .addMoleculesInfo(moleculesInfo) // Add molecule name and dosage
-      .withColumn("totalDose", col("dosage") * col("nBoxes")) // Compute total dose
-      .groupBy(groupCols: _*)
-      .agg(sum("totalDose").as("totalDose"))
-      .map(Molecule.fromRow(_, nameCol = "moleculeName", dosageCol = "totalDose"))
+    //get CIP13 drug
+    val joinedByCIP13 = df
+      .where(col(Columns.CIP07).isNull)
+      .drop(Columns.CIP07)
+      .join(molecules, Columns.CIP13)
+      .select(joinedByCIP07.columns.map(col): _*)
 
-    moleculesInfo.unpersist()
-    validatedDcir.unpersist()
-    result
+    val win = Window.partitionBy(groupCols: _*)
+    joinedByCIP07.union(joinedByCIP13)
+      .withColumn(Columns.TotalDose, sum(col(Columns.Dosage) * col(Columns.NBoxes)) over win) // Compute total dose
   }
+
+  def getPatientID(row: Row): String = row.getAs[String](Columns.PatientID)
+
+  def getValue(row: Row): String = row.getAs[String](Columns.MoleculeName)
+
+  def getWeight(row: Row): Double = row.getAs[Double](Columns.TotalDose)
+
+  def getEventDate(row: Row): Timestamp = row.getAs[Timestamp](Columns.EventDate)
+
+  final object Columns extends Serializable {
+    val PatientID = "patientID"
+    val CIP07 = "CIP07"
+    val CIP13 = "CIP13"
+    val NBoxes = "nBoxes"
+    val EventDate = "eventDate"
+    val Category = "category"
+    val MoleculeName = "moleculeName"
+    val Dosage = "dosage"
+    val TotalDose = "totalDose"
+  }
+
 }
+

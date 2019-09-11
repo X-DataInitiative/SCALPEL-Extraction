@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam
 
-import fr.polytechnique.cmap.cnam.util.{Locales, LoggerLevels}
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.{Dataset, SQLContext, SparkSession}
+import fr.polytechnique.cmap.cnam.util.{Locales, LoggerLevels}
 
 trait Main extends LoggerLevels with Locales {
 
@@ -13,22 +13,6 @@ trait Main extends LoggerLevels with Locales {
   @transient private var _spark: SparkSession = _
 
   def sc: SparkContext = _spark.sparkContext
-  def sqlContext: SQLContext = _spark.sqlContext
-  def startContext(): Unit = {
-    if (_spark == null) {
-      _spark = SparkSession
-        .builder()
-        .appName(this.appName)
-        .config("spark.sql.autoBroadcastJoinThreshold", "104857600")
-        .getOrCreate()
-    }
-  }
-  def stopContext(): Unit = {
-    if (_spark != null) {
-      _spark.stop()
-      _spark = null
-    }
-  }
 
   // Expected args are in format "arg1=value1 arg2=value2 ..."
   def main(args: Array[String]): Unit = {
@@ -43,6 +27,26 @@ trait Main extends LoggerLevels with Locales {
     finally stopContext()
   }
 
+  def sqlContext: SQLContext = _spark.sqlContext
+
+  def startContext(): Unit = {
+    if (_spark == null) {
+      _spark = SparkSession
+        .builder()
+        .appName(this.appName)
+        .config("spark.sql.autoBroadcastJoinThreshold", "104857600")
+        .getOrCreate()
+    }
+  }
+
+  def stopContext(): Unit = {
+    if (_spark != null) {
+      _spark.stop()
+      _spark = null
+    }
+  }
+
   def appName: String
+
   def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]]
 }

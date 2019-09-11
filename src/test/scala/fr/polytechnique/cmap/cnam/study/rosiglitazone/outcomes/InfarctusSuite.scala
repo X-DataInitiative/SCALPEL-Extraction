@@ -4,7 +4,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class InfarctusSuite extends SharedContext{
+class InfarctusSuite extends SharedContext {
   "transform" should "return only found I21* or I22* in diagnoses" in {
 
     val sqlCtx = sqlContext

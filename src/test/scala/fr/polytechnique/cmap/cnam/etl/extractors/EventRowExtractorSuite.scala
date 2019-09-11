@@ -8,6 +8,7 @@ class EventRowExtractorSuite extends SharedContext {
 
   object MockRowExtractor extends EventRowExtractor with ColumnNames {
     def extractPatientId(r: Row) = ""
+
     def extractStart(r: Row) = new Timestamp(0)
   }
 

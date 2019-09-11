@@ -29,7 +29,7 @@ class RichSeqSuite extends FlatSpec {
     val truePredicate: (Int) => Boolean = (i: Int) => {
       i % 5 == 0 || i % 2 == 0
     }
-    val falsePredicate: (Int) => Boolean  = (i: Int) =>{
+    val falsePredicate: (Int) => Boolean = (i: Int) => {
       i <= 0 || i > 5
     }
     // When

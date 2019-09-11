@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.mco
 
 import java.sql.Timestamp
-import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.{DataFrame, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder}
 import fr.polytechnique.cmap.cnam.etl.extractors.{EventRowExtractor, Extractor}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
@@ -12,8 +12,6 @@ trait McoExtractor[EventType <: AnyEvent] extends Extractor[EventType] with McoS
   val columnName: String
 
   val eventBuilder: EventBuilder
-
-  def code = (row: Row) => row.getAs[String](columnName)
 
   def getInput(sources: Sources): DataFrame = sources.mco.get.select(ColNames.all.map(col): _*).estimateStayStartTime
 
@@ -31,6 +29,8 @@ trait McoExtractor[EventType <: AnyEvent] extends Extractor[EventType] with McoS
 
     Seq(eventBuilder[EventType](patientId, groupId, code(row), weight, eventDate, endDate))
   }
+
+  def code = (row: Row) => row.getAs[String](columnName)
 
   def extractPatientId(r: Row): String = {
     r.getAs[String](ColNames.PatientID)

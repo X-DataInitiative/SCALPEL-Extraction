@@ -4,7 +4,7 @@ import org.apache.spark.sql.DataFrame
 
 trait McoSourceSanitizer {
 
-  implicit def addMcoSourceSanitizerImplicits(rawMco: DataFrame) : McoFilters = {
+  implicit def addMcoSourceSanitizerImplicits(rawMco: DataFrame): McoFilters = {
     new McoFilters(rawMco)
   }
 }

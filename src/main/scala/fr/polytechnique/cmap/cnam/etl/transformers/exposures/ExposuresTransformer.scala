@@ -52,9 +52,9 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
       .withStartEnd(minPurchases, startDelay, purchasesWindow, endThresholdGc, endThresholdNgc, endDelay)
       .where(col(ExposureStart) =!= col(ExposureEnd)) // This also removes rows where exposureStart = null
       .withColumn(
-        "Correct_Exposure_End",
-        when(col(FollowUpEnd) < col(ExposureEnd), col(FollowUpEnd)).otherwise(col(ExposureEnd))
-      ).drop(ExposureEnd) // This makes sure that all the exposures end at the followup end date
+      "Correct_Exposure_End",
+      when(col(FollowUpEnd) < col(ExposureEnd), col(FollowUpEnd)).otherwise(col(ExposureEnd))
+    ).drop(ExposureEnd) // This makes sure that all the exposures end at the followup end date
       .withColumnRenamed("Correct_Exposure_End", ExposureEnd)
       .aggregateWeight(
         cumulativeExposureWindow,

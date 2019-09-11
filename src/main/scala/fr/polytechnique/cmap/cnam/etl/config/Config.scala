@@ -11,12 +11,11 @@ object Config {
 
     // used to add a ts at the end of the root when the save_mode = "new"
     lazy val outputSavePath: String = {
-      if (saveMode == "withTimestamp")
+      if (saveMode == "withTimestamp") {
         Path(root).withTimestampSuffix().toString
-      else
+      } else {
         root.toString
+      }
     }
-
   }
-
 }

@@ -6,13 +6,15 @@ import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.{DrugClassConfig, PharmacologicalClassConfig}
 
-class TherapeuticSuite extends SharedContext{
+class TherapeuticSuite extends SharedContext {
 
   private val family = new DrugClassConfig {
     override val name: String = "mock"
     override val cip13Codes: Set[String] = Set("3400930820629")
-    override val pharmacologicalClasses: List[PharmacologicalClassConfig] = List(Mockito
-      .mock(classOf[PharmacologicalClassConfig]))
+    override val pharmacologicalClasses: List[PharmacologicalClassConfig] = List(
+      Mockito
+        .mock(classOf[PharmacologicalClassConfig])
+    )
   }
 
   "isInFamily" should "return false when the Row doesn't belong to the family" in {

@@ -18,6 +18,9 @@ object StudyConfig {
     dosages: Option[String] = None)
 
   case class OutputPaths(
-    override val root: String, override val saveMode: String = "errorIfExists") extends Config.OutputPaths(root, saveMode)
+    override val root: String, override val saveMode: String = "errorIfExists") extends Config.OutputPaths(
+    root,
+    saveMode
+  )
 
 }

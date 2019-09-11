@@ -2,8 +2,8 @@ package fr.polytechnique.cmap.cnam.util
 
 import java.text.SimpleDateFormat
 import java.util.Date
-import org.scalatest.FlatSpec
 import org.apache.hadoop.fs.{Path => HDFSPath}
+import org.scalatest.FlatSpec
 
 class PathSuite extends FlatSpec {
 

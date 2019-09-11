@@ -1,13 +1,12 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.tracklosses
 
 import java.sql.Timestamp
-
-import fr.polytechnique.cmap.cnam.etl.events.{Event, Trackloss}
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
+import fr.polytechnique.cmap.cnam.etl.events.{Event, Trackloss}
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class Tracklosses(config: TracklossesConfig) {
 
@@ -18,7 +17,7 @@ class Tracklosses(config: TracklossesConfig) {
     val dcir: DataFrame = sources.dcir.get
 
     import dcir.sqlContext.implicits._
-    dcir.select(inputColumns:_*)
+    dcir.select(inputColumns: _*)
       .filter(col("drug").isNotNull)
       .select(col("patientID"), col("eventDate"))
       .distinct

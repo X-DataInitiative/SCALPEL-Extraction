@@ -19,12 +19,13 @@ class OperationReporterSuite extends SharedContext {
     val expected = OperationMetadata(
       "test", List("input"),
       OperationTypes.AnyEvents,
-      Some(Path(path, "test", "data").toString),
-      Some(Path(path, "test", "patients").toString)
+      Path(path, "test", "data").toString,
+      Path(path, "test", "patients").toString
     )
 
     // When
-    val result: OperationMetadata = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path)
+    val result: OperationMetadata = OperationReporter
+      .report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path)
 
     // Then
     assert(result == expected)
@@ -42,14 +43,15 @@ class OperationReporterSuite extends SharedContext {
 
     // When
     var meta = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path, "overwrite")
-    val result = spark.read.parquet(meta.outputPath.get)
+    val result = spark.read.parquet(meta.outputPath)
     val exception = intercept[Exception] {
       OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path)
     }
     meta = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path, "append")
-    val resultAppend = spark.read.parquet(meta.outputPath.get)
-    meta = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, pathWithTimestamp, "withTimestamp")
-    val resultWithTimestamp = spark.read.parquet(meta.outputPath.get)
+    val resultAppend = spark.read.parquet(meta.outputPath)
+    meta = OperationReporter
+      .report("test", List("input"), OperationTypes.AnyEvents, data.toDF, pathWithTimestamp, "withTimestamp")
+    val resultWithTimestamp = spark.read.parquet(meta.outputPath)
 
 
     // Then
@@ -85,13 +87,13 @@ class OperationReporterSuite extends SharedContext {
     val expectedMetadata = OperationMetadata(
       "test", List("input"),
       OperationTypes.Patients,
-      Some(Path(basePath, "test", "data").toString),
-      None
+      Path(basePath, "test", "data").toString
     )
     val expectedData = Seq(("Patient_A", 1), ("Patient_B", 2)).toDF("patientID", "other_col")
 
     // When
-    val resultMetadata: OperationMetadata = OperationReporter.report("test", List("input"), OperationTypes.Patients, data.toDF, basePath)
+    val resultMetadata: OperationMetadata = OperationReporter
+      .report("test", List("input"), OperationTypes.Patients, data.toDF, basePath)
     val resultData = spark.read.parquet(Path(basePath, "test", "data").toString)
 
     // Then
@@ -108,13 +110,14 @@ class OperationReporterSuite extends SharedContext {
     val expectedMetadata = OperationMetadata(
       "test", List("input"),
       OperationTypes.Sources,
-      None,
-      Some(Path(basePath, "test", "patients").toString)
+      "",
+      Path(basePath, "test", "patients").toString
     )
     val expectedPatients = Seq("Patient_A", "Patient_B").toDF("patientID")
 
     // When
-    val resultMetadata: OperationMetadata = OperationReporter.report("test", List("input"), OperationTypes.Sources, data.toDF, basePath)
+    val resultMetadata: OperationMetadata = OperationReporter
+      .report("test", List("input"), OperationTypes.Sources, data.toDF, basePath)
     val resultPatients = spark.read.parquet(Path(basePath, "test", "patients").toString)
 
     // Then
@@ -127,8 +130,14 @@ class OperationReporterSuite extends SharedContext {
     // Given
     val basePath = Path("target/test/output")
     val data = Seq(("Patient_A", 1), ("Patient_A", 2), ("Patient_B", 3)).toDF("patientID", "other_col")
-    val optionMetadata: OperationMetadata = OperationReporter.report("test", List("input"), OperationTypes.Sources, data.toDF, basePath)
-    val expectedMetadata =  MainMetadata(this.getClass.getName, new java.util.Date(), new java.util.Date(), List(optionMetadata)).toJsonString()
+    val optionMetadata: OperationMetadata = OperationReporter
+      .report("test", List("input"), OperationTypes.Sources, data.toDF, basePath)
+    val expectedMetadata = MainMetadata(
+      this.getClass.getName,
+      new java.util.Date(),
+      new java.util.Date(),
+      List(optionMetadata)
+    ).toJsonString()
 
     // When
     OperationReporter.writeMetaData(expectedMetadata, "metadata_env1.json", "env1")

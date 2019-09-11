@@ -8,14 +8,14 @@ class NonCumulativeWeightAgg(data: DataFrame) extends WeightAggregatorImpl(data)
 
   import Columns._
 
-  private def aggregateWeightImpl = data.withColumn(Weight, lit(1D))
+  def aggregateWeight: DataFrame = aggregateWeight(None, None, None, None, None)
 
   def aggregateWeight(
-      cumWindow: Option[Int],
-      cumStartThreshold: Option[Int],
-      cumEndThreshold: Option[Int],
-      dosageLevelIntervals: Option[List[Int]],
-      purchaseIntervals: Option[List[Int]]): DataFrame = this.aggregateWeightImpl
+    cumWindow: Option[Int],
+    cumStartThreshold: Option[Int],
+    cumEndThreshold: Option[Int],
+    dosageLevelIntervals: Option[List[Int]],
+    purchaseIntervals: Option[List[Int]]): DataFrame = this.aggregateWeightImpl
 
-  def aggregateWeight: DataFrame = aggregateWeight(None, None, None, None, None)
+  private def aggregateWeightImpl = data.withColumn(Weight, lit(1D))
 }

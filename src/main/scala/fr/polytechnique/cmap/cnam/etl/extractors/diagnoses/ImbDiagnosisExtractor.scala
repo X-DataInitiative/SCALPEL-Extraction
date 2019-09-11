@@ -43,4 +43,5 @@ trait ImbSource extends Serializable {
     final lazy val Code = "MED_MTF_COD"
     final lazy val Date = "IMB_ALD_DTD"
   }
+
 }

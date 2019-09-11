@@ -72,7 +72,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
     val expected = "A10000001"
 
     // When
-    val result =  NonMedicalPractitionerClaimExtractor.extractGroupId(row)
+    val result = NonMedicalPractitionerClaimExtractor.extractGroupId(row)
 
     // Then
     assert(result == expected)

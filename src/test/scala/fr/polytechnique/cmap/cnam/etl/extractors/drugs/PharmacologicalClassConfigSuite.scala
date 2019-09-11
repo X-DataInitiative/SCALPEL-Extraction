@@ -4,7 +4,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.PharmacologicalClassConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families.Antidepresseurs
 
-class PharmacologicalClassConfigSuite extends SharedContext{
+class PharmacologicalClassConfigSuite extends SharedContext {
 
   "isCorrect" should "return true when the atcCode is in the ocdeList and is not an exception and the CIP is not an exception" in {
 

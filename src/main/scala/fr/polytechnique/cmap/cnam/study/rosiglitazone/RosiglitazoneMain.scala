@@ -45,7 +45,8 @@ object RosiglitazoneMain extends Main {
     //Extracting Patients
     val patients: Dataset[Patient] = new Patients(config.patients).extract(sources).cache()
     operationsMetadata += {
-      OperationReporter.report("extract_patients",
+      OperationReporter.report(
+        "extract_patients",
         List("DCIR", "MCO", "IR_BEN_R"),
         OperationTypes.Patients,
         patients.toDF(),
@@ -84,12 +85,14 @@ object RosiglitazoneMain extends Main {
 
     val hospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
     operationsMetadata += {
-      OperationReporter.report("extract_hospital_stays",
+      OperationReporter.report(
+        "extract_hospital_stays",
         List("MCO"),
         OperationTypes.HospitalStays,
         hospitalStays.toDF,
         Path(config.output.outputSavePath),
-        config.output.saveMode)
+        config.output.saveMode
+      )
     }
 
     // Extract Heart Problems Outcomes
@@ -182,15 +185,17 @@ object RosiglitazoneMain extends Main {
         }
         delayedFreePatients
       }
-      else
+      else {
         patients
+      }
 
       if (config.filters.filterDiagnosedPatients) {
         filteredPatientsAncestors ++= List("outcomes", "followup")
         firstFilterResult.removeEarlyDiagnosedPatients(outcomes, followups, config.outcomes.outcomeDefinition.toString)
       }
-      else
+      else {
         firstFilterResult
+      }
     }
     operationsMetadata += {
       OperationReporter
@@ -227,7 +232,8 @@ object RosiglitazoneMain extends Main {
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
     val metadataJson: String = metadata.toJsonString()
 
-    OperationReporter.writeMetaData(metadataJson, "metadata_rosiglitazone_" + format.format(startTimestamp) + ".json", argsMap("env"))
+    OperationReporter
+      .writeMetaData(metadataJson, "metadata_rosiglitazone_" + format.format(startTimestamp) + ".json", argsMap("env"))
 
     //unpersist
     patients.unpersist()

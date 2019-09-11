@@ -9,13 +9,12 @@ import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriod
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 
-
 class FollowUpTransformerSuite extends SharedContext {
 
   case class FollowUpTestConfig(
-      override val delayMonths: Int = 2,
-      override val firstTargetDisease: Boolean = true,
-      override val outcomeName: Option[String] = Some("cancer"))
+    override val delayMonths: Int = 2,
+    override val firstTargetDisease: Boolean = true,
+    override val outcomeName: Option[String] = Some("cancer"))
     extends FollowUpTransformerConfig(delayMonths, firstTargetDisease, outcomeName)
 
 
@@ -207,9 +206,21 @@ class FollowUpTransformerSuite extends SharedContext {
 
     // Given
     val patients = Seq(
-      (Patient("Regis", 1, makeTS(1989, 10, 1), None), ObservationPeriod("Regis", makeTS(2006, 1, 1), makeTS(2009, 1, 1))),
-      (Patient("pika", 1, makeTS(1980, 10, 1),  Some(makeTS(2008, 10, 1))), ObservationPeriod("pika", makeTS(2006, 1, 1), makeTS(2009, 1, 1))),
-      (Patient("patient03", 1, makeTS(1980, 10, 1),  Some(makeTS(2010, 10, 1))), ObservationPeriod("pika", makeTS(2006, 1, 1), makeTS(2009, 1, 1)))
+      (Patient("Regis", 1, makeTS(1989, 10, 1), None), ObservationPeriod(
+        "Regis",
+        makeTS(2006, 1, 1),
+        makeTS(2009, 1, 1)
+      )),
+      (Patient("pika", 1, makeTS(1980, 10, 1), Some(makeTS(2008, 10, 1))), ObservationPeriod(
+        "pika",
+        makeTS(2006, 1, 1),
+        makeTS(2009, 1, 1)
+      )),
+      (Patient("patient03", 1, makeTS(1980, 10, 1), Some(makeTS(2010, 10, 1))), ObservationPeriod(
+        "pika",
+        makeTS(2006, 1, 1),
+        makeTS(2009, 1, 1)
+      ))
     ).toDS
 
     val prescriptions = Seq(
@@ -249,9 +260,21 @@ class FollowUpTransformerSuite extends SharedContext {
 
     // Given
     val patients = Seq(
-      (Patient("Regis", 1, makeTS(1989, 10, 1), None), ObservationPeriod("Regis", makeTS(2006, 1, 1), makeTS(2009, 1, 1))),
-      (Patient("pika", 1, makeTS(1980, 10, 1),  Some(makeTS(2008, 10, 1))), ObservationPeriod("pika", makeTS(2006, 1, 1), makeTS(2009, 1, 1))),
-      (Patient("patient03", 1, makeTS(1980, 10, 1),  Some(makeTS(2010, 10, 1))), ObservationPeriod("pika", makeTS(2006, 1, 1), makeTS(2009, 1, 1)))
+      (Patient("Regis", 1, makeTS(1989, 10, 1), None), ObservationPeriod(
+        "Regis",
+        makeTS(2006, 1, 1),
+        makeTS(2009, 1, 1)
+      )),
+      (Patient("pika", 1, makeTS(1980, 10, 1), Some(makeTS(2008, 10, 1))), ObservationPeriod(
+        "pika",
+        makeTS(2006, 1, 1),
+        makeTS(2009, 1, 1)
+      )),
+      (Patient("patient03", 1, makeTS(1980, 10, 1), Some(makeTS(2010, 10, 1))), ObservationPeriod(
+        "pika",
+        makeTS(2006, 1, 1),
+        makeTS(2009, 1, 1)
+      ))
     ).toDS
 
     val prescriptions = Seq(
@@ -291,9 +314,21 @@ class FollowUpTransformerSuite extends SharedContext {
 
     // Given
     val patients = Seq(
-      (Patient("Regis", 1, makeTS(1989, 10, 1), None), ObservationPeriod("Regis", makeTS(2006, 1, 1), makeTS(2009, 1, 1))),
-      (Patient("pika", 1, makeTS(1980, 10, 1),  Some(makeTS(2008, 10, 1))), ObservationPeriod("pika", makeTS(2006, 1, 1), makeTS(2009, 1, 1))),
-      (Patient("patient03", 1, makeTS(1980, 10, 1),  Some(makeTS(2010, 10, 1))), ObservationPeriod("pika", makeTS(2006, 1, 1), makeTS(2009, 1, 1)))
+      (Patient("Regis", 1, makeTS(1989, 10, 1), None), ObservationPeriod(
+        "Regis",
+        makeTS(2006, 1, 1),
+        makeTS(2009, 1, 1)
+      )),
+      (Patient("pika", 1, makeTS(1980, 10, 1), Some(makeTS(2008, 10, 1))), ObservationPeriod(
+        "pika",
+        makeTS(2006, 1, 1),
+        makeTS(2009, 1, 1)
+      )),
+      (Patient("patient03", 1, makeTS(1980, 10, 1), Some(makeTS(2010, 10, 1))), ObservationPeriod(
+        "pika",
+        makeTS(2006, 1, 1),
+        makeTS(2009, 1, 1)
+      ))
     ).toDS
 
     val prescriptions = Seq(
@@ -306,7 +341,7 @@ class FollowUpTransformerSuite extends SharedContext {
 
     val tracklosses = Seq.empty[Event[Trackloss]].toDS
 
-    val outcomes =  Seq.empty[Event[Outcome]].toDS
+    val outcomes = Seq.empty[Event[Outcome]].toDS
     val expected = Seq(
       FollowUp("Regis", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd"),
       FollowUp("pika", makeTS(2006, 3, 1), makeTS(2008, 10, 1), "Death"),

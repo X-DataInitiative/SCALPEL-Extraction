@@ -7,10 +7,10 @@ import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification._
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.{DrugClassificationLevel, TherapeuticLevel}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification._
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.{DrugClassificationLevel, TherapeuticLevel}
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{DrugsConfig, ExposureConfig, FracturesConfig, SitesConfig}
@@ -28,31 +28,28 @@ case class FallConfig(
 
   val base: BaseConfig = FallConfig.BaseConfig
   val medicalActs: MedicalActsConfig = FallConfig.MedicalActsConfig
-  val diagnoses: DiagnosesConfig = DiagnosesConfig(sites.fracturesCodes, sites.fracturesCodes)
+  val diagnoses: DiagnosesConfig = DiagnosesConfig(sites.fracturesCodes, sites.fracturesCodes, daCodes = sites.fracturesCodes)
 }
 
 object FallConfig extends FallConfigLoader with FractureCodes {
 
-  /** Base fixed parameters for this study. */
-  final object BaseConfig extends BaseConfig(
-    ageReferenceDate = LocalDate.of(2014, 1, 1),
-    studyStart = LocalDate.of(2014, 1, 1),
-    studyEnd = LocalDate.of(2017, 1, 1)
-  )
+  /**
+    * Reads a configuration file and merges it with the default file.
+    *
+    * @param path The path of the given file.
+    * @param env  The environment in the config file (usually can be "cmap", "cnam" or "test").
+    * @return An instance of FallConfig containing all parameters.
+    */
+  def load(path: String, env: String): FallConfig = {
+    val defaultPath = "config/fall/default.conf"
+    loadConfigWithDefaults[FallConfig](path, defaultPath, env)
+  }
 
   /** Fixed parameters needed for the Patients extractors. */
   case class PatientsConfig(
     ageReferenceDate: LocalDate = FallConfig.BaseConfig.ageReferenceDate,
     startGapInMonths: Int = 2,
     followupStartDelay: Int = 0)
-
-  /** Fixed parameters needed for the acts extractors. */
-  final object MedicalActsConfig extends MedicalActsConfig(
-    dcirCodes = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList,
-    mcoCECodes = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList,
-    mcoCCAMCodes = List(),
-    mcoCIMCodes = List()
-  )
 
   /** parameters for outcomes transformer **/
   case class FracturesConfig(override val fallFrame: Period = 0.months) extends FracturesTransformerConfig(
@@ -116,15 +113,18 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     val hospitalStays: Boolean = hospitalStay contains "HospitalStay"
   }
 
-  /**
-    * Reads a configuration file and merges it with the default file.
-    *
-    * @param path The path of the given file.
-    * @param env  The environment in the config file (usually can be "cmap", "cnam" or "test").
-    * @return An instance of FallConfig containing all parameters.
-    */
-  def load(path: String, env: String): FallConfig = {
-    val defaultPath = "config/fall/default.conf"
-    loadConfigWithDefaults[FallConfig](path, defaultPath, env)
-  }
+  /** Base fixed parameters for this study. */
+  final object BaseConfig extends BaseConfig(
+    ageReferenceDate = LocalDate.of(2015, 1, 1),
+    studyStart = LocalDate.of(2014, 1, 1),
+    studyEnd = LocalDate.of(2017, 1, 1)
+  )
+
+  /** Fixed parameters needed for the acts extractors. */
+  final object MedicalActsConfig extends MedicalActsConfig(
+    dcirCodes = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList,
+    mcoCECodes = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList,
+    mcoCCAMCodes = CCAMExceptions.toList,
+    mcoCIMCodes = List()
+  )
 }
