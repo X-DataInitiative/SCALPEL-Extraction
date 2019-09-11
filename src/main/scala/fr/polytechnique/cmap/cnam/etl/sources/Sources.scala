@@ -3,13 +3,14 @@ package fr.polytechnique.cmap.cnam.etl.sources
 import java.sql.Timestamp
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.InputPaths
-import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource}
+import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource, SsrSource}
 import fr.polytechnique.cmap.cnam.etl.sources.value.{DosagesSource, IrBenSource, IrImbSource, IrPhaSource}
 
 case class Sources(
   dcir: Option[DataFrame] = None,
   mco: Option[DataFrame] = None,
   mcoCe: Option[DataFrame] = None,
+  ssr: Option[DataFrame] = None,
   irBen: Option[DataFrame] = None,
   irImb: Option[DataFrame] = None,
   irPha: Option[DataFrame] = None,
@@ -22,6 +23,7 @@ object Sources {
       dcir = sources.dcir.map(DcirSource.sanitize),
       mco = sources.mco.map(McoSource.sanitize),
       mcoCe = sources.mcoCe.map(McoCeSource.sanitize),
+      ssr = sources.ssr.map(SsrSource.sanitize),
       irBen = sources.irBen.map(IrBenSource.sanitize),
       irImb = sources.irImb.map(IrImbSource.sanitize),
       irPha = sources.irPha.map(IrPhaSource.sanitize),
@@ -72,6 +74,7 @@ object Sources {
       dcir = dcirPath.map(DcirSource.read(sqlContext, _)),
       mco = mcoPath.map(McoSource.read(sqlContext, _)),
       mcoCe = mcoCePath.map(McoCeSource.read(sqlContext, _)),
+      ssr = ssrPath.map(SsrSource.read(sqlContext, _)),
       irBen = irBenPath.map(IrBenSource.read(sqlContext, _)),
       irImb = irImbPath.map(IrImbSource.read(sqlContext, _)),
       irPha = irPhaPath.map(IrPhaSource.read(sqlContext, _)),
