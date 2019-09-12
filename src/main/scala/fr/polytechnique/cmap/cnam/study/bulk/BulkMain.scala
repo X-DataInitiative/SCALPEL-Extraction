@@ -12,6 +12,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtr
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.study.bulk.extractors.HTAExtractor
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
 
@@ -208,6 +209,18 @@ object BulkMain extends Main {
     }
     patients.unpersist()
 
+    val htas = HTAExtractor.extract(sources).cache()
+    operationsMetadata += {
+      OperationReporter.report(
+        "HTA",
+        List("DCIR"),
+        OperationTypes.Dispensations,
+        htas.toDF,
+        Path(bulkConfig.output.outputSavePath),
+        bulkConfig.output.saveMode
+      )
+    }
+    htas.unpersist()
 
     // Write Metadata
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
