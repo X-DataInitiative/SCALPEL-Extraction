@@ -11,7 +11,7 @@ object StudyConfig {
     mco: Option[String] = None,
     mcoCe: Option[String] = None,
     had: Option[String] = None,
-    ssr: Option[String] = None,
+    ssr: Option[List[String]] = None,
     irBen: Option[String] = None,
     irImb: Option[String] = None,
     irPha: Option[String] = None,

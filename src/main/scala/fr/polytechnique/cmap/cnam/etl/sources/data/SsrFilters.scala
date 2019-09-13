@@ -5,9 +5,11 @@ import org.apache.spark.sql.{Column, DataFrame}
 private[data] class SsrFilters(rawSsr: DataFrame) {
 
   def filterSsrCorruptedHospitalStays: DataFrame = {
-    val fictionalAndFalseHospitalStaysFilter: Column = !SsrSource.GRG_GHM.like("90%") and SsrSource
+    val fictionalAndFalseHospitalStaysFilter: Column = !SsrSource
       .NIR_RET === "0" and SsrSource.SEJ_RET === "0" and SsrSource
-      .FHO_RET === "0" and SsrSource.PMS_RET === "0" and SsrSource.DAT_RET === "0"
+      .FHO_RET === "0" and SsrSource.PMS_RET === "0" and SsrSource
+      .DAT_RET === "0" and SsrSource.NAI_RET === "0" and SsrSource
+      .SEX_RET === "0"
 
     rawSsr.filter(fictionalAndFalseHospitalStaysFilter)
   }

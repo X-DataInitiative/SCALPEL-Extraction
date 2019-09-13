@@ -21,7 +21,7 @@ class SourceReaderSuite extends SharedContext {
     assert(result.schema == expected.schema)
   }
 
-  it should "fail is path is invalid" in {
+  it should "fail if path is invalid" in {
 
     // Given
     val path: String = "src/test/resources/expected/invalid_path.parquet"

@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.sources.data
 
 import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.{Column, DataFrame}
+import org.apache.spark.sql.{Column, DataFrame, SQLContext}
 
 /**
   * Extractor class for the SSR table
@@ -19,16 +19,16 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
   val RHS_ANT_SEJ_ENT: Column = col("RHS_ANT_SEJ_ENT")
   val FP_PEC: Column = col("FP_PEC")
 
-  val NAI_RET: Column = col("SSR_C__NAI_RET")
   val NIR_RET: Column = col("SSR_C__NIR_RET")
-  val SEX_RET: Column = col("SSR_C__SEX_RET")
   val SEJ_RET: Column = col("SSR_C__SEJ_RET")
   val FHO_RET: Column = col("SSR_C__FHO_RET")
   val PMS_RET: Column = col("SSR_C__PMS_RET")
   val DAT_RET: Column = col("SSR_C__DAT_RET")
-  val SOR_DAT: Column = col("SSR_C__SOR_DAT")
   val ENT_DAT: Column = col("SSR_C__ENT_DAT")
+  val SOR_DAT: Column = col("SSR_C__SOR_DAT")
+  val Year: Column = col("year")
 
+  val foreignKeys: List[String] = List("RHA_NUM", "ETA_NUM", "year")
 
   override def sanitize(rawSsr: DataFrame): DataFrame = {
     /**
@@ -37,5 +37,24 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
       */
     rawSsr
       .filterSsrCorruptedHospitalStays
+  }
+
+  def readAnnotateJoin(sqlContext: SQLContext, paths: List[String], joinedTableName: String): DataFrame  = {
+    val ssrSej = sqlContext.read.parquet(paths(0))
+    val ssrC = sqlContext.read.parquet(paths(1))
+    ssrSej.join(
+      ssrC.addPrefix(joinedTableName, foreignKeys), foreignKeys, "left_outer")
+  }
+
+  implicit class TableHelper(df: DataFrame) {
+
+    def addPrefix(prefix: String, except: List[String]): DataFrame = {
+      val renamedColumns = df.columns.map {
+        case colName if !except.contains(colName) => prefix + "__" + colName
+        case keyCol => keyCol
+      }
+
+      df.toDF(renamedColumns: _*)
+    }
   }
 }
