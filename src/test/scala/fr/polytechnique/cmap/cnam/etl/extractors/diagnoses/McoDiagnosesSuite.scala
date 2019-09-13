@@ -27,7 +27,7 @@ class McoDiagnosesSuite extends SharedContext {
 
 
     // When
-    val result = MainDiagnosisExtractor.extract(sources, dpCodes)
+    val result = McoMainDiagnosisExtractor.extract(sources, dpCodes)
 
     // Then
     assertDSs(result, expected)
@@ -48,7 +48,7 @@ class McoDiagnosesSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = LinkedDiagnosisExtractor.extract(sources, linkedCodes)
+    val result = McoLinkedDiagnosisExtractor.extract(sources, linkedCodes)
 
     // Then
     assertDSs(result, expected)
@@ -69,7 +69,7 @@ class McoDiagnosesSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = AssociatedDiagnosisExtractor.extract(sources, associatedDiagnosis)
+    val result = McoAssociatedDiagnosisExtractor.extract(sources, associatedDiagnosis)
 
     // Then
     assertDSs(result, expected)

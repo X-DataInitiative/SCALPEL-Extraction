@@ -168,7 +168,7 @@ object BulkMain extends Main {
 
     classification.unpersist()
 
-    val mainDiag = MainDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val mainDiag = McoMainDiagnosisExtractor.extract(sources, Set.empty).cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -182,7 +182,7 @@ object BulkMain extends Main {
     }
     mainDiag.unpersist()
 
-    val linkedDiag = LinkedDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val linkedDiag = McoLinkedDiagnosisExtractor.extract(sources, Set.empty).cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -196,7 +196,7 @@ object BulkMain extends Main {
     }
     linkedDiag.unpersist()
 
-    val associatedDiag = AssociatedDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val associatedDiag = McoAssociatedDiagnosisExtractor.extract(sources, Set.empty).cache()
     operationsMetadata += {
       OperationReporter.report(
         "AssociatedDiagnosis",

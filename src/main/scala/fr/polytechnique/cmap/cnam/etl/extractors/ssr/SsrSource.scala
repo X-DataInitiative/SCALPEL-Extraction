@@ -21,6 +21,7 @@ trait SsrSource extends ColumnNames {
     val EtaNum: ColName = "ETA_NUM"
     val RhaNum: ColName = "RHA_NUM"
     val RhsNum: ColName = "RHS_NUM"
+    val Year: ColName = "year"
     val StayLength: ColName = "RHS_ANT_SEJ_ENT"
     val StayStartDate: ColName = "SSR_C__ENT_DAT"
     val StayEndDate: ColName = "SSR_C__SOR_DAT"
@@ -53,17 +54,18 @@ trait SsrSource extends ColumnNames {
         val endDate = parseTimestamp(ColNames.StayEndDate.toCol, "ddMMyyyy")
         (endDate.cast(LongType) - timeDelta).cast(TimestampType)
       }
+      /*
       val roughEstimate: Column = (
         unix_timestamp(
           concat_ws("-", ColNames.StayEndYear.toCol, ColNames.StayEndMonth.toCol, lit("01 00:00:00"))
         ).cast(LongType) - timeDelta
-        ).cast(TimestampType)
+        ).cast(TimestampType)*/
 
       val givenDate: Column = parseTimestamp(ColNames.StayStartDate.toCol, "ddMMyyyy")
 
       df.withColumn(
         NewColumns.EstimatedStayStart,
-        coalesce(givenDate, estimate, roughEstimate)
+        coalesce(givenDate, estimate)
       )
     }
   }

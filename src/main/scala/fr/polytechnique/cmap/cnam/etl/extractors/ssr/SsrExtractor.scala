@@ -38,7 +38,7 @@ trait SsrExtractor[EventType <: AnyEvent] extends Extractor[EventType] with SsrS
 
   override def extractGroupId(r: Row): String = {
     r.getAs[String](ColNames.EtaNum) + "_" +
-      r.getAs[String](ColNames.RsaNum) + "_" +
+      r.getAs[String](ColNames.RhaNum) + "_" +
       r.getAs[Int](ColNames.Year).toString
   }
 
