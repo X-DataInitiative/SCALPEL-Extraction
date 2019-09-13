@@ -10,9 +10,7 @@ class SsrFiltersSuite extends SharedContext {
 
     // Given
     val colNames = List(
-      SsrSource.NAI_RET,
       SsrSource.NIR_RET,
-      SsrSource.SEX_RET,
       SsrSource.SEJ_RET,
       SsrSource.FHO_RET,
       SsrSource.PMS_RET,

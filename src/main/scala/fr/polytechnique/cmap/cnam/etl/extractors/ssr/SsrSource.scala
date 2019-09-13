@@ -31,10 +31,10 @@ trait SsrSource extends ColumnNames {
       PatientID, DP, DR, DA, CCAM, CSARR, FP_PEC, EtaNum, RhaNum, RhsNum, StayLength,
       StayStartDate, StayEndDate, StartDate, EndDate
     )
-    /* TODO
+
     val hospitalStayPart = List(
       PatientID, EtaNum, RhaNum, RhsNum, Year, StartDate, EndDate
-    )*/
+    )
   }
 
   implicit class SsrDataFrame(df: DataFrame) {

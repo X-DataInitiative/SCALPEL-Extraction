@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays
 import java.sql.{Date, Timestamp}
 
 import fr.polytechnique.cmap.cnam.etl.events.{EventBuilder, HospitalStay}
-import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.ssr.SsrExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, Row}
