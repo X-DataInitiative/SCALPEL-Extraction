@@ -5,7 +5,7 @@ import org.apache.spark.sql.{Column, DataFrame}
 private[data] class SsrFilters(rawSsr: DataFrame) {
 
   def filterSsrCorruptedHospitalStays: DataFrame = {
-    val fictionalAndFalseHospitalStaysFilter: Column = !SsrSource
+    val fictionalAndFalseHospitalStaysFilter: Column = SsrSource
       .NIR_RET === "0" and SsrSource.SEJ_RET === "0" and SsrSource
       .FHO_RET === "0" and SsrSource.PMS_RET === "0" and SsrSource
       .DAT_RET === "0"
