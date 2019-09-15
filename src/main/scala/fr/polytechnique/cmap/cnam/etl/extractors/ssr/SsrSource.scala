@@ -22,6 +22,8 @@ trait SsrSource extends ColumnNames {
     val RhaNum: ColName = "RHA_NUM"
     val RhsNum: ColName = "RHS_NUM"
     val Year: ColName = "year"
+    val StayStartMonth: ColName = "SSR_C__MOI_LUN_1S"
+    val StayStartYear: ColName = "SSR_C__ANN_LUN_1S"
     val StayLength: ColName = "RHS_ANT_SEJ_ENT"
     val StayStartDate: ColName = "SSR_C__ENT_DAT"
     val StayEndDate: ColName = "SSR_C__SOR_DAT"
@@ -48,24 +50,23 @@ trait SsrSource extends ColumnNames {
       * length in one month, it results in duplicate events.
       */
     def estimateStayStartTime: DataFrame = {
+      /*
       val dayInMs = 24L * 60 * 60
       val timeDelta: Column = coalesce(ColNames.StayLength.toCol, lit(0)) * dayInMs
       val estimate: Column = {
         val endDate = parseTimestamp(ColNames.StayEndDate.toCol, "ddMMyyyy")
         (endDate.cast(LongType) - timeDelta).cast(TimestampType)
-      }
-      /*
-      val roughEstimate: Column = (
-        unix_timestamp(
-          concat_ws("-", ColNames.StayEndYear.toCol, ColNames.StayEndMonth.toCol, lit("01 00:00:00"))
-        ).cast(LongType) - timeDelta
-        ).cast(TimestampType)*/
+      }*/
+
+      val roughEstimate: Column = unix_timestamp(
+        concat_ws("-", ColNames.StayStartYear.toCol, ColNames.StayStartMonth.toCol, lit("01 00:00:00"))
+      ).cast(LongType).cast(TimestampType)
 
       val givenDate: Column = parseTimestamp(ColNames.StayStartDate.toCol, "ddMMyyyy")
 
       df.withColumn(
         NewColumns.EstimatedStayStart,
-        coalesce(givenDate, estimate)
+        coalesce(givenDate, roughEstimate)
       )
     }
   }
