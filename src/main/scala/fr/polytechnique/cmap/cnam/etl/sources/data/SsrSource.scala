@@ -2,6 +2,8 @@ package fr.polytechnique.cmap.cnam.etl.sources.data
 
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{Column, DataFrame, SQLContext}
+import org.apache.spark.sql.functions.to_date
+import org.apache.spark.sql.functions.year
 
 /**
   * Extractor class for the SSR table
@@ -28,7 +30,7 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
   val SOR_DAT: Column = col("SSR_C__SOR_DAT")
   val Year: Column = col("year")
 
-  val foreignKeys: List[String] = List("RHA_NUM", "ETA_NUM", "year")
+  val foreignKeys: List[String] = List("ETA_NUM", "RHA_NUM", "year")
 
   override def sanitize(rawSsr: DataFrame): DataFrame = {
     /**
@@ -43,18 +45,17 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
     val ssrSej = sqlContext.read.parquet(paths(0))
     val ssrC = sqlContext.read.parquet(paths(1))
     ssrSej.join(
-      ssrC.addPrefix(joinedTableName, foreignKeys), foreignKeys, "left_outer")
+      ssrC.addPrefixYear(joinedTableName, foreignKeys), foreignKeys, "left_outer")
   }
 
   implicit class TableHelper(df: DataFrame) {
 
-    def addPrefix(prefix: String, except: List[String]): DataFrame = {
+    def addPrefixYear(prefix: String, except: List[String]): DataFrame = {
       val renamedColumns = df.columns.map {
         case colName if !except.contains(colName) => prefix + "__" + colName
         case keyCol => keyCol
       }
-
-      df.toDF(renamedColumns: _*)
+      df.toDF(renamedColumns: _*).withColumn("year", year(to_date(col("SSR_C__EXE_SOI_DTD"))))
     }
   }
 }
