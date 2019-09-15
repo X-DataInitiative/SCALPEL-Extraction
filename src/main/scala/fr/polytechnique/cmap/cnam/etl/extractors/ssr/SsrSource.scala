@@ -29,7 +29,7 @@ trait SsrSource extends ColumnNames {
     val EndDate: ColName = "SSR_C__EXE_SOI_DTF"
     val all = List(
       PatientID, DP, DR, DA, CCAM, CSARR, FP_PEC, EtaNum, RhaNum, RhsNum, StayLength,
-      StayStartDate, StayEndDate, StartDate, EndDate
+      StayStartDate, StayEndDate, StartDate, EndDate, Year
     )
 
     val hospitalStayPart = List(
