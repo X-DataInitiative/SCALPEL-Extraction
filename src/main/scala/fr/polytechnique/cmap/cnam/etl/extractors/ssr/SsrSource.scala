@@ -9,7 +9,7 @@ import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 trait SsrSource extends ColumnNames {
 
   final object ColNames extends Serializable {
-    val PatientID: ColName = "NUM_ENQ"
+    val PatientID: ColName = "SSR_C__NUM_ENQ"
     val DP: ColName = "MOR_PRP"
     val DR: ColName = "ETL_AFF"
     val DA: ColName = "SSR_D__DGN_COD"
