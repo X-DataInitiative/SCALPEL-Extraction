@@ -1,4 +1,4 @@
-name := "SNIIRAM-featuring"
+name := "SCALPEL-Extraction"
 
 git.baseVersion := "2.0"
 
