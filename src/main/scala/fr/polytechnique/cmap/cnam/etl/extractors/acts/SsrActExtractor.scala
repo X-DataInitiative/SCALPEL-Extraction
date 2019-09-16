@@ -27,3 +27,15 @@ object SsrCimMedicalActExtractor extends SsrExtractor[MedicalAct] {
       r.getAs[Int](ColNames.Year).toString
   }
 }
+
+object SsrCsarrActExtractor extends SsrExtractor[MedicalAct] {
+  final override val columnName: String = ColNames.CSARR
+  override val eventBuilder: EventBuilder = SsrCSARRAct
+
+  override def extractGroupId(r: Row): String = {
+    r.getAs[String](ColNames.EtaNum) + "_" +
+      r.getAs[String](ColNames.RhaNum) + "_" +
+      r.getAs[String](ColNames.RhsNum) + "_" +
+      r.getAs[Int](ColNames.Year).toString
+  }
+}
