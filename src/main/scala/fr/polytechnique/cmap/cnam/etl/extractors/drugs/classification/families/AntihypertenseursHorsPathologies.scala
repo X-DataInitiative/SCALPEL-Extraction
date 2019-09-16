@@ -5,8 +5,6 @@ import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.{DrugClass
 object AntihypertenseursHorsPathologies extends DrugClassConfig {
   override val name: String = "Antihypertenseurs Hors Pathologies"
   override val cip13Codes: Set[String] = Set.empty[String]
-  override val pharmacologicalClasses: List[PharmacologicalClassConfig] = List(horsPathologies)
-
 
   val horsPathologies = new PharmacologicalClassConfig(
     name = "Antihypertenseurs Hors Pathologies",
@@ -24,5 +22,7 @@ object AntihypertenseursHorsPathologies extends DrugClassConfig {
       "C09DB01", "C09DB02", "C09DB04", "C09XA02", "C09XA52", "C10BX03", "C03EA"
     )
   )
+
+  override val pharmacologicalClasses: List[PharmacologicalClassConfig] = List(horsPathologies)
 
 }
