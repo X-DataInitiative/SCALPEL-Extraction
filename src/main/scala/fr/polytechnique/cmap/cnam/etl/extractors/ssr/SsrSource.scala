@@ -31,7 +31,7 @@ trait SsrSource extends ColumnNames {
     val EndDate: ColName = "SSR_C__EXE_SOI_DTF"
     val all = List(
       PatientID, DP, DR, DA, CCAM, CSARR, FP_PEC, EtaNum, RhaNum, RhsNum, StayLength,
-      StayStartDate, StayEndDate, StartDate, EndDate, Year
+      StayStartDate, StayEndDate, StartDate, EndDate, Year, StayStartMonth, StayStartYear
     )
 
     val hospitalStayPart = List(
@@ -41,7 +41,7 @@ trait SsrSource extends ColumnNames {
 
   implicit class SsrDataFrame(df: DataFrame) {
 
-    /** A REFAIRE COMPLETEMENT (pour l'instant gestion comme MCO)
+    /**
       *
       * Estimate the stay starting date according to the different versions of PMSI SSR
       * Please note that in the case of early SSR (i.e. < 2009), the estimator is

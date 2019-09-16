@@ -12,10 +12,10 @@ class SsrMedicalActsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val cim10Codes = Set("hWxNSQFFCrUfTdoczQ")
+    val cim10Codes = Set("Z100")
     val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val expected = Seq[Event[MedicalAct]](
-      SsrCIM10Act("Patient_02", "10000123_30000546_200_2019", "hWxNSQFFCrUfTdoczQ", makeTS(2019, 8, 11))
+      SsrCIM10Act("Patient_02", "10000123_30000546_300_2019", "Z100", makeTS(2019, 8, 11))
     ).toDS
 
     val input = Sources(ssr = Some(ssr))
@@ -33,8 +33,9 @@ class SsrMedicalActsSuite extends SharedContext {
     // Given
     val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val expected = Seq[Event[MedicalAct]](
-      SsrCIM10Act("Patient_02", "10000123_30000546_300_2019", "jAXcUbtm", makeTS(2019, 8, 11)),
-      SsrCIM10Act("Patient_02", "10000123_30000546_200_2019", "hWxNSQFFCrUfTdoczQ", makeTS(2019, 8, 11))
+      SsrCIM10Act("Patient_02", "10000123_30000546_200_2019", "Z400", makeTS(2019, 8, 11)),
+      SsrCIM10Act("Patient_02", "10000123_30000546_300_2019", "Z100", makeTS(2019, 8, 11)),
+      SsrCIM10Act("Patient_01", "10000123_30000801_100_2019", "Z200", makeTS(2019, 10, 20))
     ).toDS
 
     val input = Sources(ssr = Some(ssr))
@@ -73,7 +74,9 @@ class SsrMedicalActsSuite extends SharedContext {
     val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val expected = Seq[Event[MedicalAct]](
       SsrCCAMAct("Patient_02", "10000123_30000546_200_2019", "AHQP001", makeTS(2019, 8, 11)),
+      SsrCCAMAct("Patient_01", "10000123_30000801_100_2019", "AHQP005", makeTS(2019, 10, 20)),
       SsrCCAMAct("Patient_02", "10000123_30000546_300_2019", "AHQP001", makeTS(2019, 8, 11))
+
     ).toDS
 
     val input = Sources(ssr = Some(ssr))

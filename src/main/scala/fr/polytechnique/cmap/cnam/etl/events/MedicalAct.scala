@@ -57,5 +57,9 @@ object SsrCCAMAct extends MedicalAct {
 }
 
 object SsrCIM10Act extends MedicalAct {
-  val category: EventCategory[MedicalAct] = "ssr_motif_principal_act"
+  val category: EventCategory[MedicalAct] = "ssr_main_care_purpose"
+}
+
+object SsrCSARRAct extends MedicalAct {
+  val category: EventCategory[MedicalAct] = "ssr_csarr_act"
 }
