@@ -17,9 +17,9 @@ object BroadBladderCancer extends OutcomesTransformer with PioglitazoneStudyCode
   val directDiagnosisCategories = List(
     MainDiagnosis.category,
     LinkedDiagnosis.category,
-    HADMainDiagnosis.category,
-    SSRMainDiagnosis.category,
-    SSREtiologicDiagnosis.category
+    HadMainDiagnosis.category,
+    SsrMainDiagnosis.category,
+    SsrAssociatedDiagnosis.category
   )
 
   val groupDiagnosisCategories = List(

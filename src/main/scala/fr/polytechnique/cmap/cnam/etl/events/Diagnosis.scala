@@ -46,16 +46,20 @@ object AssociatedDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "associated_diagnosis"
 }
 
-object HADMainDiagnosis extends Diagnosis {
+object HadMainDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "had_main_diagnosis"
 }
 
-object SSRMainDiagnosis extends Diagnosis {
+object SsrMainDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "ssr_main_diagnosis"
 }
 
-object SSREtiologicDiagnosis extends Diagnosis {
+object SsrAssociatedDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "ssr_etiologic_diagnosis"
+}
+
+object SsrLinkedDiagnosis extends Diagnosis {
+  override val category: EventCategory[Diagnosis] = "ssr_linked_diagnosis"
 }
 
 object ImbDiagnosis extends Diagnosis {
