@@ -12,17 +12,14 @@ class SsrDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val dpCodes = Set("C67")
+    val dpCodes = Set("C66")
     val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val sources = Sources(ssr = Some(ssr))
 
     val expected = Seq[Event[Diagnosis]](
-      SsrMainDiagnosis("Patient_02", "10000123_20000123_2007", "C670", makeTS(2007, 1, 29)),
-      SsrMainDiagnosis("Patient_02", "10000123_20000345_2007", "C671", makeTS(2007, 1, 29)),
-      SsrMainDiagnosis("Patient_02", "10000123_10000987_2006", "C670", makeTS(2005, 12, 29)),
-      SsrMainDiagnosis("Patient_02", "10000123_10000543_2006", "C671", makeTS(2005, 12, 24)),
-      SsrMainDiagnosis("Patient_02", "10000123_30000546_2008", "C670", makeTS(2008, 3, 8)),
-      SsrMainDiagnosis("Patient_02", "10000123_30000852_2008", "C671", makeTS(2008, 3, 15))
+      SsrMainDiagnosis("Patient_02", "10000123_30000546_200_2019", "C66", makeTS(2019, 8, 11)),
+      SsrMainDiagnosis("Patient_02", "10000123_30000546_300_2019", "C66", makeTS(2019, 8, 11))
+      //SsrMainDiagnosis("Patient_01", "10000123_30000801_100_2019", "C70", makeTS(2019, 10, 20))
     ).toDS
 
 
@@ -33,18 +30,41 @@ class SsrDiagnosesSuite extends SharedContext {
     assertDSs(result, expected)
   }
 
+  it should "extract all available SsrMainDiagnosis when Codes is Empty" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
+    val sources = Sources(ssr = Some(ssr))
+
+    val expected = Seq[Event[Diagnosis]](
+      SsrMainDiagnosis("Patient_02", "10000123_30000546_200_2019", "C66", makeTS(2019, 8, 11)),
+      SsrMainDiagnosis("Patient_02", "10000123_30000546_300_2019", "C66", makeTS(2019, 8, 11)),
+      SsrMainDiagnosis("Patient_01", "10000123_30000801_100_2019", "C70", makeTS(2019, 10, 20))
+    ).toDS
+
+
+    // When
+    val result = SsrMainDiagnosisExtractor.extract(sources, Set.empty)
+
+    // Then
+    assertDSs(result, expected)
+  }
+
   it should "extract target SsrLinkedDiagnosis" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val linkedCodes = Set("E05", "E08")
+    val linkedCodes = Set("C6")
     val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val sources = Sources(ssr = Some(ssr))
 
     val expected = Seq[Event[Diagnosis]](
-      SsrLinkedDiagnosis("Patient_02", "10000123_20000123_2007", "E05", makeTS(2007, 1, 29)),
-      SsrLinkedDiagnosis("Patient_02", "10000123_10000543_2006", "E08", makeTS(2005, 12, 24))
+      SsrLinkedDiagnosis("Patient_02", "10000123_30000546_200_2019", "C68", makeTS(2019, 8, 11)),
+      SsrLinkedDiagnosis("Patient_02", "10000123_30000546_300_2019", "C66", makeTS(2019, 8, 11))//,
+      //SsrMainDiagnosis("Patient_01", "10000123_30000801_100_2019", "C55", makeTS(2019, 10, 20))
     ).toDS
 
     // When
@@ -59,13 +79,13 @@ class SsrDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val associatedDiagnosis = Set("C66")
+    val associatedDiagnosis = Set("C6")
     val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val sources = Sources(ssr = Some(ssr))
 
     val expected = Seq[Event[Diagnosis]](
-      SsrAssociatedDiagnosis("Patient_02", "10000123_20000123_2007", "C66.5", makeTS(2007, 1, 29)),
-      SsrAssociatedDiagnosis("Patient_02", "10000123_10000543_2006", "C66.9", makeTS(2005, 12, 24))
+      SsrAssociatedDiagnosis("Patient_02", "10000123_30000546_200_2019", "C66", makeTS(2019, 8, 11)),
+      SsrAssociatedDiagnosis("Patient_02", "10000123_30000546_300_2019", "C68", makeTS(2019, 8, 11))
     ).toDS
 
     // When

@@ -17,6 +17,7 @@ class SSrHospitalStayExtractorSuite extends SharedContext {
     val sources = Sources(ssr = Some(ssr))
 
     val expected: Dataset[Event[HospitalStay]] = Seq(
+      HospitalStay("Patient_01", "10000123_30000801_2019", makeTS(2019, 10, 20), makeTS(2019, 11, 11)),
       HospitalStay("Patient_02", "10000123_30000546_2019", makeTS(2019, 8, 11), makeTS(2019, 8, 30))
     ).toDS()
 
@@ -36,6 +37,7 @@ class SSrHospitalStayExtractorSuite extends SharedContext {
     val sources = Sources(ssr = Some(ssr))
 
     val expected: Dataset[Event[HospitalStay]] = Seq(
+      HospitalStay("Patient_01", "10000123_30000801_2019", makeTS(2019, 10, 20), makeTS(2019, 11, 11)),
       HospitalStay("Patient_02", "10000123_30000546_2019", makeTS(2019, 8, 11), makeTS(2019, 8, 30))
     ).toDS()
 

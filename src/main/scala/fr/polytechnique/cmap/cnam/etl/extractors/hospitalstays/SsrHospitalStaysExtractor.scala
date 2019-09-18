@@ -21,4 +21,10 @@ object SsrHospitalStaysExtractor extends SsrExtractor[HospitalStay] {
   override def code: Row => String = extractGroupId
 
   override def getInput(sources: Sources): DataFrame = sources.ssr.get.select(ColNames.hospitalStayPart.map(col): _*)
+
+  override def extractGroupId(r: Row): String = {
+    r.getAs[String](ColNames.EtaNum) + "_" +
+      r.getAs[String](ColNames.RhaNum) + "_" +
+      r.getAs[Int](ColNames.Year).toString
+  }
 }
