@@ -166,7 +166,7 @@ object dreesChronicMain extends Main with BpcoCodes {
       operationsMetadata += {
         OperationReporter.report(
           "diagnoses",
-          List("MCO", "IR_IMB_R"),
+          List("MCO", "SSR_SEJ"),
           OperationTypes.Diagnosis,
           diagnoses.toDF,
           Path(dreesChronicConfig.output.outputSavePath),
@@ -185,7 +185,7 @@ object dreesChronicMain extends Main with BpcoCodes {
       operationsMetadata += {
         OperationReporter.report(
           "acts",
-          List("DCIR", "MCO", "MCO_CE"),
+          List("DCIR", "MCO", "MCO_CE", "SSR_SEJ"),
           OperationTypes.MedicalActs,
           acts.toDF,
           Path(dreesChronicConfig.output.outputSavePath),
@@ -212,11 +212,13 @@ object dreesChronicMain extends Main with BpcoCodes {
     val sources = Sources.sanitizeDates(sourcesAllYears, dreesChronicConfig.base.studyStart, dreesChronicConfig.base.studyEnd)
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
+    val ssr = sources.ssr.get.repartition(4000).persist()
 
     val operationsMetadata = computePrestations(sources, dreesChronicConfig) ++ computeHospitalStays(sources, dreesChronicConfig) ++ computeOutcomes(sources, dreesChronicConfig) ++ computeExposures(sources, dreesChronicConfig)
 
     dcir.unpersist()
     mco.unpersist()
+    ssr.unpersist()
 
 
     // Write Metadata

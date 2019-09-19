@@ -12,8 +12,10 @@ class ActsExtractor(config: MedicalActsConfig) {
       .filter(act => act.groupID != DcirAct.groupID.Unknown) // filter out unknown source acts
       .filter(act => act.groupID != DcirAct.groupID.PublicAmbulatory) //filter out public amb
     val mcoCEMedicalActs = McoCeActExtractor.extract(sources, config.mcoCECodes.toSet)
+    val mcoMedicalActs = McoCcamActExtractor.extract(sources, config.mcoCCAMCodes.toSet)
+    val ssrMedicalActs = SsrCcamActExtractor.extract(sources, config.ssrCCAMCodes.toSet)
 
-    unionDatasets(dcirMedicalAct, mcoCEMedicalActs)
+    unionDatasets(dcirMedicalAct, mcoCEMedicalActs, mcoMedicalActs, ssrMedicalActs)
   }
 
 }
