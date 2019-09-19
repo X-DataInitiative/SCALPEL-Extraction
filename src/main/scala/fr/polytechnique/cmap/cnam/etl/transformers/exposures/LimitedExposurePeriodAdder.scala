@@ -22,13 +22,13 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
     *   A. The first DrugPurchase defines a new Exposure.
     *   B. If there is a DrugPurchase within the defined window of the first DrugPurchase, then expand the current
     * Exposure with the DrugPurchase.
-    *   C. Else, close and set the end of the Exposure as the reach of the current and create a new Exposure with the
-    * DrugPurchase as the new Exposure.
+    *   C. Else, close and set the end of the Exposure as the reach of the latest Drug Purchase and create a new
+    *   Exposure with the next DrugPurchase as the new Exposure.
     * This strategy is suited for short term effects.
     * !!! WARNING: THIS ONLY RETURNS EXPOSURES.
     *
     * @param minPurchases : Not used.
-    * @param startDelay : Not used.
+    * @param  startDelay : period to be added to the start of each DrugPurchase.
     * @param purchasesWindow : Not used.
     * @param endThresholdGc : the period that defines the reach for Grand Condtionnement.
     * @param endThresholdNgc : the period that defines the reach for Non Grand Condtionnement.
@@ -37,7 +37,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
     */
   def withStartEnd(
     minPurchases: Int = 2,
-    startDelay: Period = 3.months,
+    startDelay: Period = 5.days,
     purchasesWindow: Period = 4.months,
     endThresholdGc: Option[Period] = Some(120.days),
     endThresholdNgc: Option[Period] = Some(40.days),
@@ -46,9 +46,17 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
 
     val outputColumns = (data.columns.toList ++ List(ExposureStart, ExposureEnd)).map(col)
 
-    val firstLastPurchase = getFirstAndLastPurchase(data, endThresholdGc.get, endThresholdNgc.get, endDelay.get)
+    val delayedDrugPurchases = delayStart(data, startDelay)
+
+    val firstLastPurchase = getFirstAndLastPurchase(delayedDrugPurchases, endThresholdGc.get, endThresholdNgc.get, endDelay.get)
 
     toExposure(firstLastPurchase).select(outputColumns: _*)
+  }
+
+  def delayStart(data: DataFrame, startDelay: Period): DataFrame = {
+    data.withColumn("NewStart", col("start").addPeriod(startDelay))
+      .drop(col("start"))
+      .withColumnRenamed("NewStart", "start")
   }
 
   def toExposure(firstLastPurchase: DataFrame): DataFrame = {
