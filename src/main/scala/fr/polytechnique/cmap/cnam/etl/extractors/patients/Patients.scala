@@ -17,8 +17,11 @@ class Patients(config: PatientsConfig) {
     val dcir = sources.dcir.get
     val mco = sources.mco.get
     val irBen = sources.irBen.get
+    val had = sources.had.get
 
     val mcoPatients: DataFrame = McoPatients.extract(mco, config.mcoDeathCode).toDF.as("mco")
+
+    val hadPatients: DataFrame = HadPatients.extract(had, config.mcoDeathCode).toDF.as("had")
 
     val irBenPatients: DataFrame = IrBenPatients.extract(
       irBen, config.minYear, config.maxYear
@@ -30,16 +33,21 @@ class Patients(config: PatientsConfig) {
 
     import dcirPatients.sqlContext.implicits._
 
-    val joinColumn: Column = coalesce(col("irBen.patientID"), col("mco.patientID"))
+    val joinColumn: Column = coalesce(
+      col("irBen.patientID"),
+      col("mco.patientID"),
+      col("had.patientID"))
 
     val patients: DataFrame = irBenPatients
       .join(mcoPatients, col("irBen.patientID") === col("mco.patientID"), "outer")
+      .join(hadPatients, joinColumn === col("had.patientID"), "outer")
       .join(dcirPatients, joinColumn === col("dcir.patientID"), "outer")
 
     val patientID: Column = coalesce(
       col("dcir.patientID"),
       col("irBen.patientID"),
-      col("mco.patientID")
+      col("mco.patientID"),
+      col("had.patientID")
     )
 
     val gender: Column = coalesce(col("irBen.gender"), col("dcir.gender"))
@@ -58,6 +66,10 @@ class Patients(config: PatientsConfig) {
       when(
         validateDeathDate(col("mco.deathDate"), birthDate, config.maxYear),
         col("mco.deathDate")
+      ),
+      when(
+        validateDeathDate(col("had.deathDate"), birthDate, config.maxYear),
+        col("had.deathDate")
       )
     )
 
