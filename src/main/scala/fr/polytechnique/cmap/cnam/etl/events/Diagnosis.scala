@@ -50,6 +50,10 @@ object HadMainDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "had_main_diagnosis"
 }
 
+object HadAssociatedDiagnosis extends Diagnosis {
+  override val category: EventCategory[Diagnosis] = "had_associated_diagnosis"
+}
+
 object SsrMainDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "ssr_main_diagnosis"
 }
