@@ -8,18 +8,18 @@ private[patients] object SsrPatients {
 
   val inputColumns: List[Column] = List(
     col("NUM_ENQ").as("patientID"),
-    col("MCO_B__SOR_MOD").as("SOR_MOD"),
-    col("SOR_MOI"),
-    col("SOR_ANN")
+    //col("MCO_B__SOR_MOD").as("SOR_MOD"),
+    //col("SOR_MOI"),
+    //col("SOR_ANN")
   )
 
   val outputColumns: List[Column] = List(
-    col("patientID"),
-    col("deathDate")
+    col("patientID")
+    //col("deathDate")
   )
 
   implicit class SsrPatientsDataFrame(data: DataFrame) {
-
+    /*
     def getDeathDates(deathCode: Int): DataFrame = {
       // TODO: We may need to check the consistency of {SOR_MOI, SOR_ANN} against SOR_DAT in MCO_C.
       val deathDates: DataFrame = data.filter(col("SOR_MOD") === deathCode)
@@ -45,15 +45,15 @@ private[patients] object SsrPatients {
           "\nTaking Minimum Death Dates")
     */
       result
-    }
+    }*/
   }
 
-  def extract(mco: DataFrame, mcoDeathCode: Int = 9): DataFrame = {
+  def extract(ssr: DataFrame): DataFrame = {
 
-    mco
+    ssr
       .select(inputColumns: _*)
       .distinct
-      .getDeathDates(mcoDeathCode)
+      //.getDeathDates(mcoDeathCode)
       .select(outputColumns: _*)
   }
 }

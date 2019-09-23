@@ -74,7 +74,7 @@ object dreesChronicMain extends Main with BpcoCodes {
       operationsMetadata += {
         OperationReporter.report(
           "extract_patients",
-          List("DCIR", "MCO", "IR_BEN_R", "MCO_CE"),
+          List("DCIR", "MCO","SSR_SEJ", "IR_BEN_R", "MCO_CE"),
           OperationTypes.Patients,
           patients.toDF,
           Path(dreesChronicConfig.output.outputSavePath),
