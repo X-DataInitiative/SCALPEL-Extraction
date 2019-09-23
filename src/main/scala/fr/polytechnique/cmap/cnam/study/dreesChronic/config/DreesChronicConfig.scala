@@ -29,7 +29,7 @@ case class DreesChronicConfig(
   val medicalActs: MedicalActsConfig = DreesChronicConfig.MedicalActsConfig
   val diagnoses: DiagnosesConfig = DreesChronicConfig.DiagnosesConfig
   val practionnerClaimSpeciality: PractitionerClaimSpecialityConfig = DreesChronicConfig.PrestationsConfig
-  val ngapActs: NgapActConfig = DreesChronicConfig.NgapActConfig$
+  val ngapActs: NgapActConfig = DreesChronicConfig.NgapActConfig
 }
 
 object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
@@ -64,7 +64,7 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
     nonMedicalSpeCodes = nonSpeCodes
   )
 
-  final object NgapActConfig$ extends  NgapActConfig(
+  final object NgapActConfig extends  NgapActConfig(
     acts_categories = List(
       Amk,
       Ams

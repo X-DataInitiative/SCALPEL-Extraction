@@ -6,6 +6,7 @@ import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 import fr.polytechnique.cmap.cnam.etl.config.{BaseConfig, ConfigLoader}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.Cip13Level
+import fr.polytechnique.cmap.cnam.etl.extractors.ngapacts.NgapActConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.prestations.PractitionerClaimSpecialityConfig
 
 case class BulkConfig(
@@ -13,6 +14,7 @@ case class BulkConfig(
   output: StudyConfig.OutputPaths) extends StudyConfig {
   val drugs: DrugConfig = BulkConfig.DrugsConfig
   val practionnerClaimSpeciality: PractitionerClaimSpecialityConfig = BulkConfig.PrestationsConfig
+  val ngapActs: NgapActConfig = BulkConfig.NgapActConfig
   val base: BaseConfig = BulkConfig.BaseConfig
 }
 
@@ -32,6 +34,10 @@ object BulkConfig extends ConfigLoader {
   final object PrestationsConfig extends PractitionerClaimSpecialityConfig(
     medicalSpeCodes = List.empty,
     nonMedicalSpeCodes = List.empty
+  )
+
+  final object NgapActConfig extends  NgapActConfig(
+    acts_categories = List.empty
   )
 
   def load(path: String, env: String): BulkConfig = {
