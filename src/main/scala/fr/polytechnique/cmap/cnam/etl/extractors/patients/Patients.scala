@@ -16,12 +16,13 @@ class Patients(config: PatientsConfig) {
 
     val dcir = sources.dcir.get
     val mco = sources.mco.get
+    val ssr = sources.ssr.get
     val irBen = sources.irBen.get
     val had = sources.had.get
 
     val mcoPatients: DataFrame = McoPatients.extract(mco, config.mcoDeathCode).toDF.as("mco")
-
     val hadPatients: DataFrame = HadPatients.extract(had, config.mcoDeathCode).toDF.as("had")
+    val ssrPatients: DataFrame = SsrPatients.extract(ssr).toDF.as("ssr")
 
     val irBenPatients: DataFrame = IrBenPatients.extract(
       irBen, config.minYear, config.maxYear
@@ -36,17 +37,21 @@ class Patients(config: PatientsConfig) {
     val joinColumn: Column = coalesce(
       col("irBen.patientID"),
       col("mco.patientID"),
+      col("ssr.patientID"),
       col("had.patientID"))
 
     val patients: DataFrame = irBenPatients
       .join(mcoPatients, col("irBen.patientID") === col("mco.patientID"), "outer")
-      .join(hadPatients, joinColumn === col("had.patientID"), "outer")
-      .join(dcirPatients, joinColumn === col("dcir.patientID"), "outer")
+      .join(ssrPatients, joinColumn === col("ssr.patientID"), "outer")
+      .join(hadPatients, joinColumn === col("had.patientID"), "outer")     
+      .join(dcirPatients, joinColumn === col("dcir.patientID"), "outer")  
+    )
 
     val patientID: Column = coalesce(
       col("dcir.patientID"),
       col("irBen.patientID"),
       col("mco.patientID"),
+      col("ssr.patientID")
       col("had.patientID")
     )
 

@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.study.fall
 
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.DcirAct
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
@@ -40,7 +40,7 @@ object FallMainExtract extends Main with FractureCodes {
   mutable.HashMap[String, OperationMetadata] = {
 
     if (fallConfig.runParameters.hospitalStays) {
-      val hospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
+      val hospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
       meta += {
         "extract_hospital_stays" ->
           OperationReporter

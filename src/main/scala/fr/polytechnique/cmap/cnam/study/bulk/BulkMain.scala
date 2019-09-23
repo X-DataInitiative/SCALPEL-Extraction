@@ -7,7 +7,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirMedicalActExtractor, 
 import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GhmExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses._
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugExtractor
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
@@ -50,7 +50,7 @@ object BulkMain extends Main {
 
     drugs.unpersist()
 
-    val hospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
+    val hospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
     operationsMetadata += {
       OperationReporter
         .report(

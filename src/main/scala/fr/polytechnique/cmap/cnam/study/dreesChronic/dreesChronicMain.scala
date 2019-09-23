@@ -4,7 +4,7 @@ import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 //import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, Outcome}
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
@@ -26,13 +26,13 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     if (dreesChronicConfig.runParameters.hospitalStays) {
 
-      val hospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
+      val hospitalStays = new HospitalStaysExtractor().extract(sources).cache()
 
       operationsMetadata += {
         OperationReporter
           .report(
             "extract_hospital_stays",
-            List("MCO"),
+            List("MCO", "SSR_SEJ"),
             OperationTypes.HospitalStays,
             hospitalStays.toDF,
             Path(dreesChronicConfig.output.outputSavePath),
@@ -74,7 +74,7 @@ object dreesChronicMain extends Main with BpcoCodes {
       operationsMetadata += {
         OperationReporter.report(
           "extract_patients",
-          List("DCIR", "MCO", "IR_BEN_R", "MCO_CE"),
+          List("DCIR", "MCO","SSR_SEJ", "IR_BEN_R", "MCO_CE"),
           OperationTypes.Patients,
           patients.toDF,
           Path(dreesChronicConfig.output.outputSavePath),
