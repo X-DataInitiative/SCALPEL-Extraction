@@ -14,8 +14,9 @@ class ActsExtractor(config: MedicalActsConfig) {
     val mcoCEMedicalActs = McoCeActExtractor.extract(sources, config.mcoCECodes.toSet)
     val mcoMedicalActs = McoCcamActExtractor.extract(sources, config.mcoCCAMCodes.toSet)
     val ssrMedicalActs = SsrCcamActExtractor.extract(sources, config.ssrCCAMCodes.toSet)
+    val hadMedicalActs = HadCcamActExtractor.extract(sources, config.hadCCAMCodes.toSet)
 
-    unionDatasets(dcirMedicalAct, mcoCEMedicalActs, mcoMedicalActs, ssrMedicalActs)
+    unionDatasets(dcirMedicalAct, mcoCEMedicalActs, mcoMedicalActs, ssrMedicalActs, hadMedicalActs)
   }
 
 }

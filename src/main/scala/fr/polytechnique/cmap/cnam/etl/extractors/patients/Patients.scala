@@ -44,14 +44,13 @@ class Patients(config: PatientsConfig) {
       .join(mcoPatients, col("irBen.patientID") === col("mco.patientID"), "outer")
       .join(ssrPatients, joinColumn === col("ssr.patientID"), "outer")
       .join(hadPatients, joinColumn === col("had.patientID"), "outer")     
-      .join(dcirPatients, joinColumn === col("dcir.patientID"), "outer")  
-    )
+      .join(dcirPatients, joinColumn === col("dcir.patientID"), "outer")
 
     val patientID: Column = coalesce(
       col("dcir.patientID"),
       col("irBen.patientID"),
       col("mco.patientID"),
-      col("ssr.patientID")
+      col("ssr.patientID"),
       col("had.patientID")
     )
 

@@ -14,7 +14,8 @@ class MedicalActsConfig(
   val mcoCECodes: List[String],
   val mcoCCAMCodes: List[String],
   val ssrCIMCodes: List[String],
-  val ssrCCAMCodes: List[String]) extends ExtractorConfig
+  val ssrCCAMCodes: List[String],
+  val hadCCAMCodes: List[String]) extends ExtractorConfig
 
 object MedicalActsConfig {
 
@@ -24,8 +25,9 @@ object MedicalActsConfig {
     mcoCECodes: List[String] = List(),
     mcoCCAMCodes: List[String] = List(),
     ssrCIMCodes: List[String] = List(),
-    ssrCCAMCodes: List[String] = List()): MedicalActsConfig = {
+    ssrCCAMCodes: List[String] = List(),
+    hadCCAMCodes: List[String] = List()): MedicalActsConfig = {
 
-    new MedicalActsConfig(dcirCodes, mcoCIMCodes, mcoCECodes, mcoCCAMCodes, ssrCIMCodes, ssrCCAMCodes)
+    new MedicalActsConfig(dcirCodes, mcoCIMCodes, mcoCECodes, mcoCCAMCodes, ssrCIMCodes, ssrCCAMCodes, hadCCAMCodes)
   }
 }

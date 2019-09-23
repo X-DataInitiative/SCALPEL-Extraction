@@ -32,7 +32,7 @@ object dreesChronicMain extends Main with BpcoCodes {
         OperationReporter
           .report(
             "extract_hospital_stays",
-            List("MCO", "SSR_SEJ"),
+            List("MCO", "SSR_SEJ", "HAD"),
             OperationTypes.HospitalStays,
             hospitalStays.toDF,
             Path(dreesChronicConfig.output.outputSavePath),
@@ -74,7 +74,7 @@ object dreesChronicMain extends Main with BpcoCodes {
       operationsMetadata += {
         OperationReporter.report(
           "extract_patients",
-          List("DCIR", "MCO","SSR_SEJ", "IR_BEN_R", "MCO_CE"),
+          List("DCIR", "MCO", "SSR_SEJ", "HAD", "IR_BEN_R", "MCO_CE"),
           OperationTypes.Patients,
           patients.toDF,
           Path(dreesChronicConfig.output.outputSavePath),
@@ -166,7 +166,7 @@ object dreesChronicMain extends Main with BpcoCodes {
       operationsMetadata += {
         OperationReporter.report(
           "diagnoses",
-          List("MCO", "SSR_SEJ"),
+          List("MCO", "SSR_SEJ", "HAD"),
           OperationTypes.Diagnosis,
           diagnoses.toDF,
           Path(dreesChronicConfig.output.outputSavePath),
@@ -185,7 +185,7 @@ object dreesChronicMain extends Main with BpcoCodes {
       operationsMetadata += {
         OperationReporter.report(
           "acts",
-          List("DCIR", "MCO", "MCO_CE", "SSR_SEJ"),
+          List("DCIR", "MCO", "MCO_CE", "SSR_SEJ", "HAD"),
           OperationTypes.MedicalActs,
           acts.toDF,
           Path(dreesChronicConfig.output.outputSavePath),

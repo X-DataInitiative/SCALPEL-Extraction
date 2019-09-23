@@ -14,8 +14,10 @@ class DiagnosisExtractor(config: DiagnosesConfig) {
     val mcoLinkedDiag = McoLinkedDiagnosisExtractor.extract(sources, config.drCodes.toSet)
     val ssrMainDiag = SsrMainDiagnosisExtractor.extract(sources, config.dpCodes.toSet)
     val ssrLinkedDiag = SsrLinkedDiagnosisExtractor.extract(sources, config.drCodes.toSet)
+    val hadMainDiag = HadMainDiagnosisExtractor.extract(sources, config.dpCodes.toSet)
+    //val hadAssociatedDiag = HadAssociatedDiagnosisExtractor.extract(sources, config.drCodes.toSet)
 
-    unionDatasets(mcoMainDiag, mcoLinkedDiag, ssrMainDiag, ssrLinkedDiag)
+    unionDatasets(mcoMainDiag, mcoLinkedDiag, ssrMainDiag, ssrLinkedDiag, hadMainDiag)
   }
 
 }
