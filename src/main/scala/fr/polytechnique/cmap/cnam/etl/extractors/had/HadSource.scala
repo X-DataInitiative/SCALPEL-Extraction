@@ -12,8 +12,8 @@ trait HadSource extends ColumnNames {
     val EtaNumEpmsi: ColName = "ETA_NUM_EPMSI"
     val RhadNum: ColName = "RHAD_NUM"
     val DP: ColName = "HAD_B__DGN_PAL"
-    val PEC_PAL: ColName = "HAD_B_PEC_PAL"
-    val PEC_ASS: ColName = "HAD_B_PEC_ASS"
+    val PEC_PAL: ColName = "HAD_B__PEC_PAL"
+    val PEC_ASS: ColName = "HAD_B__PEC_ASS"
     val DA: ColName = "HAD_D__DGN_ASS"
     val CCAM: ColName = "HAD_A__CCAM_COD"
 
@@ -25,7 +25,7 @@ trait HadSource extends ColumnNames {
     val StartDate: ColName = "EXE_SOI_DTD"
     val EndDate: ColName = "EXE_SOI_DTF"
     val all = List(
-      PatientID, DP, DA, CCAM, EtaNumEpmsi, RhadNum, Year,
+      PatientID, DP, DA, CCAM, PEC_PAL, PEC_ASS, EtaNumEpmsi, RhadNum, Year,
       StayStartDate, StayEndDate, StartDate, EndDate
     )
     val hospitalStayPart = List(

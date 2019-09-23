@@ -31,7 +31,7 @@ trait HadExtractor[EventType <: AnyEvent] extends Extractor[EventType] with HadS
     Seq(eventBuilder[EventType](patientId, groupId, code(row), weight, eventDate, endDate))
   }
 
-  def code: Row => String = (row: Row) => row.getAs[String](columnName)
+  def code: Row => String = (row: Row) => row.getAs[Int](columnName).toString
 
   def extractPatientId(r: Row): String = {
     r.getAs[String](ColNames.PatientID)
