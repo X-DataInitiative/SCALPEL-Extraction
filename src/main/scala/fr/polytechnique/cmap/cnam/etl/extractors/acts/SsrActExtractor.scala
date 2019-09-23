@@ -9,11 +9,6 @@ object SsrCcamActExtractor extends SsrExtractor[MedicalAct] {
   override val eventBuilder: EventBuilder = SsrCCAMAct
 }
 
-object SsrCimMedicalActExtractor extends SsrExtractor[MedicalAct] {
-  final override val columnName: String = ColNames.FP_PEC
-  override val eventBuilder: EventBuilder = SsrCIM10Act
-}
-
 object SsrCsarrActExtractor extends SsrExtractor[MedicalAct] {
   final override val columnName: String = ColNames.CSARR
   override val eventBuilder: EventBuilder = SsrCSARRAct

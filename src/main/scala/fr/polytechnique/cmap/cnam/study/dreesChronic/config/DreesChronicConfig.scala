@@ -77,8 +77,9 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
     mcoCECodes = otherCCAMCodes ++ efrCCAMCodes ++ gazSangCCAMCodes,
     mcoCCAMCodes = otherCCAMCodes ++ efrCCAMCodes ++ gazSangCCAMCodes,
     mcoCIMCodes = List(),
-    ssrCIMCodes = List(),
-    ssrCCAMCodes = otherCCAMCodes ++ efrCCAMCodes ++ gazSangCCAMCodes
+    ssrCSARRCodes = List(),
+    ssrCCAMCodes = otherCCAMCodes ++ efrCCAMCodes ++ gazSangCCAMCodes,
+    hadCCAMCodes = otherCCAMCodes ++ efrCCAMCodes ++ gazSangCCAMCodes
   )
 
   /** parameters needed for drugs extractor **/

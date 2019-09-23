@@ -56,10 +56,6 @@ object SsrCCAMAct extends MedicalAct {
   val category: EventCategory[MedicalAct] = "ssr_ccam_act"
 }
 
-// TODO see where it has to be moved
-object SsrCIM10Act extends MedicalAct {
-  val category: EventCategory[MedicalAct] = "ssr_main_care_purpose"
-}
 
 object SsrCSARRAct extends MedicalAct {
   val category: EventCategory[MedicalAct] = "ssr_csarr_act"

@@ -126,7 +126,8 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     mcoCECodes = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList,
     mcoCCAMCodes = CCAMExceptions.toList,
     mcoCIMCodes = List(),
+    ssrCSARRCodes = List(),
     ssrCCAMCodes = List(),
-    ssrCIMCodes = List()
+    hadCCAMCodes = List()
   )
 }

@@ -95,5 +95,44 @@ class SsrDiagnosesSuite extends SharedContext {
     assertDSs(result, expected)
   }
 
+  "extract" should "return a DataSet of SsrTakingOverPurposes (cim10 codes)" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val cim10Codes = Set("Z100")
+    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
+    val expected = Seq[Event[Diagnosis]](
+      SsrTakingOverPurpose("Patient_02", "10000123_30000546_300_2019", "Z100", makeTS(2019, 8, 11))
+    ).toDS
+
+    val input = Sources(ssr = Some(ssr))
+    // When
+    val result = SsrTakingOverPurposeExtractor.extract(input, cim10Codes)
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+  it should "return all available SsrTakingOverPurposes when codes is Empty" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
+    val expected = Seq[Event[Diagnosis]](
+      SsrTakingOverPurpose("Patient_02", "10000123_30000546_200_2019", "Z400", makeTS(2019, 8, 11)),
+      SsrTakingOverPurpose("Patient_02", "10000123_30000546_300_2019", "Z100", makeTS(2019, 8, 11)),
+      SsrTakingOverPurpose("Patient_01", "10000123_30000801_100_2019", "Z200", makeTS(2019, 10, 20))
+    ).toDS
+
+    val input = Sources(ssr = Some(ssr))
+    // When
+    val result = SsrTakingOverPurposeExtractor.extract(input, Set.empty)
+
+    // Then
+    assertDSs(result, expected)
+  }
+
 }
 

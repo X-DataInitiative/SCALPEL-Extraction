@@ -8,14 +8,17 @@ object SsrMainDiagnosisExtractor extends SsrExtractor[Diagnosis] {
   override val eventBuilder: EventBuilder = SsrMainDiagnosis
 }
 
-
 object SsrAssociatedDiagnosisExtractor extends SsrExtractor[Diagnosis] {
   final override val columnName: String = ColNames.DA
   override val eventBuilder: EventBuilder = SsrAssociatedDiagnosis
 }
 
-
 object SsrLinkedDiagnosisExtractor extends SsrExtractor[Diagnosis] {
   final override val columnName: String = ColNames.DR
   override val eventBuilder: EventBuilder = SsrLinkedDiagnosis
+}
+
+object SsrTakingOverPurposeExtractor extends SsrExtractor[Diagnosis] {
+  final override val columnName: String = ColNames.FP_PEC
+  override val eventBuilder: EventBuilder = SsrTakingOverPurpose
 }
