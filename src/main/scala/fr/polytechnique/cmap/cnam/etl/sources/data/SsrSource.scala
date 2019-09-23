@@ -30,6 +30,8 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
   val SOR_DAT: Column = col("SSR_C__SOR_DAT")
   val Year: Column = col("year")
 
+  override val EXE_SOI_DTD: Column = col("SSR_C__EXE_SOI_DTD")
+
   val foreignKeys: List[String] = List("ETA_NUM", "RHA_NUM", "year")
 
   override def sanitize(rawSsr: DataFrame): DataFrame = {
