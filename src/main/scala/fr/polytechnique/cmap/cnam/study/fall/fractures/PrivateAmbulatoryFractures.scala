@@ -23,7 +23,7 @@ object PrivateAmbulatoryFractures extends OutcomesTransformer with FractureCodes
       .map(
         event => {
           val fractureSite = BodySite.getSiteFromCode(event.value, BodySites.sites, CodeType.CCAM)
-          Outcome(event.patientID, fractureSite, outcomeName, event.start)
+          Outcome(event.patientID, fractureSite, outcomeName, event.weight, event.start)
         }
       )
   }

@@ -43,5 +43,3 @@ class FracturesTransformer(config: FallConfig) extends OutcomesTransformer with 
   }
 
 }
-
-

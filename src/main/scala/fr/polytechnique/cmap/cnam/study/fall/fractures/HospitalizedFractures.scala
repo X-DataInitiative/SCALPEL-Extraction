@@ -37,6 +37,7 @@ object HospitalizedFractures extends OutcomesTransformer with FractureCodes {
           event.patientID,
           BodySite.getSiteFromCode(event.value, ghmSites, CodeType.CIM10),
           outcomeName,
+          event.weight,
           event.start
         )
       )
@@ -45,10 +46,6 @@ object HospitalizedFractures extends OutcomesTransformer with FractureCodes {
 
   def isFractureDiagnosis(event: Event[Diagnosis], ghmSites: List[String]): Boolean = {
     isInCodeList(event, ghmSites.toSet)
-  }
-
-  def isMainOrDASDiagnosis(event: Event[Diagnosis]): Boolean = {
-    event.category == MainDiagnosis.category || event.category == AssociatedDiagnosis.category
   }
 
   def isBadGHM(event: Event[MedicalAct]): Boolean = {
@@ -60,9 +57,9 @@ object HospitalizedFractures extends OutcomesTransformer with FractureCodes {
   }
 
   /**
-    * filters diagnosis that do not have a DP in the same hospital stay
-    * and the diagnosis that relates to an incorrectGHMStay
-    */
+   * filters diagnosis that do not have a DP in the same hospital stay
+   * and the diagnosis that relates to an incorrectGHMStay
+   */
   def filterHospitalStay(
     events: Dataset[Event[Diagnosis]],
     incorrectGHMStays: Dataset[HospitalStayID])
@@ -86,6 +83,10 @@ object HospitalizedFractures extends OutcomesTransformer with FractureCodes {
     fracturesDiagnoses
       .join(broadcast(patientsToFilter), Seq("patientID"), "left_anti")
       .as[Event[Diagnosis]]
+  }
+
+  def isMainOrDASDiagnosis(event: Event[Diagnosis]): Boolean = {
+    event.category == MainDiagnosis.category || event.category == AssociatedDiagnosis.category
   }
 
 }

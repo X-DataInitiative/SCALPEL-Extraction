@@ -13,24 +13,24 @@ class McoSourceSuite extends SharedContext with McoSource {
     import sqlCtx.implicits._
 
     Seq(
-      ("HasCancer1", Some("C669"), Some("C672"), Some("C643"), Some(12), Some(2011), 11,
+      ("HasCancer1", Some("C669"), Some("C672"), Some("C643"), Some(9), Some(12), Some(2011), 11,
         Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12)), Some("01122011"), Some("12122011")),
-      ("HasCancer1", Some("C679"), Some("C691"), Some("C643"), Some(12), Some(2011), 11,
+      ("HasCancer1", Some("C679"), Some("C691"), Some("C643"), Some(0), Some(12), Some(2011), 11,
         Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12)), Some("01122011"), Some("12122011")),
-      ("HasCancer2", Some("C669"), Some("C672"), Some("C643"), Some(12), Some(2011), 11,
+      ("HasCancer2", Some("C669"), Some("C672"), Some("C643"), Some(0),Some(12), Some(2011), 11,
         None, Some(makeTS(2011, 12, 12)), None, Some("12122011")),
-      ("HasCancer3", Some("C669"), Some("C672"), Some("C643"), Some(12), Some(2011), 11,
+      ("HasCancer3", Some("C669"), Some("C672"), Some("C643"), Some(0), Some(12), Some(2011), 11,
         None, None, None, None),
-      ("HasCancer4", Some("C669"), Some("C672"), Some("C643"), None, None, 11,
+      ("HasCancer4", Some("C669"), Some("C672"), Some("C643"), Some(0), None, None, 11,
         None, Some(makeTS(2011, 12, 12)), None, Some("12122011")),
-      ("HasCancer5", Some("C679"), Some("B672"), Some("C673"), Some(1), Some(2010), 31,
+      ("HasCancer5", Some("C679"), Some("B672"), Some("C673"), Some(0), Some(1), Some(2010), 31,
         Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12)), Some("01122011"), Some("12122011")),
-      ("MustBeDropped1", None, None, None, Some(1), Some(2010), 31,
+      ("MustBeDropped1", None, None, None, Some(0),  Some(1), Some(2010), 31,
         Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12)), Some("01122011"), Some("12122011")),
-      ("MustBeDropped2", None, Some("7"), None, Some(1), Some(2010), 31,
+      ("MustBeDropped2", None, Some("7"), None, Some(0), Some(1), Some(2010), 31,
         Some(makeTS(2011, 12, 1)), Some(makeTS(2011, 12, 12)), Some("01122011"), Some("12122011"))
     ).toDF(
-      "NUM_ENQ", "MCO_D__ASS_DGN", "MCO_B__DGN_PAL", "MCO_B__DGN_REL", "MCO_B__SOR_MOI",
+      "NUM_ENQ", "MCO_D__ASS_DGN", "MCO_B__DGN_PAL", "MCO_B__DGN_REL", "SOR_MOD", "MCO_B__SOR_MOI",
       "MCO_B__SOR_ANN", "MCO_B__SEJ_NBJ", "ENT_DAT", "SOR_DAT", "ENT_DAT_STR", "SOR_DAT_STR"
     )
   }

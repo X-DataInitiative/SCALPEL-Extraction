@@ -61,7 +61,7 @@ class DcirMedicalActsSuite extends SharedContext {
     // Given
     val inputArray = Array[Any]("Patient_A", "AAAA", makeTS(2010, 1, 1))
     val inputRow = new GenericRowWithSchema(inputArray, oldSchema)
-    val expected = Seq(DcirAct("Patient_A", DcirAct.groupID.DcirAct, "AAAA", makeTS(2010, 1, 1)))
+    val expected = Seq(DcirAct("Patient_A", DcirAct.groupID.DcirAct, "AAAA", 1.0, makeTS(2010, 1, 1)))
 
     // When
     val result = DcirMedicalActExtractor.builder(inputRow)
@@ -232,9 +232,9 @@ class DcirMedicalActsSuite extends SharedContext {
     val sources = Sources(dcir = Some(input))
 
     val expected = Seq[Event[MedicalAct]](
-      DcirAct("Patient_A", DcirAct.groupID.Liberal, "AAAA", makeTS(2010, 1, 1)),
-      DcirAct("Patient_B", DcirAct.groupID.Liberal, "CCCC", makeTS(2010, 3, 1)),
-      DcirAct("Patient_B", DcirAct.groupID.PrivateAmbulatory, "CCCC", makeTS(2010, 4, 1))
+      DcirAct("Patient_A", DcirAct.groupID.Liberal, "AAAA", 1.0, makeTS(2010, 1, 1)),
+      DcirAct("Patient_B", DcirAct.groupID.Liberal, "CCCC", 1.0, makeTS(2010, 3, 1)),
+      DcirAct("Patient_B", DcirAct.groupID.PrivateAmbulatory, "CCCC", 1.0, makeTS(2010, 4, 1))
     ).toDS
 
     // When
