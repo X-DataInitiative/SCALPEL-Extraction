@@ -53,12 +53,12 @@ class OutcomeSuite extends FlatSpec {
     assert(result == expected)
   }
 
-  "fromRow2" should "have severity" in {
+  "fromRow" should "have severity" in {
     // Given
     val schema = StructType(
       StructField("pID", StringType) ::
         StructField("name", StringType) ::
-        StructField("weigh", DoubleType) ::
+        StructField("weight", DoubleType) ::
         StructField("date", TimestampType) :: Nil
     )
     val values = Array[Any]("Patient01", "bladder_cancer", 4.0, makeTS(2010, 1, 1))
@@ -66,7 +66,7 @@ class OutcomeSuite extends FlatSpec {
     val expected = Outcome("Patient01", "bladder_cancer", 4.0, makeTS(2010, 1, 1))
 
     // When
-    val result = Outcome.fromRow2(r, "pID", "name", "weigh", "date")
+    val result = Outcome.fromRow(r, "pID", "name", "weight", "date")
 
     // Then
     assert(result == expected)

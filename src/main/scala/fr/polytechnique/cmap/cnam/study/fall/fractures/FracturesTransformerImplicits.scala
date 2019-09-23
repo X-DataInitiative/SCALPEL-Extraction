@@ -10,13 +10,13 @@ import fr.polytechnique.cmap.cnam.etl.events.{Event, Outcome}
 private[fall] class FracturesTransformerImplicits(outcomes: Dataset[Event[Outcome]]) extends Serializable {
 
   /**
-    * The fracture only depends on site and patient
-    * When we have multiple fracture events of the same site happening consecutively within a period,
-    * they should be considered as a single one, with the date equal to the first event of the period.
-    *
-    * @param frame the followup period
-    * @return a dateset of fracture events
-    */
+   * The fracture only depends on site and patient
+   * When we have multiple fracture events of the same site happening consecutively within a period,
+   * they should be considered as a single one, with the date equal to the first event of the period.
+   *
+   * @param frame the followup period
+   * @return a dateset of fracture events
+   */
   def groupConsecutiveFractures(frame: Period): Dataset[Event[Outcome]] = {
 
     val sqlCtx = outcomes.sqlContext
@@ -29,7 +29,19 @@ private[fall] class FracturesTransformerImplicits(outcomes: Dataset[Event[Outcom
       when(col("start") >= col("lastStart").addPeriod(frame), "first")
     )
 
+    val windowsSpec = Window.partitionBy(
+      Event.Columns.PatientID,
+      Event.Columns.GroupID,
+      Event.Columns.Category,
+      Event.Columns.Value,
+      Event.Columns.Start,
+      Event.Columns.End
+    )
+
     outcomes
+      .withColumn("maxweight", max(col(Event.Columns.Weight)).over(windowsSpec))
+      .filter(col(Event.Columns.Weight) === col("maxweight"))
+      .drop("maxweight")
       .withColumn("lastStart", lag("start", 1).over(window))
       .withColumn("status", statusCol)
       .filter(col("status") === "first")

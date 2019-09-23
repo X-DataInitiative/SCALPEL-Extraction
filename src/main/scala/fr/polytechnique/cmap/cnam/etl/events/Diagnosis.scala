@@ -20,8 +20,26 @@ trait Diagnosis extends AnyEvent with EventBuilder {
     patientIDCol: String = "patientID",
     groupIDCol: String = "groupID",
     codeCol: String = "code",
-    weightCol: String = "weight",
     dateCol: String = "eventDate"): Event[Diagnosis] = {
+    apply(
+      r.getAs[String](patientIDCol),
+      r.getAs[String](groupIDCol),
+      r.getAs[String](codeCol),
+      r.getAs[Timestamp](dateCol)
+    )
+  }
+
+  def apply(patientID: String, groupID: String, code: String, date: Timestamp): Event[Diagnosis] = {
+    Event(patientID, category, groupID, code, 0.0, date, None)
+  }
+
+  def fromRow(
+    r: Row,
+    patientIDCol: String,
+    groupIDCol: String,
+    codeCol: String,
+    weightCol: String,
+    dateCol: String): Event[Diagnosis] = {
     apply(
       r.getAs[String](patientIDCol),
       r.getAs[String](groupIDCol),
@@ -29,10 +47,6 @@ trait Diagnosis extends AnyEvent with EventBuilder {
       r.getAs[Double](weightCol),
       r.getAs[Timestamp](dateCol)
     )
-  }
-
-  def apply(patientID: String, groupID: String, code: String, date: Timestamp): Event[Diagnosis] = {
-    Event(patientID, category, groupID, code, 0.0, date, None)
   }
 
   def apply(patientID: String, groupID: String, code: String, weight: Double, date: Timestamp): Event[Diagnosis] = {

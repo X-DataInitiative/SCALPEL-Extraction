@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.study.fall.extractors.{AssociatedDiagnosisFallExtractor, LinkedDiagnosisFallExtractor, MainDiagnosisFallExtractor}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class McoDiagnosesSuite extends SharedContext {
@@ -29,7 +30,7 @@ class McoDiagnosesSuite extends SharedContext {
 
 
     // When
-    val result = MainDiagnosisExtractor.extract(sources, dpCodes)
+    val result = MainDiagnosisFallExtractor.extract(sources, dpCodes)
 
     // Then
     assertDSs(result, expected)
@@ -45,12 +46,12 @@ class McoDiagnosesSuite extends SharedContext {
     val sources = Sources(mco = Some(mco))
 
     val expected = Seq[Event[Diagnosis]](
-      LinkedDiagnosis("Patient_02", "10000123_20000123_2007", "E05", makeTS(2007, 1, 29)),
-      LinkedDiagnosis("Patient_02", "10000123_10000543_2006", "E08", makeTS(2005, 12, 24))
+      LinkedDiagnosis("Patient_02", "10000123_20000123_2007", "E05", 2.0, makeTS(2007, 1, 29)),
+      LinkedDiagnosis("Patient_02", "10000123_10000543_2006", "E08", 2.0, makeTS(2005, 12, 24))
     ).toDS
 
     // When
-    val result = LinkedDiagnosisExtractor.extract(sources, linkedCodes)
+    val result = LinkedDiagnosisFallExtractor.extract(sources, linkedCodes)
 
     // Then
     assertDSs(result, expected)
@@ -71,7 +72,7 @@ class McoDiagnosesSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = AssociatedDiagnosisExtractor.extract(sources, associatedDiagnosis)
+    val result = AssociatedDiagnosisFallExtractor.extract(sources, associatedDiagnosis)
 
     // Then
     assertDSs(result, expected)

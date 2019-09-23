@@ -21,15 +21,13 @@ object DcirMedicalActExtractor extends DcirExtractor[MedicalAct] {
     getGroupId(r) recover { case _: IllegalArgumentException => DcirAct.groupID.DcirAct }
   }.get
 
-  override def extractWeight(r: Row): Double = 1.0
-
   /**
-    * Get the information of the origin of DCIR act that is being extracted. It returns a
-    * Failure[IllegalArgumentException] if the DCIR schema is old, a success if the DCIR schema contains an information.
-    *
-    * @param r the row of DCIR to be investigated.
-    * @return Try[String]
-    */
+   * Get the information of the origin of DCIR act that is being extracted. It returns a
+   * Failure[IllegalArgumentException] if the DCIR schema is old, a success if the DCIR schema contains an information.
+   *
+   * @param r the row of DCIR to be investigated.
+   * @return Try[String]
+   */
   def getGroupId(r: Row): Try[String] = Try {
 
     if (!r.isNullAt(r.fieldIndex(ColNames.Sector)) && getSector(r) == 1) {
@@ -58,5 +56,7 @@ object DcirMedicalActExtractor extends DcirExtractor[MedicalAct] {
   def getInstitutionCode(r: Row): Double = r.getAs[Double](ColNames.InstitutionCode)
 
   def getSector(r: Row): Double = r.getAs[Double](ColNames.Sector)
+
+  override def extractWeight(r: Row): Double = 1.0
 
 }

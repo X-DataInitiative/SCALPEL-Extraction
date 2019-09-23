@@ -44,5 +44,5 @@ trait McoExtractor[EventType <: AnyEvent] extends Extractor[EventType] with McoS
 
   def extractStart(r: Row): Timestamp = r.getAs[Timestamp](NewColumns.EstimatedStayStart)
 
-  def getExit(r: Row): String = r.getAs[String](ColNames.Exit)
+  def getExit(r: Row): String = r.getAs[String](ColNames.ExitMode)
 }
