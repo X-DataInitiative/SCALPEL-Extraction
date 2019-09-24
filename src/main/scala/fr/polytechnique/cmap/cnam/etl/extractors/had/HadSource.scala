@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.had
 import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame}
 
 trait HadSource extends ColumnNames {
@@ -43,7 +44,7 @@ trait HadSource extends ColumnNames {
       */
     def estimateStayStartTime: DataFrame = {
 
-      val givenDate: Column = ColNames.StartDate.toCol
+      val givenDate: Column = ColNames.StartDate.toCol.cast(TimestampType)
 
       //val estimateDate: Column = parseTimestamp(ColNames.StayStartDate.toCol, "ddMMyyyy")
 

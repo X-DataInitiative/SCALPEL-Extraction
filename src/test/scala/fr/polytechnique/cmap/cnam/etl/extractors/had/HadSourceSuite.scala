@@ -20,7 +20,7 @@ class HadSourceSuite extends SharedContext with HadSource {
       ("HasCancer2", Some("C669"), Some("C672"), Some("C643"),
         Some(makeTS(2011, 12, 11)), Some(makeTS(2011, 12, 12)), None, Some("12122011")),
       ("HasCancer4", Some("C669"), Some("C672"), Some("C643"),
-        None, Some(makeTS(2011, 12, 12)), Some("11112011"), Some("12122011")),
+        Some(makeTS(2011, 11, 11)), Some(makeTS(2011, 12, 12)), Some("11112011"), Some("12122011")),
       ("HasCancer5", Some("C679"), Some("B672"), Some("C673"),
         Some(makeTS(2010, 12, 1)), Some(makeTS(2010, 12, 12)), Some("01122010"), Some("12122010"))
     ).toDF(
