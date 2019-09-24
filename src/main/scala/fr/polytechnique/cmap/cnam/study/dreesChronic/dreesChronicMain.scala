@@ -210,15 +210,15 @@ object dreesChronicMain extends Main with BpcoCodes {
     import implicits.SourceReader
     val sourcesAllYears = Sources.sanitize(sqlContext.readSources(dreesChronicConfig.input))
     val sources = Sources.sanitizeDates(sourcesAllYears, dreesChronicConfig.base.studyStart, dreesChronicConfig.base.studyEnd)
-    val dcir = sources.dcir.get.repartition(4000).persist()
-    val mco = sources.mco.get.repartition(4000).persist()
-    val ssr = sources.ssr.get.repartition(4000).persist()
+    //val dcir = sources.dcir.get.repartition(4000).persist()
+    //val mco = sources.mco.get.repartition(4000).persist()
+    //val ssr = sources.ssr.get.repartition(4000).persist()
 
     val operationsMetadata = computePrestations(sources, dreesChronicConfig) ++ computeHospitalStays(sources, dreesChronicConfig) ++ computeOutcomes(sources, dreesChronicConfig) ++ computeExposures(sources, dreesChronicConfig)
 
-    dcir.unpersist()
-    mco.unpersist()
-    ssr.unpersist()
+    //dcir.unpersist()
+    //mco.unpersist()
+    //ssr.unpersist()
 
 
     // Write Metadata
