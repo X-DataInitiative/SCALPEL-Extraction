@@ -28,7 +28,7 @@ trait HadSource extends ColumnNames {
       StayStartDate, StayEndDate, StartDate, EndDate
     )
     val hospitalStayPart = List(
-      PatientID, EtaNumEpmsi, RhadNum, StartDate, EndDate
+      PatientID, EtaNumEpmsi, RhadNum, StartDate, StayStartDate, StayEndDate, EndDate
     )
   }
 
