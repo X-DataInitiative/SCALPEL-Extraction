@@ -19,17 +19,16 @@ trait HadSource extends ColumnNames {
 
     // val GHM: ColName = "HAD_B__GRG_GHM" ?? TODO equivalent GHM pour la HAD
 
-    val Year: ColName = "HAD_B__SOR_ANN"
     val StayStartDate: ColName = "ENT_DAT"
     val StayEndDate: ColName = "SOR_DAT"
     val StartDate: ColName = "EXE_SOI_DTD"
     val EndDate: ColName = "EXE_SOI_DTF"
     val all = List(
-      PatientID, DP, DA, CCAM, PEC_PAL, PEC_ASS, EtaNumEpmsi, RhadNum, Year,
+      PatientID, DP, DA, CCAM, PEC_PAL, PEC_ASS, EtaNumEpmsi, RhadNum,
       StayStartDate, StayEndDate, StartDate, EndDate
     )
     val hospitalStayPart = List(
-      PatientID, EtaNumEpmsi, RhadNum, Year, StartDate, EndDate
+      PatientID, EtaNumEpmsi, RhadNum, StartDate, EndDate
     )
   }
 
@@ -48,15 +47,22 @@ trait HadSource extends ColumnNames {
 
       val givenDate: Column = parseTimestamp(ColNames.StayStartDate.toCol, "ddMMyyyy")
 
+      val givenYear: Column = year(givenDate)
+
+      val estimateYear: Column = year(estimate)
+
       df.withColumn(
         NewColumns.EstimatedStayStart,
-        coalesce(givenDate, estimate)
-      )
+        coalesce(givenDate, estimate))
+        .withColumn(
+          NewColumns.Year,
+          coalesce(givenYear, estimateYear))
     }
   }
 
   object NewColumns extends Serializable {
     val EstimatedStayStart: ColName = "estimated_start"
+    val Year: ColName = "year"
   }
 
 }

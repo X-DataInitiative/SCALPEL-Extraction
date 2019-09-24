@@ -25,6 +25,6 @@ object HadHospitalStaysExtractor extends HadExtractor[HospitalStay] {
   override def extractGroupId(r: Row): String = {
     r.getAs[String](ColNames.EtaNumEpmsi) + "_" +
       r.getAs[String](ColNames.RhadNum) + "_" +
-      r.getAs[Int](ColNames.Year).toString
+      r.getAs[Int](NewColumns.Year).toString
   }
 }
