@@ -180,7 +180,7 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     if (dreesChronicConfig.runParameters.acts) {
 
-      val acts = new ActsExtractor(dreesChronicConfig.medicalActs).extract(sources).persist()
+      val acts = new ActsExtractor(dreesChronicConfig.medicalActs).extract(sources)//.persist()
 
       operationsMetadata += {
         OperationReporter.report(
