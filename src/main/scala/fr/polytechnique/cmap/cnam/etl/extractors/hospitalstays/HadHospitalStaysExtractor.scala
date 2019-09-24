@@ -20,7 +20,7 @@ object HadHospitalStaysExtractor extends HadExtractor[HospitalStay] {
 
   override def code: Row => String = extractGroupId
 
-  override def getInput(sources: Sources): DataFrame = sources.had.get.select(ColNames.hospitalStayPart.map(col): _*)
+  override def getInput(sources: Sources): DataFrame = sources.had.get.select(ColNames.hospitalStayPart.map(col): _*).estimateStayStartTime
 
   override def extractGroupId(r: Row): String = {
     r.getAs[String](ColNames.EtaNumEpmsi) + "_" +
