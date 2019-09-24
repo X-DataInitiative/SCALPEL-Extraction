@@ -214,7 +214,7 @@ object dreesChronicMain extends Main with BpcoCodes {
     //val mco = sources.mco.get.repartition(4000).persist()
     //val ssr = sources.ssr.get.repartition(4000).persist()
 
-    val operationsMetadata = computePrestations(sources, dreesChronicConfig) ++ computeHospitalStays(sources, dreesChronicConfig) ++ computeOutcomes(sources, dreesChronicConfig) ++ computeExposures(sources, dreesChronicConfig)
+    val operationsMetadata = computeHospitalStays(sources, dreesChronicConfig) ++ computePrestations(sources, dreesChronicConfig) ++  computeOutcomes(sources, dreesChronicConfig) ++ computeExposures(sources, dreesChronicConfig)
 
     //dcir.unpersist()
     //mco.unpersist()
