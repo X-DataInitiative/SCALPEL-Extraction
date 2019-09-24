@@ -15,21 +15,21 @@ object BroadBladderCancer extends OutcomesTransformer with PioglitazoneStudyCode
   override val outcomeName: String = "broad_bladder_cancer"
 
   val directDiagnosisCategories = List(
-    MainDiagnosis.category,
-    LinkedDiagnosis.category,
+    McoMainDiagnosis.category,
+    McoLinkedDiagnosis.category,
     HadMainDiagnosis.category,
     SsrMainDiagnosis.category,
     SsrAssociatedDiagnosis.category
   )
 
   val groupDiagnosisCategories = List(
-    MainDiagnosis.category,
-    LinkedDiagnosis.category
+    McoMainDiagnosis.category,
+    McoLinkedDiagnosis.category
   )
 
   def isGroupDiagnosis(eventsGroup: Seq[Event[Diagnosis]]): Boolean = {
     eventsGroup.exists { ev =>
-      ev.category == AssociatedDiagnosis.category && ev.value == primaryDiagCode
+      ev.category == McoAssociatedDiagnosis.category && ev.value == primaryDiagCode
     } &&
       eventsGroup.exists { ev =>
         groupDiagnosisCategories.contains(ev.category) && secondaryDiagCodes.contains(ev.value)

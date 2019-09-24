@@ -40,10 +40,10 @@ class FracturesTransformerSuite extends SharedContext {
     val liberalActs = acts.filter(act => act.groupID == DcirAct.groupID.Liberal && !CCAMExceptions.contains(act.value))
     val diagnoses = Seq(
       //hospitalization diagnoses
-      MainDiagnosis("emile", "3", "S222", makeTS(2017, 7, 18)),
-      MainDiagnosis("Paul", "1", "S42.54678", makeTS(2017, 7, 20)),
-      MainDiagnosis("Paul", "7", "hemorroides", makeTS(2017, 1, 2)),
-      AssociatedDiagnosis("Jacques", "8", "qu'est-ce-que tu fais là?", makeTS(2017, 7, 18))
+      McoMainDiagnosis("emile", "3", "S222", makeTS(2017, 7, 18)),
+      McoMainDiagnosis("Paul", "1", "S42.54678", makeTS(2017, 7, 20)),
+      McoMainDiagnosis("Paul", "7", "hemorroides", makeTS(2017, 1, 2)),
+      McoAssociatedDiagnosis("Jacques", "8", "qu'est-ce-que tu fais là?", makeTS(2017, 7, 18))
     ).toDS
 
     val expectedOutcomes = Seq(

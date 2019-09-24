@@ -10,9 +10,9 @@ object HeartFailure extends OutcomesTransformer with RosiglitazoneStudyCodes {
 
   override val outcomeName: String = OutcomeDefinition.HeartFailure.outcomeName
 
-  private val DP = MainDiagnosis.category
-  private val DR = LinkedDiagnosis.category
-  private val DAS = AssociatedDiagnosis.category
+  private val DP = McoMainDiagnosis.category
+  private val DR = McoLinkedDiagnosis.category
+  private val DAS = McoAssociatedDiagnosis.category
 
   private val diagHeartFailure = diagCodeHeartFailure
   private val diagHeartComplication = diagCodeHeartComplication

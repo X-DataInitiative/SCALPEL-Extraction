@@ -18,9 +18,9 @@ class NarrowBladderCancerSuite extends SharedContext {
   "checkDates" should "return true if all the events have the same date, or if the list is empty" in {
     // Given
     val events: List[Event[AnyEvent]] = List(
-      MainDiagnosis(patientID, hospitalStayID, "C67", date),
-      LinkedDiagnosis(patientID, hospitalStayID, "C67", date),
-      AssociatedDiagnosis(patientID, hospitalStayID, "C67", date),
+      McoMainDiagnosis(patientID, hospitalStayID, "C67", date),
+      McoLinkedDiagnosis(patientID, hospitalStayID, "C67", date),
+      McoAssociatedDiagnosis(patientID, hospitalStayID, "C67", date),
       McoCCAMAct(patientID, hospitalStayID, "A", date)
     )
 
@@ -32,7 +32,7 @@ class NarrowBladderCancerSuite extends SharedContext {
   it should "return false otherwise" in {
     // Given
     val events: List[Event[AnyEvent]] = List(
-      AssociatedDiagnosis(patientID, hospitalStayID, "C67", date),
+      McoAssociatedDiagnosis(patientID, hospitalStayID, "C67", date),
       McoCCAMAct(patientID, hospitalStayID, "A", date + 1.day)
     )
 
@@ -43,20 +43,20 @@ class NarrowBladderCancerSuite extends SharedContext {
   "checkDiagnosesInStay" should "return true if the diagnoses in a stay conform to the rules" in {
     // Given
     val dpEvent: List[Event[AnyEvent]] = List(
-      MainDiagnosis(patientID, hospitalStayID, "C67", date), // true
-      MainDiagnosis(patientID, hospitalStayID, "AAA", date) // false
+      McoMainDiagnosis(patientID, hospitalStayID, "C67", date), // true
+      McoMainDiagnosis(patientID, hospitalStayID, "AAA", date) // false
     )
     val drEvent: List[Event[AnyEvent]] = List(
-      LinkedDiagnosis(patientID, hospitalStayID, "C67", date), // true
-      LinkedDiagnosis(patientID, hospitalStayID, "AAA", date) // false
+      McoLinkedDiagnosis(patientID, hospitalStayID, "C67", date), // true
+      McoLinkedDiagnosis(patientID, hospitalStayID, "AAA", date) // false
     )
     val dasWithDp: List[Event[AnyEvent]] = List(
-      AssociatedDiagnosis(patientID, hospitalStayID, "C67", date),
-      MainDiagnosis(patientID, hospitalStayID, "C77", date)
+      McoAssociatedDiagnosis(patientID, hospitalStayID, "C67", date),
+      McoMainDiagnosis(patientID, hospitalStayID, "C77", date)
     )
     val dasWithDr: List[Event[AnyEvent]] = List(
-      AssociatedDiagnosis(patientID, hospitalStayID, "C67", date),
-      LinkedDiagnosis(patientID, hospitalStayID, "C78", date)
+      McoAssociatedDiagnosis(patientID, hospitalStayID, "C67", date),
+      McoLinkedDiagnosis(patientID, hospitalStayID, "C78", date)
     )
 
     // When|Then
@@ -70,16 +70,16 @@ class NarrowBladderCancerSuite extends SharedContext {
     // Given
     val emptyList: List[Event[AnyEvent]] = Nil
     val wrongCodeEvents: List[Event[AnyEvent]] = List(
-      MainDiagnosis(patientID, hospitalStayID, "AAA", date),
-      LinkedDiagnosis(patientID, hospitalStayID, "AAA", date),
-      AssociatedDiagnosis(patientID, hospitalStayID, "AAA", date)
+      McoMainDiagnosis(patientID, hospitalStayID, "AAA", date),
+      McoLinkedDiagnosis(patientID, hospitalStayID, "AAA", date),
+      McoAssociatedDiagnosis(patientID, hospitalStayID, "AAA", date)
     )
     val onlyDas: List[Event[AnyEvent]] = List(
-      AssociatedDiagnosis(patientID, hospitalStayID, "C67", date)
+      McoAssociatedDiagnosis(patientID, hospitalStayID, "C67", date)
     )
     val noDas: List[Event[AnyEvent]] = List(
-      MainDiagnosis(patientID, hospitalStayID, "C77", date),
-      LinkedDiagnosis(patientID, hospitalStayID, "C79", date)
+      McoMainDiagnosis(patientID, hospitalStayID, "C77", date),
+      McoLinkedDiagnosis(patientID, hospitalStayID, "C79", date)
     )
 
     // When|Then
@@ -151,8 +151,8 @@ class NarrowBladderCancerSuite extends SharedContext {
     )
 
     val mcoDiagnoses: List[Event[AnyEvent]] = List(
-      AssociatedDiagnosis(patientID, hospitalStayID, "C67", date),
-      LinkedDiagnosis(patientID, hospitalStayID, "C79", date)
+      McoAssociatedDiagnosis(patientID, hospitalStayID, "C67", date),
+      McoLinkedDiagnosis(patientID, hospitalStayID, "C79", date)
     )
 
     val mcoActs: List[Event[AnyEvent]] = List(
@@ -177,13 +177,13 @@ class NarrowBladderCancerSuite extends SharedContext {
       // dcir
       DcirAct(patientID, dcirGroupID, "YYYY045", date + 1.month),
       // hosp1 (true: dcir act)
-      AssociatedDiagnosis(patientID, "hosp1", "C67", date),
-      LinkedDiagnosis(patientID, "hosp1", "C79", date),
+      McoAssociatedDiagnosis(patientID, "hosp1", "C67", date),
+      McoLinkedDiagnosis(patientID, "hosp1", "C79", date),
       // hosp2 (true: mco z510)
-      MainDiagnosis(patientID, "hosp2", "C67", date + 6.months),
+      McoMainDiagnosis(patientID, "hosp2", "C67", date + 6.months),
       McoCIM10Act(patientID, "hosp2", "Z510", date + 6.months),
       // hosp3 (false)
-      LinkedDiagnosis(patientID, "hosp3", "C67", date + 9.months)
+      McoLinkedDiagnosis(patientID, "hosp3", "C67", date + 9.months)
     )
     val expected: Seq[Event[Outcome]] = Stream(
       Outcome(patientID, NarrowBladderCancer.outcomeName, date + 6.months),
@@ -204,12 +204,12 @@ class NarrowBladderCancerSuite extends SharedContext {
 
     // Given
     val diagnoses: Dataset[Event[Diagnosis]] = Seq(
-      AssociatedDiagnosis("PatientA", "hosp1", "C67", date),
-      LinkedDiagnosis("PatientA", "hosp1", "C79", date),
-      MainDiagnosis("PatientA", "hosp2", "C67", date + 4.months),
-      MainDiagnosis("PatientA", "hosp3", "C67", date + 6.months),
-      LinkedDiagnosis("PatientB", "hosp4", "C67", date + 8.months),
-      MainDiagnosis("PatientC", "hosp5", "C67", date + 10.months)
+      McoAssociatedDiagnosis("PatientA", "hosp1", "C67", date),
+      McoLinkedDiagnosis("PatientA", "hosp1", "C79", date),
+      McoMainDiagnosis("PatientA", "hosp2", "C67", date + 4.months),
+      McoMainDiagnosis("PatientA", "hosp3", "C67", date + 6.months),
+      McoLinkedDiagnosis("PatientB", "hosp4", "C67", date + 8.months),
+      McoMainDiagnosis("PatientC", "hosp5", "C67", date + 10.months)
     ).toDS
 
     val acts: Dataset[Event[MedicalAct]] = Seq(

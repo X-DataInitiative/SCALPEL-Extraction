@@ -2,7 +2,7 @@ package fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, MainDiagnosis, Outcome}
+import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, McoMainDiagnosis, Outcome}
 import fr.polytechnique.cmap.cnam.study.rosiglitazone.RosiglitazoneStudyCodes
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
@@ -30,7 +30,7 @@ class RosiglitazoneOutcomeTransformerSuite extends SharedContext {
     object RosiglitazoneCodes extends RosiglitazoneStudyCodes
     val infarctusCodes = RosiglitazoneCodes.infarctusDiagnosisCodes
     val input: Dataset[Event[Diagnosis]] = Seq(
-      MainDiagnosis("A", infarctusCodes.head, makeTS(2010, 1, 1))
+      McoMainDiagnosis("A", infarctusCodes.head, makeTS(2010, 1, 1))
     ).toDS
     val expected: Dataset[Event[Outcome]] = Seq(
       Outcome("A", OutcomeDefinition.Infarctus.outcomeName, makeTS(2010, 1, 1))

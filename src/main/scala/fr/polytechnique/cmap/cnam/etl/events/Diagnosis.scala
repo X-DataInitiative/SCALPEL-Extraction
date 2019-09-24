@@ -34,16 +34,16 @@ trait Diagnosis extends AnyEvent with EventBuilder {
   }
 }
 
-object MainDiagnosis extends Diagnosis {
-  override val category: EventCategory[Diagnosis] = "main_diagnosis"
+object McoMainDiagnosis extends Diagnosis {
+  override val category: EventCategory[Diagnosis] = "mco_main_diagnosis"
 }
 
-object LinkedDiagnosis extends Diagnosis {
-  override val category: EventCategory[Diagnosis] = "linked_diagnosis"
+object McoLinkedDiagnosis extends Diagnosis {
+  override val category: EventCategory[Diagnosis] = "mco_linked_diagnosis"
 }
 
-object AssociatedDiagnosis extends Diagnosis {
-  override val category: EventCategory[Diagnosis] = "associated_diagnosis"
+object McoAssociatedDiagnosis extends Diagnosis {
+  override val category: EventCategory[Diagnosis] = "mco_associated_diagnosis"
 }
 
 object HadMainDiagnosis extends Diagnosis {

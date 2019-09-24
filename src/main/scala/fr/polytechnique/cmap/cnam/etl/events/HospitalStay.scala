@@ -26,3 +26,15 @@ trait HospitalStay extends AnyEvent with EventBuilder {
 }
 
 object HospitalStay extends HospitalStay
+
+object McoHospitalStay extends HospitalStay {
+  override val category: EventCategory[HospitalStay] = "mco_hospital_stay"
+}
+
+object SsrHospitalStay extends HospitalStay {
+  override val category: EventCategory[HospitalStay] = "ssr_hospital_stay"
+}
+
+object HadHospitalStay extends HospitalStay {
+  override val category: EventCategory[HospitalStay] = "had_hospital_stay"
+}

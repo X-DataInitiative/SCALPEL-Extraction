@@ -12,12 +12,12 @@ class InfarctusSuite extends SharedContext {
 
     // Given
     val input = Seq[Event[Diagnosis]](
-      MainDiagnosis("PatientA", "I2100", makeTS(2010, 1, 1)),
-      LinkedDiagnosis("PatientB", "I2120", makeTS(2010, 2, 1)),
-      AssociatedDiagnosis("PatientC", "I2200", makeTS(2010, 3, 1)),
+      McoMainDiagnosis("PatientA", "I2100", makeTS(2010, 1, 1)),
+      McoLinkedDiagnosis("PatientB", "I2120", makeTS(2010, 2, 1)),
+      McoAssociatedDiagnosis("PatientC", "I2200", makeTS(2010, 3, 1)),
 
-      MainDiagnosis("PatientD", "ABC", makeTS(2010, 1, 1)),
-      LinkedDiagnosis("PatientA", "P50", makeTS(2010, 2, 1))
+      McoMainDiagnosis("PatientD", "ABC", makeTS(2010, 1, 1)),
+      McoLinkedDiagnosis("PatientA", "P50", makeTS(2010, 2, 1))
     ).toDS
 
     val expected = Seq(
@@ -40,9 +40,9 @@ class InfarctusSuite extends SharedContext {
 
     // Given
     val input = Seq[Event[Diagnosis]](
-      MainDiagnosis("PatientA", "CX50", makeTS(2010, 1, 1)),
-      LinkedDiagnosis("PatientB", "YNWA", makeTS(2010, 2, 1)),
-      AssociatedDiagnosis("PatientC", "LIV", makeTS(2010, 3, 1))
+      McoMainDiagnosis("PatientA", "CX50", makeTS(2010, 1, 1)),
+      McoLinkedDiagnosis("PatientB", "YNWA", makeTS(2010, 2, 1)),
+      McoAssociatedDiagnosis("PatientC", "LIV", makeTS(2010, 3, 1))
     ).toDS
 
     val expected = Seq.empty[Event[Outcome]]
