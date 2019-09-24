@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.study.dreesChronic
 
-import scala.collection.mutable
-import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
+import org.apache.spark.sql.{Dataset, SQLContext}
+
+import scala.collection.mutable
 //import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, Outcome}
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
@@ -26,13 +26,13 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     if (dreesChronicConfig.runParameters.hospitalStays) {
 
-      val hospitalStays = new HospitalStaysExtractor().extract(sources).cache()
+      val hospitalStays = new HospitalStaysExtractor().extract(sources)//.cache()
 
       operationsMetadata += {
         OperationReporter
           .report(
             "extract_hospital_stays",
-            List("MCO", "SSR_SEJ", "HAD"),
+            List("MCO", "SSR", "HAD"),
             OperationTypes.HospitalStays,
             hospitalStays.toDF,
             Path(dreesChronicConfig.output.outputSavePath),
@@ -49,7 +49,7 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     val optionDrugPurchases = if (dreesChronicConfig.runParameters.drugPurchases) {
 
-      val drugPurchases = new DrugsExtractor(dreesChronicConfig.drugs).extract(sources).cache()
+      val drugPurchases = new DrugsExtractor(dreesChronicConfig.drugs).extract(sources)//.cache()
 
       operationsMetadata += {
         OperationReporter
@@ -69,12 +69,12 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     val optionPatients = if (dreesChronicConfig.runParameters.patients) {
 
-      val patients = new Patients(PatientsConfig(dreesChronicConfig.base.studyStart)).extract(sources).cache()
+      val patients = new Patients(PatientsConfig(dreesChronicConfig.base.studyStart)).extract(sources)//.cache()
 
       operationsMetadata += {
         OperationReporter.report(
           "extract_patients",
-          List("DCIR", "MCO", "SSR_SEJ", "HAD", "IR_BEN_R", "MCO_CE"),
+          List("DCIR", "MCO", "SSR", "HAD", "IR_BEN_R", "MCO_CE"),
           OperationTypes.Patients,
           patients.toDF,
           Path(dreesChronicConfig.output.outputSavePath),
@@ -118,7 +118,7 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     if (dreesChronicConfig.runParameters.practionnerClaimSpeciality) {
 
-      val prestations =  new PractitionnerClaimSpecialityExtractor(dreesChronicConfig.practionnerClaimSpeciality).extract(sources).cache()
+      val prestations = new PractitionnerClaimSpecialityExtractor(dreesChronicConfig.practionnerClaimSpeciality).extract(sources)//.cache()
 
       operationsMetadata += {
         OperationReporter.report(
@@ -137,7 +137,7 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     val optionNgap = if (dreesChronicConfig.runParameters.ngapActs) {
 
-      val ngapActs = new DcirNgapActsExtractor(dreesChronicConfig.ngapActs).extract(sources).persist()
+      val ngapActs = new DcirNgapActsExtractor(dreesChronicConfig.ngapActs).extract(sources)//.persist()
 
       operationsMetadata += {
         OperationReporter.report(
@@ -161,12 +161,12 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     if (dreesChronicConfig.runParameters.diagnoses) {
 
-      val diagnoses = new DiagnosisExtractor(dreesChronicConfig.diagnoses).extract(sources).cache()
+      val diagnoses = new DiagnosisExtractor(dreesChronicConfig.diagnoses).extract(sources)//.cache()
 
       operationsMetadata += {
         OperationReporter.report(
           "diagnoses",
-          List("MCO", "SSR_SEJ", "HAD"),
+          List("MCO", "SSR", "HAD"),
           OperationTypes.Diagnosis,
           diagnoses.toDF,
           Path(dreesChronicConfig.output.outputSavePath),
@@ -185,7 +185,7 @@ object dreesChronicMain extends Main with BpcoCodes {
       operationsMetadata += {
         OperationReporter.report(
           "acts",
-          List("DCIR", "MCO", "MCO_CE", "SSR_SEJ", "HAD"),
+          List("DCIR", "MCO", "MCO_CE", "SSR", "HAD"),
           OperationTypes.MedicalActs,
           acts.toDF,
           Path(dreesChronicConfig.output.outputSavePath),
