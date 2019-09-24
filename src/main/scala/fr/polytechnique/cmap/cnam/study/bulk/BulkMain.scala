@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.study.bulk
 import java.io.PrintWriter
 
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirMedicalActExtractor, HadCcamActExtractor, McoCcamActExtractor, McoCeActExtractor, McoCimMedicalActExtractor, SsrCcamActExtractor, SsrCsarrActExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirMedicalActExtractor, HadCcamActExtractor, McoCcamActExtractor, McoCeActExtractor, McoCimMedicalActExtractor, SsrCcamActExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GhmExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses._
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugExtractor
@@ -163,19 +163,19 @@ object BulkMain extends Main {
     }
     //ssrCcamMedicalActs.unpersist()
 
-    val ssrCsarrMedicalActs = SsrCsarrActExtractor.extract(sources, Set.empty)//.cache()
-
-    operationsMetadata += {
-      OperationReporter.report(
-        "SsrCsarrMedicalActs",
-        List("SSR"),
-        OperationTypes.MedicalActs,
-        ssrCsarrMedicalActs.toDF,
-        Path(bulkConfig.output.outputSavePath),
-        bulkConfig.output.saveMode
-      )
-    }
-    //ssrCsarrMedicalActs.unpersist()
+//    val ssrCsarrMedicalActs = SsrCsarrActExtractor.extract(sources, Set.empty)//.cache()
+//
+//    operationsMetadata += {
+//      OperationReporter.report(
+//        "SsrCsarrMedicalActs",
+//        List("SSR"),
+//        OperationTypes.MedicalActs,
+//        ssrCsarrMedicalActs.toDF,
+//        Path(bulkConfig.output.outputSavePath),
+//        bulkConfig.output.saveMode
+//      )
+//    }
+//    //ssrCsarrMedicalActs.unpersist()
 
     val hadCcamMedicalActs = HadCcamActExtractor.extract(sources, Set.empty)//.cache()
 

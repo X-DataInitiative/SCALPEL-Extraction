@@ -43,20 +43,18 @@ trait HadSource extends ColumnNames {
       */
     def estimateStayStartTime: DataFrame = {
 
-      val estimate: Column = ColNames.StartDate.toCol
+      val givenDate: Column = ColNames.StartDate.toCol
 
-      val givenDate: Column = parseTimestamp(ColNames.StayStartDate.toCol, "ddMMyyyy")
+      //val estimateDate: Column = parseTimestamp(ColNames.StayStartDate.toCol, "ddMMyyyy")
+
+      //val estimateYear: Column = year(estimateDate)
 
       val givenYear: Column = year(givenDate)
 
-      val estimateYear: Column = year(estimate)
-
       df.withColumn(
-        NewColumns.EstimatedStayStart,
-        coalesce(givenDate, estimate))
+        NewColumns.EstimatedStayStart, givenDate)
         .withColumn(
-          NewColumns.Year,
-          coalesce(givenYear, estimateYear))
+          NewColumns.Year, givenYear)
     }
   }
 

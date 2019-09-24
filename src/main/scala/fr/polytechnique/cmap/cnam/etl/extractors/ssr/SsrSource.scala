@@ -14,7 +14,8 @@ trait SsrSource extends ColumnNames {
     val DR: ColName = "ETL_AFF"
     val DA: ColName = "SSR_D__DGN_COD"
     val CCAM: ColName = "SSR_CCAM__CCAM_ACT"
-    val CSARR: ColName = "SSR_CSARR__CSARR_COD"
+    // present only in 2014-2015-2016, should be let untouched for the studies on the echantillon
+    // val CSARR: ColName = "SSR_CSARR__CSARR_COD"
     val FP_PEC: ColName = "FP_PEC"
     // MOI_ANN_SOR_SEJ ?
     //val GHM: ColName = "SSR_B__GRG_GHM" -> GME TODO
@@ -30,7 +31,7 @@ trait SsrSource extends ColumnNames {
     val StartDate: ColName = "SSR_C__EXE_SOI_DTD"
     val EndDate: ColName = "SSR_C__EXE_SOI_DTF"
     val all = List(
-      PatientID, DP, DR, DA, CCAM, CSARR, FP_PEC, EtaNum, RhaNum, RhsNum, StayLength,
+      PatientID, DP, DR, DA, CCAM, FP_PEC, EtaNum, RhaNum, RhsNum, StayLength, //CSARR,
       StayStartDate, StayEndDate, StartDate, EndDate, Year, StayStartMonth, StayStartYear
     )
 
