@@ -27,7 +27,7 @@ object HadSource extends DataSourceManager with HadSourceSanitizer {
   
 //  val ENT_DAT: Column = col("ENT_DAT")
 //  val SOR_DAT: Column = col("SOR_DAT")
-//  val Year: Column = col("year")
+  val Year: Column = col("year")
 
   //val foreignKeys: List[String] = List("ETA_NUM_EPMSI", "RHA_NUM", "year")
 
