@@ -55,7 +55,7 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
 
     // Given
     val input = Seq(
-      ("A", "P", makeTS(2008, 1, 1), 1.0),
+      ("A", "P", makeTS(2008, 1, 1), 2.0),
       ("A", "P", makeTS(2008, 2, 1), 1.0),
       ("A", "P", makeTS(2008, 5, 1), 1.0),
       ("A", "P", makeTS(2008, 6, 1), 1.0),
@@ -63,18 +63,18 @@ class LimitedExposurePeriodAdderSuite extends SharedContext {
       ("A", "P", makeTS(2009, 1, 1), 1.0),
       ("A", "P", makeTS(2009, 7, 1), 1.0),
       ("A", "P", makeTS(2009, 8, 1), 1.0),
-      ("A", "S", makeTS(2008, 2, 1), 1.0)
+      ("A", "S", makeTS(2008, 2, 1), 2.0)
     ).toDF(PatientID, Value, Start, Weight)
 
     val expected = Seq(
-      ("A", "P", makeTS(2008, 1, 1), 1.0, "first", makeTS(2008, 2, 11)),
+      ("A", "P", makeTS(2008, 1, 1), 2.0, "first", makeTS(2008, 4, 11)),
       ("A", "P", makeTS(2008, 2, 1), 1.0, "last", makeTS(2008, 3, 11)),
       ("A", "P", makeTS(2008, 5, 1), 1.0, "first", makeTS(2008, 6, 11)),
       ("A", "P", makeTS(2008, 7, 1), 1.0, "last", makeTS(2008, 8, 11)),
       ("A", "P", makeTS(2009, 1, 1), 1.0, "first", makeTS(2009, 2, 11)),
       ("A", "P", makeTS(2009, 7, 1), 1.0, "first", makeTS(2009, 8, 11)),
       ("A", "P", makeTS(2009, 8, 1), 1.0, "last", makeTS(2009, 9, 11)),
-      ("A", "S", makeTS(2008, 2, 1), 1.0, "first", makeTS(2008, 3, 11))
+      ("A", "S", makeTS(2008, 2, 1), 2.0, "first", makeTS(2008, 5, 11))
     ).toDF(PatientID, Value, Start, Weight, "Status", "purchaseReach")
 
     val result = mockInstance.getFirstAndLastPurchase(input, 1.months, 3.month, 10.days)
