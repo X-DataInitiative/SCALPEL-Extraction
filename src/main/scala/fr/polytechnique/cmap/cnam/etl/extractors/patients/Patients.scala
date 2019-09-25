@@ -36,9 +36,7 @@ class Patients(config: PatientsConfig) {
 
     val joinColumn: Column = coalesce(
       col("irBen.patientID"),
-      col("mco.patientID"),
-      col("ssr.patientID"),
-      col("had.patientID"))
+      col("mco.patientID"))
 
     val patients: DataFrame = irBenPatients
       .join(mcoPatients, col("irBen.patientID") === col("mco.patientID"), "outer")

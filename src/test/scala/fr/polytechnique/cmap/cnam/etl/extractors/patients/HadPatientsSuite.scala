@@ -76,4 +76,21 @@ class HadPatientsSuite extends SharedContext {
     // Then
     assertDFs(result.toDF, expected)
   }
+
+  "extract" should "extract target HadPatients" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val had = spark.read.parquet("src/test/resources/test-input/HAD.parquet")
+
+    val result = HadPatients.extract(had)
+
+    val expected: DataFrame = Seq.empty[
+      (String, Timestamp)
+    ].toDF("patientID", "deathDate")
+
+    // Then
+    assertDSs(result, expected)
+  }
 }

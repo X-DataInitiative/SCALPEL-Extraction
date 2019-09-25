@@ -37,6 +37,19 @@ object BulkMain extends Main {
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
+    val patients = new Patients(PatientsConfig(bulkConfig.base.studyStart)).extract(sources)//.cache()
+    operationsMetadata += {
+      OperationReporter.report(
+        "BasePopulation",
+        List("IR_BEN", "DCIR", "MCO", "MCO_CE", "SSR", "HAD"),
+        OperationTypes.Patients,
+        patients.toDF,
+        Path(bulkConfig.output.outputSavePath),
+        bulkConfig.output.saveMode
+      )
+    }
+    //patients.unpersist()
+    
     val mcoHospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty)//.cache()
     operationsMetadata += {
       OperationReporter
@@ -373,19 +386,6 @@ object BulkMain extends Main {
       )
     }
     //imbDiagnoses.unpersist()
-
-    val patients = new Patients(PatientsConfig(bulkConfig.base.studyStart)).extract(sources)//.cache()
-    operationsMetadata += {
-      OperationReporter.report(
-        "BasePopulation",
-        List("IR_BEN", "DCIR", "MCO", "MCO_CE", "SSR", "HAD"),
-        OperationTypes.Patients,
-        patients.toDF,
-        Path(bulkConfig.output.outputSavePath),
-        bulkConfig.output.saveMode
-      )
-    }
-    //patients.unpersist()
 
     // Write Metadata
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)

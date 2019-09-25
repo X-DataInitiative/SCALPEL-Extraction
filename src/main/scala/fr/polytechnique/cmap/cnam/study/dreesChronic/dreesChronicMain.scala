@@ -21,31 +21,27 @@ object dreesChronicMain extends Main with BpcoCodes {
 
   override def appName: String = "dreesChronic study"
 
-  def computeHospitalStays(sources: Sources, dreesChronicConfig: DreesChronicConfig): mutable.Buffer[OperationMetadata] = {
-    val operationsMetadata = mutable.Buffer[OperationMetadata]()
-
-    if (dreesChronicConfig.runParameters.hospitalStays) {
-
-      val hospitalStays = new HospitalStaysExtractor().extract(sources)//.cache()
-
-      operationsMetadata += {
-        OperationReporter
-          .report(
-            "extract_hospital_stays",
-            List("MCO", "SSR", "HAD"),
-            OperationTypes.HospitalStays,
-            hospitalStays.toDF,
-            Path(dreesChronicConfig.output.outputSavePath),
-            dreesChronicConfig.output.saveMode
-          )
-      }
-    }
-    operationsMetadata
-  }
-
   def computeExposures(sources: Sources, dreesChronicConfig: DreesChronicConfig): mutable.Buffer[OperationMetadata] = {
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
+
+    val optionPatients = if (dreesChronicConfig.runParameters.patients) {
+
+      val patients = new Patients(PatientsConfig(dreesChronicConfig.base.studyStart)).extract(sources)//.cache()
+
+      operationsMetadata += {
+        OperationReporter.report(
+          "extract_patients",
+          List("DCIR", "MCO", "SSR", "HAD", "IR_BEN_R", "MCO_CE"),
+          OperationTypes.Patients,
+          patients.toDF,
+          Path(dreesChronicConfig.output.outputSavePath),
+          dreesChronicConfig.output.saveMode)
+      }
+      Some(patients)
+    } else {
+      None
+    }
 
     val optionDrugPurchases = if (dreesChronicConfig.runParameters.drugPurchases) {
 
@@ -67,23 +63,6 @@ object dreesChronicMain extends Main with BpcoCodes {
       None
     }
 
-    val optionPatients = if (dreesChronicConfig.runParameters.patients) {
-
-      val patients = new Patients(PatientsConfig(dreesChronicConfig.base.studyStart)).extract(sources)//.cache()
-
-      operationsMetadata += {
-        OperationReporter.report(
-          "extract_patients",
-          List("DCIR", "MCO", "SSR", "HAD", "IR_BEN_R", "MCO_CE"),
-          OperationTypes.Patients,
-          patients.toDF,
-          Path(dreesChronicConfig.output.outputSavePath),
-          dreesChronicConfig.output.saveMode)
-      }
-      Some(patients)
-    } else {
-      None
-    }
 
     if (dreesChronicConfig.runParameters.startGapPatients) {
 
@@ -109,6 +88,29 @@ object dreesChronicMain extends Main with BpcoCodes {
       }
     }
 
+    operationsMetadata
+  }
+
+  def computeHospitalStays(sources: Sources, dreesChronicConfig: DreesChronicConfig): mutable.Buffer[OperationMetadata] = {
+    val operationsMetadata = mutable.Buffer[OperationMetadata]()
+
+
+    if (dreesChronicConfig.runParameters.hospitalStays) {
+
+      val hospitalStays = new HospitalStaysExtractor().extract(sources)//.cache()
+
+      operationsMetadata += {
+        OperationReporter
+          .report(
+            "extract_hospital_stays",
+            List("MCO", "SSR", "HAD"),
+            OperationTypes.HospitalStays,
+            hospitalStays.toDF,
+            Path(dreesChronicConfig.output.outputSavePath),
+            dreesChronicConfig.output.saveMode
+          )
+      }
+    }
     operationsMetadata
   }
 
@@ -214,7 +216,7 @@ object dreesChronicMain extends Main with BpcoCodes {
     //val mco = sources.mco.get.repartition(4000).persist()
     //val ssr = sources.ssr.get.repartition(4000).persist()
 
-    val operationsMetadata = computePrestations(sources, dreesChronicConfig) ++ computeHospitalStays(sources, dreesChronicConfig) ++ computeOutcomes(sources, dreesChronicConfig) ++ computeExposures(sources, dreesChronicConfig)
+    val operationsMetadata = computeExposures(sources, dreesChronicConfig) ++ computePrestations(sources, dreesChronicConfig) ++ computeHospitalStays(sources, dreesChronicConfig) ++ computeOutcomes(sources, dreesChronicConfig)
 
     //dcir.unpersist()
     //mco.unpersist()
