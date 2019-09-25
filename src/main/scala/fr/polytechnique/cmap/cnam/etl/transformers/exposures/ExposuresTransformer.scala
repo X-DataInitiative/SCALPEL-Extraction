@@ -56,6 +56,7 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
       when(col(FollowUpEnd) < col(ExposureEnd), col(FollowUpEnd)).otherwise(col(ExposureEnd))
     ).drop(ExposureEnd) // This makes sure that all the exposures end at the followup end date
       .withColumnRenamed("Correct_Exposure_End", ExposureEnd)
+      .where(col(ExposureStart) <= col(ExposureEnd))
       .aggregateWeight(
         cumulativeExposureWindow,
         cumulativeStartThreshold,
