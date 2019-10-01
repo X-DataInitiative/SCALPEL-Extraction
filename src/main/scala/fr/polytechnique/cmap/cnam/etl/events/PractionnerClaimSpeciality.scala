@@ -32,3 +32,11 @@ object MedicalPractitionerClaim extends PractitionerClaimSpeciality {
 object NonMedicalPractitionerClaim extends PractitionerClaimSpeciality {
   override val category: EventCategory[PractitionerClaimSpeciality] = "non_medical_practitioner_claim"
 }
+
+object McoCeMedicalPractitionerClaim extends PractitionerClaimSpeciality {
+  override val category: EventCategory[PractitionerClaimSpeciality] = "mco_ce_practitioner_claim"
+}
+
+object SsrCeMedicalPractitionerClaim extends PractitionerClaimSpeciality {
+  override val category: EventCategory[PractitionerClaimSpeciality] = "ssr_ce_practitioner_claim"
+}
