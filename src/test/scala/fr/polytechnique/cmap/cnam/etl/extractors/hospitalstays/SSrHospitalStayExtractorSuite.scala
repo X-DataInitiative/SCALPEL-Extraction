@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.{Event, HospitalStay}
+import fr.polytechnique.cmap.cnam.etl.events.{Event, HospitalStay, SsrHospitalStay}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 import org.apache.spark.sql.Dataset
@@ -17,8 +17,8 @@ class SSrHospitalStayExtractorSuite extends SharedContext {
     val sources = Sources(ssr = Some(ssr))
 
     val expected: Dataset[Event[HospitalStay]] = Seq(
-      HospitalStay("Patient_01", "10000123_30000801_2019", makeTS(2019, 10, 20), makeTS(2019, 11, 11)),
-      HospitalStay("Patient_02", "10000123_30000546_2019", makeTS(2019, 8, 11), makeTS(2019, 8, 30))
+      SsrHospitalStay("Patient_01", "10000123_30000801_2019", makeTS(2019, 10, 20), makeTS(2019, 11, 11)),
+      SsrHospitalStay("Patient_02", "10000123_30000546_2019", makeTS(2019, 8, 11), makeTS(2019, 8, 30))
     ).toDS()
 
     //When
@@ -37,8 +37,8 @@ class SSrHospitalStayExtractorSuite extends SharedContext {
     val sources = Sources(ssr = Some(ssr))
 
     val expected: Dataset[Event[HospitalStay]] = Seq(
-      HospitalStay("Patient_01", "10000123_30000801_2019", makeTS(2019, 10, 20), makeTS(2019, 11, 11)),
-      HospitalStay("Patient_02", "10000123_30000546_2019", makeTS(2019, 8, 11), makeTS(2019, 8, 30))
+      SsrHospitalStay("Patient_01", "10000123_30000801_2019", makeTS(2019, 10, 20), makeTS(2019, 11, 11)),
+      SsrHospitalStay("Patient_02", "10000123_30000546_2019", makeTS(2019, 8, 11), makeTS(2019, 8, 30))
     ).toDS()
 
     //When
