@@ -120,6 +120,7 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
     mcoCECodes = List(),
     ssrCCAMCodes = List(),
     ssrCSARRCodes = List(),
+    ssrCECodes = List(),
     hadCCAMCodes = List()
   )
 

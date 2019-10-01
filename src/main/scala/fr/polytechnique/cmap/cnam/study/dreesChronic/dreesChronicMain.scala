@@ -161,6 +161,25 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
+    if (dreesChronicConfig.runParameters.acts) {
+
+      val acts = new ActsExtractor(dreesChronicConfig.medicalActs).extract(sources)//.persist()
+
+      operationsMetadata += {
+        OperationReporter.report(
+          "acts",
+          List("DCIR", "MCO", "MCO_CE", "SSR", "SSR_CE","HAD"),
+          OperationTypes.MedicalActs,
+          acts.toDF,
+          Path(dreesChronicConfig.output.outputSavePath),
+          dreesChronicConfig.output.saveMode
+        )
+      }
+      Some(acts)
+    } else {
+      None
+    }
+
     if (dreesChronicConfig.runParameters.diagnoses) {
 
       val diagnoses = new DiagnosisExtractor(dreesChronicConfig.diagnoses).extract(sources)//.cache()
@@ -180,25 +199,6 @@ object dreesChronicMain extends Main with BpcoCodes {
       None
     }
 
-    if (dreesChronicConfig.runParameters.acts) {
-
-      val acts = new ActsExtractor(dreesChronicConfig.medicalActs).extract(sources)//.persist()
-
-      operationsMetadata += {
-        OperationReporter.report(
-          "acts",
-          List("DCIR", "MCO", "MCO_CE", "SSR", "HAD"),
-          OperationTypes.MedicalActs,
-          acts.toDF,
-          Path(dreesChronicConfig.output.outputSavePath),
-          dreesChronicConfig.output.saveMode
-        )
-      }
-      Some(acts)
-    } else {
-      None
-    }
-
     operationsMetadata
   }
 
@@ -211,13 +211,15 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     import implicits.SourceReader
     val sourcesAllYears = Sources.sanitize(sqlContext.readSources(dreesChronicConfig.input))
-    val sources = Sources.sanitizeDates(sourcesAllYears, dreesChronicConfig.base.studyStart, dreesChronicConfig.base.studyEnd)
+    val sources = Sources.sanitizeDates(
+      sourcesAllYears,
+      dreesChronicConfig.base.studyStart,
+      dreesChronicConfig.base.studyEnd)
     //val dcir = sources.dcir.get.repartition(4000).persist()
     //val mco = sources.mco.get.repartition(4000).persist()
     //val ssr = sources.ssr.get.repartition(4000).persist()
 
-    val operationsMetadata = computeExposures(sources, dreesChronicConfig) ++ computePrestations(sources, dreesChronicConfig) ++ computeHospitalStays(sources, dreesChronicConfig) ++ computeOutcomes(sources, dreesChronicConfig)
-
+    val operationsMetadata = computeOutcomes(sources, dreesChronicConfig) ++ computeExposures(sources, dreesChronicConfig) ++ computePrestations(sources, dreesChronicConfig) ++ computeHospitalStays(sources, dreesChronicConfig)
     //dcir.unpersist()
     //mco.unpersist()
     //ssr.unpersist()
