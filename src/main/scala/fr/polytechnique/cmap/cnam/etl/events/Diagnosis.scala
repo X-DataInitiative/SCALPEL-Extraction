@@ -59,7 +59,7 @@ object SsrMainDiagnosis extends Diagnosis {
 }
 
 object SsrAssociatedDiagnosis extends Diagnosis {
-  override val category: EventCategory[Diagnosis] = "ssr_etiologic_diagnosis"
+  override val category: EventCategory[Diagnosis] = "ssr_associated_diagnosis"
 }
 
 object SsrLinkedDiagnosis extends Diagnosis {
