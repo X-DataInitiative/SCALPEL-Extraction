@@ -8,6 +8,8 @@ import org.apache.spark.sql.Dataset
 
 class ActsExtractor(config: MedicalActsConfig) {
   def extract(sources: Sources): Dataset[Event[MedicalAct]] = {
+
+    val ssrCeMedialActs = SsrCeActExtractor.extract(sources, config.ssrCECodes.toSet)
     val dcirMedicalAct = DcirMedicalActExtractor.extract(sources, config.dcirCodes.toSet)
       .filter(act => act.groupID != DcirAct.groupID.Unknown) // filter out unknown source acts
       .filter(act => act.groupID != DcirAct.groupID.PublicAmbulatory) //filter out public amb
@@ -16,7 +18,12 @@ class ActsExtractor(config: MedicalActsConfig) {
     val ssrMedicalActs = SsrCcamActExtractor.extract(sources, config.ssrCCAMCodes.toSet)
     val hadMedicalActs = HadCcamActExtractor.extract(sources, config.hadCCAMCodes.toSet)
 
-    unionDatasets(dcirMedicalAct, mcoCEMedicalActs, mcoMedicalActs, ssrMedicalActs, hadMedicalActs)
+    unionDatasets(
+      ssrCeMedialActs,
+      dcirMedicalAct,
+      mcoCEMedicalActs,
+      mcoMedicalActs,
+      ssrMedicalActs,
+      hadMedicalActs)
   }
-
 }

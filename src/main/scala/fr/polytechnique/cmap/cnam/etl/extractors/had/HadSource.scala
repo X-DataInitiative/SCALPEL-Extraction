@@ -3,6 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.had
 import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{Column, DataFrame}
 
 trait HadSource extends ColumnNames {
@@ -19,17 +20,16 @@ trait HadSource extends ColumnNames {
 
     // val GHM: ColName = "HAD_B__GRG_GHM" ?? TODO equivalent GHM pour la HAD
 
-    val Year: ColName = "HAD_B__SOR_ANN"
     val StayStartDate: ColName = "ENT_DAT"
     val StayEndDate: ColName = "SOR_DAT"
     val StartDate: ColName = "EXE_SOI_DTD"
     val EndDate: ColName = "EXE_SOI_DTF"
     val all = List(
-      PatientID, DP, DA, CCAM, PEC_PAL, PEC_ASS, EtaNumEpmsi, RhadNum, Year,
+      PatientID, DP, DA, CCAM, PEC_PAL, PEC_ASS, EtaNumEpmsi, RhadNum,
       StayStartDate, StayEndDate, StartDate, EndDate
     )
     val hospitalStayPart = List(
-      PatientID, EtaNumEpmsi, RhadNum, Year, StartDate, EndDate
+      PatientID, EtaNumEpmsi, RhadNum, StartDate, StayStartDate, StayEndDate, EndDate
     )
   }
 
@@ -44,19 +44,24 @@ trait HadSource extends ColumnNames {
       */
     def estimateStayStartTime: DataFrame = {
 
-      val estimate: Column = ColNames.StartDate.toCol
+      val givenDate: Column = ColNames.StartDate.toCol.cast(TimestampType)
 
-      val givenDate: Column = parseTimestamp(ColNames.StayStartDate.toCol, "ddMMyyyy")
+      //val estimateDate: Column = parseTimestamp(ColNames.StayStartDate.toCol, "ddMMyyyy")
+
+      //val estimateYear: Column = year(estimateDate)
+
+      val givenYear: Column = year(givenDate)
 
       df.withColumn(
-        NewColumns.EstimatedStayStart,
-        coalesce(givenDate, estimate)
-      )
+        NewColumns.EstimatedStayStart, givenDate)
+        .withColumn(
+          NewColumns.Year, givenYear)
     }
   }
 
   object NewColumns extends Serializable {
     val EstimatedStayStart: ColName = "estimated_start"
+    val Year: ColName = "year"
   }
 
 }

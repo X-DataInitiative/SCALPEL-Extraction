@@ -18,6 +18,7 @@ class DiagnosisExtractor(config: DiagnosesConfig) {
     val ssrAssociatedDiag = SsrAssociatedDiagnosisExtractor.extract(sources, config.daCodes.toSet)
     val hadMainDiag = HadMainDiagnosisExtractor.extract(sources, config.dpCodes.toSet)
     val hadAssociatedDiag = HadAssociatedDiagnosisExtractor.extract(sources, config.daCodes.toSet)
+    val irImbDiag = ImbDiagnosisExtractor.extract(sources, config.imbCodes.toSet)
 
     unionDatasets(
       mcoMainDiag,
@@ -27,6 +28,7 @@ class DiagnosisExtractor(config: DiagnosesConfig) {
       ssrLinkedDiag,
       ssrAssociatedDiag,
       hadMainDiag,
-      hadAssociatedDiag)
+      hadAssociatedDiag,
+      irImbDiag)
   }
 }

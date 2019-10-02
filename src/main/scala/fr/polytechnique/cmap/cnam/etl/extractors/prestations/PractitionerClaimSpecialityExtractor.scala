@@ -46,3 +46,6 @@ object NonMedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerCl
   override def isInStudy(codes: Set[String])
     (row: Row): Boolean = codes.contains(code(row))
 }
+
+
+// TODO add MCO_ce pfs num + SSR_CE ce pfs_num

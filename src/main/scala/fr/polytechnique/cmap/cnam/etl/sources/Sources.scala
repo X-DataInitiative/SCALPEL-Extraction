@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.sources
 import java.sql.Timestamp
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.InputPaths
-import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource, SsrSource, HadSource}
+import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource, SsrSource, SsrCeSource, HadSource}
 import fr.polytechnique.cmap.cnam.etl.sources.value.{DosagesSource, IrBenSource, IrImbSource, IrPhaSource}
 
 case class Sources(
@@ -11,6 +11,7 @@ case class Sources(
   mco: Option[DataFrame] = None,
   mcoCe: Option[DataFrame] = None,
   ssr: Option[DataFrame] = None,
+  ssrCe: Option[DataFrame] = None,
   had: Option[DataFrame] = None,
   irBen: Option[DataFrame] = None,
   irImb: Option[DataFrame] = None,
@@ -25,6 +26,7 @@ object Sources {
       mco = sources.mco.map(McoSource.sanitize),
       mcoCe = sources.mcoCe.map(McoCeSource.sanitize),
       ssr = sources.ssr.map(SsrSource.sanitize),
+      ssrCe = sources.ssrCe.map(SsrCeSource.sanitize),
       had = sources.had.map(HadSource.sanitize),
       irBen = sources.irBen.map(IrBenSource.sanitize),
       irImb = sources.irImb.map(IrImbSource.sanitize),
@@ -40,6 +42,7 @@ object Sources {
       ssr = sources.ssr.map(SsrSource.sanitizeDates(_, studyStart, studyEnd)),
       had = sources.had.map(HadSource.sanitizeDates(_, studyStart, studyEnd)),
       mcoCe = sources.mcoCe.map(McoCeSource.sanitizeDates(_, studyStart, studyEnd)),
+      ssrCe = sources.ssrCe.map(SsrCeSource.sanitizeDates(_, studyStart, studyEnd)),
       irBen = sources.irBen,
       irImb = sources.irImb,
       irPha = sources.irPha,
@@ -55,6 +58,7 @@ object Sources {
       mcoCePath = paths.mcoCe,
       hadPath = paths.had,
       ssrPaths = paths.ssr,
+      ssrCePath = paths.ssrCe,
       irBenPath = paths.irBen,
       irImbPath = paths.irImb,
       irPhaPath = paths.irPha,
@@ -69,6 +73,7 @@ object Sources {
     mcoCePath: Option[String] = None,
     hadPath: Option[String] = None,
     ssrPaths: Option[List[String]] = None,
+    ssrCePath: Option[String] = None,
     irBenPath: Option[String] = None,
     irImbPath: Option[String] = None,
     irPhaPath: Option[String] = None,
@@ -79,6 +84,7 @@ object Sources {
       mco = mcoPath.map(McoSource.read(sqlContext, _)),
       mcoCe = mcoCePath.map(McoCeSource.read(sqlContext, _)),
       ssr = ssrPaths.map(SsrSource.readAnnotateJoin(sqlContext, _, "SSR_C")),
+      ssrCe = ssrCePath.map(SsrCeSource.read(sqlContext, _)),
       had = hadPath.map(HadSource.read(sqlContext, _)),
       irBen = irBenPath.map(IrBenSource.read(sqlContext, _)),
       irImb = irImbPath.map(IrImbSource.read(sqlContext, _)),

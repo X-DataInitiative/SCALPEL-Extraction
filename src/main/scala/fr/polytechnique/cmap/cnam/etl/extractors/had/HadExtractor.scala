@@ -40,7 +40,7 @@ trait HadExtractor[EventType <: AnyEvent] extends Extractor[EventType] with HadS
   override def extractGroupId(r: Row): String = {
     r.getAs[String](ColNames.EtaNumEpmsi) + "_" +
       r.getAs[String](ColNames.RhadNum) + "_" +
-      r.getAs[Int](ColNames.Year).toString
+      r.getAs[Int](NewColumns.Year).toString
   }
 
   def extractStart(r: Row): Timestamp = r.getAs[Timestamp](NewColumns.EstimatedStayStart)

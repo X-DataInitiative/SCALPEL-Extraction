@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.study.bulk
 import java.io.PrintWriter
 
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirMedicalActExtractor, HadCcamActExtractor, McoCcamActExtractor, McoCeActExtractor, McoCimMedicalActExtractor, SsrCcamActExtractor, SsrCsarrActExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirMedicalActExtractor, HadCcamActExtractor, McoCcamActExtractor, McoCeActExtractor, McoCimMedicalActExtractor, SsrCcamActExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GhmExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses._
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugExtractor
@@ -37,7 +37,62 @@ object BulkMain extends Main {
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
-    val drugs = new DrugExtractor(bulkConfig.drugs).extract(sources, Set.empty).cache()
+    val patients = new Patients(PatientsConfig(bulkConfig.base.studyStart)).extract(sources)//.cache()
+    operationsMetadata += {
+      OperationReporter.report(
+        "BasePopulation",
+        List("IR_BEN", "DCIR", "MCO", "MCO_CE", "SSR", "HAD"),
+        OperationTypes.Patients,
+        patients.toDF,
+        Path(bulkConfig.output.outputSavePath),
+        bulkConfig.output.saveMode
+      )
+    }
+    //patients.unpersist()
+    
+    val mcoHospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty)//.cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "McoHospitalStays",
+          List("MCO"),
+          OperationTypes.HospitalStays,
+          mcoHospitalStays.toDF,
+          Path(bulkConfig.output.outputSavePath),
+          bulkConfig.output.saveMode
+        )
+    }
+    //mcoHospitalStays.unpersist()
+
+    val ssrHospitalStays = SsrHospitalStaysExtractor.extract(sources, Set.empty)//.cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "SsrHospitalStays",
+          List("SSR"),
+          OperationTypes.HospitalStays,
+          ssrHospitalStays.toDF,
+          Path(bulkConfig.output.outputSavePath),
+          bulkConfig.output.saveMode
+        )
+    }
+    //ssrHospitalStays.unpersist()
+
+    val hadHospitalStays = HadHospitalStaysExtractor.extract(sources, Set.empty)//.cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "HadHospitalStays",
+          List("HAD"),
+          OperationTypes.HospitalStays,
+          hadHospitalStays.toDF,
+          Path(bulkConfig.output.outputSavePath),
+          bulkConfig.output.saveMode
+        )
+    }
+    //hadHospitalStays.unpersist()
+
+    val drugs = new DrugExtractor(bulkConfig.drugs).extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -49,49 +104,9 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    drugs.unpersist()
+    //drugs.unpersist()
 
-    val mcoHospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
-    operationsMetadata += {
-      OperationReporter
-        .report(
-          "HospitalStays",
-          List("MCO"),
-          OperationTypes.HospitalStays,
-          mcoHospitalStays.toDF,
-          Path(bulkConfig.output.outputSavePath),
-          bulkConfig.output.saveMode
-        )
-    }
-
-    val ssrHospitalStays = SsrHospitalStaysExtractor.extract(sources, Set.empty).cache()
-    operationsMetadata += {
-      OperationReporter
-        .report(
-          "HospitalStays",
-          List("SSR"),
-          OperationTypes.HospitalStays,
-          ssrHospitalStays.toDF,
-          Path(bulkConfig.output.outputSavePath),
-          bulkConfig.output.saveMode
-        )
-    }
-
-    val hadHospitalStays = HadHospitalStaysExtractor.extract(sources, Set.empty).cache()
-    operationsMetadata += {
-      OperationReporter
-        .report(
-          "HospitalStays",
-          List("HAD"),
-          OperationTypes.HospitalStays,
-          ssrHospitalStays.toDF,
-          Path(bulkConfig.output.outputSavePath),
-          bulkConfig.output.saveMode
-        )
-    }
-    hadHospitalStays.unpersist()
-
-    val prestations = new PractitionnerClaimSpecialityExtractor(bulkConfig.practionnerClaimSpeciality).extract(sources).cache()
+    val prestations = new PractitionnerClaimSpecialityExtractor(bulkConfig.practionnerClaimSpeciality).extract(sources)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -103,9 +118,9 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    prestations.unpersist()
+    //prestations.unpersist()
 
-    val dcirMedicalAct = DcirMedicalActExtractor.extract(sources, Set.empty).cache()
+    val dcirMedicalAct = DcirMedicalActExtractor.extract(sources, Set.empty)//.cache()
     operationsMetadata += {
       OperationReporter.report(
         "DCIRMedicalAct",
@@ -116,15 +131,15 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    dcirMedicalAct.unpersist()
+    //dcirMedicalAct.unpersist()
 
-    //val dcirNgapAct = new DcirNgapActExtractor(BulkConfig.ngapActs).extract(sources).cache()
+    //val dcirNgapAct = new DcirNgapActExtractor(BulkConfig.ngapActs).extract(sources)//.cache()
 
-    val McoCimMedicalAct = McoCimMedicalActExtractor.extract(sources, Set.empty).cache()
+    val McoCimMedicalAct = McoCimMedicalActExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
-        "CIM-Medical-Acts",
+        "McoCIM-Medical-Acts",
         List("MCO"),
         OperationTypes.MedicalActs,
         McoCimMedicalAct.toDF,
@@ -132,14 +147,14 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    McoCimMedicalAct.unpersist()
+    //McoCimMedicalAct.unpersist()
 
 
-    val mcoCcamMedicalAct = McoCcamActExtractor.extract(sources, Set.empty).cache()
+    val mcoCcamMedicalAct = McoCcamActExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
-        "CCAM-Medical-Acts",
+        "McoCCAM-Medical-Acts",
         List("MCO"),
         OperationTypes.MedicalActs,
         mcoCcamMedicalAct.toDF,
@@ -147,51 +162,9 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    mcoCcamMedicalAct.unpersist()
+    //mcoCcamMedicalAct.unpersist()
 
-    val ssrCcamMedicalActs = SsrCcamActExtractor.extract(sources, Set.empty).cache()
-
-    operationsMetadata += {
-      OperationReporter.report(
-        "SsrCcamMedicalActs",
-        List("SSR"),
-        OperationTypes.MedicalActs,
-        ssrCcamMedicalActs.toDF,
-        Path(bulkConfig.output.outputSavePath),
-        bulkConfig.output.saveMode
-      )
-    }
-    ssrCcamMedicalActs.unpersist()
-
-    val ssrCsarrMedicalActs = SsrCsarrActExtractor.extract(sources, Set.empty).cache()
-
-    operationsMetadata += {
-      OperationReporter.report(
-        "SsrCsarrMedicalActs",
-        List("SSR"),
-        OperationTypes.MedicalActs,
-        ssrCsarrMedicalActs.toDF,
-        Path(bulkConfig.output.outputSavePath),
-        bulkConfig.output.saveMode
-      )
-    }
-    ssrCsarrMedicalActs.unpersist()
-
-    val hadCcamMedicalActs = HadCcamActExtractor.extract(sources, Set.empty).cache()
-
-    operationsMetadata += {
-      OperationReporter.report(
-        "HadCcamMedicalActs",
-        List("HAD"),
-        OperationTypes.MedicalActs,
-        hadCcamMedicalActs.toDF,
-        Path(bulkConfig.output.outputSavePath),
-        bulkConfig.output.saveMode
-      )
-    }
-    hadCcamMedicalActs.unpersist()
-
-    val liberalActs = McoCeActExtractor.extract(sources, Set.empty).cache()
+    val liberalActs = McoCeActExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -203,23 +176,51 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    liberalActs.unpersist()
+    //liberalActs.unpersist()
 
-    val imbDiagnoses = ImbDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val ssrCcamMedicalActs = SsrCcamActExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
-        "ImbDiagnoses",
-        List("IR_IMB_R"),
+        "SsrCcamMedicalActs",
+        List("SSR"),
         OperationTypes.MedicalActs,
-        imbDiagnoses.toDF,
+        ssrCcamMedicalActs.toDF,
         Path(bulkConfig.output.outputSavePath),
         bulkConfig.output.saveMode
       )
     }
-    imbDiagnoses.unpersist()
+    //ssrCcamMedicalActs.unpersist()
 
-    val classification = GhmExtractor.extract(sources, Set.empty).cache()
+    //    val ssrCsarrMedicalActs = SsrCsarrActExtractor.extract(sources, Set.empty)//.cache()
+    //
+    //    operationsMetadata += {
+    //      OperationReporter.report(
+    //        "SsrCsarrMedicalActs",
+    //        List("SSR"),
+    //        OperationTypes.MedicalActs,
+    //        ssrCsarrMedicalActs.toDF,
+    //        Path(bulkConfig.output.outputSavePath),
+    //        bulkConfig.output.saveMode
+    //      )
+    //    }
+    //    //ssrCsarrMedicalActs.unpersist()
+
+    val hadCcamMedicalActs = HadCcamActExtractor.extract(sources, Set.empty)//.cache()
+
+    operationsMetadata += {
+      OperationReporter.report(
+        "HadCcamMedicalActs",
+        List("HAD"),
+        OperationTypes.MedicalActs,
+        hadCcamMedicalActs.toDF,
+        Path(bulkConfig.output.outputSavePath),
+        bulkConfig.output.saveMode
+      )
+    }
+    //hadCcamMedicalActs.unpersist()
+
+    val classification = GhmExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -231,13 +232,13 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    classification.unpersist()
+    //classification.unpersist()
 
-    val mcoMainDiag = McoMainDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val mcoMainDiag = McoMainDiagnosisExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
-        "MainDiagnosis",
+        "McoMainDiagnosis",
         List("MCO"),
         OperationTypes.Diagnosis,
         mcoMainDiag.toDF,
@@ -245,13 +246,13 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    mcoMainDiag.unpersist()
+    //mcoMainDiag.unpersist()
 
-    val mcoLinkedDiag = McoLinkedDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val mcoLinkedDiag = McoLinkedDiagnosisExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
-        "LinkedDiagnosis",
+        "McoLinkedDiagnosis",
         List("MCO"),
         OperationTypes.Diagnosis,
         mcoLinkedDiag.toDF,
@@ -259,12 +260,12 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    mcoLinkedDiag.unpersist()
+    //mcoLinkedDiag.unpersist()
 
-    val mcoAssociatedDiag = McoAssociatedDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val mcoAssociatedDiag = McoAssociatedDiagnosisExtractor.extract(sources, Set.empty)//.cache()
     operationsMetadata += {
       OperationReporter.report(
-        "AssociatedDiagnosis",
+        "McoAssociatedDiagnosis",
         List("MCO"),
         OperationTypes.Diagnosis,
         mcoAssociatedDiag.toDF,
@@ -272,9 +273,9 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    mcoAssociatedDiag.unpersist()
+    //mcoAssociatedDiag.unpersist()
 
-    val ssrMainDiag = SsrMainDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val ssrMainDiag = SsrMainDiagnosisExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -286,9 +287,9 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    ssrMainDiag.unpersist()
+    //ssrMainDiag.unpersist()
 
-    val ssrLinkedDiag = SsrLinkedDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val ssrLinkedDiag = SsrLinkedDiagnosisExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -300,9 +301,9 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    ssrLinkedDiag.unpersist()
+    //ssrLinkedDiag.unpersist()
 
-    val ssrAssociatedDiag = SsrAssociatedDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val ssrAssociatedDiag = SsrAssociatedDiagnosisExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -314,13 +315,13 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    ssrAssociatedDiag.unpersist()
+    //ssrAssociatedDiag.unpersist()
 
-    val ssrTakingOverPurpose = SsrTakingOverPurposeExtractor.extract(sources, Set.empty).cache()
+    val ssrTakingOverPurpose = SsrTakingOverPurposeExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
-        "ssrTakingOverPurpose",
+        "SsrTakingOverPurpose",
         List("SSR"),
         OperationTypes.Diagnosis,
         ssrTakingOverPurpose.toDF,
@@ -328,9 +329,9 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    ssrTakingOverPurpose.unpersist()
+    //ssrTakingOverPurpose.unpersist()
 
-    val hadMainDiag = HadMainDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val hadMainDiag = HadMainDiagnosisExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -342,9 +343,9 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    hadMainDiag.unpersist()
+    //hadMainDiag.unpersist()
 
-    val hadAssociatedDiag = HadAssociatedDiagnosisExtractor.extract(sources, Set.empty).cache()
+    val hadAssociatedDiag = HadAssociatedDiagnosisExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -356,9 +357,9 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    hadAssociatedDiag.unpersist()
+    //hadAssociatedDiag.unpersist()
 
-    val hadMainTakeOverReason = HadMainTakeOverExtractor.extract(sources, Set.empty).cache()
+    val hadMainTakeOverReason = HadMainTakeOverExtractor.extract(sources, Set.empty)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
@@ -370,20 +371,21 @@ object BulkMain extends Main {
         bulkConfig.output.saveMode
       )
     }
-    hadMainTakeOverReason.unpersist()
+    //hadMainTakeOverReason.unpersist()
 
-    val patients = new Patients(PatientsConfig(bulkConfig.base.studyStart)).extract(sources).cache()
+    val imbDiagnoses = ImbDiagnosisExtractor.extract(sources, Set.empty)//.cache()
+
     operationsMetadata += {
       OperationReporter.report(
-        "BasePopulation",
-        List("IR_BEN", "DCIR", "MCO", "MCO_CE", "SSR", "HAD"),
-        OperationTypes.Patients,
-        patients.toDF,
+        "ImbDiagnoses",
+        List("IR_IMB_R"),
+        OperationTypes.MedicalActs,
+        imbDiagnoses.toDF,
         Path(bulkConfig.output.outputSavePath),
         bulkConfig.output.saveMode
       )
     }
-    patients.unpersist()
+    //imbDiagnoses.unpersist()
 
     // Write Metadata
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
