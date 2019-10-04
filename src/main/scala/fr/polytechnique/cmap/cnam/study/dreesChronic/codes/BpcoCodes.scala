@@ -28,7 +28,8 @@ trait BpcoCodes {
     "J448", // Autres maladies pulmonaires obstructives précisées
     "J449", // Maladie pulmonaire obstructive sans précision
     "J960", // Insuffisance respi aigue (à chercher avec DA = J44*)
-    "J181" // Pneumopathie lombaire (à chercher avec DA = J44*)
+    "J181", // Pneumopathie lombaire (à chercher avec DA = J44*)
+    "Z515" // Soins palliatifs
   )
   val secondaryDiagCodes: List[String] = List("J44")
 
@@ -74,6 +75,15 @@ trait BpcoCodes {
     //"26" // MK
   )
 
+//  val ghmCodes: List[String] = List(
+//    "7956",
+//    "7957",
+//    "7958",
+//    "7991",
+//    "7992",
+//    "7993",
+//    "7994" // tous soins palliatifs
+//  )
   /*
    *  DCIR Acts
    */

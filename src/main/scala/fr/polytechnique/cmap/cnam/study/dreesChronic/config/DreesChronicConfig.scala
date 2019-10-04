@@ -64,7 +64,7 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
     nonMedicalSpeCodes = nonSpeCodes
   )
 
-  final object NgapActConfig extends  NgapActConfig(
+  final object NgapActConfig extends NgapActConfig(
     acts_categories = List(
       Amk,
       Ams
@@ -96,7 +96,7 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
 
   /** Parameters if run the calculation of outcome or exposure **/
   case class RunConfig(
-    outcome: List[String] = List("Acts", "Diagnoses", "Outcomes"),
+    outcome: List[String] = List("Acts", "Diagnoses", "Outcomes", "GhmGroups"),
     exposure: List[String] = List("Patients", "StartGapPatients", "DrugPurchases", "Exposures"),
     hospitalStay: List[String] = List("HospitalStay"),
     prestation: List[String] =  List("Specialities", "NgapAct")) {
@@ -113,7 +113,7 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
     val practionnerClaimSpeciality: Boolean = prestation contains "Specialities"
     val ngapActs: Boolean = prestation contains "NgapAct"
     val outcomes: Boolean = List("Diagnoses", "Acts", "Outcomes").forall(outcome.contains)
-
+    val ghmGroups: Boolean = outcome contains "GhmGroups"
   }
 
   /**

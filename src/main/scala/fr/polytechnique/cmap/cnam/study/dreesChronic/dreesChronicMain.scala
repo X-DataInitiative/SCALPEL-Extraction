@@ -16,6 +16,7 @@ import fr.polytechnique.cmap.cnam.study.dreesChronic.extractors._
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
+import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GhmExtractor
 
 object dreesChronicMain extends Main with BpcoCodes {
 
@@ -160,6 +161,27 @@ object dreesChronicMain extends Main with BpcoCodes {
   def computeOutcomes(sources: Sources, dreesChronicConfig: DreesChronicConfig): mutable.Buffer[OperationMetadata] = {
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
+
+
+    if (dreesChronicConfig.runParameters.ghmGroups) {
+      // extract all ghm codes...
+      val ghms = GhmExtractor.extract(sources, Set.empty)//.persist()
+
+      operationsMetadata += {
+        OperationReporter.report(
+          "ghm groups",
+          List("MCO"),
+          OperationTypes.AnyEvents,
+          ghms.toDF,
+          Path(dreesChronicConfig.output.outputSavePath),
+          dreesChronicConfig.output.saveMode
+        )
+      }
+      Some(ghms)
+    } else {
+      None
+    }
+
 
     if (dreesChronicConfig.runParameters.acts) {
 
