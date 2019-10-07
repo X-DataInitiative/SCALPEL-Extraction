@@ -52,9 +52,9 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
 
   /** Fixed parameters needed for the Diagnoses extractors. */
   final object DiagnosesConfig extends DiagnosesConfig(
-    dpCodes = primaryDiagCodes ::: secondaryDiagCodes ::: asthmeCIM10Codes,
-    drCodes = primaryDiagCodes ::: secondaryDiagCodes ::: asthmeCIM10Codes,
-    daCodes = primaryDiagCodes ::: secondaryDiagCodes ::: asthmeCIM10Codes,
+    dpCodes = primaryDiagCodes ::: secondaryDiagCodes ::: otherCIM10Codes  ,
+    drCodes = primaryDiagCodes ::: secondaryDiagCodes ::: otherCIM10Codes,
+    daCodes = primaryDiagCodes ::: secondaryDiagCodes ::: otherCIM10Codes,
     imbCodes = ALDcodes
   )
 

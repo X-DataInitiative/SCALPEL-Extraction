@@ -14,11 +14,10 @@ trait BpcoCodes {
    *  Diagnoses
    */
   val ALDcodes: List[String] = List(
-    "J45",
-    "J961",
-    "J42",
-    "J43"
-    // "J47", "J459", "L209", "J420", "J451", "J841", "J440", "J849" presents in ALD14 with less than 5 occurences in the echantillon
+    "J45", "J961", "J42", "J43", // BPCO et asthmes ald 14
+    // "J47", "J459", "L209", "J420", "J451", "J841", "J440", "J849" presents in ALD14 with less than 5 occurrences in the echantillon
+    "F00", "F03", "F01", "G30", // ald 15 alzheimer,
+    "E84" // ald 18 mucovisidose
   )
 
   //val primaryDiagCode: String = "C67"
@@ -33,9 +32,12 @@ trait BpcoCodes {
   )
   val secondaryDiagCodes: List[String] = List("J44")
 
-  val asthmeCIM10Codes: List[String] = List(
+  val otherCIM10Codes: List[String] = List(
     "J45", // asthme en DP, DA ou DR
-    "J46" // etat de mal asthmatique en DP, DA ou DR
+    "J46", // etat de mal asthmatique en DP, DA ou DR
+    "Z5180", // oxygenotherapie
+    "J93", "J938", "S270", "S272", "J931", "J930", "S2700", "S2701", "S2720", "S271", // pneumothorax
+    "I21", "I22", "I63" // infarctus
   )
   /*
    *  MCO Acts
@@ -45,7 +47,9 @@ trait BpcoCodes {
   //val mcoCCAMActCodes: List[String] = List("")
 
   val otherCCAMCodes: List[String] = List(
-    "GEME121" // Thermoplastie bronchique
+    "GEME121", // Thermoplastie bronchique
+    "GLLD019", "GLMF001", // VNI
+    "GLQP017", "GLLD017", "GLQF001", "GLLD021", "GLLP007", "GLLP006" //oxygenotherapie
   )
 
 //  val spiroCCAMCodes: List[String] = List(
