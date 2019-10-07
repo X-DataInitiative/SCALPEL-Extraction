@@ -1,3 +1,5 @@
+// License: BSD 3 clause
+
 package fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families
 
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.{DrugClassConfig, PharmacologicalClassConfig}

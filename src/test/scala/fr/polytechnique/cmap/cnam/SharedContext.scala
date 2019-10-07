@@ -1,3 +1,5 @@
+// License: BSD 3 clause
+
 package fr.polytechnique.cmap.cnam
 
 import java.io.File

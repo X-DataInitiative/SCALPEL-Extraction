@@ -1,3 +1,5 @@
+// License: BSD 3 clause
+
 package fr.polytechnique.cmap.cnam.util
 
 import org.apache.log4j.{Level, Logger}

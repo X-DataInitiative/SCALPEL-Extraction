@@ -1,3 +1,5 @@
+// License: BSD 3 clause
+
 package fr.polytechnique.cmap.cnam.study.fall.fractures
 
 import org.apache.spark.sql.functions._

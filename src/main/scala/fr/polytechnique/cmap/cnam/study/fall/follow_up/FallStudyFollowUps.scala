@@ -1,3 +1,5 @@
+// License: BSD 3 clause
+
 package fr.polytechnique.cmap.cnam.study.fall.follow_up
 
 import java.sql.Timestamp

@@ -1,3 +1,5 @@
+// License: BSD 3 clause
+
 package fr.polytechnique.cmap.cnam.util.datetime
 
 /* inspired by https://github.com/danielpes/spark-datetime-lite */

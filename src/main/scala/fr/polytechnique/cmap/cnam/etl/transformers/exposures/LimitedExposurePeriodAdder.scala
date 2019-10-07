@@ -1,3 +1,5 @@
+// License: BSD 3 clause
+
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
 import me.danielpes.spark.datetime.Period
@@ -33,7 +35,7 @@ private class LimitedExposurePeriodAdder(data: DataFrame) extends ExposurePeriod
    * @param endThresholdGc : the period that defines the reach for Grand Conditionnement.
    * @param endThresholdNgc : the period that defines the reach for Non Grand Conditionnement.
    * @param endDelay : period added to the end of an exposure.
-   * @return: A DataFrame of Exposures.
+   * @return A DataFrame of Exposures.
    */
   def withStartEnd(
     minPurchases: Int = 2,
