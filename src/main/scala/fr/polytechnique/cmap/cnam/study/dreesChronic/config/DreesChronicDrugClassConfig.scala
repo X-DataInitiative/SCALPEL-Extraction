@@ -11,6 +11,7 @@ object DreesChronicDrugClassConfig {
       case "Nicotiniques" => Nicotiniques
       case "Traitements" => Traitements
       case "Vaccins" => Vaccins
+      case "Corticoides" => Corticoides
     }
   }
 }

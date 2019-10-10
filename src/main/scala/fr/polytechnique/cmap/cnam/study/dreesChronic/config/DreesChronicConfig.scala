@@ -90,7 +90,8 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
       Antibiotiques,
       Bronchodilatateurs,
       Nicotiniques,
-      Traitements
+      Traitements,
+      Corticoides
     )) extends DrugConfig(level = level, families = families)
 
 
