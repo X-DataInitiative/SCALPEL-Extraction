@@ -17,6 +17,7 @@ import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
 import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GhmExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.ImbDiagnosisExtractor
 
 object dreesChronicMain extends Main with BpcoCodes {
 
@@ -162,6 +163,18 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
+    val adlDiagnoses = ImbDiagnosisExtractor.extract(sources, dreesChronicConfig.diagnoses.imbCodes.toSet)//.cache()
+
+    operationsMetadata += {
+      OperationReporter.report(
+        "aldDiagnoses",
+        List("IR_IMB"),
+        OperationTypes.aldDiagnosis,
+        adlDiagnoses.toDF,
+        Path(dreesChronicConfig.output.outputSavePath),
+        dreesChronicConfig.output.saveMode
+      )
+    }
 
     if (dreesChronicConfig.runParameters.ghmGroups) {
       // extract all ghm codes...

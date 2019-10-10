@@ -13,8 +13,8 @@ class Diagnoses(config: DiagnosesConfig) {
     val mainDiag = McoMainDiagnosisExtractor.extract(sources, config.dpCodes.toSet)
     val linkedDiag = McoLinkedDiagnosisExtractor.extract(sources, config.drCodes.toSet)
     val associatedDiag = McoAssociatedDiagnosisExtractor.extract(sources, config.daCodes.toSet)
-    val imbDiag = ImbDiagnosisExtractor.extract(sources, config.imbCodes.toSet)
-    functions.unionDatasets(mainDiag, linkedDiag, associatedDiag, imbDiag)
+    //val imbDiag = ImbDiagnosisExtractor.extract(sources, config.imbCodes.toSet)
+    functions.unionDatasets(mainDiag, linkedDiag, associatedDiag)//, imbDiag)
   }
 
 }
