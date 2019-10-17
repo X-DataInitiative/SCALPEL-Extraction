@@ -1,3 +1,5 @@
+// License: BSD 3 clause
+
 package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
 
 import org.apache.spark.sql.expressions.Window

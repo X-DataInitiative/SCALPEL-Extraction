@@ -1,3 +1,5 @@
+// License: BSD 3 clause
+
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
 import me.danielpes.spark.datetime.implicits._
