@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.study.bulk
 import java.io.PrintWriter
 
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirMedicalActExtractor, HadCcamActExtractor, McoCcamActExtractor, McoCeActExtractor, McoCimMedicalActExtractor, SsrCcamActExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirBiologyActExtractor, DcirMedicalActExtractor, HadCcamActExtractor, McoCcamActExtractor, McoCeActExtractor, McoCimMedicalActExtractor, SsrCcamActExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GhmExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses._
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugExtractor
@@ -36,6 +36,19 @@ object BulkMain extends Main {
     val sources = Sources.sanitize(sqlContext.readSources(bulkConfig.input))
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
+
+    val dcirBiologyAct = DcirBiologyActExtractor.extract(sources, Set.empty)//.cache()
+    operationsMetadata += {
+      OperationReporter.report(
+        "DCIRBiologyAct",
+        List("DCIR"),
+        OperationTypes.MedicalActs,
+        dcirBiologyAct.toDF,
+        Path(bulkConfig.output.outputSavePath),
+        bulkConfig.output.saveMode
+      )
+    }
+
 
     val patients = new Patients(PatientsConfig(bulkConfig.base.studyStart)).extract(sources)//.cache()
     operationsMetadata += {

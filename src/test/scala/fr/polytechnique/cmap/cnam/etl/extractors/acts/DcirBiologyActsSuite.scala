@@ -251,16 +251,14 @@ class DcirBiologyActsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val codes = Set("AAAA", "CCCC")
+    val codes = Set("238")
 
-    val input = sqlCtx.read.parquet("src/test/resources/test-input/DCIR.parquet")
+    val input = sqlCtx.read.parquet("src/test/resources/test-input/DCIR_w_BIO.parquet")
 
     val sources = Sources(dcir = Some(input))
 
     val expected = Seq[Event[BiologyAct]](
-      BiologyDcirAct("Patient_A", BiologyDcirAct.groupID.Liberal, "AAAA", makeTS(2010, 1, 1)),
-      BiologyDcirAct("Patient_B", BiologyDcirAct.groupID.Liberal, "CCCC", makeTS(2010, 3, 1)),
-      BiologyDcirAct("Patient_B", BiologyDcirAct.groupID.PrivateAmbulatory, "CCCC", makeTS(2010, 4, 1))
+      BiologyDcirAct("Patient_01", BiologyDcirAct.groupID.Liberal, "238", makeTS(2006, 1, 15))
     ).toDS
 
     // When

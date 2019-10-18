@@ -5,6 +5,7 @@ object OperationTypes {
   val Patients: OperationType = "patients"
   val Sources: OperationType = "sources"
   val MedicalActs: OperationType = "acts"
+  val BiologyActs: OperationType = "biology"
   val Diagnosis: OperationType = "diagnosis"
   val aldDiagnosis: OperationType = "aldDiagnosis"
   val Dispensations: OperationType = "dispensations"
