@@ -42,7 +42,7 @@ object BulkMain extends Main {
       OperationReporter.report(
         "DCIRBiologyAct",
         List("DCIR"),
-        OperationTypes.MedicalActs,
+        OperationTypes.BiologyActs,
         dcirBiologyAct.toDF,
         Path(bulkConfig.output.outputSavePath),
         bulkConfig.output.saveMode
