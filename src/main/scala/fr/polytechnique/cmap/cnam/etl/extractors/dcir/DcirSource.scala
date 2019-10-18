@@ -12,6 +12,7 @@ trait DcirSource extends ColumnNames {
     lazy val DcirEventStart: ColName = "EXE_SOI_DTD"
     lazy val DcirFluxDate: ColName = "FLX_DIS_DTD"
     lazy val CamCode: String = "ER_CAM_F__CAM_PRS_IDE"
+    lazy val BioCode: String = "ER_BIO_F__BIO_PRS_IDE"
     lazy val GHSCode: String = "ER_ETE_F__ETE_GHS_NUM"
     lazy val InstitutionCode: String = "ER_ETE_F__ETE_TYP_COD"
     lazy val Sector: String = "ER_ETE_F__PRS_PPU_SEC"
@@ -21,6 +22,7 @@ trait DcirSource extends ColumnNames {
     lazy val all = List(
       PatientID,
       CamCode,
+      BioCode,
       GHSCode,
       InstitutionCode,
       Sector,
