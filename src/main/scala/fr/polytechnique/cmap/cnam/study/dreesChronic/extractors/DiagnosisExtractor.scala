@@ -16,7 +16,7 @@ class DiagnosisExtractor(config: DiagnosesConfig) {
     val ssrMainDiag = SsrMainDiagnosisExtractor.extract(sources, config.dpCodes.toSet)
     val ssrLinkedDiag = SsrLinkedDiagnosisExtractor.extract(sources, config.drCodes.toSet)
     val ssrAssociatedDiag = SsrAssociatedDiagnosisExtractor.extract(sources, config.daCodes.toSet)
-    val ssrTakingOverPurpose = SsrTakingOverPurposeExtractor.extract(sources, config.csarrCodes.toSet)
+    val ssrTakingOverPurpose = SsrTakingOverPurposeExtractor.extract(sources, Set.empty)
     val hadMainDiag = HadMainDiagnosisExtractor.extract(sources, config.dpCodes.toSet)
     val hadAssociatedDiag = HadAssociatedDiagnosisExtractor.extract(sources, config.daCodes.toSet)
 

@@ -88,6 +88,8 @@ object dreesChronicMain extends Main with BpcoCodes {
             dreesChronicConfig.output.saveMode
           )
       }
+    } else {
+      None
     }
 
     operationsMetadata
@@ -112,6 +114,8 @@ object dreesChronicMain extends Main with BpcoCodes {
             dreesChronicConfig.output.saveMode
           )
       }
+    } else {
+      None
     }
     operationsMetadata
   }
