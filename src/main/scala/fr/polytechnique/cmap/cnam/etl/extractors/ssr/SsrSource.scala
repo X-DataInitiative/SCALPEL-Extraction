@@ -30,7 +30,7 @@ trait SsrSource extends ColumnNames {
     val StartDate: ColName = "SSR_C__EXE_SOI_DTD"
     val EndDate: ColName = "SSR_C__EXE_SOI_DTF"
     val all = List(
-      PatientID, DP, DR, DA, CCAM, FP_PEC, EtaNum, RhaNum, RhsNum, StayLength, //CSARR,
+      PatientID, DP, DR, DA, CCAM, CSARR, FP_PEC, EtaNum, RhaNum, RhsNum, StayLength, //CSARR,
       StayStartDate, StayEndDate, StartDate, EndDate, Year, StayStartMonth, StayStartYear
     )
 
