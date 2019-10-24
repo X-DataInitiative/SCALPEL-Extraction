@@ -55,7 +55,8 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
     dpCodes = primaryDiagCodes ::: secondaryDiagCodes ::: otherCIM10Codes  ,
     drCodes = primaryDiagCodes ::: secondaryDiagCodes ::: otherCIM10Codes,
     daCodes = primaryDiagCodes ::: secondaryDiagCodes ::: otherCIM10Codes,
-    imbCodes = ALDcodes
+    imbCodes = ALDcodes,
+    csarrCodes = csarrCodes
   )
 
   /** Fixed parameters needed for the Prestation extractors. */

@@ -79,6 +79,8 @@ trait BpcoCodes {
     //"26" // MK
   )
 
+  val csarrCodes: List[String] = List()
+
 //  val ghmCodes: List[String] = List(
 //    "7956",
 //    "7957",

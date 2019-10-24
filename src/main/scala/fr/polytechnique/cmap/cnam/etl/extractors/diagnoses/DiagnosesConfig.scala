@@ -12,7 +12,8 @@ class DiagnosesConfig(
   val dpCodes: List[String],
   val drCodes: List[String],
   val daCodes: List[String],
-  val imbCodes: List[String]) extends ExtractorConfig
+  val imbCodes: List[String],
+  val csarrCodes: List[String]) extends ExtractorConfig
 
 object DiagnosesConfig {
 
@@ -20,8 +21,9 @@ object DiagnosesConfig {
     dpCodes: List[String] = List(),
     drCodes: List[String] = List(),
     daCodes: List[String] = List(),
-    imbCodes: List[String] = List()): DiagnosesConfig = {
+    imbCodes: List[String] = List(),
+    csarrCodes: List[String] = List()): DiagnosesConfig = {
 
-    new DiagnosesConfig(dpCodes, drCodes, daCodes, imbCodes)
+    new DiagnosesConfig(dpCodes, drCodes, daCodes, imbCodes, csarrCodes)
   }
 }

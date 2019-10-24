@@ -139,7 +139,7 @@ object dreesChronicMain extends Main with BpcoCodes {
       None
     }
 
-    val optionNgap = if (dreesChronicConfig.runParameters.ngapActs) {
+     if (dreesChronicConfig.runParameters.ngapActs) {
 
       val ngapActs = new DcirNgapActsExtractor(dreesChronicConfig.ngapActs).extract(sources)//.persist()
 
@@ -163,14 +163,14 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
-    val adlDiagnoses = ImbDiagnosisExtractor.extract(sources, dreesChronicConfig.diagnoses.imbCodes.toSet)//.cache()
+    val aldDiagnoses = ImbDiagnosisExtractor.extract(sources, dreesChronicConfig.diagnoses.imbCodes.toSet)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
         "aldDiagnoses",
         List("IR_IMB"),
         OperationTypes.aldDiagnosis,
-        adlDiagnoses.toDF,
+        aldDiagnoses.toDF,
         Path(dreesChronicConfig.output.outputSavePath),
         dreesChronicConfig.output.saveMode
       )
