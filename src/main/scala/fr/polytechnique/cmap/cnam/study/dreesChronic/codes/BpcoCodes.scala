@@ -37,7 +37,8 @@ trait BpcoCodes {
     "J46", // etat de mal asthmatique en DP, DA ou DR
     "Z5180", // oxygenotherapie
     "J93", "J938", "S270", "S272", "J931", "J930", "S2700", "S2701", "S2720", "S271", // pneumothorax
-    "I21", "I22", "I63" // infarctus
+    "I21", "I22", "I63", // infarctus
+    "Z515" // palliatifs
   )
   /*
    *  MCO Acts
