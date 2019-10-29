@@ -17,12 +17,17 @@ assemblyMergeStrategy in assembly := {
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
 }
-scalacOptions := Seq("-Xmacro-settings:materialize-derivations")
+scalacOptions := Seq("-Xmacro-settings:materialize-derivations", "-Ypartial-unification")
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 
 val sparkDependencies = List(
   "org.apache.spark" %% "spark-core" % sparkVersion % "provided",
   "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
+)
+
+val catDependencies = List(
+  "org.typelevel" %% "cats-laws" % "2.0.0"
+
 )
 
 val testDependencies = List(
@@ -35,5 +40,5 @@ val additionalDependencies = List(
   "com.github.pureconfig" %% "pureconfig" % "0.9.0"
 )
 
-libraryDependencies ++= sparkDependencies ++ testDependencies ++ additionalDependencies
+libraryDependencies ++= sparkDependencies ++ testDependencies ++ additionalDependencies ++ catDependencies
 
