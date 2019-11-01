@@ -8,6 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.events.{Event, Exposure}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class NLevelInteractionTransformerSuite extends SharedContext {
+
   "elevateExposureN" should "join and return a DataSet of ExposureN" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -21,36 +22,171 @@ class NLevelInteractionTransformerSuite extends SharedContext {
       Exposure("Federer", "King", "Diazepam", 1.0D, makeTS(2019, 4, 1), Some(makeTS(2019, 6, 1)))
     ).toDS()
 
-/*
-    val exposureN = NLevelInteractionTransformer.elevateExposureN(exposures, 3)
+    val expected: List[Dataset[ExposureN]] = List(
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Paracetamol", "Dopamine", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1)))
+      ).toDS(),
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Dopamine", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 3, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 6, 1))),
+        ExposureN("Federer", Set("Alprazolam", "Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1)))
+      ).toDS(),
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 3, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Alprazolam"), Period(makeTS(2019, 1, 1), makeTS(2019, 3, 1))),
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 6, 1)))
+      ).toDS()
+    )
 
-    val down = NLevelInteractionTransformer
-      .elevateExposureN(exposures, 3)
-      .filter(dataset => dataset.take(1).apply(0).values.size > 1)
-      .map(dataset => dataset.flatMap(e => e.toLowerLevelInvolvedExposureN).distinct())
-
-    print(down.zip(exposureN.drop(1)).map(
-      e => {
-        val down1 = e._1
-        val high = e._2
-
-        high.joinWith(down1, high("patientID") === down1("patientID") && high("values") === down1("values"), "left")
-      }
-    ).map(
-      dataset => dataset.groupByKey(e => e._1).flatMapGroups(
-        (e, i) =>
-          RemainingPeriod.delimitPeriods(
-            RightRemainingPeriod(e),
-            i.map(_._2).toList.sortBy(_.period.start).map(e => LeftRemainingPeriod[ExposureN](e)),
-            List.empty[LeftRemainingPeriod[ExposureN]]
-          )
-      )
-    ).foldLeft(exposureN.head.map(l => l.toInteraction))((acc, b) => acc.union(b.map(l => l.e.toInteraction))).distinct().sort("start").show())*/
-
-    val result = NLevelInteractionTransformer(3).transform(exposures)
-    print(result.show())
+    val result = NLevelInteractionTransformer(3).elevateToExposureN(exposures, 3)
+    // The mapping is necessary for now as Spark seems to struggle with nested Data Structures
+    result.zip(expected).foreach(e => assertDSs(e._1.map(_.toInteraction).distinct(), e._2.distinct().map(_.toInteraction).distinct()))
 
   }
 
+  "trickleDownExposureN" should "give the involvement of ExposureN level n to level n-1" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    //Given
+
+    val input: List[Dataset[ExposureN]] = List(
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Paracetamol", "Dopamine", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1)))
+      ).toDS(),
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Dopamine", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 3, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 6, 1))),
+        ExposureN("Federer", Set("Alprazolam", "Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1)))
+      ).toDS(),
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 3, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Alprazolam"), Period(makeTS(2019, 1, 1), makeTS(2019, 3, 1))),
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 6, 1)))
+      ).toDS()
+    )
+
+    val expected: List[Dataset[ExposureN]] = List(
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Dopamine", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1)))
+      ).toDS(),
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 3, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 3, 1), makeTS(2019, 5, 1))),
+
+        ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 4, 1), makeTS(2019, 6, 1))),
+        ExposureN("Federer", Set("Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 6, 1))),
+
+        ExposureN("Federer", Set("Alprazolam"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1))),
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1)))
+      ).toDS()
+    )
+
+    val result = NLevelInteractionTransformer(3).trickleDownExposureN(input)
+    // The mapping is necessary for now as Spark seems to struggle with nested Data Structures
+    result.zip(expected).foreach(e => assertDSs(e._1.map(_.toInteraction).distinct(), e._2.distinct().map(_.toInteraction).distinct()))
+  }
+
+  "reduceHigherExposuresNFromLowerExposures" should "reduce the time period of higher ExposureN from lower ExposureN" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    val interactions: List[Dataset[ExposureN]] = List(
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Dopamine", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 3, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 6, 1))),
+        ExposureN("Federer", Set("Alprazolam", "Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1)))
+      ).toDS(),
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 3, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Alprazolam"), Period(makeTS(2019, 1, 1), makeTS(2019, 3, 1))),
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 6, 1)))
+      ).toDS()
+    )
+
+    val higherInteractionInvolvement: List[Dataset[ExposureN]] = List(
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Dopamine", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1)))
+      ).toDS(),
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 3, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 3, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 4, 1), makeTS(2019, 6, 1))),
+        ExposureN("Federer", Set("Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 6, 1))),
+        ExposureN("Federer", Set("Alprazolam"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1))),
+        ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1)))
+      ).toDS()
+    )
+
+    val expected: List[Dataset[ExposureN]] = List(
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 3, 1), makeTS(2019, 4, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Diazepam"), Period(makeTS(2019, 5, 1), makeTS(2019, 6, 1))),
+        ExposureN("Federer", Set("Alprazolam", "Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1)))
+      ).toDS(),
+      Seq[ExposureN](
+        ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 6, 1), makeTS(2019, 7, 1))),
+        ExposureN("Federer", Set("Alprazolam"), Period(makeTS(2019, 1, 1), makeTS(2019, 2, 1)))
+      ).toDS()
+    )
+
+    val result = NLevelInteractionTransformer(3).reduceHigherExposuresNFromLowerExposures(interactions, higherInteractionInvolvement)
+    result.zip(expected).foreach(e => assertDSs(e._1.map(_.e.toInteraction).distinct(), e._2.distinct().map(_.toInteraction).distinct()))
+  }
+
+  "transform" should "create interactions of level N" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    //Given
+    val exposures: Dataset[Event[Exposure]] = Seq[Event[Exposure]](
+      Exposure("Federer", "King", "Paracetamol", 1.0D, makeTS(2019, 3, 1), Some(makeTS(2019, 8, 1))),
+      Exposure("Federer", "King", "Alprazolam", 1.0D, makeTS(2019, 1, 1), Some(makeTS(2019, 3, 1))),
+      Exposure("Federer", "King", "Dopamine", 1.0D, makeTS(2019, 2, 1), Some(makeTS(2019, 5, 1))),
+      Exposure("Federer", "King", "Dopamine", 1.0D, makeTS(2019, 7, 1), Some(makeTS(2019, 8, 1))),
+      Exposure("Federer", "King", "Diazepam", 1.0D, makeTS(2019, 4, 1), Some(makeTS(2019, 6, 1)))
+    ).toDS()
+
+    val expected: Dataset[Interaction_] = Seq[ExposureN](
+        ExposureN("Federer", Set("Paracetamol", "Dopamine", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 3, 1), makeTS(2019, 4, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+        ExposureN("Federer", Set("Paracetamol", "Diazepam"), Period(makeTS(2019, 5, 1), makeTS(2019, 6, 1))),
+        ExposureN("Federer", Set("Alprazolam", "Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1))),
+        ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 6, 1), makeTS(2019, 7, 1))),
+        ExposureN("Federer", Set("Alprazolam"), Period(makeTS(2019, 1, 1), makeTS(2019, 2, 1)))
+      ).toDS.map[Interaction_]((e: ExposureN) => e.toInteraction)
+
+    val result = NLevelInteractionTransformer(3).transform(exposures)
+
+    assertDSs(result, expected)
+  }
 
 }
