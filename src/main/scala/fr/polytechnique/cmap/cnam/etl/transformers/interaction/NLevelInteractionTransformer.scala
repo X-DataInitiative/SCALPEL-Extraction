@@ -5,6 +5,7 @@ package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Exposure, Interaction}
+import fr.polytechnique.cmap.cnam.util.functions._
 
 case class NLevelInteractionTransformer(highestLevel: Int) extends InteractionTransformer {
   self =>
@@ -22,14 +23,10 @@ case class NLevelInteractionTransformer(highestLevel: Int) extends InteractionTr
       .cache()
   }
 
-  def isDataSetEmpty[T](dataset: Dataset[T]): Boolean = {
-    dataset.count() > 0
-  }
-
   private def wrapper(right: Dataset[ExposureN], left: Option[Dataset[ExposureN]]): Option[Dataset[ExposureN]] =
     left.flatMap(l => Some(self.joinTwoExposureNDataSet(right, l)))
 
-  def elevateToExposureN(exposures: Exposures, n: Int): List[Dataset[ExposureN]] = {
+  def elevateToExposureN(exposures: Dataset[Event[Exposure]], n: Int): List[Dataset[ExposureN]] = {
     val sqlCtx = exposures.sqlContext
     import sqlCtx.implicits._
 

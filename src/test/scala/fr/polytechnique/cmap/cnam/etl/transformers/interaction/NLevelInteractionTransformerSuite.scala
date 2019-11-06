@@ -4,7 +4,7 @@ package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.{Event, Exposure}
+import fr.polytechnique.cmap.cnam.etl.events.{Event, Exposure, Interaction}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class NLevelInteractionTransformerSuite extends SharedContext {
@@ -174,7 +174,7 @@ class NLevelInteractionTransformerSuite extends SharedContext {
       Exposure("Federer", "King", "Diazepam", 1.0D, makeTS(2019, 4, 1), Some(makeTS(2019, 6, 1)))
     ).toDS()
 
-    val expected: Dataset[Interaction_] = Seq[ExposureN](
+    val expected: Dataset[Event[Interaction]] = Seq[ExposureN](
         ExposureN("Federer", Set("Paracetamol", "Dopamine", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
         ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 3, 1), makeTS(2019, 4, 1))),
         ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
@@ -182,11 +182,11 @@ class NLevelInteractionTransformerSuite extends SharedContext {
         ExposureN("Federer", Set("Alprazolam", "Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1))),
         ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 6, 1), makeTS(2019, 7, 1))),
         ExposureN("Federer", Set("Alprazolam"), Period(makeTS(2019, 1, 1), makeTS(2019, 2, 1)))
-      ).toDS.map[Interaction_]((e: ExposureN) => e.toInteraction)
+      ).toDS.map[Event[Interaction]]((e: ExposureN) => e.toInteraction)
 
-    val result = NLevelInteractionTransformer(3).transform(exposures)
+    val result = NLevelInteractionTransformer(6).transform(exposures)
 
-    assertDSs(result, expected)
+    assertDSs(result, expected, true)
   }
 
 }
