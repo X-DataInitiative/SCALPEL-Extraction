@@ -7,7 +7,7 @@ import org.apache.spark.sql.functions
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Exposure, Interaction}
 import fr.polytechnique.cmap.cnam.util.functions._
 
-case class NLevelInteractionTransformer(highestLevel: Int) extends InteractionTransformer {
+case class NLevelInteractionTransformer(config: InteractionTransformerConfig) extends InteractionTransformer {
   self =>
 
   def joinTwoExposureNDataSet(right: Dataset[ExposureN], left: Dataset[ExposureN]): Dataset[ExposureN] = {
@@ -78,7 +78,7 @@ case class NLevelInteractionTransformer(highestLevel: Int) extends InteractionTr
   }
 
   override def transform(exposures: Dataset[Event[Exposure]]): Dataset[Event[Interaction]] = {
-    val exposureN = self.elevateToExposureN(exposures, highestLevel)
+    val exposureN = self.elevateToExposureN(exposures, config.level)
 
     val sqlCtx = exposures.sqlContext
     import sqlCtx.implicits._

@@ -42,7 +42,7 @@ class NLevelInteractionTransformerSuite extends SharedContext {
       ).toDS()
     )
 
-    val result = NLevelInteractionTransformer(3).elevateToExposureN(exposures, 3)
+    val result = NLevelInteractionTransformer(InteractionTransformerConfig(3)).elevateToExposureN(exposures, 3)
     // The mapping is necessary for now as Spark seems to struggle with nested Data Structures
     result.zip(expected).foreach(e => assertDSs(e._1.map(_.toInteraction).distinct(), e._2.distinct().map(_.toInteraction).distinct()))
 
@@ -98,7 +98,7 @@ class NLevelInteractionTransformerSuite extends SharedContext {
       ).toDS()
     )
 
-    val result = NLevelInteractionTransformer(3).trickleDownExposureN(input)
+    val result = NLevelInteractionTransformer(InteractionTransformerConfig(3)).trickleDownExposureN(input)
     // The mapping is necessary for now as Spark seems to struggle with nested Data Structures
     result.zip(expected).foreach(e => assertDSs(e._1.map(_.toInteraction).distinct(), e._2.distinct().map(_.toInteraction).distinct()))
   }
@@ -157,7 +157,7 @@ class NLevelInteractionTransformerSuite extends SharedContext {
       ).toDS()
     )
 
-    val result = NLevelInteractionTransformer(3).reduceHigherExposuresNFromLowerExposures(interactions, higherInteractionInvolvement)
+    val result = NLevelInteractionTransformer(InteractionTransformerConfig(3)).reduceHigherExposuresNFromLowerExposures(interactions, higherInteractionInvolvement)
     result.zip(expected).foreach(e => assertDSs(e._1.map(_.e.toInteraction).distinct(), e._2.distinct().map(_.toInteraction).distinct()))
   }
 
@@ -184,9 +184,9 @@ class NLevelInteractionTransformerSuite extends SharedContext {
         ExposureN("Federer", Set("Alprazolam"), Period(makeTS(2019, 1, 1), makeTS(2019, 2, 1)))
       ).toDS.map[Event[Interaction]]((e: ExposureN) => e.toInteraction)
 
-    val result = NLevelInteractionTransformer(6).transform(exposures)
+    val result = NLevelInteractionTransformer(InteractionTransformerConfig(6)).transform(exposures)
 
-    assertDSs(result, expected, true)
+    assertDSs(result, expected)
   }
 
 }

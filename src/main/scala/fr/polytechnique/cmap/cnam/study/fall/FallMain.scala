@@ -13,6 +13,7 @@ import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.interaction.NLevelInteractionTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.extractors._
@@ -37,9 +38,7 @@ object FallMain extends Main with FractureCodes {
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
 
-    val operationsMetadata = computeControls(sources, fallConfig) ++
-      computeExposures(sources, fallConfig) ++
-      computeOutcomes(sources, fallConfig)
+    val operationsMetadata = computeExposures(sources, fallConfig)
 
     dcir.unpersist()
     mco.unpersist()
@@ -190,6 +189,19 @@ object FallMain extends Main with FractureCodes {
             List("drug_purchases"),
             OperationTypes.Exposures,
             exposures.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
+      }
+
+      val interactions = NLevelInteractionTransformer(fallConfig.interactions).transform(exposures).cache()
+      operationsMetadata += {
+        OperationReporter
+          .report(
+            "interactions",
+            List("exposures"),
+            OperationTypes.Exposures,
+            interactions.toDF,
             Path(fallConfig.output.outputSavePath),
             fallConfig.output.saveMode
           )
