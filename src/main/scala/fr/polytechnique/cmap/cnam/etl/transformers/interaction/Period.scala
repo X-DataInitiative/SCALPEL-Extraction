@@ -27,7 +27,13 @@ case class Period(start: Timestamp, end: Timestamp) extends Remainable[Period]{
     }
   }
 
-  def merge(other: Period): Period = Period(max(self.start, other.start), min(self.end, other.end))
+  def intersect(other: Period): Option[Period] = {
+    if (self & other) {
+      Some(Period(max(self.start, other.start), min(self.end, other.end)))
+    } else {
+      None
+    }
+  }
 
   def - (other: Period): RemainingPeriod[Period] = {
     (self.start.compareTo(other.start), self.end.compareTo(other.end)) match {

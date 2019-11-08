@@ -9,14 +9,13 @@ case class ExposureN(patientID: String, values: Set[String], period: Period) ext
   Ordering[ExposureN] with Remainable[ExposureN] {
   self =>
 
-  def isElevatable(other: ExposureN): Boolean = {
-    self.patientID.equals(other.patientID) &&
-      self.values.intersect(other.values).isEmpty &&
-      (self.period & other.period)
-  }
-
-  def intersect(other: ExposureN): ExposureN = {
-    ExposureN(patientID, self.values ++ other.values, self.period.merge(other.period))
+  def intersect(other: ExposureN): Option[ExposureN] = {
+    if (self.patientID.equals(other.patientID) &&
+      self.values.intersect(other.values).isEmpty){
+      self.period.intersect(other.period).map(p => ExposureN(patientID, self.values ++ other.values, p))
+    } else {
+      None
+    }
   }
 
   def toInteraction: Event[Interaction] =

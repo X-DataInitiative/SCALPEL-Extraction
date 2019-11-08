@@ -9,6 +9,7 @@ import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.interaction.NLevelInteractionTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.follow_up.FallStudyFollowUps
@@ -123,6 +124,21 @@ object FallMainTransform extends Main with FractureCodes {
       meta += {
         exposuresReport.name -> exposuresReport
       }
+
+      val interactions = NLevelInteractionTransformer(fallConfig.interactions).transform(exposures).cache()
+      val interactionReport = OperationReporter.reportAsDataSet(
+        "interactions",
+        List("exposures"),
+        OperationTypes.Exposures,
+        interactions.toDF,
+        Path(fallConfig.output.outputSavePath),
+        fallConfig.output.saveMode
+      )
+
+      meta += {
+        interactionReport.name -> interactionReport
+      }
+
     }
     meta
   }

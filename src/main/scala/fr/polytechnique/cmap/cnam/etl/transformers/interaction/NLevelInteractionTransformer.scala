@@ -18,7 +18,7 @@ case class NLevelInteractionTransformer(config: InteractionTransformerConfig) ex
         left,
         left(Event.Columns.PatientID) === right(Event.Columns.PatientID) && !left("values").geq(right("values"))
       )
-      .filter(e => e._1.isElevatable(e._2)).map(e => e._1.intersect(e._2))
+      .flatMap(e => e._1.intersect(e._2))
       .repartition(functions.col("patientID"), functions.col("values"))
       .cache()
   }
