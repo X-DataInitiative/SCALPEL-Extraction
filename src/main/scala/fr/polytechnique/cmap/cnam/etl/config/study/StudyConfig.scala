@@ -16,6 +16,7 @@ object StudyConfig {
     irBen: Option[String] = None,
     irImb: Option[String] = None,
     irPha: Option[String] = None,
+    irNat: Option[String] = None,
     dosages: Option[String] = None)
 
   case class OutputPaths(
