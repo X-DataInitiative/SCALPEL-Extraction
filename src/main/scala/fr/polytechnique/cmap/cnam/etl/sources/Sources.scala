@@ -5,13 +5,15 @@ package fr.polytechnique.cmap.cnam.etl.sources
 import java.sql.Timestamp
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.InputPaths
-import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource}
+import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource, SsrSource, SsrCeSource}
 import fr.polytechnique.cmap.cnam.etl.sources.value.{DosagesSource, IrBenSource, IrImbSource, IrPhaSource}
 
 case class Sources(
   dcir: Option[DataFrame] = None,
   mco: Option[DataFrame] = None,
   mcoCe: Option[DataFrame] = None,
+  ssr: Option[DataFrame] = None,
+  ssrCe: Option[DataFrame] = None,
   irBen: Option[DataFrame] = None,
   irImb: Option[DataFrame] = None,
   irPha: Option[DataFrame] = None,
@@ -24,6 +26,8 @@ object Sources {
       dcir = sources.dcir.map(DcirSource.sanitize),
       mco = sources.mco.map(McoSource.sanitize),
       mcoCe = sources.mcoCe.map(McoCeSource.sanitize),
+      ssr = sources.ssr.map(SsrSource.sanitize),
+      ssrCe = sources.ssrCe.map(SsrCeSource.sanitize),
       irBen = sources.irBen.map(IrBenSource.sanitize),
       irImb = sources.irImb.map(IrImbSource.sanitize),
       irPha = sources.irPha.map(IrPhaSource.sanitize),
@@ -35,6 +39,7 @@ object Sources {
     sources.copy(
       dcir = sources.dcir.map(DcirSource.sanitizeDates(_, studyStart, studyEnd)),
       mco = sources.mco.map(McoSource.sanitizeDates(_, studyStart, studyEnd)),
+      ssr = sources.ssr.map(SsrSource.sanitizeDates(_, studyStart, studyEnd)),
       mcoCe = sources.mcoCe.map(McoCeSource.sanitizeDates(_, studyStart, studyEnd)),
       irBen = sources.irBen,
       irImb = sources.irImb,
@@ -50,7 +55,7 @@ object Sources {
       mcoPath = paths.mco,
       mcoCePath = paths.mcoCe,
       hadPath = paths.had,
-      ssrPath = paths.ssr,
+      ssrPaths = paths.ssr,
       irBenPath = paths.irBen,
       irImbPath = paths.irImb,
       irPhaPath = paths.irPha,
@@ -64,7 +69,7 @@ object Sources {
     mcoPath: Option[String] = None,
     mcoCePath: Option[String] = None,
     hadPath: Option[String] = None,
-    ssrPath: Option[String] = None,
+    ssrPaths: Option[List[String]] = None,
     irBenPath: Option[String] = None,
     irImbPath: Option[String] = None,
     irPhaPath: Option[String] = None,
@@ -74,6 +79,7 @@ object Sources {
       dcir = dcirPath.map(DcirSource.read(sqlContext, _)),
       mco = mcoPath.map(McoSource.read(sqlContext, _)),
       mcoCe = mcoCePath.map(McoCeSource.read(sqlContext, _)),
+      ssr = ssrPaths.map(SsrSource.readAnnotateJoin(sqlContext, _, "SSR_C")),
       irBen = irBenPath.map(IrBenSource.read(sqlContext, _)),
       irImb = irImbPath.map(IrImbSource.read(sqlContext, _)),
       irPha = irPhaPath.map(IrPhaSource.read(sqlContext, _)),
