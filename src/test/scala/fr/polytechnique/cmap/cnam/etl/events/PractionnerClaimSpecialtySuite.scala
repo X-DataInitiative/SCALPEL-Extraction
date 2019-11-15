@@ -7,12 +7,12 @@ import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
 import fr.polytechnique.cmap.cnam.util.functions._
 
-class PractitionerClaimSpecialitySuite extends FlatSpec {
+class PractionnerClaimSpecialtySuite extends FlatSpec {
 
   val patientID: String = "patientID"
   val timestamp: Timestamp = mock(classOf[Timestamp])
 
-  object MockPractionnerClaimSpeciality$ extends PractitionerClaimSpeciality {
+  object MockPractionnerClaimSpeciality extends PractitionerClaimSpeciality {
     val category: EventCategory[PractitionerClaimSpeciality] = "mock_prestationSpeciality"
   }
 
@@ -21,7 +21,7 @@ class PractitionerClaimSpecialitySuite extends FlatSpec {
     // Given
     val expected = Event[PractitionerClaimSpeciality](
       patientID,
-      MockPractionnerClaimSpeciality$.category,
+      MockPractionnerClaimSpeciality.category,
       "A10000001",
       "42",
       0.0,
@@ -30,7 +30,7 @@ class PractitionerClaimSpecialitySuite extends FlatSpec {
     )
 
     // When
-    val result = MockPractionnerClaimSpeciality$(patientID, "A10000001", "42", timestamp)
+    val result = MockPractionnerClaimSpeciality(patientID, "A10000001", "42", timestamp)
 
     // Then
     assert(result == expected)
@@ -47,10 +47,10 @@ class PractitionerClaimSpecialitySuite extends FlatSpec {
     )
     val values = Array[Any]("Patient01", "A10000001", "42", makeTS(2010, 1, 1))
     val r = new GenericRowWithSchema(values, schema)
-    val expected = MockPractionnerClaimSpeciality$("Patient01", "A10000001", "42", makeTS(2010, 1, 1))
+    val expected = MockPractionnerClaimSpeciality("Patient01", "A10000001", "42", makeTS(2010, 1, 1))
 
     // When
-    val result = MockPractionnerClaimSpeciality$.fromRow(r, "pID", "gId", "cod", "dat")
+    val result = MockPractionnerClaimSpeciality.fromRow(r, "pID", "gId", "cod", "dat")
 
     // Then
     assert(result == expected)

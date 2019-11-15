@@ -7,6 +7,8 @@ import fr.polytechnique.cmap.cnam.etl.events.{Event, MedicalPractitionerClaim, N
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
+import scala.collection.immutable.Stream.Empty
+
 class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
   "extract" should "extract health care related services provided by medical practitioner raw data" in {
@@ -16,7 +18,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
     // Given
     val medicalSpeCodes = List("42")
-    val input = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
+    val input = spark.read.parquet("src/test/resources/test-input/DCIR_w_BIO.parquet")
     val sources = Sources(dcir = Some(input))
 
     val expected = Seq[Event[PractitionerClaimSpeciality]](
@@ -41,14 +43,13 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
     // Given
     val nonMedicalSpeCodes = List("42")
-    val input = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
+    val input = spark.read.parquet("src/test/resources/test-input/DCIR_w_BIO.parquet")
     val sources = Sources(dcir = Some(input))
 
     val expected = Seq[Event[PractitionerClaimSpeciality]](
       NonMedicalPractitionerClaim("Patient_01", "A10000001", "42", makeTS(2006, 2, 1)),
       NonMedicalPractitionerClaim("Patient_01", "A10000001", "42", makeTS(2006, 1, 15)),
       NonMedicalPractitionerClaim("Patient_01", "A10000001", "42", makeTS(2006, 1, 30)),
-      NonMedicalPractitionerClaim("Patient_02", "A10000005", "42", makeTS(2006, 1, 5)),
       NonMedicalPractitionerClaim("Patient_02", "A10000005", "42", makeTS(2006, 1, 15)),
       NonMedicalPractitionerClaim("Patient_02", "A10000005", "42", makeTS(2006, 1, 30))
     ).toDS
@@ -76,5 +77,30 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
     // Then
     assert(result == expected)
+  }
+
+
+  "extract" should "discard providers with a specialty of 0" in {
+
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val medicalSpeCodes = List()
+    val input = spark.read.parquet("src/test/resources/test-input/DCIR_w_BIO.parquet")
+    val sources = Sources(dcir = Some(input))
+
+    val expected = Seq[Event[PractitionerClaimSpeciality]](
+      MedicalPractitionerClaim("Patient_01", "A10000001", "42", makeTS(2006, 2, 1)),
+      MedicalPractitionerClaim("Patient_01", "A10000001", "42", makeTS(2006, 1, 15)),
+      MedicalPractitionerClaim("Patient_01", "A10000001", "42", makeTS(2006, 1, 30))
+    ).toDS
+
+
+    // When
+    val result = MedicalPractitionerClaimExtractor.extract(sources, medicalSpeCodes.toSet)
+
+    // Then
+    assertDSs(result, expected)
   }
 }

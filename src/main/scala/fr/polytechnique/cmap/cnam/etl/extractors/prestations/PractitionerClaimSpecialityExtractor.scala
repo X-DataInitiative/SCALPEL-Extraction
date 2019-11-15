@@ -25,7 +25,12 @@ object MedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerClaim
 
   override def isInStudy(codes: Set[String])
     (row: Row): Boolean = codes.contains(code(row))
+
+  override def isInExtractorScope(row: Row): Boolean = {
+    (!row.isNullAt(row.fieldIndex(columnName))) & (row.getAs[Integer](columnName) != 0)
+  }
 }
+
 
 object NonMedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerClaimSpeciality] {
   override val columnName: String = ColNames.NonMSpe
@@ -43,9 +48,13 @@ object NonMedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerCl
     r.getAs[String](ColNames.ExecPSNum)
   }
 
+  override def isInExtractorScope(row: Row): Boolean = {
+    (!row.isNullAt(row.fieldIndex(columnName))) & (row.getAs[Integer](columnName) != 0)
+  }
+
   override def isInStudy(codes: Set[String])
     (row: Row): Boolean = codes.contains(code(row))
 }
 
 
-// TODO add MCO_ce pfs num + SSR_CE ce pfs_num
+// TODO: add MCO_ce pfs num + SSR_CE ce pfs_num (need tables FBSTC and FCSTC)
