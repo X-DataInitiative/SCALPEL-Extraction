@@ -56,28 +56,40 @@ trait Diagnosis extends AnyEvent with EventBuilder {
   }
 }
 
-object MainDiagnosis extends Diagnosis {
-  override val category: EventCategory[Diagnosis] = "main_diagnosis"
+object McoMainDiagnosis extends Diagnosis {
+  override val category: EventCategory[Diagnosis] = "mco_main_diagnosis"
 }
 
-object LinkedDiagnosis extends Diagnosis {
-  override val category: EventCategory[Diagnosis] = "linked_diagnosis"
+object McoLinkedDiagnosis extends Diagnosis {
+  override val category: EventCategory[Diagnosis] = "mco_linked_diagnosis"
 }
 
-object AssociatedDiagnosis extends Diagnosis {
-  override val category: EventCategory[Diagnosis] = "associated_diagnosis"
+object McoAssociatedDiagnosis extends Diagnosis {
+  override val category: EventCategory[Diagnosis] = "mco_associated_diagnosis"
 }
 
-object HADMainDiagnosis extends Diagnosis {
+object HadMainDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "had_main_diagnosis"
 }
 
-object SSRMainDiagnosis extends Diagnosis {
+object HadAssociatedDiagnosis extends Diagnosis {
+  override val category: EventCategory[Diagnosis] = "had_associated_diagnosis"
+}
+
+object SsrMainDiagnosis extends Diagnosis {
   override val category: EventCategory[Diagnosis] = "ssr_main_diagnosis"
 }
 
-object SSREtiologicDiagnosis extends Diagnosis {
-  override val category: EventCategory[Diagnosis] = "ssr_etiologic_diagnosis"
+object SsrAssociatedDiagnosis extends Diagnosis {
+  override val category: EventCategory[Diagnosis] = "ssr_associated_diagnosis"
+}
+
+object SsrLinkedDiagnosis extends Diagnosis {
+  override val category: EventCategory[Diagnosis] = "ssr_linked_diagnosis"
+}
+
+object SsrTakingOverPurpose extends Diagnosis {
+  val category: EventCategory[Diagnosis] = "ssr_taking_over_purpose"
 }
 
 object ImbDiagnosis extends Diagnosis {
