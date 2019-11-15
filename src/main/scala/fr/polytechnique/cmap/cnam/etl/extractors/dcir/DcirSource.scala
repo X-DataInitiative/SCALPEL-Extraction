@@ -1,5 +1,3 @@
-// License: BSD 3 clause
-
 package fr.polytechnique.cmap.cnam.etl.extractors.dcir
 
 import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
@@ -14,10 +12,13 @@ trait DcirSource extends ColumnNames {
     lazy val DcirEventStart: ColName = "EXE_SOI_DTD"
     lazy val DcirFluxDate: ColName = "FLX_DIS_DTD"
     lazy val CamCode: String = "ER_CAM_F__CAM_PRS_IDE"
+    lazy val BioCode: String = "ER_BIO_F__BIO_PRS_IDE"
     lazy val GHSCode: String = "ER_ETE_F__ETE_GHS_NUM"
     lazy val InstitutionCode: String = "ER_ETE_F__ETE_TYP_COD"
     lazy val Sector: String = "ER_ETE_F__PRS_PPU_SEC"
     lazy val Date: String = "EXE_SOI_DTD"
+    lazy val NaturePrestation: ColName = "PRS_NAT_REF"
+    lazy val NgapCoefficient: ColName = "PRS_ACT_CFT"
     lazy val all = List(
       PatientID,
       CamCode,
@@ -28,7 +29,9 @@ trait DcirSource extends ColumnNames {
       MSpe,
       NonMSpe,
       ExecPSNum,
-      DcirFluxDate
+      DcirFluxDate,
+      NaturePrestation,
+      NgapCoefficient
     )
 
   }
