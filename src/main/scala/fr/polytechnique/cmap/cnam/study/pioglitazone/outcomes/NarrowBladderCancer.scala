@@ -19,9 +19,9 @@ object NarrowBladderCancer extends OutcomesTransformer with PioglitazoneStudyCod
 
   override val outcomeName: String = "narrow_bladder_cancer"
 
-  private val DP = MainDiagnosis.category
-  private val DR = LinkedDiagnosis.category
-  private val DAS = AssociatedDiagnosis.category
+  private val DP = McoMainDiagnosis.category
+  private val DR = McoLinkedDiagnosis.category
+  private val DAS = McoAssociatedDiagnosis.category
   private val MCO_CIM_ACT = McoCIM10Act.category
   private val MCO_CAM_ACT = McoCCAMAct.category
   private val DCIR_CAM_ACT = DcirAct.category
