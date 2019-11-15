@@ -4,7 +4,7 @@ import java.sql.Timestamp
 
 import scala.reflect.runtime.universe._
 import scala.util.Try
-import org.apache.spark.sql.{DataFrame, Dataset, Row}
+import org.apache.spark.sql.{Column, DataFrame, Dataset, Row, SparkSession}
 import fr.polytechnique.cmap.cnam.etl.events.{Event, EventBuilder, NgapAct}
 import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
@@ -16,10 +16,24 @@ class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[
   override val eventBuilder: EventBuilder = NgapAct
 
 
-  override def getInput(sources: Sources): DataFrame = sources.dcir.get.select(
-    ColNames.PatientID, ColNames.NaturePrestation, ColNames.NgapCoefficient,
-    ColNames.Date, ColNames.ExecPSNum, ColNames.DcirFluxDate
-  )
+  override def getInput(sources: Sources): DataFrame = {
+    val neededColumns: List[ColName] = List(
+      ColNames.PatientID, ColNames.NaturePrestation, ColNames.NgapCoefficient,
+      ColNames.Date, ColNames.ExecPSNum, ColNames.DcirFluxDate
+    )
+
+    sources.dcir.get.select(
+
+    )
+
+    lazy val irNat = sources.irNat.get
+    lazy val dcir = sources.dcir.get
+    val spark: SparkSession = dcir.sparkSession
+
+    lazy val df: DataFrame = dcir.join(irNat, dcir.col("PRS_NAT_REF") === irNat.col("PRS_NAT"))
+
+    df.select(neededColumns: _*)
+  }
 
   override def isInExtractorScope(row: Row): Boolean = {
     !row.isNullAt(row.fieldIndex(columnName)) &&
