@@ -12,18 +12,12 @@ import fr.polytechnique.cmap.cnam.util.functions.makeTS
 class DcirNgapActsExtractorSuite extends SharedContext {
 
   object ngapClassConsultation extends NgapActClassConfig {
-    val naturePrestation: Int = 1111
+    val ngapKeyLetters: Seq[String] = Seq("C")
     val ngapCoefficients: Seq[String] = Seq(
       "0.42"
     )
   }
 
-//  object ngapClassMock extends NgapActClassConfig {
-//    val naturePrestation: Int = 5678
-//    val ngapCoefficients: Seq[String] = Seq(
-//      "4321.0"
-//    )
-//  }
 
   "extract" should "extract ngap acts events from raw data" in {
 
@@ -34,11 +28,14 @@ class DcirNgapActsExtractorSuite extends SharedContext {
     val ngapCoefficients = Seq("0.42")
 
     val dcir: DataFrame = sqlCtx.read.load("src/test/resources/test-input/DCIR.parquet")
-    val source = new Sources(dcir = Some(dcir))
+    val irNat: DataFrame = sqlCtx.read.load("src/test/resources/value_tables/IR_NAT_V.parquet")
+
+    val source = new Sources(dcir = Some(dcir), irNat = Some(irNat))
+
     val expected = Seq[Event[NgapAct]](
-      NgapAct("Patient_01", "A10000001", "0.42", makeTS(2006, 2, 1)),
-      NgapAct("Patient_01", "A10000001", "0.42", makeTS(2006, 1, 15)),
-      NgapAct("Patient_01", "A10000001", "0.42", makeTS(2006, 1, 30))
+      NgapAct("Patient_01", "A10000001", "C_0.42", makeTS(2006, 2, 1)),
+      NgapAct("Patient_01", "A10000001", "C_0.42", makeTS(2006, 1, 15)),
+      NgapAct("Patient_01", "A10000001", "C_0.42", makeTS(2006, 1, 30))
     ).toDS
 
     val ngapConf = NgapActConfig(
