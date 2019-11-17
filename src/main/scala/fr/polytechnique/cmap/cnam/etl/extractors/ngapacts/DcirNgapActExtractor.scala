@@ -8,19 +8,22 @@ import org.apache.spark.sql.{Column, DataFrame, Dataset, Row, SparkSession}
 import fr.polytechnique.cmap.cnam.etl.events.{Event, EventBuilder, NgapAct}
 import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import org.apache.spark.sql.functions.col
 
 class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[NgapAct] {
 
   override val columnName: String = ColNames.NgapCoefficient
   val columnNaturePrestation: String = ColNames.NaturePrestation
+  val ngapKeyLetter: String = "PRS_NAT_CB2"
+
   override val eventBuilder: EventBuilder = NgapAct
 
 
   override def getInput(sources: Sources): DataFrame = {
-    val neededColumns: List[ColName] = List(
+    val neededColumns: List[Column] = List(
       ColNames.PatientID, ColNames.NaturePrestation, ColNames.NgapCoefficient,
-      ColNames.Date, ColNames.ExecPSNum, ColNames.DcirFluxDate
-    )
+      ColNames.Date, ColNames.ExecPSNum, ColNames.DcirFluxDate, ngapKeyLetter
+    ).map(colName => col(colName))
 
     sources.dcir.get.select(
 
@@ -30,7 +33,7 @@ class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[
     lazy val dcir = sources.dcir.get
     val spark: SparkSession = dcir.sparkSession
 
-    lazy val df: DataFrame = dcir.join(irNat, dcir.col("PRS_NAT_REF") === irNat.col("PRS_NAT"))
+    lazy val df: DataFrame = dcir.join(irNat, dcir("PRS_NAT_REF").cast("String") === irNat("PRS_NAT"))
 
     df.select(neededColumns: _*)
   }
@@ -47,7 +50,10 @@ class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[
     )
   }
 
-  override def code: Row => String = (row: Row) => row.getAs[Double](columnName).toString
+  override def code: Row => String = (row: Row) => {
+    row.getAs[String](ngapKeyLetter) + "_" +
+      row.getAs[Double](columnName).toString
+  }
 
   override def extractStart(r: Row): Timestamp = {
     Try(super.extractStart(r)) recover {

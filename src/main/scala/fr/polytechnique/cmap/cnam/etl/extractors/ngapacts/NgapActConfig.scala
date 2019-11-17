@@ -9,7 +9,7 @@ class NgapActConfig(
   def isInCategory(
                     categories: List[NgapActClassConfig],
                     row: Row): Boolean = categories
-      .exists(category => category.naturePrestation == row.getAs[Int]("PRS_NAT_REF") &&
+      .exists(category => category.ngapKeyLetters.contains(row.getAs[String]("PRS_NAT_CB2")) &&
         category.ngapCoefficients.contains(row.getAs[Double]("PRS_ACT_CFT").toString)
       )
 }
