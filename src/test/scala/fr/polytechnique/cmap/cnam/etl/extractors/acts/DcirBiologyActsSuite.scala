@@ -1,7 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
+import scala.util.Success
+
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.{BiologyAct, BiologyDcirAct, DcirAct, Event}
+import fr.polytechnique.cmap.cnam.etl.events.{BiologyDcirAct, DcirAct, Event, MedicalAct}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
@@ -9,7 +11,6 @@ import org.apache.spark.sql.types._
 import org.scalatest.Matchers.{an, convertToAnyShouldWrapper}
 import org.scalatest.TryValues._
 
-import scala.util.Success
 
 class DcirBiologyActsSuite extends SharedContext {
 
@@ -62,7 +63,7 @@ class DcirBiologyActsSuite extends SharedContext {
     // Given
     val inputArray = Array[Any]("Patient_A", "AAAA", makeTS(2010, 1, 1))
     val inputRow = new GenericRowWithSchema(inputArray, oldSchema)
-    val expected = Seq(BiologyDcirAct("Patient_A", BiologyDcirAct.groupID.DcirAct, "AAAA", makeTS(2010, 1, 1)))
+    val expected = Seq(BiologyDcirAct("Patient_A", BiologyDcirAct.groupID.DcirAct, "AAAA", 1.0, makeTS(2010, 1, 1)))
 
     // When
     val result = DcirBiologyActExtractor.builder(inputRow)
@@ -220,22 +221,22 @@ class DcirBiologyActsSuite extends SharedContext {
     val codes = Set("AAAA", "CCCC")
 
     val input = Seq(
-      ("Patient_A", "AAAA", Some(makeTS(2010, 1, 1)), None, None, None, makeTS(2010, 1, 1)),
-      ("Patient_A", "BBBB", Some(makeTS(2010, 2, 1)), Some(1D), Some(0D), Some(1D), makeTS(2010, 2, 1)),
-      ("Patient_B", "CCCC", Some(makeTS(2010, 3, 1)), None, None, None, makeTS(2010, 3, 1)),
-      ("Patient_B", "CCCC", Some(makeTS(2010, 4, 1)), Some(7D), Some(0D), Some(2D), makeTS(2010, 4, 1)),
-      ("Patient_C", "BBBB", None, Some(1D), Some(0D), Some(2D), makeTS(2010, 5, 1))
+      ("Patient_A", "AAAA", "CCAM1", Some(makeTS(2010, 1, 1)), None, None, None, makeTS(2010, 1, 1)),
+      ("Patient_A", "BBBB", "CCAM1", Some(makeTS(2010, 2, 1)), Some(1D), Some(0D), Some(1D), makeTS(2010, 2, 1)),
+      ("Patient_B", "CCCC", "CCAM1", Some(makeTS(2010, 3, 1)), None, None, None, makeTS(2010, 3, 1)),
+      ("Patient_B", "CCCC", "CCAM1", Some(makeTS(2010, 4, 1)), Some(7D), Some(0D), Some(2D), makeTS(2010, 4, 1)),
+      ("Patient_C", "BBBB", "CCAM1", None, Some(1D), Some(0D), Some(2D), makeTS(2010, 5, 1))
     ).toDF(
-      ColNames.PatientID, ColNames.BioCode, ColNames.Date,
+      ColNames.PatientID, ColNames.BioCode, ColNames.CamCode, ColNames.Date,
       ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector, ColNames.DcirFluxDate
     )
 
     val sources = Sources(dcir = Some(input))
 
-    val expected = Seq[Event[BiologyAct]](
-      BiologyDcirAct("Patient_A", BiologyDcirAct.groupID.Liberal, "AAAA", makeTS(2010, 1, 1)),
-      BiologyDcirAct("Patient_B", BiologyDcirAct.groupID.Liberal, "CCCC", makeTS(2010, 3, 1)),
-      BiologyDcirAct("Patient_B", BiologyDcirAct.groupID.PrivateAmbulatory, "CCCC", makeTS(2010, 4, 1))
+    val expected = Seq[Event[MedicalAct]](
+      BiologyDcirAct("Patient_A", BiologyDcirAct.groupID.Liberal, "AAAA", 1.0, makeTS(2010, 1, 1)),
+      BiologyDcirAct("Patient_B", BiologyDcirAct.groupID.Liberal, "CCCC", 1.0, makeTS(2010, 3, 1)),
+      BiologyDcirAct("Patient_B", BiologyDcirAct.groupID.PrivateAmbulatory, "CCCC", 1.0, makeTS(2010, 4, 1))
     ).toDS
 
     // When
@@ -257,8 +258,8 @@ class DcirBiologyActsSuite extends SharedContext {
 
     val sources = Sources(dcir = Some(input))
 
-    val expected = Seq[Event[BiologyAct]](
-      BiologyDcirAct("Patient_01", BiologyDcirAct.groupID.Liberal, "238", makeTS(2006, 1, 15))
+    val expected = Seq[Event[MedicalAct]](
+      BiologyDcirAct("Patient_01", BiologyDcirAct.groupID.Liberal, "238", 1.0, makeTS(2006, 1, 15))
     ).toDS
 
     // When

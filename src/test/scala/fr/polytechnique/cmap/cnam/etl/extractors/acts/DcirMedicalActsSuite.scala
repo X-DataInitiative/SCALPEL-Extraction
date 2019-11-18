@@ -221,13 +221,13 @@ class DcirMedicalActsSuite extends SharedContext {
     val codes = Set("AAAA", "CCCC")
 
     val input = Seq(
-      ("Patient_A", "AAAA", makeTS(2010, 1, 1), None, None, None),
-      ("Patient_A", "BBBB", makeTS(2010, 2, 1), Some(1D), Some(0D), Some(1D)),
-      ("Patient_B", "CCCC", makeTS(2010, 3, 1), None, None, None),
-      ("Patient_B", "CCCC", makeTS(2010, 4, 1), Some(7D), Some(0D), Some(2D)),
-      ("Patient_C", "BBBB", makeTS(2010, 5, 1), Some(1D), Some(0D), Some(2D))
+      ("Patient_A", "AAAA", "NABM1", makeTS(2010, 1, 1), None, None, None),
+      ("Patient_A", "BBBB", "NABM1", makeTS(2010, 2, 1), Some(1D), Some(0D), Some(1D)),
+      ("Patient_B", "CCCC", "NABM1", makeTS(2010, 3, 1), None, None, None),
+      ("Patient_B", "CCCC", "NABM1", makeTS(2010, 4, 1), Some(7D), Some(0D), Some(2D)),
+      ("Patient_C", "BBBB", "NABM1", makeTS(2010, 5, 1), Some(1D), Some(0D), Some(2D))
     ).toDF(
-      ColNames.PatientID, ColNames.CamCode, ColNames.Date,
+      ColNames.PatientID, ColNames.CamCode, ColNames.BioCode, ColNames.Date,
       ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector
     )
 

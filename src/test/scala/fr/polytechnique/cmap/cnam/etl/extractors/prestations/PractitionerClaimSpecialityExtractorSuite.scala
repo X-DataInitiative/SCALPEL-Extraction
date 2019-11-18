@@ -60,7 +60,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
     val result = NonMedicalPractitionerClaimExtractor.extract(sources, nonMedicalSpeCodes.toSet)
 
     // Then
-    assertDSs(result, expected, debug = true)
+    assertDSs(result, expected)
   }
 
   "extractGroupId" should "return the health care practitioner ID" in {
