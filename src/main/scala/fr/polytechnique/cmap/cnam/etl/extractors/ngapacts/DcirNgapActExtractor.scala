@@ -31,7 +31,6 @@ class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[
 
     lazy val irNat = sources.irNat.get
     lazy val dcir = sources.dcir.get
-    val spark: SparkSession = dcir.sparkSession
 
     lazy val df: DataFrame = dcir.join(irNat, dcir("PRS_NAT_REF").cast("String") === irNat("PRS_NAT"))
 
