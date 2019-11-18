@@ -7,11 +7,17 @@ class NgapActConfig(
   val acts_categories: List[NgapActClassConfig]) extends ExtractorConfig with Serializable {
 
   def isInCategory(
-                    categories: List[NgapActClassConfig],
-                    row: Row): Boolean = categories
-      .exists(category => category.ngapKeyLetters.contains(row.getAs[String]("PRS_NAT_CB2")) &&
-        category.ngapCoefficients.contains(row.getAs[Double]("PRS_ACT_CFT").toString)
+    categories: List[NgapActClassConfig],
+    row: Row): Boolean = {
+
+    val ngapKeyLetter : String = row.getAs[String]("PRS_NAT_CB2")
+    val ngapCoefficient : String = row.getAs[Double]("PRS_ACT_CFT").toString
+
+    categories
+      .exists(category => category.ngapKeyLetters.contains(ngapKeyLetter) &&
+        category.ngapCoefficients.contains(ngapCoefficient)
       )
+  }
 }
 
 object NgapActConfig {
