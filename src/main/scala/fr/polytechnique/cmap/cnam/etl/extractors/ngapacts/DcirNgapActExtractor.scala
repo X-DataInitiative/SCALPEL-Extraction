@@ -4,7 +4,7 @@ import java.sql.Timestamp
 
 import scala.reflect.runtime.universe._
 import scala.util.Try
-import org.apache.spark.sql.{Column, DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.{Column, DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{Event, EventBuilder, NgapAct}
 import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
@@ -13,7 +13,6 @@ import org.apache.spark.sql.functions.col
 class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[NgapAct] {
 
   override val columnName: String = ColNames.NgapCoefficient
-  val columnNaturePrestation: String = ColNames.NaturePrestation
   val ngapKeyLetter: String = "PRS_NAT_CB2"
 
   override val eventBuilder: EventBuilder = NgapAct
@@ -38,8 +37,7 @@ class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[
   }
 
   override def isInExtractorScope(row: Row): Boolean = {
-    !row.isNullAt(row.fieldIndex(columnName)) &&
-      !row.isNullAt(row.fieldIndex(columnNaturePrestation))
+    !row.isNullAt(row.fieldIndex(ngapKeyLetter))
   }
 
   override def isInStudy(codes: Set[String])(row: Row): Boolean = {
