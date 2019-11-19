@@ -46,7 +46,7 @@ object RemainingPeriod {
     lrs match {
       case Nil => rr.toLeft :: acc
       case _@LeftRemainingPeriod(null) :: Nil => rr.toLeft :: acc // This happens because of the Left Join
-      case i :: rest => rr.e - i.e match {
+      case lr :: rest => rr.e - lr.e match {
         case NullRemainingPeriod => acc
         case l: LeftRemainingPeriod[A] => l :: acc
         case r: RightRemainingPeriod[A] => delimitPeriods[A](r, rest, acc)

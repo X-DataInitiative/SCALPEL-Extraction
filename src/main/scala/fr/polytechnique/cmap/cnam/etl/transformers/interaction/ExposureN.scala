@@ -5,8 +5,7 @@ package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Interaction}
 import cats.syntax.functor._
 
-case class ExposureN(patientID: String, values: Set[String], period: Period) extends
-  Ordering[ExposureN] with Remainable[ExposureN] {
+case class ExposureN(patientID: String, values: Set[String], period: Period) extends Remainable[ExposureN] {
   self =>
 
   def intersect(other: ExposureN): Option[ExposureN] = {
@@ -27,8 +26,6 @@ case class ExposureN(patientID: String, values: Set[String], period: Period) ext
       self.period.end
     )
 
-  override def compare(x: ExposureN, y: ExposureN): Int = x.values.size.compareTo(y.values.size)
-
   def toLowerLevelInvolvedExposureN: Iterator[ExposureN] = {
     self.values.subsets(self.values.size - 1).map(vs => ExposureN(self.patientID, vs, self.period))
   }
@@ -36,7 +33,9 @@ case class ExposureN(patientID: String, values: Set[String], period: Period) ext
   override def - (other: ExposureN): RemainingPeriod[ExposureN] = ExposureN.minus(self, other)
 }
 
-object ExposureN {
+object ExposureN extends Ordering[ExposureN] {
+  override def compare(x: ExposureN, y: ExposureN): Int = x.values.size.compareTo(y.values.size)
+
   def minus(left: ExposureN, right: ExposureN): RemainingPeriod[ExposureN] = {
     if (left.patientID == right.patientID && left.values.equals(right.values)) {
       (left.period - right.period).map(e => ExposureN(left.patientID, left.values, e))
