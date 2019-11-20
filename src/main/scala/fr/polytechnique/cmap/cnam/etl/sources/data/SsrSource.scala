@@ -43,7 +43,11 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
       .filterSsrCorruptedHospitalStays
   }
 
-  def readAnnotateJoin(sqlContext: SQLContext, paths: List[String], joinedTableName: String): DataFrame  = {
+  def read(sqlContext: SQLContext, path: List[String]): DataFrame  = {
+    readAnnotateJoin(sqlContext, path, "SSR_C")
+  }
+
+  private def readAnnotateJoin(sqlContext: SQLContext, paths: List[String], joinedTableName: String): DataFrame  = {
     val ssrSej = sqlContext.read.parquet(paths.head)
     val ssrC = sqlContext.read.parquet(paths(1))
     ssrSej.join(
@@ -52,7 +56,7 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
 
   implicit class TableHelper(df: DataFrame) {
 
-    def addPrefixYear(prefix: String, except: List[String]): DataFrame = {
+     def addPrefixYear(prefix: String, except: List[String]): DataFrame = {
       val renamedColumns = df.columns.map {
         case colName if !except.contains(colName) => prefix + "__" + colName
         case keyCol => keyCol
