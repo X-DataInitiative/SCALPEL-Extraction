@@ -94,7 +94,7 @@ class PatientsSuite extends SharedContext {
       ssr = Some(ssrDf))
 
     // When
-    val result = new Patients(config).extract(sources).toDF.sort("patientID")
+    val result = new Patients(config).extract(sources).toDF
     val expected: DataFrame = Seq(
       ("Patient_01", 1, makeTS(1945, 1, 1), None),
       ("Patient_02", 1, makeTS(1956, 2, 1), Some(makeTS(2009, 3, 13))),
