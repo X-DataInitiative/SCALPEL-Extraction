@@ -1,5 +1,3 @@
-// License: BSD 3 clause
-
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
 import fr.polytechnique.cmap.cnam.etl.events._
