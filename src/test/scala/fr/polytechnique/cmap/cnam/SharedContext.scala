@@ -23,7 +23,7 @@ abstract class SharedContext
   Locale.setDefault(Locale.US)
   TimeZone.setDefault(TimeZone.getTimeZone("UTC"))
 
-  protected val debug: Boolean = false
+  protected val debug: Boolean = true
   private var _spark: SparkSession = _
 
   def assertDFs(ds1: DataFrame, ds2: DataFrame, debug: Boolean = this.debug) = assertDSs[Row](ds1, ds2, debug)
