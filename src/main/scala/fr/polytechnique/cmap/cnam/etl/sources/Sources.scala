@@ -5,9 +5,8 @@ package fr.polytechnique.cmap.cnam.etl.sources
 import java.sql.Timestamp
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.InputPaths
-import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource, SsrSource, SsrCeSource}
+import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource, SsrSource, SsrCeSource, HadSource}
 import fr.polytechnique.cmap.cnam.etl.sources.value.{DosagesSource, IrBenSource, IrImbSource, IrPhaSource}
-import fr.polytechnique.cmap.cnam.etl.sources.data.SsrSource.read
 
 case class Sources(
   dcir: Option[DataFrame] = None,
@@ -15,6 +14,7 @@ case class Sources(
   mcoCe: Option[DataFrame] = None,
   ssr: Option[DataFrame] = None,
   ssrCe: Option[DataFrame] = None,
+  had: Option[DataFrame] = None,
   irBen: Option[DataFrame] = None,
   irImb: Option[DataFrame] = None,
   irPha: Option[DataFrame] = None,
@@ -29,6 +29,7 @@ object Sources {
       mcoCe = sources.mcoCe.map(McoCeSource.sanitize),
       ssr = sources.ssr.map(SsrSource.sanitize),
       ssrCe = sources.ssrCe.map(SsrCeSource.sanitize),
+      had = sources.had.map(HadSource.sanitize),
       irBen = sources.irBen.map(IrBenSource.sanitize),
       irImb = sources.irImb.map(IrImbSource.sanitize),
       irPha = sources.irPha.map(IrPhaSource.sanitize),
@@ -41,6 +42,7 @@ object Sources {
       dcir = sources.dcir.map(DcirSource.sanitizeDates(_, studyStart, studyEnd)),
       mco = sources.mco.map(McoSource.sanitizeDates(_, studyStart, studyEnd)),
       ssr = sources.ssr.map(SsrSource.sanitizeDates(_, studyStart, studyEnd)),
+      had = sources.had.map(HadSource.sanitizeDates(_, studyStart, studyEnd)),
       mcoCe = sources.mcoCe.map(McoCeSource.sanitizeDates(_, studyStart, studyEnd)),
       irBen = sources.irBen,
       irImb = sources.irImb,
@@ -81,6 +83,7 @@ object Sources {
       dcir = dcirPath.map(DcirSource.read(sqlContext, _)),
       mco = mcoPath.map(McoSource.read(sqlContext, _)),
       mcoCe = mcoCePath.map(McoCeSource.read(sqlContext, _)),
+      had = hadPath.map(HadSource.read(sqlContext, _)),
       ssr = ssrPaths.map(SsrSource.read(sqlContext, _)),
       irBen = irBenPath.map(IrBenSource.read(sqlContext, _)),
       irImb = irImbPath.map(IrImbSource.read(sqlContext, _)),
