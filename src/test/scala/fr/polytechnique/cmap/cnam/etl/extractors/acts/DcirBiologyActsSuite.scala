@@ -1,24 +1,24 @@
-// License: BSD 3 clause
-
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import scala.util.Success
-import org.scalatest.Matchers.{an, convertToAnyShouldWrapper}
-import org.scalatest.TryValues._
-import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
-import org.apache.spark.sql.types._
+
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, MedicalAct}
+import fr.polytechnique.cmap.cnam.etl.events.{BiologyDcirAct, DcirAct, Event, MedicalAct}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
+import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
+import org.apache.spark.sql.types._
+import org.scalatest.Matchers.{an, convertToAnyShouldWrapper}
+import org.scalatest.TryValues._
 
-class DcirMedicalActsSuite extends SharedContext {
 
-  import DcirMedicalActExtractor.ColNames
+class DcirBiologyActsSuite extends SharedContext {
+
+  import DcirBiologyActExtractor.ColNames
 
   val schema = StructType(
     StructField(ColNames.PatientID, StringType) ::
-      StructField(ColNames.CamCode, StringType) ::
+      StructField(ColNames.BioCode, StringType) ::
       StructField(ColNames.InstitutionCode, DoubleType) ::
       StructField(ColNames.GHSCode, DoubleType) ::
       StructField(ColNames.Sector, DoubleType) ::
@@ -27,7 +27,7 @@ class DcirMedicalActsSuite extends SharedContext {
 
   val oldSchema = StructType(
     StructField(ColNames.PatientID, StringType) ::
-      StructField(ColNames.CamCode, StringType) ::
+      StructField(ColNames.BioCode, StringType) ::
       StructField(ColNames.Date, DateType) :: Nil
   )
 
@@ -39,7 +39,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val inputRow = new GenericRowWithSchema(inputArray, schema)
 
     // When
-    val result = DcirMedicalActExtractor.isInStudy(codes)(inputRow)
+    val result = DcirBiologyActExtractor.isInStudy(codes)(inputRow)
 
     // Then
     assert(result)
@@ -53,7 +53,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val inputRow = new GenericRowWithSchema(inputArray, schema)
 
     // When
-    val result = DcirMedicalActExtractor.isInStudy(codes)(inputRow)
+    val result = DcirBiologyActExtractor.isInStudy(codes)(inputRow)
 
     // Then
     assert(!result)
@@ -63,10 +63,10 @@ class DcirMedicalActsSuite extends SharedContext {
     // Given
     val inputArray = Array[Any]("Patient_A", "AAAA", makeTS(2010, 1, 1))
     val inputRow = new GenericRowWithSchema(inputArray, oldSchema)
-    val expected = Seq(DcirAct("Patient_A", DcirAct.groupID.DcirAct, "AAAA", 1.0, makeTS(2010, 1, 1)))
+    val expected = Seq(BiologyDcirAct("Patient_A", BiologyDcirAct.groupID.DcirAct, "AAAA", 1.0, makeTS(2010, 1, 1)))
 
     // When
-    val result = DcirMedicalActExtractor.builder(inputRow)
+    val result = DcirBiologyActExtractor.builder(inputRow)
 
     // Then
     assert(result == expected)
@@ -80,7 +80,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = 3D
 
     // When
-    val result = DcirMedicalActExtractor.getGHS(input)
+    val result = DcirBiologyActExtractor.getGHS(input)
 
     // Then
     assert(result == expected)
@@ -94,7 +94,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = 3D
 
     // When
-    val result = DcirMedicalActExtractor.getSector(input)
+    val result = DcirBiologyActExtractor.getSector(input)
 
     // Then
     assert(result == expected)
@@ -108,7 +108,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = 52D
 
     // When
-    val result = DcirMedicalActExtractor.getInstitutionCode(input)
+    val result = DcirBiologyActExtractor.getInstitutionCode(input)
 
     // Then
     assert(result == expected)
@@ -127,7 +127,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = Success(DcirAct.groupID.PrivateAmbulatory)
 
     // When
-    val result = DcirMedicalActExtractor.getGroupId(input)
+    val result = DcirBiologyActExtractor.getGroupId(input)
 
     // Then
     assert(result == expected)
@@ -140,7 +140,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val array = Array[Any](1D)
     val input = new GenericRowWithSchema(array, schema)
     // When
-    val result = DcirMedicalActExtractor.getGroupId(input)
+    val result = DcirBiologyActExtractor.getGroupId(input)
 
     // Then
     result.success.value shouldBe DcirAct.groupID.PublicAmbulatory
@@ -157,7 +157,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val array = Array[Any](null, null)
     val input = new GenericRowWithSchema(array, schema)
     // When
-    val result = DcirMedicalActExtractor.getGroupId(input)
+    val result = DcirBiologyActExtractor.getGroupId(input)
 
     // Then
     result.success.value shouldBe DcirAct.groupID.Liberal
@@ -174,7 +174,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val array = Array[Any](null, 0D, 4D)
     val input = new GenericRowWithSchema(array, schema)
     // When
-    val result = DcirMedicalActExtractor.getGroupId(input)
+    val result = DcirBiologyActExtractor.getGroupId(input)
 
     // Then
     result.success.value shouldBe DcirAct.groupID.PrivateAmbulatory
@@ -191,7 +191,7 @@ class DcirMedicalActsSuite extends SharedContext {
     val array = Array[Any](null, 1D, 4D)
     val input = new GenericRowWithSchema(array, schema)
     // When
-    val result = DcirMedicalActExtractor.getGroupId(input)
+    val result = DcirBiologyActExtractor.getGroupId(input)
 
     // Then
     result.success.value shouldBe DcirAct.groupID.Unknown
@@ -206,13 +206,13 @@ class DcirMedicalActsSuite extends SharedContext {
     val array = Array[Any](0D, 2D, 6D)
     val input = new GenericRowWithSchema(array, schema)
     // When
-    val result = DcirMedicalActExtractor.getGroupId(input)
+    val result = DcirBiologyActExtractor.getGroupId(input)
 
     // Then
     result.failure.exception shouldBe an[IllegalArgumentException]
   }
 
-  "extract" should "return a Dataset of DCIR Medical Acts" in {
+  "extract" should "return a Dataset of DCIR Biology Acts" in {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -221,26 +221,49 @@ class DcirMedicalActsSuite extends SharedContext {
     val codes = Set("AAAA", "CCCC")
 
     val input = Seq(
-      ("Patient_A", "AAAA", "NABM1", makeTS(2010, 1, 1), None, None, None),
-      ("Patient_A", "BBBB", "NABM1", makeTS(2010, 2, 1), Some(1D), Some(0D), Some(1D)),
-      ("Patient_B", "CCCC", "NABM1", makeTS(2010, 3, 1), None, None, None),
-      ("Patient_B", "CCCC", "NABM1", makeTS(2010, 4, 1), Some(7D), Some(0D), Some(2D)),
-      ("Patient_C", "BBBB", "NABM1", makeTS(2010, 5, 1), Some(1D), Some(0D), Some(2D))
+      ("Patient_A", "AAAA", "CCAM1", Some(makeTS(2010, 1, 1)), None, None, None, makeTS(2010, 1, 1)),
+      ("Patient_A", "BBBB", "CCAM1", Some(makeTS(2010, 2, 1)), Some(1D), Some(0D), Some(1D), makeTS(2010, 2, 1)),
+      ("Patient_B", "CCCC", "CCAM1", Some(makeTS(2010, 3, 1)), None, None, None, makeTS(2010, 3, 1)),
+      ("Patient_B", "CCCC", "CCAM1", Some(makeTS(2010, 4, 1)), Some(7D), Some(0D), Some(2D), makeTS(2010, 4, 1)),
+      ("Patient_C", "BBBB", "CCAM1", None, Some(1D), Some(0D), Some(2D), makeTS(2010, 5, 1))
     ).toDF(
-      ColNames.PatientID, ColNames.CamCode, ColNames.BioCode, ColNames.Date,
-      ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector
+      ColNames.PatientID, ColNames.BioCode, ColNames.CamCode, ColNames.Date,
+      ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector, ColNames.DcirFluxDate
     )
 
     val sources = Sources(dcir = Some(input))
 
     val expected = Seq[Event[MedicalAct]](
-      DcirAct("Patient_A", DcirAct.groupID.Liberal, "AAAA", 1.0, makeTS(2010, 1, 1)),
-      DcirAct("Patient_B", DcirAct.groupID.Liberal, "CCCC", 1.0, makeTS(2010, 3, 1)),
-      DcirAct("Patient_B", DcirAct.groupID.PrivateAmbulatory, "CCCC", 1.0, makeTS(2010, 4, 1))
+      BiologyDcirAct("Patient_A", BiologyDcirAct.groupID.Liberal, "AAAA", 1.0, makeTS(2010, 1, 1)),
+      BiologyDcirAct("Patient_B", BiologyDcirAct.groupID.Liberal, "CCCC", 1.0, makeTS(2010, 3, 1)),
+      BiologyDcirAct("Patient_B", BiologyDcirAct.groupID.PrivateAmbulatory, "CCCC", 1.0, makeTS(2010, 4, 1))
     ).toDS
 
     // When
-    val result = DcirMedicalActExtractor.extract(sources, codes)
+    val result = DcirBiologyActExtractor.extract(sources, codes)
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "extract" should "return a Dataset of DCIR Biology Acts from raw data" in {
+
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val codes = Set("238")
+
+    val input = sqlCtx.read.parquet("src/test/resources/test-input/DCIR.parquet")
+
+    val sources = Sources(dcir = Some(input))
+
+    val expected = Seq[Event[MedicalAct]](
+      BiologyDcirAct("Patient_01", BiologyDcirAct.groupID.Liberal, "238", 1.0, makeTS(2006, 1, 15))
+    ).toDS
+
+    // When
+    val result = DcirBiologyActExtractor.extract(sources, codes)
 
     // Then
     assertDSs(result, expected)

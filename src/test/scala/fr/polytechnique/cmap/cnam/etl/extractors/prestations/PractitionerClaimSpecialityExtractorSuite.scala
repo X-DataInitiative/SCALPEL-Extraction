@@ -42,7 +42,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val nonMedicalSpeCodes = List("42")
+    val nonMedicalSpeCodes = List()
     val input = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
     val sources = Sources(dcir = Some(input))
 
@@ -50,7 +50,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
       NonMedicalPractitionerClaim("Patient_01", "A10000001", "42", makeTS(2006, 2, 1)),
       NonMedicalPractitionerClaim("Patient_01", "A10000001", "42", makeTS(2006, 1, 15)),
       NonMedicalPractitionerClaim("Patient_01", "A10000001", "42", makeTS(2006, 1, 30)),
-      NonMedicalPractitionerClaim("Patient_02", "A10000005", "42", makeTS(2006, 1, 5)),
+      NonMedicalPractitionerClaim("Patient_02", "A10000005", "0", makeTS(2006, 1, 5)),
       NonMedicalPractitionerClaim("Patient_02", "A10000005", "42", makeTS(2006, 1, 15)),
       NonMedicalPractitionerClaim("Patient_02", "A10000005", "42", makeTS(2006, 1, 30))
     ).toDS

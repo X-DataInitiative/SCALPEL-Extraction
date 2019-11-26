@@ -59,3 +59,16 @@ object McoCIM10Act extends MedicalAct {
 object McoCEAct extends MedicalAct {
   val category: EventCategory[MedicalAct] = "mco_ce_act"
 }
+
+object BiologyDcirAct extends MedicalAct {
+  override val category: EventCategory[MedicalAct] = "dcir_biology_act"
+
+  object groupID {
+    val PrivateAmbulatory = "private_ambulatory"
+    val PublicAmbulatory = "public_ambulatory"
+    val PrivateHospital = "private_hospital"
+    val Liberal = "liberal"
+    val DcirAct = "DCIR_act" // For legacy purpose, works with old DCIR schemas
+    val Unknown = "unknown_source"
+  }
+}
