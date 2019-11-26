@@ -2,8 +2,10 @@
 
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
-import org.apache.spark.sql.{Column, DataFrame}
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.events.Event
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
 
@@ -94,18 +96,18 @@ class PatientsSuite extends SharedContext {
       ssr = Some(ssrDf))
 
     // When
-    val result = new Patients(config).extract(sources).toDF
-    val expected: DataFrame = Seq(
-      ("Patient_01", 1, makeTS(1945, 1, 1), None),
-      ("Patient_02", 1, makeTS(1956, 2, 1), Some(makeTS(2009, 3, 13))),
-      ("Patient_03", 2, makeTS(1937, 3, 1), Some(makeTS(1980, 4, 1))),
-      ("Patient_04", 2, makeTS(1966, 2, 1), Some(makeTS(2009, 3, 13))),
-      ("Patient_05", 1, makeTS(1935, 4, 1), Some(makeTS(2008, 3, 13))),
-      ("Patient_06", 1, makeTS(1920, 8, 1), Some(makeTS(1980, 8, 1)))
-    ).toDF("patientID", "gender", "birthDate", "deathDate")
+    val result = new Patients(config).extract(sources)
+    val expected: Dataset[Patient] = Seq(
+      Patient("Patient_01", 1, makeTS(1945, 1, 1), None),
+      Patient("Patient_02", 1, makeTS(1956, 2, 1), Some(makeTS(2009, 3, 13))),
+      Patient("Patient_03", 2, makeTS(1937, 3, 1), Some(makeTS(1980, 4, 1))),
+      Patient("Patient_04", 2, makeTS(1966, 2, 1), Some(makeTS(2009, 3, 13))),
+      Patient("Patient_05", 1, makeTS(1935, 4, 1), Some(makeTS(2008, 3, 13))),
+      Patient("Patient_06", 1, makeTS(1920, 8, 1), Some(makeTS(1980, 8, 1)))
+    ).toDS()
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
   }
 
 }

@@ -70,6 +70,7 @@ object Sources {
     mcoPath: Option[String] = None,
     mcoCePath: Option[String] = None,
     hadPath: Option[String] = None,
+    //@todo The merge of ssr_sej and ssr_c should be finally moved to the Flattening project
     ssrPaths: Option[List[String]] = None,
     irBenPath: Option[String] = None,
     irImbPath: Option[String] = None,
