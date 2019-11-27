@@ -7,15 +7,17 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
+import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, ObservationPeriod}
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 
 class ObservationPeriodTransformer(config: ObservationPeriodTransformerConfig) {
 
+  import Columns._
+
   val outputColumns = List(
     col("patientID"),
     col("observationStart").as("start"),
-    col("observationEnd").as("stop")
+    col("observationEnd").as("end")
   )
 
   def computeObservationStart(data: DataFrame): DataFrame = {
@@ -39,15 +41,24 @@ class ObservationPeriodTransformer(config: ObservationPeriodTransformerConfig) {
     def withObservationEnd: DataFrame = computeObservationEnd(data)
   }
 
-  def transform(events: Dataset[Event[AnyEvent]]): Dataset[ObservationPeriod] = {
+  def transform(events: Dataset[Event[AnyEvent]]): Dataset[Event[ObservationPeriod]] = {
 
     import events.sqlContext.implicits._
 
-    events.toDF
+    val observation = events.toDF
       .withObservationStart
       .withObservationEnd
-      .select(outputColumns: _*)
       .dropDuplicates(Seq("patientID"))
-      .as[ObservationPeriod]
+      .map(
+        ObservationPeriod.fromRow(
+          _,
+          patientIDCol = PatientID,
+          startCol = ObservationStart,
+          endCol = ObservationEnd
+        )
+      )
+
+    observation.as
+      [Event[ObservationPeriod]]
   }
 }

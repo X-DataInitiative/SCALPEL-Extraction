@@ -5,7 +5,7 @@ package fr.polytechnique.cmap.cnam.study.fall
 import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, Outcome}
+import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, FollowUp, Outcome}
 import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
@@ -134,7 +134,7 @@ object FallMain extends Main with FractureCodes {
     if (fallConfig.runParameters.exposures) {
       val exposures = {
         val definition = fallConfig.exposures
-        val patientsWithFollowUp = FallStudyFollowUps
+        val patientsWithFollowUp: Dataset[(Patient, Event[FollowUp])] = FallStudyFollowUps
           .transform(
             optionPatients.get,
             fallConfig.base.studyStart,
@@ -142,7 +142,7 @@ object FallMain extends Main with FractureCodes {
             fallConfig.patients.followupStartDelay
           )
         import patientsWithFollowUp.sparkSession.sqlContext.implicits._
-        val followUps = patientsWithFollowUp.map(_._2)
+        val followUps = patientsWithFollowUp.map(e => e._2)
         operationsMetadata += {
           OperationReporter
             .report(

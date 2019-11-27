@@ -2,27 +2,35 @@
 
 package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
 
-import org.scalatest.Matchers.convertToAnyShouldWrapper
+import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.events.{Event, FollowUp}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class FollowUpSuite extends SharedContext {
 
   "isValid" should "return true for FollowUps where start < stop, false otherwise" in {
 
+    import FollowUpTransformer.FollowUpDataset
+
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
     //Given
-    val followUpPeriods = Seq(
-      FollowUp("Patient_A", makeTS(2006, 6, 1), makeTS(2009, 12, 31), "any_reason"),
-      FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2006, 7, 1), "any_reason"),
-      FollowUp("Patient_C", makeTS(2016, 8, 1), makeTS(2009, 12, 31), "any_reason")
-    )
+    val followUpPeriods: Dataset[Event[FollowUp]] = Seq(
+      FollowUp("Patient_A", "any_reason", makeTS(2006, 6, 1), makeTS(2009, 12, 31)),
+      FollowUp("Patient_B", "any_reason", makeTS(2006, 7, 1), makeTS(2006, 7, 1)),
+      FollowUp("Patient_C", "any_reason", makeTS(2016, 8, 1), makeTS(2009, 12, 31))
+    ).toDS
 
-    val expected = Seq(
-      FollowUp("Patient_A", makeTS(2006, 6, 1), makeTS(2009, 12, 31), "any_reason")
-    )
+    val expected: Dataset[Event[FollowUp]] = Seq(
+      FollowUp("Patient_A", "any_reason", makeTS(2006, 6, 1), makeTS(2009, 12, 31))
+    ).toDS
 
-    val result = followUpPeriods.filter(_.isValid)
+    // When
+    val result: Dataset[Event[FollowUp]] = followUpPeriods.cleanFollowUps()
 
-    result shouldEqual expected
+    //Then
+    assertDSs(result, expected)
   }
 }

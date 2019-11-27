@@ -2,12 +2,12 @@
 
 package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
 
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.types.TimestampType
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriod
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 
@@ -25,14 +25,15 @@ class FollowUpTransformerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     //Given
-    val followUpPeriods = Seq(
-      FollowUp("Patient_A", makeTS(2006, 6, 1), makeTS(2009, 12, 31), "any_reason"),
-      FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2006, 7, 1), "any_reason"),
-      FollowUp("Patient_C", makeTS(2016, 8, 1), makeTS(2009, 12, 31), "any_reason")
+    val followUpPeriods: Dataset[Event[FollowUp]] = Seq(
+      FollowUp("Patient_A", "any_reason", makeTS(2006, 6, 1), makeTS(2009, 12, 31)),
+      FollowUp("Patient_B", "any_reason", makeTS(2006, 7, 1), makeTS(2006, 7, 1)),
+      FollowUp("Patient_C", "any_reason", makeTS(2016, 8, 1), makeTS(2009, 12, 31))
+
     ).toDS()
 
-    val expected = Seq(
-      FollowUp("Patient_A", makeTS(2006, 6, 1), makeTS(2009, 12, 31), "any_reason")
+    val expected: Dataset[Event[FollowUp]] = Seq(
+      FollowUp("Patient_A", "any_reason", makeTS(2006, 6, 1), makeTS(2009, 12, 31))
     ).toDS()
 
     // When
@@ -225,6 +226,7 @@ class FollowUpTransformerSuite extends SharedContext {
       ))
     ).toDS
 
+
     val prescriptions = Seq(
       Molecule("Regis", "doliprane", 200.00, makeTS(2007, 1, 1)),
       Molecule("Regis", "doliprane", 200.00, makeTS(2007, 2, 1)),
@@ -241,15 +243,17 @@ class FollowUpTransformerSuite extends SharedContext {
       Outcome("pika", "cancer", makeTS(2010, 1, 1)),
       Outcome("patient03", "fall", makeTS(2010, 1, 1))
     ).toDS
-    val expected = Seq(
-      FollowUp("Regis", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd"),
-      FollowUp("pika", makeTS(2006, 3, 1), makeTS(2008, 10, 1), "Death"),
-      FollowUp("patient03", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd")
+
+    val expected: Dataset[Event[FollowUp]] = Seq(
+      FollowUp("Regis", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 1, 1)),
+      FollowUp("pika", "Death", makeTS(2006, 3, 1), makeTS(2008, 10, 1)),
+      FollowUp("patient03", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 1, 1))
     ).toDS
+
     val transformer = new FollowUpTransformer(FollowUpTestConfig())
 
     // When
-    val result = transformer.transform(patients, prescriptions, outcomes, tracklosses)
+    val result: Dataset[Event[FollowUp]] = transformer.transform(patients, prescriptions, outcomes, tracklosses)
 
     // Then
 
@@ -296,9 +300,9 @@ class FollowUpTransformerSuite extends SharedContext {
       Outcome("patient03", "fall", makeTS(2010, 1, 1))
     ).toDS
     val expected = Seq(
-      FollowUp("Regis", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd"),
-      FollowUp("pika", makeTS(2006, 3, 1), makeTS(2008, 10, 1), "Death"),
-      FollowUp("patient03", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd")
+      FollowUp("Regis", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 1, 1)),
+      FollowUp("pika", "Death", makeTS(2006, 3, 1), makeTS(2008, 10, 1)),
+      FollowUp("patient03", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 1, 1))
     ).toDS
 
     val transformer = new FollowUpTransformer(FollowUpTestConfig(firstTargetDisease = false))
@@ -345,9 +349,9 @@ class FollowUpTransformerSuite extends SharedContext {
 
     val outcomes = Seq.empty[Event[Outcome]].toDS
     val expected = Seq(
-      FollowUp("Regis", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd"),
-      FollowUp("pika", makeTS(2006, 3, 1), makeTS(2008, 10, 1), "Death"),
-      FollowUp("patient03", makeTS(2006, 3, 1), makeTS(2009, 1, 1), "ObservationEnd")
+      FollowUp("Regis", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 1, 1)),
+      FollowUp("pika", "Death", makeTS(2006, 3, 1), makeTS(2008, 10, 1)),
+      FollowUp("patient03", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 1, 1))
     ).toDS
 
     val transformer = new FollowUpTransformer(FollowUpTestConfig(firstTargetDisease = false))

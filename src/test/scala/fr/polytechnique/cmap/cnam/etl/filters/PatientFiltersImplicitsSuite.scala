@@ -4,9 +4,8 @@ package fr.polytechnique.cmap.cnam.etl.filters
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.{Event, Molecule, Outcome}
+import fr.polytechnique.cmap.cnam.etl.events.{Event, FollowUp, Molecule, Outcome}
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class PatientFiltersImplicitsSuite extends SharedContext {
@@ -38,10 +37,10 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     ).toDS
 
     val followUpPeriods = Seq(
-      FollowUp("Patient_A", makeTS(2006, 6, 1), makeTS(2009, 12, 31), "any_reason"),
-      FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2009, 12, 31), "any_reason"),
-      FollowUp("Patient_C", makeTS(2006, 8, 1), makeTS(2009, 12, 31), "any_reason"),
-      FollowUp("Patient_E", makeTS(2006, 8, 1), makeTS(2009, 12, 31), "any_reason")
+      FollowUp("Patient_A", "any_reason", makeTS(2006, 6, 1), makeTS(2009, 12, 31)),
+      FollowUp("Patient_B", "any_reason", makeTS(2006, 7, 1), makeTS(2009, 12, 31)),
+      FollowUp("Patient_C", "any_reason", makeTS(2006, 8, 1), makeTS(2009, 12, 31)),
+      FollowUp("Patient_E", "any_reason", makeTS(2006, 8, 1), makeTS(2009, 12, 31))
     ).toDS
 
     val expected = Seq(
@@ -83,10 +82,10 @@ class PatientFiltersImplicitsSuite extends SharedContext {
     ).toDS
 
     val followUpPeriods = Seq(
-      FollowUp("Patient_A", makeTS(2006, 6, 1), makeTS(2009, 12, 31), "any_reason"),
-      FollowUp("Patient_B", makeTS(2006, 7, 1), makeTS(2009, 12, 31), "any_reason"),
-      FollowUp("Patient_C", makeTS(2006, 8, 1), makeTS(2009, 12, 31), "any_reason"),
-      FollowUp("Patient_F", makeTS(2006, 8, 1), makeTS(2009, 12, 31), "any_reason")
+      FollowUp("Patient_A", "any_reason", makeTS(2006, 6, 1), makeTS(2009, 12, 31)),
+      FollowUp("Patient_B", "any_reason", makeTS(2006, 7, 1), makeTS(2009, 12, 31)),
+      FollowUp("Patient_C", "any_reason", makeTS(2006, 8, 1), makeTS(2009, 12, 31)),
+      FollowUp("Patient_F", "any_reason", makeTS(2006, 8, 1), makeTS(2009, 12, 31))
     ).toDS
 
     val expected = Seq(
