@@ -1,11 +1,9 @@
-// License: BSD 3 clause
-
-package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
+package fr.polytechnique.cmap.cnam.etl.transformers.observation
 
 import fr.polytechnique.cmap.cnam.etl.events.Event
 
+private[observation] object  Columns {
 
-private[follow_up] object Columns {
   final val PatientID = Event.Columns.PatientID
   final val Start = Event.Columns.Start
   final val End = Event.Columns.End
@@ -26,9 +24,5 @@ private[follow_up] object Columns {
 
   final val TracklossDate = "trackloss"
   final val FirstTargetDiseaseDate = "firstTargetDisease"
-
-  object EndReasons extends Enumeration {
-    val Death, Disease, Trackloss, ObservationEnd = Value
-  }
 
 }

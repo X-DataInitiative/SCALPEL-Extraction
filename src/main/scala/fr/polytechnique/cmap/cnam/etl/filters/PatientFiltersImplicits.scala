@@ -6,10 +6,9 @@ import java.sql.Timestamp
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, TimestampType}
-import org.apache.spark.sql.{Column, Dataset}
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 
 /*
@@ -37,16 +36,20 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
     */
   def filterEarlyDiagnosedPatients(
     outcomes: Dataset[Event[Outcome]],
-    followUpPeriods: Dataset[FollowUp],
+    followUpPeriods: Dataset[Event[FollowUp]],
     outcomeName: String): Dataset[Patient] = {
 
-    val joined = outcomes.joinWith(
+
+    val joined: Dataset[(Event[Outcome], Event[FollowUp])] = outcomes.joinWith(
       followUpPeriods, outcomes.col("patientID") === followUpPeriods.col("patientID")
     )
-    val patientId = s"Event.${Event.Columns.PatientID}"
-    val followUpStart = "FollowUp.start"
-    val outcomeDate = s"Event.${Event.Columns.Start}"
-    val value = s"Event.${Event.Columns.Value}"
+
+
+    val patientId = s"_1.${Event.Columns.PatientID}"
+    val followUpStart = "_2.start"
+    val outcomeDate = s"_1.${Event.Columns.Start}"
+    val value = s"_1.${Event.Columns.Value}"
+
 
     val window = Window.partitionBy(patientId)
 
@@ -57,7 +60,7 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
       ).otherwise(lit(1))
     ).over(window).cast(BooleanType)
 
-    val patientsToKeep: Set[String] = renameTupleColumns(joined)
+    val patientsToKeep: Set[String] = joined
       .withColumn("filter", diseaseFilter)
       .where(col("filter"))
       .select(patientId)
@@ -78,16 +81,16 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
     */
   def removeEarlyDiagnosedPatients(
     outcomes: Dataset[Event[Outcome]],
-    followUpPeriods: Dataset[FollowUp],
+    followUpPeriods: Dataset[Event[FollowUp]],
     outcomeName: String): Dataset[Patient] = {
 
     val joined = outcomes.joinWith(
       followUpPeriods, outcomes.col("patientID") === followUpPeriods.col("patientID")
     )
-    val patientId = s"Event.${Event.Columns.PatientID}"
-    val followUpStart = "FollowUp.start"
-    val outcomeDate = s"Event.${Event.Columns.Start}"
-    val value = s"Event.${Event.Columns.Value}"
+    val patientId = s"_1.${Event.Columns.PatientID}"
+    val followUpStart = "_2.start"
+    val outcomeDate = s"_1.${Event.Columns.Start}"
+    val value = s"_1.${Event.Columns.Value}"
 
     val window = Window.partitionBy(patientId)
 
@@ -98,7 +101,7 @@ private[filters] class PatientFiltersImplicits(patients: Dataset[Patient]) {
       ).otherwise(lit(1))
     ).over(window).cast(BooleanType)
 
-    val patientsToRemove: Set[String] = renameTupleColumns(joined)
+    val patientsToRemove: Set[String] = joined
       .withColumn("filter", diseaseFilter)
       .where(!col("filter"))
       .select(patientId)

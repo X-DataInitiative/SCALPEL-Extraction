@@ -3,6 +3,7 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.observation
 
 import java.time.LocalDate
+import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.util.functions._
@@ -47,12 +48,12 @@ class ObservationPeriodTransformerSuite extends SharedContext {
     assertDFs(result, expected)
   }
 
-  "transform" should "return a Dataset[FlatEvent] with the observation events of each patient" in {
+  "transform" should "return a Dataset[Event[ObservationPeriod]] with the observation events of each patient" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val events = Seq[Event[AnyEvent]](
+    val events: Dataset[Event[AnyEvent]] = Seq[Event[AnyEvent]](
       Molecule("Patient_A", "PIOGLITAZONE", 1.0, makeTS(2008, 1, 20)),
       Molecule("Patient_A", "PIOGLITAZONE", 1.0, makeTS(2008, 1, 1)),
       Molecule("Patient_A", "PIOGLITAZONE", 1.0, makeTS(2008, 1, 10)),
@@ -61,15 +62,16 @@ class ObservationPeriodTransformerSuite extends SharedContext {
       Outcome("Patient_B", "C67", makeTS(2007, 1, 1))
     ).toDS
 
-    val expected = Seq(
+    val expected: Dataset[Event[ObservationPeriod]] = Seq(
       ObservationPeriod("Patient_A", makeTS(2008, 1, 1), makeTS(2010, 1, 1)),
       ObservationPeriod("Patient_B", makeTS(2009, 1, 1), makeTS(2010, 1, 1))
     ).toDS
 
-    val transformer = new ObservationPeriodTransformer(testConfig)
+    val transformer: ObservationPeriodTransformer = new ObservationPeriodTransformer(testConfig)
 
     // When
-    val result = transformer.transform(events)
+    val result: Dataset[Event[ObservationPeriod]] = transformer.transform(events)
+
 
     // Then
     assertDSs(result, expected)

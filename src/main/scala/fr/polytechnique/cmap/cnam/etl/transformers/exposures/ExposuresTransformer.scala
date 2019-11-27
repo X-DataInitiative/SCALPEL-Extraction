@@ -5,9 +5,8 @@ package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 import me.danielpes.spark.datetime.Period
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
-import fr.polytechnique.cmap.cnam.etl.events.{Dispensation, Event, Exposure}
+import fr.polytechnique.cmap.cnam.etl.events.{Dispensation, Event, Exposure, FollowUp}
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUp
 import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 
 class ExposuresTransformer(config: ExposuresTransformerConfig)
@@ -32,7 +31,7 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
   val purchaseIntervals: Option[List[Int]] = config.purchaseIntervals
 
   def transform[Disp <: Dispensation](
-    patients: Dataset[(Patient, FollowUp)],
+    patients: Dataset[(Patient, Event[FollowUp])],
     dispensations: Dataset[Event[Disp]])
   : Dataset[Event[Exposure]] = {
 
@@ -41,8 +40,8 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
       col("Patient.gender").as(Gender),
       col("Patient.birthDate").as(BirthDate),
       col("Patient.deathDate").as(DeathDate),
-      col("FollowUp.start").as(FollowUpStart),
-      col("FollowUp.end").as(FollowUpEnd)
+      col("Event.start").as(FollowUpStart),
+      col("Event.end").as(FollowUpEnd)
     )
 
     val input = renameTupleColumns(patients).select(inputCols: _*).join(dispensations, Seq(PatientID))
@@ -56,7 +55,7 @@ class ExposuresTransformer(config: ExposuresTransformerConfig)
       .withColumn(
       "Correct_Exposure_End",
       when(col(FollowUpEnd) < col(ExposureEnd), col(FollowUpEnd)).otherwise(col(ExposureEnd))
-    ).drop(ExposureEnd) // This makes sure that all the exposures end at the followup end date
+      ).drop(ExposureEnd) // This makes sure that all the exposures end at the followup end date
       .withColumnRenamed("Correct_Exposure_End", ExposureEnd)
       .where(col(ExposureStart) <= col(ExposureEnd))
       .aggregateWeight(
