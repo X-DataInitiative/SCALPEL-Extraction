@@ -75,4 +75,10 @@ package object functions {
     def between(lower: Int, upper: Int): Boolean = num >= lower && num <= upper
   }
 
+  implicit val ordered: Ordering[Timestamp] = new Ordering[Timestamp] {
+    def compare(x: Timestamp, y: Timestamp): Int = x compareTo y
+  }
+
+  val min: (Timestamp, Timestamp) => Timestamp = (x: Timestamp, y: Timestamp) => if (ordered.lteq(x, y)) x else y
+  val max: (Timestamp, Timestamp) => Timestamp = (x: Timestamp, y: Timestamp) => if (ordered.gteq(x, y)) x else y
 }
