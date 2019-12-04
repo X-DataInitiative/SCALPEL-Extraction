@@ -5,7 +5,7 @@ package fr.polytechnique.cmap.cnam.study.fall
 import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, FollowUp, Outcome}
+import fr.polytechnique.cmap.cnam.etl.events.{Event, FollowUp, Outcome}
 import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
@@ -19,6 +19,7 @@ import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.extractors._
 import fr.polytechnique.cmap.cnam.study.fall.follow_up.FallStudyFollowUps
 import fr.polytechnique.cmap.cnam.study.fall.fractures.FracturesTransformer
+import fr.polytechnique.cmap.cnam.study.fall.liberalActs.LiberalActsTransformer
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
@@ -249,8 +250,7 @@ object FallMain extends Main with FractureCodes {
           )
       }
       logger.info("Liberal Medical Acts")
-      val liberalActs = acts
-        .filter(act => act.groupID == DcirAct.groupID.Liberal && !CCAMExceptions.contains(act.value)).persist()
+      val liberalActs = LiberalActsTransformer.transform(acts).persist()
       operationsMetadata += {
         OperationReporter
           .report(
