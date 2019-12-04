@@ -1,6 +1,7 @@
 package fr.polytechnique.cmap.cnam.study.dreesChronic
 
 import fr.polytechnique.cmap.cnam.Main
+import fr.polytechnique.cmap.cnam.etl.extractors.takeOverReasons.HadMainTakeOverExtractor
 import org.apache.spark.sql.{Dataset, SQLContext}
 
 import scala.collection.mutable
@@ -238,6 +239,18 @@ object dreesChronicMain extends Main with BpcoCodes {
       None
     }
 
+    val hadMainTakeOverReason = HadMainTakeOverExtractor.extract(sources, Set.empty)//.cache()
+
+    operationsMetadata += {
+      OperationReporter.report(
+        "HadMainTakeOverReason",
+        List("HAD"),
+        OperationTypes.Diagnosis,
+        hadMainTakeOverReason.toDF,
+        Path(dreesChronicConfig.output.outputSavePath),
+        dreesChronicConfig.output.saveMode
+      )
+    }
     operationsMetadata
   }
 

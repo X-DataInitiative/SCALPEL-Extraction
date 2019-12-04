@@ -5,15 +5,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.{DrugClass
 object Traitements extends DrugClassConfig {
 
   val name: String = "Traitements"
-  val cip13Codes: Set[String] = Set(
-    "3400934612855",
-    "3400934614118",
-    "3400937022576",
-    "3400939212265",
-    "3400939212494",
-    "3400939311241",
-    "3400939312361"
-  )
+  val cip13Codes: Set[String] = Set()
 
   /*
   list pharmacological classes
@@ -26,7 +18,10 @@ object Traitements extends DrugClassConfig {
 
   val antiIL5= new PharmacologicalClassConfig(
     name = "Anti_Il5",
-    ATCCodes = List("R03DC03" ,"R03DX09", "R03DX09")
+    ATCCodes = List(
+      "R03DC03", //Antileucotriène
+      "R03DX08", // Ac monoclonaux Traitement anti IL-5 
+      "R03DX09")
   )
 
   val pharmacologicalClasses = List(

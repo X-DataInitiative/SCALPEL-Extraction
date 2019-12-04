@@ -45,7 +45,7 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
   /** Fixed parameters needed for the Patients extractors. */
   case class PatientsConfig(
     ageReferenceDate: LocalDate = DreesChronicConfig.BaseConfig.ageReferenceDate,
-    minAge: Int = 40,
+    minAge: Int = 0,
     startGapInMonths: Int = 0,
     followupStartDelay: Int = 0
    )
@@ -66,6 +66,7 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
 
   final object NgapActConfig extends NgapActConfig(
     acts_categories = List(
+      Amc,
       Amk,
       Ams
     )
