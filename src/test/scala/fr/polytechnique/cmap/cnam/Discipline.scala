@@ -2,11 +2,12 @@
 
 package fr.polytechnique.cmap.cnam
 
-import org.scalatest.TestRegistration
-import org.scalatest.prop.Checkers
+import org.scalatest.funsuite.AnyFunSuiteLike
+import org.scalatestplus.scalacheck.Checkers
 import org.typelevel.discipline.Laws
 
-trait Discipline extends Checkers { self: TestRegistration =>
+trait Discipline extends Checkers {
+  self: AnyFunSuiteLike =>
 
   def checkAll(name: String, ruleSet: Laws#RuleSet): Unit = {
     for ((id, prop) <- ruleSet.all.properties)

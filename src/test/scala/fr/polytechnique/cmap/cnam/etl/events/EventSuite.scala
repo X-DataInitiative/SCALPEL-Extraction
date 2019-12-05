@@ -4,9 +4,9 @@ package fr.polytechnique.cmap.cnam.etl.events
 
 import java.sql.Timestamp
 import org.mockito.Mockito.mock
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class EventSuite extends FlatSpec {
+class EventSuite extends AnyFlatSpec {
 
   val patientID: String = "patientID"
   val timestamp: Timestamp = mock(classOf[Timestamp])

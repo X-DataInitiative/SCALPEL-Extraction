@@ -2,9 +2,9 @@
 
 package fr.polytechnique.cmap.cnam.etl.config
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class CaseClassConfigSuite extends FlatSpec {
+class CaseClassConfigSuite extends AnyFlatSpec {
 
   "fieldsToString" should "return a string with pretty-printable information of the case class" in {
 

@@ -6,11 +6,11 @@ import java.io.File
 import java.nio.file.Paths
 import com.typesafe.config.ConfigFactory
 import me.danielpes.spark.datetime.implicits._
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.PharmacologicalLevel
 
-class FallConfigSuite extends FlatSpec {
+class FallConfigSuite extends AnyFlatSpec {
 
   val inputPaths = InputPaths(
     dcir = Some("src/test/resources/test-input/DCIR.parquet"),

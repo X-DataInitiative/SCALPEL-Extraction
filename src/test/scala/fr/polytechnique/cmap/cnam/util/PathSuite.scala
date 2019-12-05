@@ -5,9 +5,9 @@ package fr.polytechnique.cmap.cnam.util
 import java.text.SimpleDateFormat
 import java.util.Date
 import org.apache.hadoop.fs.{Path => HDFSPath}
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class PathSuite extends FlatSpec {
+class PathSuite extends AnyFlatSpec {
 
   "apply" should "correctly return a org.apache.hadoop.fs.Path instance" in {
     // Given

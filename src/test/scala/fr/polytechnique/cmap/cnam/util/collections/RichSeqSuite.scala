@@ -2,9 +2,9 @@
 
 package fr.polytechnique.cmap.cnam.util.collections
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class RichSeqSuite extends FlatSpec {
+class RichSeqSuite extends AnyFlatSpec {
 
   "existAll" should "return true if all given predicates \"exist\" in the collection" in {
 

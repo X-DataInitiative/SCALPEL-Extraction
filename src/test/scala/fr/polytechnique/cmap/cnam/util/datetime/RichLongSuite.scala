@@ -2,9 +2,9 @@
 
 package fr.polytechnique.cmap.cnam.util.datetime
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class RichLongSuite extends FlatSpec {
+class RichLongSuite extends AnyFlatSpec {
 
   "millisecond/milliseconds" should "return the corresponding Period instance" in {
     // Given

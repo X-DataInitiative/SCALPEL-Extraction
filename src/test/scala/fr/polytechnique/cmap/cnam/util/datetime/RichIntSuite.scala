@@ -2,9 +2,9 @@
 
 package fr.polytechnique.cmap.cnam.util.datetime
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class RichIntSuite extends FlatSpec {
+class RichIntSuite extends AnyFlatSpec {
 
   private val one = new RichInt(1)
   private val five = new RichInt(5)

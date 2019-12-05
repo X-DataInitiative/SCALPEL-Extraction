@@ -3,10 +3,10 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
 import org.mockito.Mockito.mock
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import org.apache.spark.sql.DataFrame
 
-class ExposurePeriodAdderSuite extends FlatSpec {
+class ExposurePeriodAdderSuite extends AnyFlatSpec {
 
   "exposurePeriodImplicits" should "return the correct implementation for the 'Limited' strategy" in {
     val instance = new ExposurePeriodAdder {

@@ -3,7 +3,7 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import scala.util.Success
-import org.scalatest.Matchers.{an, convertToAnyShouldWrapper}
+import org.scalatest.matchers.should.Matchers.{an, convertToAnyShouldWrapper}
 import org.scalatest.TryValues._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._

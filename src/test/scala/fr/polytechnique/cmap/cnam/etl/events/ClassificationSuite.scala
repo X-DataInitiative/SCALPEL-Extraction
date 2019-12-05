@@ -2,13 +2,13 @@
 
 package fr.polytechnique.cmap.cnam.etl.events
 
-import org.scalatest.FlatSpecLike
+import org.scalatest.flatspec.AnyFlatSpecLike
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types.{StringType, StructField, StructType, TimestampType}
 import fr.polytechnique.cmap.cnam.util.functions._
 
 
-class ClassificationSuite extends FlatSpecLike {
+class ClassificationSuite extends AnyFlatSpecLike {
 
   "apply" should "return correct Event" in {
     // Given

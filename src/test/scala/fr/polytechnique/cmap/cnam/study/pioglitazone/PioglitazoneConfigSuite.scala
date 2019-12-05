@@ -5,11 +5,11 @@ package fr.polytechnique.cmap.cnam.study.pioglitazone
 import java.nio.file.{Files, Paths}
 import com.typesafe.config.ConfigFactory
 import me.danielpes.spark.datetime.implicits._
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes.CancerDefinition
 
-class PioglitazoneConfigSuite extends FlatSpec {
+class PioglitazoneConfigSuite extends AnyFlatSpec {
 
   val inputPaths = InputPaths(
     dcir = Some("src/test/resources/test-input/DCIR.parquet"),
