@@ -12,11 +12,6 @@ trait DcirActExtractor extends DcirExtractor[MedicalAct] {
 
   private final val PrivateInstitutionCodes = Set(4D, 5D, 6D, 7D)
 
-  override def getInput(sources: Sources): DataFrame = sources.dcir.get.select(
-    ColNames.PatientID, ColNames.CamCode, ColNames.BioCode, ColNames.Date,
-    ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector
-  )
-
   override def extractGroupId(r: Row): String = {
     getGroupId(r) recover { case _: IllegalArgumentException => DcirAct.groupID.DcirAct }
   }.get
@@ -65,6 +60,11 @@ trait DcirActExtractor extends DcirExtractor[MedicalAct] {
 object DcirMedicalActExtractor extends DcirActExtractor  {
   override val columnName: String = ColNames.CamCode
   override val eventBuilder: EventBuilder = DcirAct
+
+  override def getInput(sources: Sources): DataFrame = sources.dcir.get.select(
+    ColNames.PatientID, ColNames.CamCode, ColNames.Date,
+    ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector
+  )
 }
 
 
@@ -72,4 +72,9 @@ object DcirBiologyActExtractor extends DcirActExtractor  {
   override val columnName: String = ColNames.BioCode
   override val eventBuilder: EventBuilder = BiologyDcirAct
   override def code = (row: Row) => row.getAs[Double](columnName).toString
+
+  override def getInput(sources: Sources): DataFrame = sources.dcir.get.select(
+    ColNames.PatientID, ColNames.BioCode, ColNames.Date,
+    ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector
+  )
 }
