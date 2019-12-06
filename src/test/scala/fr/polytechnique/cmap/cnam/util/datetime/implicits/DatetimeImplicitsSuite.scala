@@ -2,10 +2,10 @@
 
 package fr.polytechnique.cmap.cnam.util.datetime.implicits
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.util.datetime._
 
-class DatetimeImplicitsSuite extends FlatSpec {
+class DatetimeImplicitsSuite extends AnyFlatSpec {
 
   "this" should "implicitly convert Ints, Longs and Dates" in {
     // Given

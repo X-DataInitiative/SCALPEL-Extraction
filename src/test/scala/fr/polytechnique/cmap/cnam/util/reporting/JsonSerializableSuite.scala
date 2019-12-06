@@ -2,11 +2,11 @@
 
 package fr.polytechnique.cmap.cnam.util.reporting
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.util.Locales
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class JsonSerializableSuite extends FlatSpec with Locales {
+class JsonSerializableSuite extends AnyFlatSpec with Locales {
 
   val input: TestItemList = {
     val item1 = TestItem(1, 1.0, "one", Some("one"), makeTS(2011, 1, 1))

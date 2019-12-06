@@ -2,9 +2,9 @@
 
 package fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class OutcomeDefinitionSuite extends FlatSpec {
+class OutcomeDefinitionSuite extends AnyFlatSpec {
 
   "types" should "list all options" in {
     assert(

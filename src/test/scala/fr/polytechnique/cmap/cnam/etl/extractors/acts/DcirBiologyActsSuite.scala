@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
-import org.scalatest.Matchers.{an, convertToAnyShouldWrapper}
+import org.scalatest.matchers.should.Matchers.{an, convertToAnyShouldWrapper}
 import org.scalatest.TryValues._
 
 

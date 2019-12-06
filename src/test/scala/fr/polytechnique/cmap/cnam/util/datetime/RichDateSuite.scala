@@ -2,9 +2,9 @@
 
 package fr.polytechnique.cmap.cnam.util.datetime
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class RichDateSuite extends FlatSpec {
+class RichDateSuite extends AnyFlatSpec {
 
   "Plus operator" should "allow adding a period to a java.sql.Date" in {
     // Given

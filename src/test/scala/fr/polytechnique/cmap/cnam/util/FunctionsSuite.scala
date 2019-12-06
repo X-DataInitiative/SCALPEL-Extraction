@@ -3,9 +3,9 @@
 package fr.polytechnique.cmap.cnam.util
 
 import java.sql.Timestamp
-import org.scalatest.FlatSpecLike
+import org.scalatest.flatspec.AnyFlatSpecLike
 
-class FunctionsSuite extends FlatSpecLike {
+class FunctionsSuite extends AnyFlatSpecLike {
 
   "parseTimestamp" should "convert a string to a Timestamp if it's not null and non-empty" in {
 

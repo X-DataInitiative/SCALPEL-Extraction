@@ -2,10 +2,10 @@
 
 package fr.polytechnique.cmap.cnam.util.collections.implicits
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.util.collections.RichSeq
 
-class CollectionsImplicitsSuite extends FlatSpec {
+class CollectionsImplicitsSuite extends AnyFlatSpec {
 
   "this" should "implicitly convert Sequences" in {
     // Given
