@@ -44,12 +44,6 @@ trait BpcoCodes {
     "Z515", // palliatifs
     "Z532" //sortie contre avis médical (possiblement vide)
   )
-  /*
-   *  MCO Acts
-   */
-  //val mcoCIM10ActCodes: List[String] = List()
-
-  //val mcoCCAMActCodes: List[String] = List("")
 
   val otherCCAMCodes: List[String] = List(
     "GEME121", // Thermoplastie bronchique
@@ -58,8 +52,9 @@ trait BpcoCodes {
     "GLRP001", //	Séance de réentraînement à l'exercice d'un enfant asthmatique, sur machine
     "GLRP002", //	Séance de réentraînement à l'exercice d'un insuffisant respiratoire chronique, sur machine
     "GLRP003", //	Épreuve d'effort sur tapis roulant ou bicyclette ergométrique, avec mesure des gaz du sang [Épreuve d'effort simplifiée] [Gazométrie à l'effort]
-    "GLRP004" //	Épreuve d'effort sur tapis roulant ou bicyclette ergométrique, avec mesure des gaz du sang et du débit d'oxygène consommé [VO2], et surveillance électrocardioscopique discontinue
-
+    "GLRP004", //	Épreuve d'effort sur tapis roulant ou bicyclette ergométrique, avec mesure des gaz du sang et du débit d'oxygène consommé [VO2], et surveillance électrocardioscopique discontinue
+    "GLLD017", // Oxygénothérapie avec surveillance continue de l'oxymétrie, en dehors de la ventilation mécanique, par 24 heures
+    "GLLD012" // Ventilation mécanique continue au masque facial pour suppléance ventilatoire, par 24 heures
   )
 
   val efrCCAMCodes: List[String] = List(
@@ -72,6 +67,7 @@ trait BpcoCodes {
     "YYYY025"	//Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard
   )
 
+  //@todo unused because we dont have implemented Lpp AND these are ccam codes (replicated in other ccam)
   val oxygenoLpp: List[String] = List(
     "GLLD017", // Oxygénothérapie avec surveillance continue de l'oxymétrie, en dehors de la ventilation mécanique, par 24 heures
     "GLLD012" // Ventilation mécanique continue au masque facial pour suppléance ventilatoire, par 24 heures
@@ -150,19 +146,5 @@ trait BpcoCodes {
     "GLQ+175",
     "GLR+206"
   )
-
-//  val ghmCodes: List[String] = List(
-//    "7956",
-//    "7957",
-//    "7958",
-//    "7991",
-//    "7992",
-//    "7993",
-//    "7994" // tous soins palliatifs
-//  )
-  /*
-   *  DCIR Acts
-   */
-  //val dcirCCAMActCodes: List[String] = List("")
 }
 
