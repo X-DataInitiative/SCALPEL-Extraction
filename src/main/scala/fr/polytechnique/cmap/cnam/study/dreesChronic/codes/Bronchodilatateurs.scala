@@ -10,12 +10,19 @@ object Bronchodilatateurs extends DrugClassConfig {
   /*
   list pharmacological classes
    */
-  val adrenergiquesBeta2= new PharmacologicalClassConfig(
-    name = "Bronchodilatateurs_Adrenergiques_Beta2",
+
+  val adrenergiquesCourteDuree = new PharmacologicalClassConfig(
+    name = "Adrenergiques_Courtes_Durees",
     ATCCodes = List(
       "R03AC02", // Bêta-2 agoniste de courte durée d’action
       "R03AC03",
       "R03AL01", // Bêta-2 + Anticholinergique de courte durée d’action
+      "R03BB01" //ATC Anticholinergique de courte durée d’action
+    )
+  )
+  val adrenergiquesBeta2= new PharmacologicalClassConfig(
+    name = "Bronchodilatateurs_Adrenergiques_Beta2",
+    ATCCodes = List(
       "R03AC13", // Beta-2 agonistes de longue durée d’action (LABA)
       "R03AC18",
       "R03AC19",
@@ -36,13 +43,13 @@ object Bronchodilatateurs extends DrugClassConfig {
   val adrenergiquesAnticolinergiques= new PharmacologicalClassConfig(
     name = "Bronchodilatateurs_Adrenergiques_anticolinergiques",
     ATCCodes = List(
-      "R03BB01", //ATC Anticholinergique de courte durée d’action
       "R03BB06", // Anticholinergique de longue durée d’action (LAMA)
       "R03BB04",
       "R03BB07"
     )
   )
   val pharmacologicalClasses = List(
+    adrenergiquesCourteDuree,
     adrenergiquesBeta2,
     adrenergiquesAnticolinergiques
   )
