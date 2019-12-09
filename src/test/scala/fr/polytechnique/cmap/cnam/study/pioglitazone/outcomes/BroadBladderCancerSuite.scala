@@ -15,11 +15,11 @@ class BroadBladderCancerSuite extends SharedContext {
     import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
     val inputDS = Seq(
-      Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[Diagnosis]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient1", "mco_main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient2", "mco_main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
       Event[Diagnosis](
         "Patient3",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g3",
         "C67",
         1.0,
@@ -28,7 +28,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient4",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g4",
         "C67",
         1.0,
@@ -37,7 +37,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient4",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g4",
         "C77",
         1.0,
@@ -46,17 +46,17 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient5",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g5",
         "C67",
         1.0,
         makeTS(2006, 2, 20),
         Some(makeTS(2006, 2, 20))
       ),
-      Event[Diagnosis]("Patient5", "main_diagnosis", "g5", "C79", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
+      Event[Diagnosis]("Patient5", "mco_main_diagnosis", "g5", "C79", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
       Event[Diagnosis](
         "Patient6",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g6",
         "C67",
         1.0,
@@ -65,7 +65,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient6",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g7",
         "C78",
         1.0,
@@ -74,14 +74,14 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient8",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g8",
         "C78",
         1.0,
         makeTS(2006, 1, 20),
         Some(makeTS(2006, 1, 20))
       ),
-      Event[Diagnosis]("Patient9", "main_diagnosis", "g9", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient9", "mco_main_diagnosis", "g9", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
       Event[Diagnosis](
         "Patient10",
         "ssr_main_diagnosis",
@@ -93,7 +93,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient11",
-        "ssr_etiologic_diagnosis",
+        "ssr_linked_diagnosis",
         "g10",
         "C67",
         1.0,
@@ -111,7 +111,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient13",
-        "ssr_etiologic_diagnosis",
+        "ssr_linked_diagnosis",
         "g10",
         "C77",
         1.0,
@@ -121,11 +121,11 @@ class BroadBladderCancerSuite extends SharedContext {
     ).toDS
 
     val expectedDS = Seq(
-      Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[Diagnosis]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient1", "mco_main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient2", "mco_main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
       Event[Diagnosis](
         "Patient3",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g3",
         "C67",
         1.0,
@@ -143,7 +143,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient11",
-        "ssr_etiologic_diagnosis",
+        "ssr_linked_diagnosis",
         "g10",
         "C67",
         1.0,
@@ -177,9 +177,9 @@ class BroadBladderCancerSuite extends SharedContext {
     import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
     val inputDS = Seq(
-      Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[Diagnosis]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
-      Event[Diagnosis]("Patient3", "linked_diagnosis", "g3", "C67", 1.0, makeTS(2006, 3, 20), Some(makeTS(2006, 3, 20)))
+      Event[Diagnosis]("Patient1", "mco_main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient2", "mco_main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
+      Event[Diagnosis]("Patient3", "mco_linked_diagnosis", "g3", "C67", 1.0, makeTS(2006, 3, 20), Some(makeTS(2006, 3, 20)))
     ).toDS
 
     val expectedDS = Seq(
@@ -204,20 +204,20 @@ class BroadBladderCancerSuite extends SharedContext {
     val input1 = Seq(
       Event[Diagnosis](
         "Patient4",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g4",
         "C67",
         1.0,
         makeTS(2006, 1, 20),
         Some(makeTS(2006, 1, 20))
       ),
-      Event[Diagnosis]("Patient4", "linked_diagnosis", "g4", "C77", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
+      Event[Diagnosis]("Patient4", "mco_linked_diagnosis", "g4", "C77", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
     )
     val input2 = Seq(
-      Event[Diagnosis]("Patient4", "main_diagnosis", "g5", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient4", "mco_main_diagnosis", "g5", "C78", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
       Event[Diagnosis](
         "Patient4",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g5",
         "C67",
         1.0,
@@ -228,14 +228,14 @@ class BroadBladderCancerSuite extends SharedContext {
     val input3 = Seq(
       Event[Diagnosis](
         "Patient4",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g6",
         "C67",
         1.0,
         makeTS(2006, 1, 20),
         Some(makeTS(2006, 1, 20))
       ),
-      Event[Diagnosis]("Patient4", "main_diagnosis", "g6", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
+      Event[Diagnosis]("Patient4", "mco_main_diagnosis", "g6", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
     )
 
     // When
@@ -256,20 +256,20 @@ class BroadBladderCancerSuite extends SharedContext {
     val input1 = Seq(
       Event[Diagnosis](
         "Patient4",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g4",
         "C67",
         1.0,
         makeTS(2006, 1, 20),
         Some(makeTS(2006, 1, 20))
       ),
-      Event[Diagnosis]("Patient4", "linked_diagnosis", "g4", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
+      Event[Diagnosis]("Patient4", "mco_linked_diagnosis", "g4", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
     )
     val input2 = Seq(
-      Event[Diagnosis]("Patient5", "main_diagnosis", "g5", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient5", "mco_main_diagnosis", "g5", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
       Event[Diagnosis](
         "Patient5",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g5",
         "C67",
         1.0,
@@ -280,7 +280,7 @@ class BroadBladderCancerSuite extends SharedContext {
     val input3 = Seq(
       Event[Diagnosis](
         "Patient6",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g6",
         "C67",
         1.0,
@@ -289,7 +289,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient6",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g6",
         "C79",
         1.0,
@@ -318,11 +318,11 @@ class BroadBladderCancerSuite extends SharedContext {
     import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
     val inputDS = Seq(
-      Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[Diagnosis]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient1", "mco_main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient2", "mco_main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
       Event[Diagnosis](
         "Patient3",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g3",
         "C67",
         1.0,
@@ -331,7 +331,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient4",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g4",
         "C67",
         1.0,
@@ -340,7 +340,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient4",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g4",
         "C77",
         1.0,
@@ -349,17 +349,17 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient5",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g5",
         "C67",
         1.0,
         makeTS(2006, 2, 20),
         Some(makeTS(2006, 2, 20))
       ),
-      Event[Diagnosis]("Patient5", "main_diagnosis", "g5", "C79", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
+      Event[Diagnosis]("Patient5", "mco_main_diagnosis", "g5", "C79", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
       Event[Diagnosis](
         "Patient6",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g6",
         "C67",
         1.0,
@@ -368,7 +368,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient6",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g7",
         "C78",
         1.0,
@@ -377,14 +377,14 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient8",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g8",
         "C78",
         1.0,
         makeTS(2006, 1, 20),
         Some(makeTS(2006, 1, 20))
       ),
-      Event[Diagnosis]("Patient1", "main_diagnosis", "g9", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
+      Event[Diagnosis]("Patient1", "mco_main_diagnosis", "g9", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20)))
     ).toDS
 
     val expectedDS = Seq(
@@ -406,11 +406,11 @@ class BroadBladderCancerSuite extends SharedContext {
     import sqlCtx.implicits._
     import fr.polytechnique.cmap.cnam.util.functions.makeTS
     val inputDS = Seq(
-      Event[Diagnosis]("Patient1", "main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
-      Event[Diagnosis]("Patient2", "main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
+      Event[Diagnosis]("Patient1", "mco_main_diagnosis", "g1", "C67", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient2", "mco_main_diagnosis", "g2", "C67", 1.0, makeTS(2006, 2, 20), Some(makeTS(2006, 2, 20))),
       Event[Diagnosis](
         "Patient3",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g3",
         "C67",
         1.0,
@@ -419,7 +419,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient4",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g4",
         "C67",
         1.0,
@@ -428,7 +428,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient4",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g4",
         "C77",
         1.0,
@@ -437,17 +437,17 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient5",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g5",
         "C67",
         1.0,
         makeTS(2006, 1, 20),
         Some(makeTS(2006, 1, 20))
       ),
-      Event[Diagnosis]("Patient5", "main_diagnosis", "g5", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient5", "mco_main_diagnosis", "g5", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
       Event[Diagnosis](
         "Patient6",
-        "associated_diagnosis",
+        "mco_associated_diagnosis",
         "g6",
         "C67",
         1.0,
@@ -456,7 +456,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient6",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g7",
         "C78",
         1.0,
@@ -465,14 +465,14 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient8",
-        "linked_diagnosis",
+        "mco_linked_diagnosis",
         "g8",
         "C78",
         1.0,
         makeTS(2006, 1, 20),
         Some(makeTS(2006, 1, 20))
       ),
-      Event[Diagnosis]("Patient1", "main_diagnosis", "g9", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
+      Event[Diagnosis]("Patient1", "mco_main_diagnosis", "g9", "C79", 1.0, makeTS(2006, 1, 20), Some(makeTS(2006, 1, 20))),
       Event[Diagnosis](
         "Patient10",
         "ssr_main_diagnosis",
@@ -484,7 +484,7 @@ class BroadBladderCancerSuite extends SharedContext {
       ),
       Event[Diagnosis](
         "Patient11",
-        "ssr_etiologic_diagnosis",
+        "ssr_linked_diagnosis",
         "g11",
         "C77",
         1.0,

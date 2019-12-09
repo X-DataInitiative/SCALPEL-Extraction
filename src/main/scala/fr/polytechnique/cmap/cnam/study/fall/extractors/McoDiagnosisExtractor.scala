@@ -4,7 +4,7 @@ package fr.polytechnique.cmap.cnam.study.fall.extractors
 
 import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.etl.events.Diagnosis
-import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses._
+import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{McoAssociatedDiagnosisExtractor, McoLinkedDiagnosisExtractor, McoMainDiagnosisExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoExtractor
 import fr.polytechnique.cmap.cnam.study.fall.fractures.Surgery
 
@@ -20,8 +20,8 @@ trait ClassifyWeight extends McoExtractor[Diagnosis] with Surgery {
   }
 }
 
-object MainDiagnosisFallExtractor extends MainDiagnosisExtractor with ClassifyWeight
+object MainDiagnosisFallExtractor extends McoMainDiagnosisExtractor with ClassifyWeight
 
-object AssociatedDiagnosisFallExtractor extends AssociatedDiagnosisExtractor with ClassifyWeight
+object AssociatedDiagnosisFallExtractor extends McoAssociatedDiagnosisExtractor with ClassifyWeight
 
-object LinkedDiagnosisFallExtractor extends LinkedDiagnosisExtractor with ClassifyWeight
+object LinkedDiagnosisFallExtractor extends McoLinkedDiagnosisExtractor with ClassifyWeight

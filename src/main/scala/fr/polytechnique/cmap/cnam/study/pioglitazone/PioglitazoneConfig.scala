@@ -119,7 +119,11 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
     dcirCodes = dcirCCAMActCodes,
     mcoCIMCodes = mcoCIM10ActCodes,
     mcoCCAMCodes = mcoCCAMActCodes,
-    mcoCECodes = List()
+    mcoCECodes = List(),
+    ssrCCAMCodes = List(),
+    ssrCSARRCodes = List(),
+    ssrCECodes = List(),
+    hadCCAMCodes = List()
   )
 
   /** Fixed parameters needed for the ObservationPeriod transformer. */

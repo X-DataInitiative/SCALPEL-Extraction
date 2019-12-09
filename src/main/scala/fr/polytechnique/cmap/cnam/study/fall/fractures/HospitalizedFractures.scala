@@ -73,7 +73,7 @@ object HospitalizedFractures extends OutcomesTransformer with FractureCodes {
       .groupByKey(_.groupID)
       .flatMapGroups { case (_, diagnoses) =>
         val diagnosisStream = diagnoses.toStream
-        if (diagnosisStream.exists(_.category == MainDiagnosis.category)) {
+        if (diagnosisStream.exists(_.category == McoMainDiagnosis.category)) {
           diagnosisStream
         } else {
           Seq.empty
@@ -88,7 +88,7 @@ object HospitalizedFractures extends OutcomesTransformer with FractureCodes {
   }
 
   def isMainOrDASDiagnosis(event: Event[Diagnosis]): Boolean = {
-    event.category == MainDiagnosis.category || event.category == AssociatedDiagnosis.category
+    event.category == McoMainDiagnosis.category || event.category == McoAssociatedDiagnosis.category
   }
 
 }
