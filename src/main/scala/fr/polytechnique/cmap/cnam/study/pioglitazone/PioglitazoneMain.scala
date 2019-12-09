@@ -231,7 +231,7 @@ object PioglitazoneMain extends Main {
           .cache()
       }
 
-      val patientsWithObservations = patients
+      val patientsWithObservations: Dataset[(Patient, Event[ObservationPeriod])] = patients
         .joinWith(
           observations,
           patients.col("patientId") === observations.col("patientId")
@@ -256,7 +256,7 @@ object PioglitazoneMain extends Main {
 
     // TODO: ancestors ? What's this ? This name needs some clarifications
     val filteredPatientsAncestors = new ListBuffer[String]
-    val cnamPaperBaseCohort = {
+    val cnamPaperBaseCohort: Dataset[(Patient, Event[FollowUp])] = {
       val firstFilterResult = if (config.filters.filterDelayedEntries) {
         filteredPatientsAncestors += "drug_purchases"
         val delayedFreePatients = patients

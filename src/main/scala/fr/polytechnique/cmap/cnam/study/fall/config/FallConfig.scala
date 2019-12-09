@@ -14,8 +14,9 @@ import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification._
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.{DrugClassificationLevel, TherapeuticLevel}
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
+import fr.polytechnique.cmap.cnam.etl.transformers.interaction.InteractionTransformerConfig
 import fr.polytechnique.cmap.cnam.study.fall.codes._
-import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{DrugsConfig, ExposureConfig, FracturesConfig, SitesConfig}
+import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{DrugsConfig, ExposureConfig, InteractionConfig, FracturesConfig, SitesConfig}
 import fr.polytechnique.cmap.cnam.study.fall.fractures.{BodySite, BodySites}
 
 case class FallConfig(
@@ -23,6 +24,7 @@ case class FallConfig(
   output: StudyConfig.OutputPaths,
   drugs: DrugsConfig = FallConfig.DrugsConfig(),
   exposures: ExposureConfig = FallConfig.ExposureConfig(),
+  interactions: InteractionConfig = FallConfig.InteractionConfig(),
   sites: SitesConfig = FallConfig.SitesConfig(),
   patients: FallConfig.PatientsConfig = FallConfig.PatientsConfig(),
   outcomes: FracturesConfig = FallConfig.FracturesConfig(),
@@ -91,6 +93,11 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     dosageLevelIntervals = Some(List()),
     purchaseIntervals = Some(List())
   )
+
+  /** Parameters needed for the Interaction Transformer **/
+  case class InteractionConfig(
+    override val level: Int = 3
+  ) extends InteractionTransformerConfig(level = level)
 
   /** Parameters needed for the diagnosesConfig **/
   case class SitesConfig(sites: List[BodySite] = List(BodySites)) {

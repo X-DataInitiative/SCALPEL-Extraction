@@ -7,11 +7,12 @@ import java.util.{Locale, TimeZone}
 import org.apache.commons.io.FileUtils
 import org.apache.log4j.{Level, Logger}
 import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpecLike
 import org.apache.spark.sql._
 import fr.polytechnique.cmap.cnam.util.{Locales, LoggerLevels, RichDataFrame}
 
 abstract class SharedContext
-  extends FlatSpecLike with BeforeAndAfterAll with BeforeAndAfterEach with LoggerLevels with Locales {
+  extends AnyFlatSpecLike with BeforeAndAfterAll with BeforeAndAfterEach with LoggerLevels with Locales {
   self: Suite =>
 
   Logger.getRootLogger.setLevel(Level.WARN)

@@ -2,9 +2,9 @@
 
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class WeightAggStrategySuite extends FlatSpec {
+class WeightAggStrategySuite extends AnyFlatSpec {
 
   "fromString" should "return the correct strategy from a string input" in {
     assert(WeightAggStrategy.fromString("non-cumulative") == WeightAggStrategy.NonCumulative)

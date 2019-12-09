@@ -8,7 +8,6 @@ import org.apache.spark.sql.types.TimestampType
 import org.apache.spark.sql.{DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.transformers.observation._
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities._
 import fr.polytechnique.cmap.cnam.util.RichDataFrame._
 
@@ -22,23 +21,24 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
   val followUpEndModelCandidates = List(col(TracklossDate), col(DeathDate), col(ObservationEnd))
 
   def transform(
-    patients: Dataset[(Patient, ObservationPeriod)],
+    patients: Dataset[(Patient, Event[ObservationPeriod])],
     dispensations: Dataset[Event[Molecule]],
     outcomes: Dataset[Event[Outcome]],
-    tracklosses: Dataset[Event[Trackloss]]): Dataset[FollowUp] = {
+    tracklosses: Dataset[Event[Trackloss]]): Dataset[Event[FollowUp]] = {
 
     import FollowUpTransformer._
 
     val inputCols = Seq(
       col("Patient.patientID").as(PatientID),
       col("Patient.deathDate").as(DeathDate),
-      col("ObservationPeriod.start").as(ObservationStart),
-      col("ObservationPeriod.stop").as(ObservationEnd)
+      col("Event.start").as(ObservationStart),
+      col("Event.end").as(ObservationEnd)
     )
 
     val events = dispensations.toDF
       .union(outcomes.toDF)
       .union(tracklosses.toDF)
+
 
     val input = renameTupleColumns(patients)
       .select(inputCols: _*)
@@ -52,16 +52,25 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
 
     import input.sqlContext.implicits._
 
-    input.repartition(col(PatientID))
+    val followUp = input.repartition(col(PatientID))
       .withFollowUpStart(config.delayMonths)
       .withTrackloss
       .withColumn(FirstTargetDiseaseDate, firstTargetDiseaseDate)
       .withColumn(FollowUpEnd, minColumn(followUpEndModelCandidates: _*))
       .na.drop("any", Seq(FollowUpStart, FollowUpEnd))
       .withEndReason
-      .select(outputColumns: _*)
       .dropDuplicates(Seq(PatientID))
-      .as[FollowUp]
+      .map(
+        FollowUp.fromRow(
+          _,
+          patientIDCol = PatientID,
+          endReason = EndReason,
+          startCol = FollowUpStart,
+          endCol = FollowUpEnd
+        )
+      )
+
+    followUp.as[Event[FollowUp]]
   }
 }
 
@@ -106,8 +115,9 @@ object FollowUpTransformer {
 
   }
 
-  implicit class FollowUpDataset(followups: Dataset[FollowUp]) {
-    def cleanFollowUps(): Dataset[FollowUp] = followups.filter(_.isValid)
+
+  implicit class FollowUpDataset(followups: Dataset[Event[FollowUp]]) {
+    def cleanFollowUps(): Dataset[Event[FollowUp]] = followups.filter(e => e.start.before(e.end.get))
   }
 
 }

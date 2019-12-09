@@ -5,7 +5,8 @@ package fr.polytechnique.cmap.cnam.study.fall
 import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, Outcome}
+
+import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, Outcome, FollowUp}
 import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
@@ -13,11 +14,13 @@ import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.interaction.NLevelInteractionTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.extractors._
 import fr.polytechnique.cmap.cnam.study.fall.follow_up.FallStudyFollowUps
 import fr.polytechnique.cmap.cnam.study.fall.fractures.FracturesTransformer
+import fr.polytechnique.cmap.cnam.study.fall.liberalActs.LiberalActsTransformer
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
@@ -37,10 +40,8 @@ object FallMain extends Main with FractureCodes {
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
 
-    val operationsMetadata = computeHospitalStays(sources, fallConfig) ++ computeOutcomes(
-      sources,
-      fallConfig
-    ) ++ computeExposures(sources, fallConfig)
+
+    val operationsMetadata = computeExposures(sources, fallConfig)
 
     dcir.unpersist()
     mco.unpersist()
@@ -135,7 +136,7 @@ object FallMain extends Main with FractureCodes {
     if (fallConfig.runParameters.exposures) {
       val exposures = {
         val definition = fallConfig.exposures
-        val patientsWithFollowUp = FallStudyFollowUps
+        val patientsWithFollowUp: Dataset[(Patient, Event[FollowUp])] = FallStudyFollowUps
           .transform(
             optionPatients.get,
             fallConfig.base.studyStart,
@@ -143,7 +144,7 @@ object FallMain extends Main with FractureCodes {
             fallConfig.patients.followupStartDelay
           )
         import patientsWithFollowUp.sparkSession.sqlContext.implicits._
-        val followUps = patientsWithFollowUp.map(_._2)
+        val followUps = patientsWithFollowUp.map(e => e._2)
         operationsMetadata += {
           OperationReporter
             .report(
@@ -195,6 +196,19 @@ object FallMain extends Main with FractureCodes {
             fallConfig.output.saveMode
           )
       }
+
+      val interactions = NLevelInteractionTransformer(fallConfig.interactions).transform(exposures).cache()
+      operationsMetadata += {
+        OperationReporter
+          .report(
+            "interactions",
+            List("exposures"),
+            OperationTypes.Exposures,
+            interactions.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
+      }
     }
 
     operationsMetadata
@@ -238,8 +252,7 @@ object FallMain extends Main with FractureCodes {
           )
       }
       logger.info("Liberal Medical Acts")
-      val liberalActs = acts
-        .filter(act => act.groupID == DcirAct.groupID.Liberal && !CCAMExceptions.contains(act.value)).persist()
+      val liberalActs = LiberalActsTransformer.transform(acts).persist()
       operationsMetadata += {
         OperationReporter
           .report(

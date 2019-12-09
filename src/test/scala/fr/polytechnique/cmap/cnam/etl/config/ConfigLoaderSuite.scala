@@ -5,10 +5,10 @@ package fr.polytechnique.cmap.cnam.etl.config
 import java.io.File
 import java.nio.file.Paths
 import com.typesafe.config.ConfigFactory
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 
-class ConfigLoaderSuite extends FlatSpec {
+class ConfigLoaderSuite extends AnyFlatSpec {
 
   "loadConfigWithDefaults" should "read a config file and an environment of the default file and merge them" in {
 

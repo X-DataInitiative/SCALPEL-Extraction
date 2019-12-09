@@ -2,7 +2,7 @@
 
 package fr.polytechnique.cmap.cnam.etl.extractors.drugs.level
 
-import org.scalatest.Matchers.{a, convertToAnyShouldWrapper}
+import org.scalatest.matchers.should.Matchers.{a, convertToAnyShouldWrapper}
 import fr.polytechnique.cmap.cnam.SharedContext
 
 class DrugClassficationLevelSuite extends SharedContext {

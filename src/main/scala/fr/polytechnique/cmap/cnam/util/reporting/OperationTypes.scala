@@ -1,5 +1,3 @@
-// License: BSD 3 clause
-
 package fr.polytechnique.cmap.cnam.util.reporting
 
 object OperationTypes {
@@ -7,6 +5,7 @@ object OperationTypes {
   val Patients: OperationType = "patients"
   val Sources: OperationType = "sources"
   val MedicalActs: OperationType = "acts"
+  val BiologyActs: OperationType = "biology"
   val Diagnosis: OperationType = "diagnosis"
   val Dispensations: OperationType = "dispensations"
   val Exposures: OperationType = "exposures"

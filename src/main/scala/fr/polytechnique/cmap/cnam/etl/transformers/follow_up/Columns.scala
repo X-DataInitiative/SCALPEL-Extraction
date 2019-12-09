@@ -6,10 +6,10 @@ import fr.polytechnique.cmap.cnam.etl.events.Event
 
 
 private[follow_up] object Columns {
-  final val PatientID = FollowUp.Columns.PatientID
-  final val Start = FollowUp.Columns.Start
-  final val End = FollowUp.Columns.End
-  final val EndReason = FollowUp.Columns.EndReason
+  final val PatientID = Event.Columns.PatientID
+  final val Start = Event.Columns.Start
+  final val End = Event.Columns.End
+  final val EndReason = Event.Columns.Value
 
   final val Category = Event.Columns.Category
   final val GroupID = Event.Columns.GroupID

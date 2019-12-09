@@ -2,9 +2,9 @@
 
 package fr.polytechnique.cmap.cnam.util.datetime
 
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class PeriodSuite extends FlatSpec {
+class PeriodSuite extends AnyFlatSpec {
 
   "A Period" should "be created directly by its fields" in {
     // Given|When

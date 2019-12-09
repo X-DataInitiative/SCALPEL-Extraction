@@ -3,10 +3,10 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
 import org.mockito.Mockito.mock
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import org.apache.spark.sql.DataFrame
 
-class WeightAggregatorSuite extends FlatSpec {
+class WeightAggregatorSuite extends AnyFlatSpec {
 
   "weightCalculationImplicits" should "return the correct implementation for the 'NonCumulative' strategy" in {
     val instance = new WeightAggregator {

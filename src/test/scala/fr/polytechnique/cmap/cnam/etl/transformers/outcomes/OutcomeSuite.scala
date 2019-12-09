@@ -4,13 +4,13 @@ package fr.polytechnique.cmap.cnam.etl.transformers.outcomes
 
 import java.sql.Timestamp
 import org.mockito.Mockito.mock
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Outcome}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class OutcomeSuite extends FlatSpec {
+class OutcomeSuite extends AnyFlatSpec {
 
   val patientID: String = "patientID"
   val timestamp: Timestamp = mock(classOf[Timestamp])
