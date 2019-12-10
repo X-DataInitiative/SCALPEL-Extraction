@@ -4,6 +4,10 @@ import org.apache.spark.sql.{Column, DataFrame}
 
 private[data] class HadFilters(rawHad: DataFrame) {
 
+  /** Removing return codes which significate error in the PMSI
+   *
+   * This is a classic filter for all PMSI products. Other filters may be implemented in the future.
+   * */
   def filterHadCorruptedHospitalStays: DataFrame = {
     val fictionalAndFalseHospitalStaysFilter: Column = HadSource
       .NIR_RET === "0" and HadSource.SEJ_RET === "0" and HadSource
@@ -13,14 +17,5 @@ private[data] class HadFilters(rawHad: DataFrame) {
     rawHad.filter(fictionalAndFalseHospitalStaysFilter)
   }
 
-  /* HAD CE A RAJOUTER
-
-  def filterHadCeCorruptedHospitalStays: DataFrame = {
-    val fictionalAndFalseHospitalStaysFilter: Column = HadCeSource.NIR_RET === "0" and HadCeSource
-      .NAI_RET === "0" and HadCeSource.SEX_RET === "0" and HadCeSource
-      .IAS_RET === "0" and HadCeSource.ENT_DAT_RET === "0"
-
-    rawHad.filter(fictionalAndFalseHospitalStaysFilter)
-  }*/
 }
 
