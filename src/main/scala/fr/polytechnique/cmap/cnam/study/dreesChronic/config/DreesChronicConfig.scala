@@ -37,7 +37,7 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
   /** Base fixed parameters for this study. */
   final object BaseConfig extends BaseConfig(
     // patient age should be taken at year N-1 thus in 2015 if study on 2014-2016
-    ageReferenceDate = LocalDate.of(2008, 1, 1),
+    ageReferenceDate = LocalDate.of(2015, 1, 1),
     studyStart = LocalDate.of(2008, 1, 1),
     studyEnd = LocalDate.of(2017, 1, 1)
   )
@@ -45,7 +45,7 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
   /** Fixed parameters needed for the Patients extractors. */
   case class PatientsConfig(
     ageReferenceDate: LocalDate = DreesChronicConfig.BaseConfig.ageReferenceDate,
-    minAge: Int = 0,
+    minAge: Int = 40,
     startGapInMonths: Int = 0,
     followupStartDelay: Int = 0
    )

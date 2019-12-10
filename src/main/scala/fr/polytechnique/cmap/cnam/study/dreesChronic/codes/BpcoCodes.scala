@@ -64,7 +64,13 @@ trait BpcoCodes {
     "GERD002",	//Épreuve de provocation par agent bronchoconstricteur ou facteur physique, au cours d'une épreuve fonctionnelle respiratoire
     "GLQD001",	//Mesure de la capacité de transfert pulmonaire du monoxyde de carbone [TLCO] ou d'un autre gaz en apnée ou en état stable, au cours d'une épreuve fonctionnelle respiratoire
     "GLQD003",	//Mesure des volumes pulmonaires non mobilisables par dilution ou rinçage d'un gaz indicateur, au cours d'une épreuve fonctionnelle respiratoire
-    "YYYY025"	//Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard
+    "YYYY025",	//Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard	Supplément pour mesure du volume résiduel de la ventilation maximale au cours d'une spirométrie standard
+    "GLQP008",	//Mesure de la capacité vitale lente et de l'expiration forcée, avec gazométrie sanguine artérielle [Spirométrie standard avec gaz du sang]
+    "GLQP002",	//Mesure de la capacité vitale lente et de l'expiration forcée, avec mesure des volumes pulmonaires mobilisables et non mobilisables par pléthysmographie 
+    "GLQP009",	//Mesure de la capacité vitale et du volume courant par pléthysmographie d'inductance
+    "GLQP014",	//Mesure du débit expiratoire maximal par technique de compression
+    "GLQP011"	  //Mesure des volumes pulmonaires mobilisables et non mobilisables par Pléthysmographie
+
   )
 
   //@todo unused because we dont have implemented Lpp AND these are ccam codes (replicated in other ccam)
