@@ -1,5 +1,3 @@
-// License: BSD 3 clause
-
 package fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays
 
 import java.sql.{Date, Timestamp}

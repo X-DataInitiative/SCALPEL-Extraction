@@ -1,5 +1,3 @@
-// License: BSD 3 clause
-
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import org.scalatest.matchers.should.Matchers.{a, convertToAnyShouldWrapper}

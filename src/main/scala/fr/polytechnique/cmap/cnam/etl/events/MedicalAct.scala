@@ -84,3 +84,7 @@ object BiologyDcirAct extends MedicalAct {
     val Unknown = "unknown_source"
   }
 }
+
+object HadCCAMAct extends MedicalAct {
+  val category: EventCategory[MedicalAct] = "had_ccam_act"
+}
