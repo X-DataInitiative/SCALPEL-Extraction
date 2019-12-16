@@ -2,12 +2,14 @@
 
 package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
 
+import java.sql.Timestamp
+import scala.util.Try
+import org.mockito.Mockito.mock
 import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.functions.lit
-import org.apache.spark.sql.types.TimestampType
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformerUtilities.{DeathReason, DiseaseReason, FollowUpEnd, ObservationEndReason, PatientDates, TrackLossDate, TrackLossReason, endReason, tracklossDateCorrected}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 
@@ -37,27 +39,26 @@ class FollowUpTransformerSuite extends SharedContext {
     ).toDS()
 
     // When
-    import FollowUpTransformer.FollowUpDataset
-    val result = followUpPeriods.cleanFollowUps()
+    val result = followUpPeriods.filter(e => e.start.before(e.end.get))
 
     assertDSs(expected, result)
   }
 
-  "withFollowUpStart" should "add a column with the start of the follow-up period" in {
+  "correctedStart" should "Add month to observation start and correct the start of the follow-up period" in {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
-    import Columns._
+
 
     // Given
     val input = Seq(
-      ("Patient_A", makeTS(2008, 1, 20), makeTS(2009, 12, 31)),
-      ("Patient_A", makeTS(2008, 1, 20), makeTS(2009, 12, 31)),
-      ("Patient_B", makeTS(2009, 1, 1), makeTS(2009, 12, 31)),
-      ("Patient_B", makeTS(2009, 1, 1), makeTS(2009, 12, 31)),
-      ("Patient_C", makeTS(2009, 10, 1), makeTS(2009, 12, 31)),
-      ("Patient_C", makeTS(2009, 10, 1), makeTS(2009, 12, 31))
-    ).toDF(PatientID, ObservationStart, ObservationEnd)
+      ("Patient_A", makeTS(2008, 1, 20), Some(makeTS(2009, 12, 31))),
+      ("Patient_A", makeTS(2008, 1, 20), Some(makeTS(2009, 12, 31))),
+      ("Patient_B", makeTS(2009, 1, 1), Some(makeTS(2009, 12, 31))),
+      ("Patient_B", makeTS(2009, 1, 1), Some(makeTS(2009, 12, 31))),
+      ("Patient_C", makeTS(2009, 10, 1), Some(makeTS(2009, 12, 31))),
+      ("Patient_C", makeTS(2009, 10, 1), Some(makeTS(2009, 12, 31)))
+    ).toDS
 
     val expected = Seq(
       ("Patient_A", Some(makeTS(2008, 7, 20))),
@@ -66,141 +67,143 @@ class FollowUpTransformerSuite extends SharedContext {
       ("Patient_B", Some(makeTS(2009, 7, 1))),
       ("Patient_C", None),
       ("Patient_C", None)
-    ).toDF(PatientID, FollowUpStart)
+    ).toDS
 
     // When
-    import FollowUpTransformer.FollowUpDataFrame
-    val result = input.withFollowUpStart(6).select(PatientID, FollowUpStart)
+    import FollowUpTransformerUtilities.correctedStart
 
+    val result = input.
+      map(e => (e._1, correctedStart(e._2, e._3, 6)))
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
   }
 
 
-  "withTrackLoss" should "add the date of the right trackloss event" in {
+  "tracklossDateCorrected" should "add the corrected date of the  trackloss event" in {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
-    import Columns._
+
 
     // Given
-    val input = Seq(
-      ("Patient_D", "molecule", makeTS(2006, 2, 1), makeTS(2006, 6, 30)),
-      ("Patient_D", "molecule", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
-      ("Patient_D", "trackloss", makeTS(2006, 8, 1), makeTS(2006, 6, 30)),
-      ("Patient_D", "disease", makeTS(2007, 1, 1), makeTS(2006, 6, 30))
-    ).toDF(PatientID, Category, Start, FollowUpStart)
+    val input: Dataset[(PatientDates, Event[Trackloss])] = Seq(
+      (PatientDates("Patient_A", Some(makeTS(2015, 2, 1)), Some(makeTS(2006, 2, 1)), Some(makeTS(2009, 6, 30))),
+        Trackloss("Patient_A", makeTS(2006, 5, 1))),
+      (PatientDates("Patient_B", Some(makeTS(2016, 2, 1)), Some(makeTS(2005, 1, 1)), Some(makeTS(2012, 6, 30))),
+        Trackloss("Patient_B", makeTS(2008, 2, 1))),
+      (PatientDates("Patient_C", Some(makeTS(2017, 2, 1)), Some(makeTS(2006, 8, 1)), Some(makeTS(2010, 6, 30))),
+        Trackloss("Patient_C", makeTS(2006, 12, 1))),
+      (PatientDates("Patient_D", Some(makeTS(2018, 2, 1)), Some(makeTS(2007, 1, 1)), Some(makeTS(2008, 6, 30))),
+        Trackloss("Patient_D", makeTS(2007, 9, 1)))
+    ).toDS
 
-    val expected = Seq(
-      ("Patient_D", "molecule", makeTS(2006, 8, 1)),
-      ("Patient_D", "molecule", makeTS(2006, 8, 1)),
-      ("Patient_D", "trackloss", makeTS(2006, 8, 1)),
-      ("Patient_D", "disease", makeTS(2006, 8, 1))
-    ).toDF(PatientID, Category, TracklossDate)
-
-    // When
-    import FollowUpTransformer.FollowUpDataFrame
-    val result = input.withTrackloss.select(PatientID, Category, TracklossDate)
-
-    // Then
-    assertDFs(result, expected)
-  }
-
-  it should "get the first trackloss" in {
-
-    val sqlCtx = sqlContext
-    import sqlCtx.implicits._
-    import Columns._
-
-    // Given
-    val input = Seq(
-      ("Patient_D", "molecule", makeTS(2006, 2, 1), makeTS(2006, 6, 30)),
-      ("Patient_D", "molecule", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
-      ("Patient_D", "trackloss", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
-      ("Patient_D", "trackloss", makeTS(2006, 8, 1), makeTS(2006, 6, 30)),
-      ("Patient_D", "trackloss", makeTS(2006, 12, 1), makeTS(2006, 6, 30)),
-      ("Patient_D", "disease", makeTS(2007, 1, 1), makeTS(2006, 6, 30))
-    ).toDF(PatientID, Category, Start, FollowUpStart)
-
-    val expected = Seq(
-      ("Patient_D", "molecule", makeTS(2006, 8, 1)),
-      ("Patient_D", "molecule", makeTS(2006, 8, 1)),
-      ("Patient_D", "trackloss", makeTS(2006, 8, 1)),
-      ("Patient_D", "trackloss", makeTS(2006, 8, 1)),
-      ("Patient_D", "trackloss", makeTS(2006, 8, 1)),
-      ("Patient_D", "disease", makeTS(2006, 8, 1))
-    ).toDF(PatientID, Category, TracklossDate)
+    val expected: Dataset[TrackLossDate] = Seq(
+      TrackLossDate("Patient_A", Some(makeTS(2006, 5, 1))),
+      TrackLossDate("Patient_B", Some(makeTS(2008, 2, 1))),
+      TrackLossDate("Patient_C", Some(makeTS(2006, 12, 1))),
+      TrackLossDate("Patient_D", Some(makeTS(2007, 9, 1)))
+    ).toDS
 
     // When
-    import FollowUpTransformer.FollowUpDataFrame
-    val result = input.withTrackloss.select(PatientID, Category, TracklossDate)
+
+    val result = input.map(
+      e => TrackLossDate(
+        e._2.patientID,
+        tracklossDateCorrected(e._2.start, e._1.followUpStart.get)
+      )
+    )
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
   }
+
 
   it should "avoid useless trackloss" in {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
-    import Columns._
 
     // Given
-    val input = Seq(
-      ("Patient_C", "molecule", makeTS(2006, 2, 1), makeTS(2006, 6, 30)),
-      ("Patient_C", "molecule", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
-      ("Patient_C", "trackloss", makeTS(2006, 1, 1), makeTS(2006, 6, 30)),
-      ("Patient_C", "disease", makeTS(2007, 1, 1), makeTS(2006, 6, 30))
-    ).toDF(PatientID, Category, Start, FollowUpStart)
+    val input: Dataset[(PatientDates, Event[Trackloss])] = Seq(
+      (PatientDates("Patient_A", Some(makeTS(2015, 2, 1)), Some(makeTS(2006, 2, 1)), Some(makeTS(2009, 6, 30))),
+        Trackloss("Patient_A", makeTS(2006, 1, 1))),
+      (PatientDates("Patient_B", Some(makeTS(2016, 2, 1)), Some(makeTS(2006, 1, 1)), Some(makeTS(2012, 6, 30))),
+        Trackloss("Patient_B", makeTS(2005, 2, 1))),
+      (PatientDates("Patient_C", Some(makeTS(2017, 2, 1)), Some(makeTS(2006, 8, 1)), Some(makeTS(2010, 6, 30))),
+        Trackloss("Patient_C", makeTS(2005, 12, 1))),
+      (PatientDates("Patient_D", Some(makeTS(2018, 2, 1)), Some(makeTS(2007, 10, 1)), Some(makeTS(2008, 6, 30))),
+        Trackloss("Patient_D", makeTS(2007, 9, 1)))
+    ).toDS
 
-    val expected = Seq(
-      ("Patient_C", "molecule"),
-      ("Patient_C", "molecule"),
-      ("Patient_C", "trackloss"),
-      ("Patient_C", "disease")
-    ).toDF(PatientID, Category).withColumn(TracklossDate, lit(null).cast(TimestampType))
-
+    val expected: Dataset[TrackLossDate] = Seq(
+      TrackLossDate("Patient_A", None),
+      TrackLossDate("Patient_B", None),
+      TrackLossDate("Patient_C", None),
+      TrackLossDate("Patient_D", None)
+    ).toDS
     // When
-    import FollowUpTransformer.FollowUpDataFrame
-    val result = input.withTrackloss.select(PatientID, Category, TracklossDate)
+
+    val result = input.map(
+      e => TrackLossDate(
+        e._2.patientID,
+        tracklossDateCorrected(e._2.start, e._1.followUpStart.get)
+      )
+    )
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
   }
+
 
   "withEndReason" should "add a column for the reason of follow-up end" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
-    import Columns._
 
     // Given
-    val input = Seq(
-      (makeTS(2009, 12, 31), makeTS(2006, 12, 1), makeTS(2007, 12, 1), makeTS(2008, 12, 1),
-        makeTS(2009, 12, 31)),
-      (makeTS(2006, 12, 1), makeTS(2006, 12, 1), makeTS(2007, 12, 1), makeTS(2008, 12, 1),
-        makeTS(2009, 12, 31)),
-      (makeTS(2007, 12, 1), makeTS(2006, 12, 1), makeTS(2007, 12, 1), makeTS(2008, 12, 1),
-        makeTS(2009, 12, 31)),
-      (makeTS(2008, 12, 1), makeTS(2006, 12, 1), makeTS(2007, 12, 1), makeTS(2008, 12, 1),
-        makeTS(2009, 12, 31)),
-      (makeTS(2006, 12, 1), makeTS(2006, 12, 1), makeTS(2007, 12, 1), makeTS(2006, 12, 1),
-        makeTS(2009, 12, 31))
-    ).toDF(FollowUpEnd, DeathDate, FirstTargetDiseaseDate, TracklossDate, ObservationEnd)
+    val input: Dataset[(PatientDates, TrackLossDate, Event[Outcome])] = Seq(
+      (PatientDates("Patient_A", Some(makeTS(2015, 2, 1)), Some(makeTS(2006, 2, 1)), Some(makeTS(2009, 6, 30))),
+        TrackLossDate("Patient_A", Some(makeTS(2014, 5, 1))), Outcome(
+        "Patient_A",
+        "bladder_cancer",
+        makeTS(2007, 9, 1)
+      ))
+      ,
+      (PatientDates("Patient_B", Some(makeTS(2016, 2, 1)), Some(makeTS(2006, 1, 1)), Some(makeTS(2012, 6, 30))),
+        TrackLossDate("Patient_B", Some(makeTS(2010, 2, 1))), Outcome(
+        "Patient_B",
+        "bladder_cancer",
+        makeTS(2011, 4, 1)
+      )),
+      (PatientDates("Patient_C", Some(makeTS(2017, 2, 1)), Some(makeTS(2006, 8, 1)), None),
+        TrackLossDate("Patient_C", None), mock(classOf[Event[Outcome]])),
 
-    val expected = Seq(
-      (makeTS(2006, 12, 1), "Death"),
-      (makeTS(2006, 12, 1), "Death"),
-      (makeTS(2007, 12, 1), "Disease"),
-      (makeTS(2008, 12, 1), "Trackloss"),
-      (makeTS(2009, 12, 31), "ObservationEnd")
-    ).toDF(FollowUpEnd, EndReason)
+      (PatientDates("Patient_D", Some(makeTS(2018, 2, 1)), Some(makeTS(2007, 10, 1)), Some(makeTS(2013, 6, 30))),
+        TrackLossDate("Patient_D", Some(makeTS(2017, 9, 1))), Outcome("Patient_D", "cancer", makeTS(2013, 6, 30)))
+    ).toDS
 
     // When
-    import FollowUpTransformer.FollowUpDataFrame
-    val result = input.withEndReason.toDF.select(FollowUpEnd, EndReason)
+    val result: Dataset[FollowUpEnd] = input
+      .map { e =>
+        endReason(
+          DeathReason(date = e._1.deathDate),
+          DiseaseReason(date = Try(Option(e._3.start)).getOrElse(None)),
+          TrackLossReason(date = Try(e._2.trackloss).getOrElse(None)),
+          ObservationEndReason(date = e._1.observationEnd)
+        )
+      }
+
+
+    val expected: Dataset[FollowUpEnd] = Seq(
+      FollowUpEnd("Disease", Some(makeTS(2007, 9, 1))),
+      FollowUpEnd("Trackloss", Some(makeTS(2010, 2, 1))),
+      FollowUpEnd("Death", Some(makeTS(2017, 2, 1))),
+      FollowUpEnd("Disease", Some(makeTS(2013, 6, 30)))
+    ).toDS
+
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
+
   }
 
   "transform" should "return a Dataset[FollowUp] with the follow-up events of each patient with Cox model" in {
@@ -220,9 +223,9 @@ class FollowUpTransformerSuite extends SharedContext {
         makeTS(2009, 1, 1)
       )),
       (Patient("patient03", 1, makeTS(1980, 10, 1), Some(makeTS(2010, 10, 1))), ObservationPeriod(
-        "pika",
+        "patient03",
         makeTS(2006, 1, 1),
-        makeTS(2009, 1, 1)
+        makeTS(2009, 2, 1)
       ))
     ).toDS
 
@@ -235,7 +238,10 @@ class FollowUpTransformerSuite extends SharedContext {
       Molecule("patient03", "doliprane", 200.00, makeTS(2007, 5, 1))
     ).toDS
 
-    val tracklosses = Seq.empty[Event[Trackloss]].toDS
+    val tracklosses: Dataset[Event[Trackloss]] = Seq(
+      Trackloss("Regis", makeTS(2006, 3, 30)),
+      Trackloss("pika", makeTS(2006, 3, 30))
+    ).toDS
 
     val outcomes = Seq(
       Outcome("Regis", "bladder_cancer", makeTS(2007, 9, 1)),
@@ -245,9 +251,9 @@ class FollowUpTransformerSuite extends SharedContext {
     ).toDS
 
     val expected: Dataset[Event[FollowUp]] = Seq(
-      FollowUp("Regis", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 1, 1)),
-      FollowUp("pika", "Death", makeTS(2006, 3, 1), makeTS(2008, 10, 1)),
-      FollowUp("patient03", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 1, 1))
+      FollowUp("Regis", "Trackloss", makeTS(2006, 3, 1), makeTS(2006, 3, 30)),
+      FollowUp("pika", "Trackloss", makeTS(2006, 3, 1), makeTS(2006, 3, 30)),
+      FollowUp("patient03", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 2, 1))
     ).toDS
 
     val transformer = new FollowUpTransformer(FollowUpTestConfig())
@@ -255,8 +261,8 @@ class FollowUpTransformerSuite extends SharedContext {
     // When
     val result: Dataset[Event[FollowUp]] = transformer.transform(patients, prescriptions, outcomes, tracklosses)
 
-    // Then
 
+    // Then
     assertDSs(result, expected)
   }
 
@@ -299,8 +305,9 @@ class FollowUpTransformerSuite extends SharedContext {
       Outcome("pika", "cancer", makeTS(2010, 1, 1)),
       Outcome("patient03", "fall", makeTS(2010, 1, 1))
     ).toDS
+
     val expected = Seq(
-      FollowUp("Regis", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 1, 1)),
+      FollowUp("Regis", "Disease", makeTS(2006, 3, 1), makeTS(2007, 9, 1)),
       FollowUp("pika", "Death", makeTS(2006, 3, 1), makeTS(2008, 10, 1)),
       FollowUp("patient03", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 1, 1))
     ).toDS
