@@ -34,6 +34,15 @@ trait DcirSource extends ColumnNames {
       NgapCoefficient
     )
 
+
+   lazy val DateStart: ColName = "FLX_DIS_DTD"
+   lazy val DateEntry: ColName = "FLX_TRT_DTD"
+   lazy val EmitterType: ColName = "FLX_EMT_TYP"
+   lazy val EmitterId: ColName = "FLX_EMT_NUM"
+   lazy val FlowNumber: ColName = "FLX_EMT_ORD"
+   lazy val OrgId: ColName = "ORG_CLE_NUM"
+   lazy val OrderId: ColName = "DCT_ORD_NUM"
+
   }
 
 }
