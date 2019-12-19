@@ -108,6 +108,36 @@ object OperationReporter {
     }
   }
 
+  def reportDataAndPopulationAsDataSet[A, B](
+    operationName: String,
+    operationInputs: List[String],
+    outputType: OperationType,
+    data: Dataset[A],
+    population: Dataset[B],
+    basePath: Path,
+    saveMode: String = "errorIfExists"): OperationMetadata = {
+    val dataPath: Path = Path(basePath, operationName, "data")
+    val dataPathStr = dataPath.toString
+    logger.info(s"""=> Reporting operation "$operationName" of output type "$outputType" to "$dataPathStr"""")
+
+    val patientsPath: Path = Path(basePath, operationName, "patients")
+    val baseMetadata = OperationMetadata(operationName, operationInputs, outputType)
+
+    data.write.mode(saveModeFrom(saveMode)).parquet(dataPath.toString)
+    outputType match {
+      case OperationTypes.Patients =>
+        baseMetadata.copy(
+          outputPath = dataPath.toString
+        )
+      case _ =>
+        population.write.mode(saveModeFrom(saveMode)).parquet(patientsPath.toString)
+        baseMetadata.copy(
+          outputPath = dataPath.toString,
+          populationPath = patientsPath.toString
+        )
+    }
+  }
+
   /**
     * the method to output the meta data
     *

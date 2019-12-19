@@ -5,8 +5,7 @@ package fr.polytechnique.cmap.cnam.study.fall
 import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-
-import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, Outcome, FollowUp}
+import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, FollowUp, Outcome}
 import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
@@ -21,6 +20,7 @@ import fr.polytechnique.cmap.cnam.study.fall.extractors._
 import fr.polytechnique.cmap.cnam.study.fall.follow_up.FallStudyFollowUps
 import fr.polytechnique.cmap.cnam.study.fall.fractures.FracturesTransformer
 import fr.polytechnique.cmap.cnam.study.fall.liberalActs.LiberalActsTransformer
+import fr.polytechnique.cmap.cnam.study.fall.statistics.DiagnosisCounter
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
@@ -221,13 +221,14 @@ object FallMain extends Main with FractureCodes {
     val optionDiagnoses = if (fallConfig.runParameters.diagnoses) {
       logger.info("diagnoses")
       val diagnoses = new DiagnosisExtractor(fallConfig.diagnoses).extract(sources).persist()
+      val diagnosesPopulation = DiagnosisCounter.process(diagnoses)
       operationsMetadata += {
-        OperationReporter
-          .report(
+        OperationReporter.reportDataAndPopulationAsDataSet(
             "diagnoses",
             List("MCO", "IR_IMB_R"),
             OperationTypes.Diagnosis,
-            diagnoses.toDF,
+            diagnoses,
+            diagnosesPopulation,
             Path(fallConfig.output.outputSavePath),
             fallConfig.output.saveMode
           )

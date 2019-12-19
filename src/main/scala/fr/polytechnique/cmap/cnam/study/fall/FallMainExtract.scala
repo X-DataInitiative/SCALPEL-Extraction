@@ -14,11 +14,9 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.extractors._
+import fr.polytechnique.cmap.cnam.study.fall.statistics.DiagnosisCounter
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.reporting._
-import org.apache.spark.sql.{Dataset, SQLContext}
-
-import scala.collection.mutable
 
 object FallMainExtract extends Main with FractureCodes {
 
@@ -118,11 +116,13 @@ object FallMainExtract extends Main with FractureCodes {
     if (fallConfig.runParameters.diagnoses) {
       logger.info("diagnoses")
       val diagnoses = new DiagnosisExtractor(fallConfig.diagnoses).extract(sources).persist()
-      val diagnoses_report = OperationReporter.reportAsDataSet(
+      val diagnosesPopulation = DiagnosisCounter.process(diagnoses)
+      val diagnoses_report = OperationReporter.reportDataAndPopulationAsDataSet(
         "diagnoses",
         List("MCO", "IR_IMB_R"),
         OperationTypes.Diagnosis,
         diagnoses,
+        diagnosesPopulation,
         Path(fallConfig.output.outputSavePath),
         fallConfig.output.saveMode
       )
