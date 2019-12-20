@@ -5,6 +5,7 @@ package fr.polytechnique.cmap.cnam.etl.config
 import java.io.File
 import java.nio.file.Paths
 import com.typesafe.config.ConfigFactory
+import pureconfig.generic.auto._
 import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 

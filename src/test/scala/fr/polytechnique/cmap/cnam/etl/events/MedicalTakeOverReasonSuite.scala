@@ -6,9 +6,9 @@ import fr.polytechnique.cmap.cnam.util.functions.makeTS
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types._
 import org.mockito.Mockito.mock
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class MedicalTakeOverReasonSuite extends FlatSpec {
+class MedicalTakeOverReasonSuite extends AnyFlatSpec {
 
   val patientID: String = "patientID"
   val timestamp: Timestamp = mock(classOf[Timestamp])
