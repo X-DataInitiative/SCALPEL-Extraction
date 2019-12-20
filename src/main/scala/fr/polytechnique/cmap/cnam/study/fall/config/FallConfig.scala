@@ -21,9 +21,9 @@ import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.{DrugsConfig, Exp
 import fr.polytechnique.cmap.cnam.study.fall.fractures.{BodySite, BodySites}
 
 case class FallConfig(
-  exposures: ExposureConfig,
   input: StudyConfig.InputPaths,
   output: StudyConfig.OutputPaths,
+  exposures: ExposureConfig = FallConfig.ExposureConfig(),
   drugs: DrugsConfig = FallConfig.DrugsConfig(),
   interactions: InteractionConfig = FallConfig.InteractionConfig(),
   sites: SitesConfig = FallConfig.SitesConfig(),
@@ -77,7 +77,12 @@ object FallConfig extends FallConfigLoader with FractureCodes {
 
   /** Parameters needed for the Exposure Transformer **/
   case class ExposureConfig(
-    override val exposurePeriodAdder: NewExposurePeriodAdder
+    override val exposurePeriodAdder: NewExposurePeriodAdder = NLimitedExposureAdder(
+      startDelay = 0.days,
+      10.days,
+      30.days,
+      90.days
+    )
   ) extends NewExposuresTransformerConfig(exposurePeriodAdder = exposurePeriodAdder)
 
 

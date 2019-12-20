@@ -12,7 +12,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchasesConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.PatientsConfig
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures._
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformerConfig
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformerConfig
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformerConfig
@@ -52,26 +52,12 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
 
   /** Parameters needed for the Exposures transformer. */
   case class ExposuresConfig(
-    override val minPurchases: Int = 2,
-    override val startDelay: Period = 3.month,
-    override val purchasesWindow: Period = 6.months) extends ExposuresTransformerConfig(
-
-    minPurchases = minPurchases,
-    startDelay = startDelay,
-    purchasesWindow = purchasesWindow,
-
-    periodStrategy = ExposurePeriodStrategy.Unlimited,
-    endThresholdGc = None,
-    endThresholdNgc = None,
-    endDelay = None,
-
-    weightAggStrategy = WeightAggStrategy.NonCumulative,
-    cumulativeExposureWindow = None,
-    cumulativeStartThreshold = None,
-    cumulativeEndThreshold = None,
-    dosageLevelIntervals = None,
-    purchaseIntervals = None
-  )
+    override val exposurePeriodAdder: NewExposurePeriodAdder = NUnlimitedExposureAdder(
+      3.months,
+      2,
+      6.months
+    )
+  ) extends NewExposuresTransformerConfig(exposurePeriodAdder = exposurePeriodAdder)
 
   /** Parameters needed for the Outcomes transformer. */
   case class OutcomesConfig(

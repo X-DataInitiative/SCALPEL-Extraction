@@ -74,24 +74,18 @@ class FallConfigSuite extends AnyFlatSpec {
         |  }
         |  """.trim.stripMargin
 
-    val expected = defaultConf.copy(
-      input = defaultConf.input.copy(
-        mco = Some("new/in/path")
-      ),
-      output = defaultConf.output.copy(
-        root = "new/out/path"
-      ),
-      exposures = defaultConf.exposures.copy(NLimitedExposureAdder(
-        startDelay = 10.days,
-        endDelay = 1.days,
-        endThresholdNgc = 300.days,
-        endThresholdGc = 900.days
-      )),
-      drugs = defaultConf.drugs.copy(
-        level = PharmacologicalLevel
-      ),
-      runParameters = defaultConf.runParameters.copy(exposure = List("Patients", "DrugPurchases", "Exposures"))
-    )
+    val expected = defaultConf.copy(input = defaultConf.input.copy(
+            mco = Some("new/in/path")
+          ), output = defaultConf.output.copy(
+            root = "new/out/path"
+          ), exposures = defaultConf.exposures.copy(NLimitedExposureAdder(
+            startDelay = 10.days,
+            endDelay = 1.days,
+            endThresholdNgc = 300.days,
+            endThresholdGc = 900.days
+          )), drugs = defaultConf.drugs.copy(
+            level = PharmacologicalLevel
+          ), runParameters = defaultConf.runParameters.copy(exposure = List("Patients", "DrugPurchases", "Exposures")))
     //When
     pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(stringConfig), Paths.get(tempPath), true)
     val result = FallConfig.load(tempPath, "test")
