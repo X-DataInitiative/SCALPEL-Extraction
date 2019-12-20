@@ -3,9 +3,10 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 
 import java.sql.Timestamp
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.Addable
 import fr.polytechnique.cmap.cnam.util.functions._
 
-case class Period(start: Timestamp, end: Timestamp) extends Remainable[Period]{
+case class Period(start: Timestamp, end: Timestamp) extends Remainable[Period] with Addable[Period]{
   self =>
 
   def & (other: Period): Boolean = {
@@ -56,6 +57,17 @@ case class Period(start: Timestamp, end: Timestamp) extends Remainable[Period]{
         case 0 => LeftRemainingPeriod(self)
         case -1 => LeftRemainingPeriod(self)
         case 1 => LeftRemainingPeriod(Period(self.start, other.start))
+      }
+    }
+  }
+
+  def + (other: Period): RemainingPeriod[Period] = {
+    if (self & other) {
+      RightRemainingPeriod(Period(min(self.start, other.start), max(self.end, other.end)))
+    } else {
+      (self.start.compareTo(other.start), self.end.compareTo(other.end)) match {
+        case (1, 1) => DisjointedRemainingPeriod(LeftRemainingPeriod(other), RightRemainingPeriod(self))
+        case (-1, -1) => DisjointedRemainingPeriod(LeftRemainingPeriod(self), RightRemainingPeriod(other))
       }
     }
   }

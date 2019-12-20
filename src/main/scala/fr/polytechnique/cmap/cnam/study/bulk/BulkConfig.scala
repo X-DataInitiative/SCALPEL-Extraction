@@ -3,6 +3,7 @@
 package fr.polytechnique.cmap.cnam.study.bulk
 
 import java.time.LocalDate
+import pureconfig.generic.auto._
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 import fr.polytechnique.cmap.cnam.etl.config.{BaseConfig, ConfigLoader}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
