@@ -66,12 +66,15 @@ case class NLevelInteractionTransformer(config: InteractionTransformerConfig) ex
           "left"
         ).groupByKey(e => e._1)
           .flatMapGroups(
-            (e, i) =>
+            (e, i) => {
+              val sortedPeriods = i.map(_._2).toList.sortBy(_.period.start)
               RemainingPeriod.delimitPeriods(
                 RightRemainingPeriod(e),
-                i.map(_._2).toList.sortBy(_.period.start).map(e => LeftRemainingPeriod[ExposureN](e)),
+                sortedPeriods.map(e => LeftRemainingPeriod[ExposureN](e)),
                 List.empty[LeftRemainingPeriod[ExposureN]]
               )
+            }
+
           )
       }
     )

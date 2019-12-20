@@ -3,6 +3,7 @@
 package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
 import java.time.LocalDate
+import pureconfig.generic.auto._
 import me.danielpes.spark.datetime.Period
 import me.danielpes.spark.datetime.implicits._
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig

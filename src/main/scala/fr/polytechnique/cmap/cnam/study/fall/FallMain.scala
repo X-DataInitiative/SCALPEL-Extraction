@@ -12,7 +12,7 @@ import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposuresTransformer, NewExposureTransformer}
 import fr.polytechnique.cmap.cnam.etl.transformers.interaction.NLevelInteractionTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
@@ -170,8 +170,8 @@ object FallMain extends Main with FractureCodes {
             )
         }
 
-        val controlDrugExposures = new ExposuresTransformer(definition)
-          .transform(patientsWithFollowUp, controlDrugPurchases)
+        val controlDrugExposures = new NewExposureTransformer(definition)
+          .transform(patientsWithFollowUp.map(_._2))(controlDrugPurchases)
         operationsMetadata += {
           OperationReporter
             .report(
@@ -184,7 +184,7 @@ object FallMain extends Main with FractureCodes {
             )
         }
 
-        new ExposuresTransformer(definition).transform(patientsWithFollowUp, optionDrugPurchases.get)
+        new NewExposureTransformer(definition).transform(patientsWithFollowUp.map(_._2).distinct())(optionDrugPurchases.get)
       }
       operationsMetadata += {
         OperationReporter
