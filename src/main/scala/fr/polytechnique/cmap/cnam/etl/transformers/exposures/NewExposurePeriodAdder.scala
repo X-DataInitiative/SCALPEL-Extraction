@@ -129,7 +129,10 @@ final case class NUnlimitedExposureAdder(
     val last = drugs.reverse.headOption
     first match {
       case None => false
-      case Some(e) => (e.start + purchasesWindow).get.after(last.get.start)
+      case Some(e) => {
+        val reachTs = (e.start + purchasesWindow).get
+        reachTs.after(last.get.start) | reachTs.equals(last.get.start)
+      }
     }
   }
 
