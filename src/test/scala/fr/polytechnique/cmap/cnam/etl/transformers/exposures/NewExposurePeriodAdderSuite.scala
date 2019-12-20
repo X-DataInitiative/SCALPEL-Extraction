@@ -27,14 +27,15 @@ class NewExposurePeriodAdderSuite extends SharedContext{
       FollowUp("patient", "any_reason", makeTS(2006, 6, 1), makeTS(2020, 12, 31)),
       FollowUp("Patient_B", "any_reason", makeTS(2006, 7, 1), makeTS(2006, 7, 1)),
       FollowUp("Patient_C", "any_reason", makeTS(2016, 8, 1), makeTS(2009, 12, 31))
-
     ).toDS()
 
-
+    val expected: Dataset[Event[Exposure]] = Seq[Event[Exposure]](
+      Exposure("patient", "NA", "Antidepresseurs", 1, makeTS(2014, 1, 8), Some(makeTS(2014, 6, 7)))
+    ).toDS()
     val exposureAdder = NLimitedExposureAdder(0.days, 15.days, 90.days, 30.days)
 
     val result = exposureAdder.toExposure(followUp)(input)
-    print(result.show())
+    assertDSs(result, expected, true)
   }
 
   "toExposure" should "transform drugs to exposure based on the unlimited adder strategy" in {
