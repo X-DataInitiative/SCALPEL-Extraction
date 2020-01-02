@@ -3,6 +3,7 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.dcir
 
 import java.sql.Timestamp
+import org.apache.commons.codec.binary.Base64
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder}
@@ -42,4 +43,20 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
   def extractStart(r: Row): Timestamp = r.getAs[java.util.Date](ColNames.Date).toTimestamp
 
   def extractFluxDate(r: Row): Timestamp = r.getAs[java.util.Date](ColNames.DcirFluxDate).toTimestamp
+
+  override def extractGroupId(r: Row): String = {
+    Base64.encodeBase64(s"${r.getAs[String](ColNames.DateStart)}_${r.getAs[String](ColNames.DateEntry)}_${
+      r.getAs[String](
+        ColNames
+          .EmitterType
+      )
+    }_${r.getAs[String](ColNames.EmitterId)}_${r.getAs[String](ColNames.FlowNumber)}_${
+      r.getAs[String](
+        ColNames
+          .OrgId
+      )
+    }_${r.getAs[String](ColNames.OrderId)}".getBytes()).map(_.toChar).mkString
+
+
+  }
 }
