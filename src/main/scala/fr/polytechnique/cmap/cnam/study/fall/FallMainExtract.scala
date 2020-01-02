@@ -6,7 +6,7 @@ import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.DcirAct
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
@@ -16,6 +16,9 @@ import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.extractors._
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.reporting._
+import org.apache.spark.sql.{Dataset, SQLContext}
+
+import scala.collection.mutable
 
 object FallMainExtract extends Main with FractureCodes {
 
@@ -42,7 +45,7 @@ object FallMainExtract extends Main with FractureCodes {
   mutable.HashMap[String, OperationMetadata] = {
 
     if (fallConfig.runParameters.hospitalStays) {
-      val hospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
+      val hospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
       meta += {
         "extract_hospital_stays" ->
           OperationReporter

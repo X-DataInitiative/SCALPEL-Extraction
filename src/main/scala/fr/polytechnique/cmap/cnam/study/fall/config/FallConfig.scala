@@ -101,7 +101,7 @@ object FallConfig extends FallConfigLoader with FractureCodes {
 
   /** Parameters needed for the diagnosesConfig **/
   case class SitesConfig(sites: List[BodySite] = List(BodySites)) {
-    val fracturesCodes = BodySite.extractCIM10CodesFromSites(sites)
+    val fracturesCodes: List[String] = BodySite.extractCIM10CodesFromSites(sites)
   }
 
   /** Parameters if run the calculation of outcome or exposure **/
@@ -134,6 +134,10 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     dcirCodes = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList,
     mcoCECodes = (NonHospitalizedFracturesCcam ++ CCAMExceptions).toList,
     mcoCCAMCodes = CCAMExceptions.toList,
-    mcoCIMCodes = List()
+    mcoCIMCodes = List(),
+    ssrCSARRCodes = List(),
+    ssrCCAMCodes = List(),
+    hadCCAMCodes = List(),
+    ssrCECodes = List()
   )
 }

@@ -6,7 +6,7 @@ import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.{Event, FollowUp, Outcome}
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
@@ -39,7 +39,9 @@ object FallMain extends Main with FractureCodes {
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
 
-    val operationsMetadata = computeExposures(sources, fallConfig)
+    val operationsMetadata = computeControls(sources, fallConfig) ++
+      computeExposures(sources, fallConfig) ++
+      computeOutcomes(sources, fallConfig)
 
     dcir.unpersist()
     mco.unpersist()
@@ -57,7 +59,7 @@ object FallMain extends Main with FractureCodes {
   def computeHospitalStays(sources: Sources, fallConfig: FallConfig): mutable.Buffer[OperationMetadata] = {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
     if (fallConfig.runParameters.hospitalStays) {
-      val hospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
+      val hospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
 
       operationsMetadata += {
         OperationReporter
