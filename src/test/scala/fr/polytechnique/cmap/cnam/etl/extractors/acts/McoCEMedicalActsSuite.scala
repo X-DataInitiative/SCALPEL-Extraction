@@ -46,7 +46,7 @@ class McoCEMedicalActsSuite extends SharedContext {
     val sources = Sources(mcoCe = Some(input))
 
     val expected = List(
-      McoCEAct("georgette", "ACE", "angine", 1.0, makeTS(2003, 2, 1))
+      McoCEAct("georgette", "ACE", "angine", makeTS(2003, 2, 1))
     ).toDS
 
     // When
@@ -71,8 +71,8 @@ class McoCEMedicalActsSuite extends SharedContext {
     val sources = Sources(mcoCe = Some(input))
 
     val expected = List(
-      McoCEAct("georgette", "ACE", "angine", 1.0, makeTS(2003, 2, 1)),
-      McoCEAct("george", "ACE", "coloscopie", 1.0, makeTS(2003, 2, 1))
+      McoCEAct("georgette", "ACE", "angine", makeTS(2003, 2, 1)),
+      McoCEAct("george", "ACE", "coloscopie", makeTS(2003, 2, 1))
     ).toDS
 
     // When
