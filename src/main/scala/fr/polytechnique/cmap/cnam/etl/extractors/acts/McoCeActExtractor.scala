@@ -1,5 +1,3 @@
-// License: BSD 3 clause
-
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import java.sql.{Date, Timestamp}
@@ -19,14 +17,12 @@ object McoCeActExtractor extends Extractor[MedicalAct] with McoCeSourceExtractor
     lazy val patientID = getPatientID(row)
     lazy val date = getDate(row)
     lazy val code = getCode(row)
-    lazy val weight = getWeight(row)
 
-    Seq(McoCEAct(patientID, "ACE", code, weight, date))
+    Seq(McoCEAct(patientID, "ACE", code, date))
   }
 
   override def getInput(sources: Sources): DataFrame =
     sources.mcoCe.get.select(ColNames.all.map(functions.col): _*)
-
 }
 
 
@@ -37,8 +33,6 @@ trait McoCeSourceExtractor {
   def getDate(row: Row): Timestamp = row.getAs[Date](ColNames.Date).toTimestamp
 
   def getCode(row: Row): String = row.getAs[String](ColNames.CamCode)
-
-  def getWeight(row: Row): Double = 1.0
 
   def isNullAt(colName: String)(row: Row): Boolean = row.isNullAt(row.fieldIndex(colName))
 
