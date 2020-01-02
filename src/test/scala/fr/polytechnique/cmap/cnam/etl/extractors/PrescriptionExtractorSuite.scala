@@ -20,7 +20,7 @@ class PrescriptionExtractorSuite extends SharedContext {
 
   trait DcirMockExtractor extends DcirExtractor[MockEvent]
 
-  object MockPrescriptionwExtractor extends DcirMockExtractor {
+  object MockPrescriptionExtractor extends DcirMockExtractor {
     override val columnName: String = ""
     override val eventBuilder: EventBuilder = MockEventobject
   }
@@ -44,7 +44,7 @@ class PrescriptionExtractorSuite extends SharedContext {
     val expected = "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMwMDBfMTc0OQ=="
 
     // When
-    val result = MockPrescriptionwExtractor.extractGroupId(r)
+    val result = MockPrescriptionExtractor.extractGroupId(r)
 
     // Then
     assert(result == expected)
