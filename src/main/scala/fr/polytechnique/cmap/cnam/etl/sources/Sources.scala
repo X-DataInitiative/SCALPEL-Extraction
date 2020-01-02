@@ -7,6 +7,7 @@ import org.apache.spark.sql.{DataFrame, SQLContext}
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.InputPaths
 import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, McoCeSource, McoSource, SsrSource, SsrCeSource}
 import fr.polytechnique.cmap.cnam.etl.sources.value.{DosagesSource, IrBenSource, IrImbSource, IrPhaSource}
+import fr.polytechnique.cmap.cnam.etl.sources.data.SsrSource.read
 
 case class Sources(
   dcir: Option[DataFrame] = None,
@@ -69,6 +70,7 @@ object Sources {
     mcoPath: Option[String] = None,
     mcoCePath: Option[String] = None,
     hadPath: Option[String] = None,
+    //@todo The merge of ssr_sej and ssr_c should be finally moved to the Flattening project
     ssrPaths: Option[List[String]] = None,
     irBenPath: Option[String] = None,
     irImbPath: Option[String] = None,
@@ -79,7 +81,7 @@ object Sources {
       dcir = dcirPath.map(DcirSource.read(sqlContext, _)),
       mco = mcoPath.map(McoSource.read(sqlContext, _)),
       mcoCe = mcoCePath.map(McoCeSource.read(sqlContext, _)),
-      ssr = ssrPaths.map(SsrSource.readAnnotateJoin(sqlContext, _, "SSR_C")),
+      ssr = ssrPaths.map(SsrSource.read(sqlContext, _)),
       irBen = irBenPath.map(IrBenSource.read(sqlContext, _)),
       irImb = irImbPath.map(IrImbSource.read(sqlContext, _)),
       irPha = irPhaPath.map(IrPhaSource.read(sqlContext, _)),

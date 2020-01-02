@@ -7,7 +7,9 @@ import org.apache.spark.sql.functions._
 
 class SsrSourceSuite extends SharedContext with SsrSource {
 
-  lazy val fakeSsrData = {
+  "estimateStayStartTime" should "estimate a stay starting date using SSr available data" in {
+
+    val fakeSsrData = {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -24,8 +26,6 @@ class SsrSourceSuite extends SharedContext with SsrSource {
       "SSR_C__ENT_DAT", "SSR_C__ANN_LUN_1S", "SSR_C__MOI_LUN_1S"
     )
   }
-
-  "estimateStayStartTime" should "estimate a stay starting date using SSr available data" in {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._

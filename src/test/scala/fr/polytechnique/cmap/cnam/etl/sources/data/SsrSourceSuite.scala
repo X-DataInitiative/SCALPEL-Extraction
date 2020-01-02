@@ -65,10 +65,9 @@ class SsrSourceSuite extends SharedContext {
     val ssrSejPath = "src/test/resources/test-input/SSR_SEJ.parquet"
     val ssrCPath = "src/test/resources/test-input/SSR_C.parquet"
     val expected = sqlCtx.read.parquet("src/test/resources/test-joined/SSR.parquet")
-    val result = SsrSource.readAnnotateJoin(
+    val result = SsrSource.read(
       sqlCtx,
-      List(ssrSejPath, ssrCPath),
-    "SSR_C")
+      List(ssrSejPath, ssrCPath))
 
     assertDFs(result, expected)
   }

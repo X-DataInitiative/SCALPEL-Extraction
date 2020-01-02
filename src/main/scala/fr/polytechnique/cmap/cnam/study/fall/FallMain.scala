@@ -5,7 +5,7 @@ package fr.polytechnique.cmap.cnam.study.fall
 import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, Outcome}
+import fr.polytechnique.cmap.cnam.etl.events.{Event, FollowUp, Outcome}
 import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
