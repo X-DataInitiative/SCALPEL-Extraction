@@ -9,6 +9,12 @@ import java.time.{LocalDate, LocalDateTime}
 
 package object implicits {
 
+  implicit def addMonthsToRichTimestamp(period: Int, date: Timestamp): java.sql.Timestamp = {
+    val periodInMonths = Period(months = period)
+    val inputDate = new RichDate(java.sql.Timestamp.valueOf(date.toString))
+    java.sql.Timestamp.valueOf((inputDate + periodInMonths).toString)
+  }
+
   implicit def toRichInt(value: Int): RichInt = new RichInt(value)
 
   implicit def toRichLong(value: Long): RichLong = new RichLong(value)

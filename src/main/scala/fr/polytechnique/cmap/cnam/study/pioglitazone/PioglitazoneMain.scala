@@ -18,7 +18,6 @@ import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
-import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer.FollowUpDataset
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
 import fr.polytechnique.cmap.cnam.study.pioglitazone.extractors.{Diagnoses, MedicalActs}
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes._
@@ -32,10 +31,10 @@ object PioglitazoneMain extends Main {
   val appName: String = "Pioglitazone"
 
   /**
-    * Arguments expected:
-    * "conf" -> "path/to/file.conf" (default: "$resources/config/pioglitazone/default.conf")
-    * "env" -> "cnam" | "cmap" | "test" (default: "test")
-    */
+   * Arguments expected:
+   * "conf" -> "path/to/file.conf" (default: "$resources/config/pioglitazone/default.conf")
+   * "env" -> "cnam" | "cmap" | "test" (default: "test")
+   */
   def run(sqlContext: SQLContext, argsMap: Map[String, String] = Map()): Option[Dataset[_]] = {
 
     val format = new java.text.SimpleDateFormat("yyyy_MM_dd_HH_mm_ss")
@@ -302,8 +301,8 @@ object PioglitazoneMain extends Main {
       } else {
         firstFilterResult
       }
-
-      val cleanFollowUps = followups.cleanFollowUps() // Keep only followups for which start < stop
+      val cleanFollowUps = followups
+        .filter(e => e.start.before(e.end.get)) // Keep only followups for which start < stop
       operationsMetadata += {
         OperationReporter
           .report(
