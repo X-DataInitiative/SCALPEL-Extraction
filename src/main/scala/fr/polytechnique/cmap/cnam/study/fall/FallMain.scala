@@ -20,6 +20,7 @@ import fr.polytechnique.cmap.cnam.study.fall.extractors._
 import fr.polytechnique.cmap.cnam.study.fall.follow_up.FallStudyFollowUps
 import fr.polytechnique.cmap.cnam.study.fall.fractures.FracturesTransformer
 import fr.polytechnique.cmap.cnam.study.fall.liberalActs.LiberalActsTransformer
+import fr.polytechnique.cmap.cnam.study.fall.statistics.DiagnosisCounter
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
@@ -221,13 +222,14 @@ object FallMain extends Main with FractureCodes {
     val optionDiagnoses = if (fallConfig.runParameters.diagnoses) {
       logger.info("diagnoses")
       val diagnoses = new DiagnosisExtractor(fallConfig.diagnoses).extract(sources).persist()
+      val diagnosesPopulation = DiagnosisCounter.process(diagnoses)
       operationsMetadata += {
-        OperationReporter
-          .report(
+        OperationReporter.reportDataAndPopulationAsDataSet(
             "diagnoses",
             List("MCO", "IR_IMB_R"),
             OperationTypes.Diagnosis,
-            diagnoses.toDF,
+            diagnoses,
+            diagnosesPopulation,
             Path(fallConfig.output.outputSavePath),
             fallConfig.output.saveMode
           )
