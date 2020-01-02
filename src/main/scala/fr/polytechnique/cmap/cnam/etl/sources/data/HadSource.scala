@@ -4,9 +4,9 @@ import org.apache.spark.sql.functions.{col, to_date, year}
 import org.apache.spark.sql.{Column, DataFrame, SQLContext}
 
 /**
-  * Extractor class for the SSR table
-  * This filtering is explained here
-  * https://datainitiative.atlassian.net/wiki/pages/viewpage.action?pageId=40304642
+  * Extractor class for the HAD table
+  *
+  *
   */
 object HadSource extends DataSourceManager with HadSourceSanitizer {
 

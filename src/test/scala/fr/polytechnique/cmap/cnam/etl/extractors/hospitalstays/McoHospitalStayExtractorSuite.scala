@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.etl.events.{Event, HospitalStay, McoHospitalSt
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class HospitalStayExtractorSuite extends SharedContext {
+class McoHospitalStayExtractorSuite extends SharedContext {
 
   "extract" should "return the hospital stays from mco sources" in {
     //Given

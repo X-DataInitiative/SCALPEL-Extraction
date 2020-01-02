@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
-import fr.polytechnique.cmap.cnam.util.functions._
+import fr.polytechnique.cmap.cnam.util.functions.computeDateUsingMonthYear
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame}
 
