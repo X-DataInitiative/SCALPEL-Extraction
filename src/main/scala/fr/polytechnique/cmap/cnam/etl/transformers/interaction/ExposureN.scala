@@ -4,6 +4,7 @@ package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Interaction}
 import cats.syntax.functor._
+import fr.polytechnique.cmap.cnam.etl.datatypes.{NullRemainingPeriod, Period, Remainable, RemainingPeriod}
 
 case class ExposureN(patientID: String, values: Set[String], period: Period) extends Remainable[ExposureN] {
   self =>
