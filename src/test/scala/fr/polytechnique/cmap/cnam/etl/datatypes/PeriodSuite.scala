@@ -36,6 +36,63 @@ class PeriodSuite extends SharedContext {
 
   }
 
+  "+" should "return a RemainingPeriod of type Period indicating the addition of Periods" in {
+    val input = Period(functions.makeTS(2019, 11, 1), functions.makeTS(2019, 12, 1))
+    var result = input - Period(functions.makeTS(2019, 11, 1), functions.makeTS(2019, 11, 5))
+    var expected: RemainingPeriod[Period] = RightRemainingPeriod(
+      Period(
+        functions.makeTS(2019, 11, 5),
+        functions.makeTS(2019, 12, 1)
+      )
+    )
+    assert(result == expected)
+
+    result = input + Period(functions.makeTS(2019, 10, 1), functions.makeTS(2019, 12, 1))
+    expected = RightRemainingPeriod(Period(functions.makeTS(2019, 10, 1), functions.makeTS(2019, 12, 1)))
+    assert(result == expected)
+
+    result = input + Period(functions.makeTS(2019, 11, 5), functions.makeTS(2019, 11, 15))
+    expected = RightRemainingPeriod(Period(functions.makeTS(2019, 11, 1), functions.makeTS(2019, 12, 1)))
+    assert(result == expected)
+
+    result = input + Period(functions.makeTS(2019, 11, 5), functions.makeTS(2019, 12, 15))
+    expected = RightRemainingPeriod(Period(functions.makeTS(2019, 11, 1), functions.makeTS(2019, 12, 15)))
+    assert(result == expected)
+
+    result = input + Period(functions.makeTS(2019, 10, 5), functions.makeTS(2019, 11, 15))
+    expected = RightRemainingPeriod(Period(functions.makeTS(2019, 10, 5), functions.makeTS(2019, 12, 1)))
+    assert(result == expected)
+
+    result = input + Period(functions.makeTS(2019, 10, 1), functions.makeTS(2019, 11, 1))
+    expected = DisjointedRemainingPeriod(
+      LeftRemainingPeriod(Period(functions.makeTS(2019, 10, 1), functions.makeTS(2019, 11, 1))),
+      RightRemainingPeriod(Period(functions.makeTS(2019, 11, 1), functions.makeTS(2019, 12, 1)))
+    )
+    assert(result == expected)
+
+    result = input + Period(functions.makeTS(2019, 10, 1), functions.makeTS(2019, 10, 31))
+    expected = DisjointedRemainingPeriod(
+      LeftRemainingPeriod(Period(functions.makeTS(2019, 10, 1), functions.makeTS(2019, 10, 31))),
+      RightRemainingPeriod(Period(functions.makeTS(2019, 11, 1), functions.makeTS(2019, 12, 1)))
+    )
+    assert(result == expected)
+
+    result = input + Period(functions.makeTS(2019, 12, 5), functions.makeTS(2019, 12, 15))
+    expected = DisjointedRemainingPeriod(
+      LeftRemainingPeriod(Period(functions.makeTS(2019, 11, 1), functions.makeTS(2019, 12, 1))),
+      RightRemainingPeriod(Period(functions.makeTS(2019, 12, 5), functions.makeTS(2019, 12, 15)))
+    )
+    assert(result == expected)
+
+    result = input + Period(functions.makeTS(2019, 12, 1), functions.makeTS(2019, 12, 15))
+    expected = DisjointedRemainingPeriod(
+      LeftRemainingPeriod(Period(functions.makeTS(2019, 11, 1), functions.makeTS(2019, 12, 1))),
+      RightRemainingPeriod(Period(functions.makeTS(2019, 12, 1), functions.makeTS(2019, 12, 15)))
+    )
+    assert(result == expected)
+
+  }
+
   "-" should "return a RemainingPeriod of type Period indicating the substract of Periods" in {
     val input = Period(functions.makeTS(2019, 11, 1), functions.makeTS(2019, 12, 1))
     var result = input - Period(functions.makeTS(2019, 11, 1), functions.makeTS(2019, 11, 5))

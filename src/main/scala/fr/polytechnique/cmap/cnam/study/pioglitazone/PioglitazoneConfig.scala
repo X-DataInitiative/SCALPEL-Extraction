@@ -52,12 +52,12 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
 
   /** Parameters needed for the Exposures transformer. */
   case class ExposuresConfig(
-    override val exposurePeriodAdder: NewExposurePeriodAdder = NUnlimitedExposureAdder(
+    override val exposurePeriodAdder: ExposurePeriodAdder = UnlimitedExposureAdder(
       3.months,
       2,
       6.months
     )
-  ) extends NewExposuresTransformerConfig(exposurePeriodAdder = exposurePeriodAdder)
+  ) extends ExposuresTransformerConfig(exposurePeriodAdder = exposurePeriodAdder)
 
   /** Parameters needed for the Outcomes transformer. */
   case class OutcomesConfig(

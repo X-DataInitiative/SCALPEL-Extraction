@@ -7,7 +7,7 @@ import com.typesafe.config.ConfigFactory
 import me.danielpes.spark.datetime.implicits._
 import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.NUnlimitedExposureAdder
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.UnlimitedExposureAdder
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes.CancerDefinition
 
 class PioglitazoneConfigSuite extends AnyFlatSpec {
@@ -66,7 +66,7 @@ class PioglitazoneConfigSuite extends AnyFlatSpec {
         root = "new/out/path"
       ),
       exposures = default.exposures.copy(
-        NUnlimitedExposureAdder(
+        UnlimitedExposureAdder(
           3.months,
           1,
           3.months
