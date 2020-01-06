@@ -8,6 +8,7 @@ import scala.reflect.runtime.universe._
 import me.danielpes.spark.datetime.implicits._
 import me.danielpes.spark.datetime.{Period => Duration}
 import org.apache.spark.sql.Dataset
+import fr.polytechnique.cmap.cnam.etl.datatypes._
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event, Exposure, FollowUp}
 import fr.polytechnique.cmap.cnam.etl.transformers.interaction._
 import fr.polytechnique.cmap.cnam.util.functions._
@@ -40,9 +41,10 @@ final case class NLimitedExposureAdder(
   override val startDelay: Duration,
   endDelay: Duration,
   endThresholdGc: Duration,
-  endThresholdNgc: Duration) extends NewExposurePeriodAdder(startDelay){
+  endThresholdNgc: Duration) extends NewExposurePeriodAdder(startDelay) {
 
-  override def toExposure(followUps: Dataset[Event[FollowUp]])(drugs: Dataset[Event[Drug]]): Dataset[Event[Exposure]] = {
+  override def toExposure(followUps: Dataset[Event[FollowUp]])
+    (drugs: Dataset[Event[Drug]]): Dataset[Event[Exposure]] = {
     drugs.transform(delayStart(followUps)).transform(toExposure)
   }
 
@@ -58,7 +60,8 @@ final case class NLimitedExposureAdder(
 
   def combineExposureDurations(exposureDurations: Iterator[ExposureDuration]): List[ExposureDuration] = {
     val sortedExposureDurations = exposureDurations.toList.sortBy(_.period.start).map(LeftRemainingPeriod(_))
-    combineExposureDurationsRec(sortedExposureDurations.head.toRight, sortedExposureDurations.drop(1), List.empty).map(_.e)
+    combineExposureDurationsRec(sortedExposureDurations.head.toRight, sortedExposureDurations.drop(1), List.empty)
+      .map(_.e)
   }
 
   def fromDrugToExposureDuration(drug: Event[Drug]): ExposureDuration = {
@@ -94,7 +97,7 @@ final case class NLimitedExposureAdder(
     }
   }
 
-  def fromConditioningToDuration (weight: Double): Long = weight match {
+  def fromConditioningToDuration(weight: Double): Long = weight match {
     case 1 => endThresholdGc.totalMilliseconds
     case _ => endThresholdNgc.totalMilliseconds
   }
@@ -104,7 +107,7 @@ final case class NUnlimitedExposureAdder(
   override val startDelay: Duration,
   minPurchases: Int,
   purchasesWindow: Duration
-  ) extends NewExposurePeriodAdder(startDelay){
+) extends NewExposurePeriodAdder(startDelay) {
 
   override def toExposure(followUps: Dataset[Event[FollowUp]])
     (drugs: Dataset[Event[Drug]]): Dataset[Event[Exposure]] = {
@@ -121,7 +124,8 @@ final case class NUnlimitedExposureAdder(
   }
 
   def fromDrugsToExposureCandidate(drugs: Iterator[Event[Drug]]): TraversableOnce[Event[Drug]] =
-    drugs.toList.sortBy(_.start).toStream.sliding(minPurchases, 1).find(ds => ds.size >= minPurchases & inWindow(ds)).map(_.reverse.head)
+    drugs.toList.sortBy(_.start).toStream.sliding(minPurchases, 1).find(ds => ds.size >= minPurchases & inWindow(ds))
+      .map(_.reverse.head)
 
 
   def inWindow(drugs: Stream[Event[Drug]]): Boolean = {
@@ -129,10 +133,10 @@ final case class NUnlimitedExposureAdder(
     val last = drugs.reverse.headOption
     first match {
       case None => false
-      case Some(e) => {
+      case Some(e) =>
         val reachTs = (e.start + purchasesWindow).get
         reachTs.after(last.get.start) | reachTs.equals(last.get.start)
-      }
+
     }
   }
 

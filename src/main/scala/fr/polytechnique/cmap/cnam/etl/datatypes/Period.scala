@@ -1,9 +1,11 @@
 // License: BSD 3 clause
 
-package fr.polytechnique.cmap.cnam.etl.transformers.interaction
+// License: BSD 3 clause
+
+package fr.polytechnique.cmap.cnam.etl.datatypes
 
 import java.sql.Timestamp
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.Addable
+import fr.polytechnique.cmap.cnam.etl.transformers.interaction._
 import fr.polytechnique.cmap.cnam.util.functions._
 
 case class Period(start: Timestamp, end: Timestamp) extends Remainable[Period] with Addable[Period]{

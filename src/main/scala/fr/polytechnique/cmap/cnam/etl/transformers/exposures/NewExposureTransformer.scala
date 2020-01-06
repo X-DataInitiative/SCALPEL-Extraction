@@ -30,7 +30,7 @@ class NewExposureTransformer(config: NewExposuresTransformerConfig) extends Seri
   }
 
   /** Returns None if Exposure happens before or after the FollowUp, otherwise return Some(Exposure) where the Exposure
-    * start as earliest as the FollowUp start and ends at FollowUp end as latest.
+    * start as earliest as the FollowUp start and ends as latest as FollowUp end.
     *
     * @param exposure to regulate.
     * @param followUp to regulate with.
