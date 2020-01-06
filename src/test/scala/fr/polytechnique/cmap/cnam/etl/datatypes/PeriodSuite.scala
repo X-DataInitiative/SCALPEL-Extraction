@@ -1,9 +1,10 @@
 // License: BSD 3 clause
 
-package fr.polytechnique.cmap.cnam.etl.transformers.interaction
+// License: BSD 3 clause
+
+package fr.polytechnique.cmap.cnam.etl.datatypes
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.datatypes._
 import fr.polytechnique.cmap.cnam.util.functions
 
 
