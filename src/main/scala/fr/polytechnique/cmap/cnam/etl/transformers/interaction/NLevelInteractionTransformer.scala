@@ -4,6 +4,7 @@ package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions
+import fr.polytechnique.cmap.cnam.etl.datatypes.{LeftRemainingPeriod, Period, RemainingPeriod, RightRemainingPeriod}
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Exposure, Interaction}
 import fr.polytechnique.cmap.cnam.util.functions._
 

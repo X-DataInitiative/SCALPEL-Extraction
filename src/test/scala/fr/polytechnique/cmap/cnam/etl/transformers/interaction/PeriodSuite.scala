@@ -3,6 +3,7 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.datatypes._
 import fr.polytechnique.cmap.cnam.util.functions
 
 
