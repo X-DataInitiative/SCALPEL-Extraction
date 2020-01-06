@@ -12,7 +12,7 @@ import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposuresTransformer, NewExposureTransformer}
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.NewExposureTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.interaction.NLevelInteractionTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
@@ -182,7 +182,8 @@ object FallMain extends Main with FractureCodes {
             )
         }
 
-        new NewExposureTransformer(definition).transform(patientsWithFollowUp.map(_._2).distinct())(optionDrugPurchases.get)
+        new NewExposureTransformer(definition)
+          .transform(patientsWithFollowUp.map(_._2).distinct())(optionDrugPurchases.get)
       }
       operationsMetadata += {
         OperationReporter
