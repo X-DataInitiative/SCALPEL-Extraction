@@ -58,8 +58,8 @@ object RosiglitazoneConfig extends ConfigLoader with RosiglitazoneStudyCodes {
   /** Parameters needed for the Exposures transformer. */
   case class ExposureConfig(
     override val exposurePeriodAdder: NewExposurePeriodAdder = NUnlimitedExposureAdder(
-      startDelay = 0.days,
-      1,
+      startDelay = 3.months,
+      2,
       6.months
     )
   ) extends NewExposuresTransformerConfig(exposurePeriodAdder = exposurePeriodAdder)
