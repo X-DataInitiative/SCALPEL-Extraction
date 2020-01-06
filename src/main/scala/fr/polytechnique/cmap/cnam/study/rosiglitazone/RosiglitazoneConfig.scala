@@ -4,14 +4,13 @@ package fr.polytechnique.cmap.cnam.study.rosiglitazone
 
 import java.time.LocalDate
 import pureconfig.generic.auto._
-import me.danielpes.spark.datetime.Period
 import me.danielpes.spark.datetime.implicits._
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 import fr.polytechnique.cmap.cnam.etl.config.{BaseConfig, ConfigLoader}
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchasesConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.PatientsConfig
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures._
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformerConfig
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformerConfig
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformerConfig
@@ -20,7 +19,7 @@ import fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes.OutcomeDefinition
 case class RosiglitazoneConfig(
   input: StudyConfig.InputPaths,
   output: StudyConfig.OutputPaths,
-  exposures: RosiglitazoneConfig.ExposuresConfig = RosiglitazoneConfig.ExposuresConfig(),
+  exposures: RosiglitazoneConfig.ExposureConfig = RosiglitazoneConfig.ExposureConfig(),
   outcomes: RosiglitazoneConfig.OutcomesConfig = RosiglitazoneConfig.OutcomesConfig(),
   filters: RosiglitazoneConfig.FiltersConfig = RosiglitazoneConfig.FiltersConfig())
   extends StudyConfig {
@@ -57,27 +56,13 @@ object RosiglitazoneConfig extends ConfigLoader with RosiglitazoneStudyCodes {
   )
 
   /** Parameters needed for the Exposures transformer. */
-  case class ExposuresConfig(
-    override val minPurchases: Int = 1,
-    override val startDelay: Period = 0.month,
-    override val purchasesWindow: Period = 0.months) extends ExposuresTransformerConfig(
-
-    minPurchases = minPurchases,
-    startDelay = startDelay,
-    purchasesWindow = purchasesWindow,
-
-    periodStrategy = ExposurePeriodStrategy.Unlimited,
-    endThresholdGc = None,
-    endThresholdNgc = None,
-    endDelay = None,
-
-    weightAggStrategy = WeightAggStrategy.NonCumulative,
-    cumulativeExposureWindow = None,
-    cumulativeStartThreshold = None,
-    cumulativeEndThreshold = None,
-    dosageLevelIntervals = None,
-    purchaseIntervals = None
-  )
+  case class ExposureConfig(
+    override val exposurePeriodAdder: NewExposurePeriodAdder = NUnlimitedExposureAdder(
+      startDelay = 3.months,
+      2,
+      6.months
+    )
+  ) extends NewExposuresTransformerConfig(exposurePeriodAdder = exposurePeriodAdder)
 
   /** Parameters needed for the Outcomes transformer. */
   case class OutcomesConfig(
