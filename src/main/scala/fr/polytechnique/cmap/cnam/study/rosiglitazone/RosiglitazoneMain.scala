@@ -6,7 +6,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Diagnosis, Event, Molecule}
+import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.Patients
@@ -15,7 +15,7 @@ import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposuresTransformer, ExposuresTransformerConfig}
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.NewExposureTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
 import fr.polytechnique.cmap.cnam.study.rosiglitazone.extractors.Diagnoses
@@ -214,9 +214,11 @@ object RosiglitazoneMain extends Main {
     // Extract Exposures
     val exposures = {
       val patientsWithFollowups = patients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
-      val exposureConfig = ExposuresTransformerConfig()
-      new ExposuresTransformer(exposureConfig)
-        .transform(patientsWithFollowups, drugPurchases)
+      new NewExposureTransformer(config.exposures)
+        .transform(patientsWithFollowups.map(_._2))(
+          drugPurchases
+            .map(m => Drug(m.patientID, m.groupID, m.value, m.weight, m.start, m.end))
+        )
     }
     operationsMetadata += {
       OperationReporter

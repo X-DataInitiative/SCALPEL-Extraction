@@ -35,7 +35,7 @@ class NewExposurePeriodAdderSuite extends SharedContext{
     val exposureAdder = NLimitedExposureAdder(0.days, 15.days, 90.days, 30.days)
 
     val result = exposureAdder.toExposure(followUp)(input)
-    assertDSs(result, expected, true)
+    assertDSs(result, expected)
   }
 
   "toExposure" should "transform drugs to exposure based on the unlimited adder strategy" in {
