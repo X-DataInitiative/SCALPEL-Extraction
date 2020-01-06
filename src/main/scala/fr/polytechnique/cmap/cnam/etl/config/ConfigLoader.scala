@@ -10,7 +10,7 @@ import pureconfig._
 import pureconfig.configurable.{localDateConfigConvert, localDateTimeConfigConvert}
 import pureconfig.generic.{CoproductHint, EnumCoproductHint, FieldCoproductHint, ProductHint}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.DrugClassificationLevel
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.NewExposurePeriodAdder
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposurePeriodAdder
 
 trait ConfigLoader {
 
@@ -48,7 +48,7 @@ trait ConfigLoader {
   )
 
   //For reading Exposure Period Adder Config
-  implicit val exposurePeriodAdderReader: FieldCoproductHint[NewExposurePeriodAdder] = new FieldCoproductHint[NewExposurePeriodAdder](
+  implicit val exposurePeriodAdderReader: FieldCoproductHint[ExposurePeriodAdder] = new FieldCoproductHint[ExposurePeriodAdder](
     "exposure_adder_strategy"
   ) {
     override protected def fieldValue(name: String): String = ConfigFieldMapping(PascalCase, SnakeCase)(name)

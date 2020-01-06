@@ -77,13 +77,13 @@ object FallConfig extends FallConfigLoader with FractureCodes {
 
   /** Parameters needed for the Exposure Transformer **/
   case class ExposureConfig(
-    override val exposurePeriodAdder: NewExposurePeriodAdder = NLimitedExposureAdder(
+    override val exposurePeriodAdder: ExposurePeriodAdder = LimitedExposureAdder(
       startDelay = 0.days,
       10.days,
       30.days,
       90.days
     )
-  ) extends NewExposuresTransformerConfig(exposurePeriodAdder = exposurePeriodAdder)
+  ) extends ExposuresTransformerConfig(exposurePeriodAdder = exposurePeriodAdder)
 
 
   /** Parameters needed for the Interaction Transformer **/

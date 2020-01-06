@@ -15,7 +15,7 @@ import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.NewExposureTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposureTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
 import fr.polytechnique.cmap.cnam.study.rosiglitazone.extractors.Diagnoses
@@ -214,7 +214,7 @@ object RosiglitazoneMain extends Main {
     // Extract Exposures
     val exposures = {
       val patientsWithFollowups = patients.joinWith(followups, followups.col("patientId") === patients.col("patientId"))
-      new NewExposureTransformer(config.exposures)
+      new ExposureTransformer(config.exposures)
         .transform(patientsWithFollowups.map(_._2))(
           drugPurchases
             .map(m => Drug(m.patientID, m.groupID, m.value, m.weight, m.start, m.end))

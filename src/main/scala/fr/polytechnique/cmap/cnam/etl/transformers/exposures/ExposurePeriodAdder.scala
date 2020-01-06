@@ -14,7 +14,7 @@ import fr.polytechnique.cmap.cnam.etl.transformers.interaction._
 import fr.polytechnique.cmap.cnam.util.functions._
 
 
-sealed abstract class NewExposurePeriodAdder(val startDelay: Duration) extends Serializable {
+sealed abstract class ExposurePeriodAdder(val startDelay: Duration) extends Serializable {
 
   def toExposure(followUps: Dataset[Event[FollowUp]])(drugs: Dataset[Event[Drug]]): Dataset[Event[Exposure]]
 
@@ -37,11 +37,11 @@ sealed abstract class NewExposurePeriodAdder(val startDelay: Duration) extends S
 }
 
 
-final case class NLimitedExposureAdder(
+final case class LimitedExposureAdder(
   override val startDelay: Duration,
   endDelay: Duration,
   endThresholdGc: Duration,
-  endThresholdNgc: Duration) extends NewExposurePeriodAdder(startDelay) {
+  endThresholdNgc: Duration) extends ExposurePeriodAdder(startDelay) {
 
   override def toExposure(followUps: Dataset[Event[FollowUp]])
     (drugs: Dataset[Event[Drug]]): Dataset[Event[Exposure]] = {
@@ -103,11 +103,11 @@ final case class NLimitedExposureAdder(
   }
 }
 
-final case class NUnlimitedExposureAdder(
+final case class UnlimitedExposureAdder(
   override val startDelay: Duration,
   minPurchases: Int,
   purchasesWindow: Duration
-) extends NewExposurePeriodAdder(startDelay) {
+) extends ExposurePeriodAdder(startDelay) {
 
   override def toExposure(followUps: Dataset[Event[FollowUp]])
     (drugs: Dataset[Event[Drug]]): Dataset[Event[Exposure]] = {
