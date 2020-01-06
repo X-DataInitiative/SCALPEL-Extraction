@@ -4,5 +4,5 @@ package fr.polytechnique.cmap.cnam.etl.transformers.exposures
 
 import fr.polytechnique.cmap.cnam.etl.transformers.TransformerConfig
 
-class NewExposuresTransformerConfig(
-  val exposurePeriodAdder: NewExposurePeriodAdder) extends TransformerConfig with Serializable
+class ExposuresTransformerConfig(
+  val exposurePeriodAdder: ExposurePeriodAdder) extends TransformerConfig with Serializable

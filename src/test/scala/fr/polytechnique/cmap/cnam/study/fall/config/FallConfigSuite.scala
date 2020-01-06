@@ -9,7 +9,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import me.danielpes.spark.datetime.implicits._
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.PharmacologicalLevel
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.NLimitedExposureAdder
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.LimitedExposureAdder
 
 class FallConfigSuite extends AnyFlatSpec {
 
@@ -78,7 +78,7 @@ class FallConfigSuite extends AnyFlatSpec {
             mco = Some("new/in/path")
           ), output = defaultConf.output.copy(
             root = "new/out/path"
-          ), exposures = defaultConf.exposures.copy(NLimitedExposureAdder(
+          ), exposures = defaultConf.exposures.copy(LimitedExposureAdder(
             startDelay = 10.days,
             endDelay = 1.days,
             endThresholdNgc = 300.days,

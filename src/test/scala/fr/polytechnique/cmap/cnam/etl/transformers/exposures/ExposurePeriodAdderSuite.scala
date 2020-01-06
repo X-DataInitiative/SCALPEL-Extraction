@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event, Exposure, FollowUp}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class NewExposurePeriodAdderSuite extends SharedContext{
+class ExposurePeriodAdderSuite extends SharedContext{
   "toExposure" should "transform drugs to exposure based on the limited adder strategy" in {
     // Given
     val sqlCtx = sqlContext
@@ -32,7 +32,7 @@ class NewExposurePeriodAdderSuite extends SharedContext{
     val expected: Dataset[Event[Exposure]] = Seq[Event[Exposure]](
       Exposure("patient", "NA", "Antidepresseurs", 1, makeTS(2014, 1, 8), Some(makeTS(2014, 6, 7)))
     ).toDS()
-    val exposureAdder = NLimitedExposureAdder(0.days, 15.days, 90.days, 30.days)
+    val exposureAdder = LimitedExposureAdder(0.days, 15.days, 90.days, 30.days)
 
     val result = exposureAdder.toExposure(followUp)(input)
     assertDSs(result, expected)
@@ -64,7 +64,7 @@ class NewExposurePeriodAdderSuite extends SharedContext{
     val expected: Dataset[Event[Exposure]] = Seq[Event[Exposure]](
       Exposure("Patient_A", "NA", "PIOGLITAZONE", 1, makeTS(2008, 2, 1), Some(makeTS(2008, 11, 30)))
     ).toDS()
-    val exposureAdder = NUnlimitedExposureAdder(3.months, 2, 6.months)
+    val exposureAdder = UnlimitedExposureAdder(3.months, 2, 6.months)
 
     val result = exposureAdder.toExposure(followUp)(input)
     assertDSs(result, expected)
@@ -97,7 +97,7 @@ class NewExposurePeriodAdderSuite extends SharedContext{
       Exposure("Patient_A", "NA", "PIOGLITAZONE", 1, makeTS(2008, 1, 1), Some(makeTS(2008, 11, 30))),
       Exposure("Patient_B", "NA", "BENFLUOREX", 1, makeTS(2007, 1, 1), Some(makeTS(2007, 7, 1)))
     ).toDS()
-    val exposureAdder = NUnlimitedExposureAdder(0.months, 1, 0.months)
+    val exposureAdder = UnlimitedExposureAdder(0.months, 1, 0.months)
 
     val result = exposureAdder.toExposure(followUp)(input)
     assertDSs(result, expected)

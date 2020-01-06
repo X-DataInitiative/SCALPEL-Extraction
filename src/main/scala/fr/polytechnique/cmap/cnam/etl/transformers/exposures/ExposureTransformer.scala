@@ -6,7 +6,7 @@ import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event, Exposure, FollowUp}
 import fr.polytechnique.cmap.cnam.util.functions._
 
-class NewExposureTransformer(config: NewExposuresTransformerConfig) extends Serializable {
+class ExposureTransformer(config: ExposuresTransformerConfig) extends Serializable {
 
   def transform(followUps: Dataset[Event[FollowUp]])(drugs: Dataset[Event[Drug]]): Dataset[Event[Exposure]] = {
     drugs

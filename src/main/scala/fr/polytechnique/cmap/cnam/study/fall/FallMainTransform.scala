@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.NewExposureTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposureTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.interaction.NLevelInteractionTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
@@ -97,7 +97,7 @@ object FallMainTransform extends Main with FractureCodes {
         meta += {
           followUpReport.name -> followUpReport
         }
-        val controlDrugExposures = new NewExposureTransformer(definition)
+        val controlDrugExposures = new ExposureTransformer(definition)
           .transform(patientsWithFollowUp.map(_._2))(controlDrugPurchases)
         meta += {
           "control_drugs_exposures" ->
@@ -111,7 +111,7 @@ object FallMainTransform extends Main with FractureCodes {
                 fallConfig.output.saveMode
               )
         }
-        new NewExposureTransformer(definition).transform(patientsWithFollowUp.map(_._2))(drugPurchases).cache()
+        new ExposureTransformer(definition).transform(patientsWithFollowUp.map(_._2))(drugPurchases).cache()
       }
       val exposuresReport = OperationReporter.reportAsDataSet(
         "exposures",

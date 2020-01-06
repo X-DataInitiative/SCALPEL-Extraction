@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event, Exposure, FollowUp}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-class NewExposureTransformerSuite extends SharedContext {
+class ExposureTransformerSuite extends SharedContext {
   "toExposure" should "transform drugs to exposure based on parameters" in {
     // Given
     val sqlCtx = sqlContext
@@ -31,9 +31,9 @@ class NewExposureTransformerSuite extends SharedContext {
       Exposure("Patient_A", "NA", "Antidepresseurs", 1D, makeTS(2014, 6, 8), Some(makeTS(2014, 8, 7))),
       Exposure("Patient_B", "NA", "Antidepresseurs", 1D, makeTS(2014, 9, 1), Some(makeTS(2014, 10, 1)))
     ).toDS
-    val exposureTransformer = new NewExposureTransformer(
-      new NewExposuresTransformerConfig(
-        NLimitedExposureAdder(
+    val exposureTransformer = new ExposureTransformer(
+      new ExposuresTransformerConfig(
+        LimitedExposureAdder(
           0.days,
           15.days,
           90.days,
@@ -64,9 +64,9 @@ class NewExposureTransformerSuite extends SharedContext {
       Exposure("Patient_A", "NA", "Antidepresseurs", 1D, makeTS(2014, 5, 1), Some(makeTS(2014, 10, 1)))
     )
 
-    val exposureTransformer = new NewExposureTransformer(
-      new NewExposuresTransformerConfig(
-        NLimitedExposureAdder(
+    val exposureTransformer = new ExposureTransformer(
+      new ExposuresTransformerConfig(
+        LimitedExposureAdder(
           0.days,
           15.days,
           90.days,
@@ -97,9 +97,9 @@ class NewExposureTransformerSuite extends SharedContext {
       Exposure("Patient_A", "NA", "Antidepresseurs", 1D, makeTS(2013, 5, 1), Some(makeTS(2013, 10, 1)))
     )
 
-    val exposureTransformer = new NewExposureTransformer(
-      new NewExposuresTransformerConfig(
-        NLimitedExposureAdder(
+    val exposureTransformer = new ExposureTransformer(
+      new ExposuresTransformerConfig(
+        LimitedExposureAdder(
           0.days,
           15.days,
           90.days,
@@ -127,9 +127,9 @@ class NewExposureTransformerSuite extends SharedContext {
       Exposure("Patient_A", "NA", "Antidepresseurs", 1D, makeTS(2014, 5, 1), Some(makeTS(2014, 12, 31)))
     )
 
-    val exposureTransformer = new NewExposureTransformer(
-      new NewExposuresTransformerConfig(
-        NLimitedExposureAdder(
+    val exposureTransformer = new ExposureTransformer(
+      new ExposuresTransformerConfig(
+        LimitedExposureAdder(
           0.days,
           15.days,
           90.days,
@@ -157,9 +157,9 @@ class NewExposureTransformerSuite extends SharedContext {
       Exposure("Patient_A", "NA", "Antidepresseurs", 1D, makeTS(2014, 6, 1), Some(makeTS(2014, 10, 1)))
     )
 
-    val exposureTransformer = new NewExposureTransformer(
-      new NewExposuresTransformerConfig(
-        NLimitedExposureAdder(
+    val exposureTransformer = new ExposureTransformer(
+      new ExposuresTransformerConfig(
+        LimitedExposureAdder(
           0.days,
           15.days,
           90.days,
