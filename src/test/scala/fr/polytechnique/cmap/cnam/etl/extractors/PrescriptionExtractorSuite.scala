@@ -17,7 +17,6 @@ object MockEventobject extends MockEvent {
 
 class PrescriptionExtractorSuite extends SharedContext {
 
-
   trait DcirMockExtractor extends DcirExtractor[MockEvent]
 
   object MockPrescriptionExtractor extends DcirMockExtractor {
@@ -49,6 +48,4 @@ class PrescriptionExtractorSuite extends SharedContext {
     // Then
     assert(result == expected)
   }
-
-
 }

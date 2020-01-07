@@ -302,7 +302,6 @@ class DrugsExtractorSuite extends SharedContext {
     assertDSs(result, expected)
   }
 
-
   "extract" should "return expected drug purchases with MoleculeCombination level" in {
 
     // Given
@@ -348,10 +347,6 @@ class DrugsExtractorSuite extends SharedContext {
     assertDSs(result, expected)
   }
 
-
-
-
-
   "extractGroupId" should "return the group ID for done values" in {
     // Given
     val schema = StructType(
@@ -378,6 +373,4 @@ class DrugsExtractorSuite extends SharedContext {
     // Then
     assert(result == expected)
   }
-
-
 }
