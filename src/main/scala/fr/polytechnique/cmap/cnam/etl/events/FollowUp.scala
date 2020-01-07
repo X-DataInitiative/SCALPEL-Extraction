@@ -13,30 +13,6 @@ trait FollowUp extends AnyEvent with EventBuilder {
 
   val category: EventCategory[FollowUp] = "follow_up"
 
-  /** Creates un Event object of type FollowUp taken each row from a dataset.
-   *
-   * @param r            The Row object itself
-   * @param patientIDCol The value patientID from dataset
-   * @param endReason    The value endReason from dataset
-   * @param startCol     The value start from dataset
-   * @param endCol       The value end from dataset
-   * @return Event[FollowUp]
-   */
-  def fromRow(
-    r: Row,
-    patientIDCol: String = "patientID",
-    endReason: String = "endReason",
-    startCol: String = "start",
-    endCol: String = "end"): Event[FollowUp] = {
-
-    FollowUp(
-      r.getAs[String](patientIDCol),
-      r.getAs[String](endReason),
-      r.getAs[Timestamp](startCol),
-      r.getAs[Timestamp](endCol)
-    )
-  }
-
   /** Creates un Event object of type FollowUp using a map function to map a dataset.
    *
    * @param patientID The value patientID from dataset
