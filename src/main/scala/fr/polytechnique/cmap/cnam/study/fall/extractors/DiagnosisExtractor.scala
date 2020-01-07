@@ -12,9 +12,9 @@ class DiagnosisExtractor(config: DiagnosesConfig) {
 
   def extract(sources: Sources): Dataset[Event[Diagnosis]] = {
 
-    val mainDiag = McoMainDiagnosisExtractor.extract(sources, config.dpCodes.toSet)
-    val linkedDiag = McoLinkedDiagnosisExtractor.extract(sources, config.drCodes.toSet)
-    val dasDiag = McoAssociatedDiagnosisExtractor.extract(sources, config.daCodes.toSet)
+    val mainDiag = MainDiagnosisFallExtractor.extract(sources, config.dpCodes.toSet)
+    val linkedDiag = LinkedDiagnosisFallExtractor.extract(sources, config.drCodes.toSet)
+    val dasDiag = AssociatedDiagnosisFallExtractor.extract(sources, config.daCodes.toSet)
 
     unionDatasets(mainDiag, linkedDiag, dasDiag)
   }
