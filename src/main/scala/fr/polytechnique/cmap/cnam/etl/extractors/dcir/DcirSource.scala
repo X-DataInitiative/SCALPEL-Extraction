@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.dcir
 
 import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
 
+/** Trait to retrieve the columns of dcir dataset. */
 trait DcirSource extends ColumnNames {
 
   final object ColNames extends Serializable {
@@ -33,7 +34,6 @@ trait DcirSource extends ColumnNames {
       NaturePrestation,
       NgapCoefficient
     )
-
 
    lazy val DateStart: ColName = "FLX_DIS_DTD"
    lazy val DateEntry: ColName = "FLX_TRT_DTD"
