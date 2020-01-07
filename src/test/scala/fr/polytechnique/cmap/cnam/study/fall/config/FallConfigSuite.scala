@@ -4,10 +4,12 @@ package fr.polytechnique.cmap.cnam.study.fall.config
 
 import java.io.File
 import java.nio.file.Paths
+import java.time.LocalDate
 import com.typesafe.config.ConfigFactory
 import org.scalatest.flatspec.AnyFlatSpec
 import me.danielpes.spark.datetime.implicits._
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.PharmacologicalLevel
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.LimitedExposureAdder
 
@@ -25,14 +27,21 @@ class FallConfigSuite extends AnyFlatSpec {
   val outputPaths = OutputPaths(
     root = "target/test/output"
   )
-/*  "load" should "load default config file" in {
+
+  val base = new BaseConfig(
+    ageReferenceDate = LocalDate.of(2015, 1, 1),
+    studyStart = LocalDate.of(2014, 1, 1),
+    studyEnd = LocalDate.of(2032, 1, 1)
+  )
+
+  "load" should "load default config file" in {
     //Given
-    val expected = FallConfig(inputPaths, outputPaths)
+    val expected = FallConfig(inputPaths, outputPaths, base)
     //When
     val result = FallConfig.load("", "test")
     //Then
     assert(result == expected)
-  }*/
+  }
 
   "load" should "load the correct config file" in {
     //Given

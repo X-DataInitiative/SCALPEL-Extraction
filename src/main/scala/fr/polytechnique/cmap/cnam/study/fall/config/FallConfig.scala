@@ -23,6 +23,7 @@ import fr.polytechnique.cmap.cnam.study.fall.fractures.{BodySite, BodySites}
 case class FallConfig(
   input: StudyConfig.InputPaths,
   output: StudyConfig.OutputPaths,
+  base: BaseConfig,
   exposures: ExposureConfig = FallConfig.ExposureConfig(),
   drugs: DrugsConfig = FallConfig.DrugsConfig(),
   interactions: InteractionConfig = FallConfig.InteractionConfig(),
@@ -31,7 +32,6 @@ case class FallConfig(
   outcomes: FracturesConfig = FallConfig.FracturesConfig(),
   runParameters: FallConfig.RunConfig = FallConfig.RunConfig()) extends StudyConfig {
 
-  val base: BaseConfig = FallConfig.BaseConfig
   val medicalActs: MedicalActsConfig = FallConfig.MedicalActsConfig
   val diagnoses: DiagnosesConfig = DiagnosesConfig(
     sites.fracturesCodes,
@@ -56,7 +56,7 @@ object FallConfig extends FallConfigLoader with FractureCodes {
 
   /** Fixed parameters needed for the Patients extractors. */
   case class PatientsConfig(
-    ageReferenceDate: LocalDate = FallConfig.BaseConfig.ageReferenceDate,
+    ageReferenceDate: LocalDate = LocalDate.of(2015, 1, 1),
     startGapInMonths: Int = 2,
     followupStartDelay: Int = 0)
 
@@ -79,9 +79,9 @@ object FallConfig extends FallConfigLoader with FractureCodes {
   case class ExposureConfig(
     override val exposurePeriodAdder: ExposurePeriodAdder = LimitedExposureAdder(
       startDelay = 0.days,
-      10.days,
-      30.days,
-      90.days
+      15.days,
+      90.days,
+      30.days
     )
   ) extends ExposuresTransformerConfig(exposurePeriodAdder = exposurePeriodAdder)
 
@@ -113,13 +113,6 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     // Hospital Stays
     val hospitalStays: Boolean = hospitalStay contains "HospitalStay"
   }
-
-  /** Base fixed parameters for this study. */
-  final object BaseConfig extends BaseConfig(
-    ageReferenceDate = LocalDate.of(2015, 1, 1),
-    studyStart = LocalDate.of(2014, 1, 1),
-    studyEnd = LocalDate.of(2018, 1, 1)
-  )
 
   /** Fixed parameters needed for the acts extractors. */
   final object MedicalActsConfig extends MedicalActsConfig(

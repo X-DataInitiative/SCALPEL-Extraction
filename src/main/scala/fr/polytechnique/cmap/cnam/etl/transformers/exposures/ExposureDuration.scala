@@ -6,7 +6,6 @@ import me.danielpes.spark.datetime.implicits._
 import me.danielpes.spark.datetime.{Period => Duration}
 import fr.polytechnique.cmap.cnam.etl.datatypes._
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Exposure}
-import fr.polytechnique.cmap.cnam.etl.transformers.interaction._
 
 
 case class ExposureDuration(patientID: String, value: String, period: Period, span: Long)

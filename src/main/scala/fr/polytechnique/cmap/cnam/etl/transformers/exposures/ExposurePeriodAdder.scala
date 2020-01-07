@@ -10,7 +10,6 @@ import me.danielpes.spark.datetime.{Period => Duration}
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.datatypes._
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event, Exposure, FollowUp}
-import fr.polytechnique.cmap.cnam.etl.transformers.interaction._
 import fr.polytechnique.cmap.cnam.util.functions._
 
 
