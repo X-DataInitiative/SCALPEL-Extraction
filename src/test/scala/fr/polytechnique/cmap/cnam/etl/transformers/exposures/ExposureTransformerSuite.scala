@@ -9,6 +9,7 @@ import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event, Exposure, FollowUp}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class ExposureTransformerSuite extends SharedContext {
+
   "toExposure" should "transform drugs to exposure based on parameters" in {
     // Given
     val sqlCtx = sqlContext
@@ -16,10 +17,10 @@ class ExposureTransformerSuite extends SharedContext {
 
     //Given
     val input: Dataset[Event[Drug]] = Seq(
-      Drug("Patient_A", "Antidepresseurs", 2, makeTS(2014, 6, 8)),
-      Drug("Patient_A", "Antidepresseurs", 2, makeTS(2014, 7, 1)),
-      Drug("Patient_B", "Antidepresseurs", 2, makeTS(2014, 2, 5)),
-      Drug("Patient_B", "Antidepresseurs", 2, makeTS(2014, 9, 1))
+      Drug("Patient_A", "Antidepresseurs", 2,"MjAxNC0wOS0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMxMDBfMTc0OQ==", makeTS(2014, 6, 8)),
+      Drug("Patient_A", "Antidepresseurs", 2,"MjAxNC0wOS0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMxMDBfMTc0OQ==", makeTS(2014, 7, 1)),
+      Drug("Patient_B", "Antidepresseurs", 2,"MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzM0MDBfMTk0OQ==", makeTS(2014, 2, 5)),
+      Drug("Patient_B", "Antidepresseurs", 2,"MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzM0MDBfMTk0OQ==", makeTS(2014, 9, 1))
     ).toDS
     val followUp: Dataset[Event[FollowUp]] = Seq(
       FollowUp("Patient_A", "any_reason", makeTS(2014, 6, 1), makeTS(2016, 12, 31)),
@@ -44,6 +45,7 @@ class ExposureTransformerSuite extends SharedContext {
     )
 
     val result = exposureTransformer.transform(followUp)(input)
+
     assertDSs(expected, result)
   }
 

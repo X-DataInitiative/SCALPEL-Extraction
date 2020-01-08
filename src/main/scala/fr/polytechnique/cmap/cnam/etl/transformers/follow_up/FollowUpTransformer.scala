@@ -40,14 +40,14 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
       .agg(
         min(DeathDate).as(DeathDate),
         min(FollowUpStart).as(FollowUpStart),
-        min(ObservationEnd).as(ObservationEnd)
+        min(Columns.ObservationEnd).as(Columns.ObservationEnd)
       )
       .map(
         e => PatientDates(
           e.getAs[String](PatientID),
           Option(e.getAs[Timestamp](DeathDate)),
           Option(e.getAs[Timestamp](FollowUpStart)),
-          Option(e.getAs[Timestamp](ObservationEnd))
+          Option(e.getAs[Timestamp](Columns.ObservationEnd))
         )
       )
 
@@ -61,29 +61,17 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
       )
       .map(e => TrackLossDate(e.getAs[String](PatientID), Option(e.getAs[Timestamp](TracklossDate))))
 
-    val disease = config.outcomeName.getOrElse(None).toString
-
-    val outcomesDisease: Dataset[Event[Outcome]] = outcomes
-      .filter(e => e.value.matches(s".*$disease.*"))
-      .groupBy(col(PatientID))
-      .agg(
-        min(Start).as(Start)
-      ).map(e => Outcome(e.getAs[String](PatientID), disease, e.getAs[Timestamp](Start)))
-
     patientDates
       .joinWith(tracklossDates, tracklossDates.col(PatientID) === patientDates.col(PatientID), "left_outer")
-      .joinWith(outcomesDisease, col(PatientID) === col(s"_1.$PatientID"), "left_outer")
       .map { e =>
-        val trackloss: Option[Timestamp] = Try(e._1._2.trackloss).getOrElse(None)
-        val disease: Option[Timestamp] = Try(Option(e._2.start)).getOrElse(None)
+        val trackloss: Option[Timestamp] = Try(e._2.trackloss).getOrElse(None)
 
         val followUpEndReason = endReason(
-          DeathReason(date = e._1._1.deathDate),
-          DiseaseReason(date = disease),
+          DeathReason(date = e._1.deathDate),
           TrackLossReason(date = trackloss),
-          ObservationEndReason(date = e._1._1.observationEnd)
+          ObservationEndReason(date = e._1.observationEnd)
         )
-        FollowUp(e._1._1.patientID, followUpEndReason.reason, e._1._1.followUpStart.get, followUpEndReason.date.get)
+        FollowUp(e._1.patientID, followUpEndReason.reason, e._1.followUpStart.get, followUpEndReason.date.get)
       }.filter(e => e.end.nonEmpty)
 
   }

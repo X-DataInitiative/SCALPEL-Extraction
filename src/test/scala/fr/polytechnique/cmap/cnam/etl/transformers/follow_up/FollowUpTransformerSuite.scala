@@ -2,14 +2,12 @@
 
 package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
 
-import java.sql.Timestamp
 import scala.util.Try
-import org.mockito.Mockito.mock
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
-import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformerUtilities.{DeathReason, DiseaseReason, FollowUpEnd, ObservationEndReason, PatientDates, TrackLossDate, TrackLossReason, endReason, tracklossDateCorrected}
+import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformerUtilities.{DeathReason, FollowUpEnd, ObservationEndReason, PatientDates, TrackLossDate, TrackLossReason, endReason, tracklossDateCorrected}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 
@@ -160,25 +158,17 @@ class FollowUpTransformerSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val input: Dataset[(PatientDates, TrackLossDate, Event[Outcome])] = Seq(
-      (PatientDates("Patient_A", Some(makeTS(2015, 2, 1)), Some(makeTS(2006, 2, 1)), Some(makeTS(2009, 6, 30))),
-        TrackLossDate("Patient_A", Some(makeTS(2014, 5, 1))), Outcome(
-        "Patient_A",
-        "bladder_cancer",
-        makeTS(2007, 9, 1)
-      ))
+    val input: Dataset[(PatientDates, TrackLossDate)] = Seq(
+      (PatientDates("Patient_A", Some(makeTS(2015, 2, 1)), Some(makeTS(2006, 2, 1)), Some(makeTS(2014, 5, 1))),
+        TrackLossDate("Patient_A", Some(makeTS(2014, 5, 1))))
       ,
       (PatientDates("Patient_B", Some(makeTS(2016, 2, 1)), Some(makeTS(2006, 1, 1)), Some(makeTS(2012, 6, 30))),
-        TrackLossDate("Patient_B", Some(makeTS(2010, 2, 1))), Outcome(
-        "Patient_B",
-        "bladder_cancer",
-        makeTS(2011, 4, 1)
-      )),
-      (PatientDates("Patient_C", Some(makeTS(2017, 2, 1)), Some(makeTS(2006, 8, 1)), None),
-        TrackLossDate("Patient_C", None), mock(classOf[Event[Outcome]])),
+        TrackLossDate("Patient_B", Some(makeTS(2010, 2, 1)))),
+      (PatientDates("Patient_C", Some(makeTS(2017, 2, 1)), Some(makeTS(2006, 8, 1)), Some(makeTS(2017, 2, 1))),
+        TrackLossDate("Patient_C", None)),
 
       (PatientDates("Patient_D", Some(makeTS(2018, 2, 1)), Some(makeTS(2007, 10, 1)), Some(makeTS(2013, 6, 30))),
-        TrackLossDate("Patient_D", Some(makeTS(2017, 9, 1))), Outcome("Patient_D", "cancer", makeTS(2013, 6, 30)))
+        TrackLossDate("Patient_D", Some(makeTS(2017, 9, 1))))
     ).toDS
 
     // When
@@ -186,18 +176,16 @@ class FollowUpTransformerSuite extends SharedContext {
       .map { e =>
         endReason(
           DeathReason(date = e._1.deathDate),
-          DiseaseReason(date = Try(Option(e._3.start)).getOrElse(None)),
           TrackLossReason(date = Try(e._2.trackloss).getOrElse(None)),
           ObservationEndReason(date = e._1.observationEnd)
         )
       }
 
-
     val expected: Dataset[FollowUpEnd] = Seq(
-      FollowUpEnd("Disease", Some(makeTS(2007, 9, 1))),
+      FollowUpEnd("Trackloss", Some(makeTS(2014, 5, 1))),
       FollowUpEnd("Trackloss", Some(makeTS(2010, 2, 1))),
       FollowUpEnd("Death", Some(makeTS(2017, 2, 1))),
-      FollowUpEnd("Disease", Some(makeTS(2013, 6, 30)))
+      FollowUpEnd("ObservationEnd", Some(makeTS(2013, 6, 30)))
     ).toDS
 
 
@@ -307,7 +295,7 @@ class FollowUpTransformerSuite extends SharedContext {
     ).toDS
 
     val expected = Seq(
-      FollowUp("Regis", "Disease", makeTS(2006, 3, 1), makeTS(2007, 9, 1)),
+      FollowUp("Regis", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 1, 1)),
       FollowUp("pika", "Death", makeTS(2006, 3, 1), makeTS(2008, 10, 1)),
       FollowUp("patient03", "ObservationEnd", makeTS(2006, 3, 1), makeTS(2009, 1, 1))
     ).toDS
