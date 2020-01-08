@@ -31,25 +31,31 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
         input.filter(isInExtractorScope _).filter(isInStudy(codes) _)
       }
     }.flatMap(builder _).distinct()
-
   }
 
 
-
-   def extractGroupId(r: Row): String = {
-    Base64.encodeBase64(s"${r.getAs[String](ColNames.FluxDate)}_${r.getAs[String](ColNames.FluxProcessingDate)}_${
-      r.getAs[String](
-        ColNames
-          .EmitterType
-      )
-    }_${r.getAs[String](ColNames.EmitterId)}_${r.getAs[String](ColNames.FluxSeqNumber)}_${
-      r.getAs[String](
-        ColNames
-          .OrganisationOldId
-      )
-    }_${r.getAs[String](ColNames.OrganisationDecompteNumber)}".getBytes()).map(_.toChar).mkString
-
-
+  /** It generate a hash using the values of these columns
+    *(FLX_DIS_DTD,FLX_TRT_DTD,FLX_EMT_TYP,FLX_EMT_NUM,FLX_EMT_ORD,ORG_CLE_NUM,DCT_ORD_NUM).
+    * It allows to identify each prescription in a unique way, it can be used to identify
+    * the possible interactions of molecules prescript in the same period.
+    *
+    * @param r The Row object itself
+    * @return A hash Id unique in a string format
+    */
+  def extractGroupId(r: Row): String = {
+    Base64.encodeBase64(
+      s"${r.getAs[String](ColNames.FluxDate)}_${r.getAs[String](ColNames.FluxProcessingDate)}_${
+        r.getAs[String](
+          ColNames
+            .EmitterType
+        )
+      }_${r.getAs[String](ColNames.EmitterId)}_${r.getAs[String](ColNames.FluxSeqNumber)}_${
+        r.getAs[String](
+          ColNames
+            .OrganisationOldId
+        )
+      }_${r.getAs[String](ColNames.OrganisationDecompteNumber)}".getBytes()
+    ).map(_.toChar).mkString
   }
 
 
@@ -64,8 +70,9 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
     lazy val patientID = getPatientID(row)
     lazy val conditioning = getConditioning(row)
     lazy val date = getEventDate(row)
+    lazy val groupID = extractGroupId(row)
 
-    classification.map(code => Drug(patientID, code, conditioning, date))
+    classification.map(code => Drug(patientID, code, conditioning, groupID, date))
   }
 
   private def getPatientID(row: Row): String = row.getAs[String](ColNames.PatientId)
@@ -75,6 +82,7 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
   private def getEventDate(row: Row): Timestamp = row.getAs[Timestamp](ColNames.Date)
 
   override def getInput(sources: Sources): DataFrame = {
+
     val neededColumns: List[Column] = List(
       col("NUM_ENQ").cast(StringType).as("patientID"),
       col("ER_PHA_F__PHA_PRS_C13").cast(StringType).as("CIP13"),
@@ -82,7 +90,7 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
       col("EXE_SOI_DTD").cast(TimestampType).as("eventDate"),
       col("molecule_combination").cast(StringType).as("molecules"),
       col("PHA_CND_TOP").cast(StringType).as("conditioning")
-    )
+    ) ::: ColNames.GroupID.map(col)
 
     lazy val irPhaR = sources.irPha.get
     lazy val dcir = sources.dcir.get
@@ -96,7 +104,7 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
       .na.drop(Seq("eventDate", "CIP13", "ATC5"))
   }
 
-  final object ColNames {
+  final object ColNames extends Serializable {
     val PatientId = "patientID"
     val Conditioning = "conditioning"
     val Date = "eventDate"
@@ -109,6 +117,10 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
     lazy val FluxSeqNumber = "FLX_EMT_ORD"
     lazy val OrganisationOldId = "ORG_CLE_NUM"
     lazy val OrganisationDecompteNumber = "DCT_ORD_NUM"
+
+    lazy val GroupID = List(
+      FluxDate, FluxProcessingDate, EmitterType, EmitterId, FluxSeqNumber, OrganisationOldId, OrganisationDecompteNumber
+    )
   }
 
 }
