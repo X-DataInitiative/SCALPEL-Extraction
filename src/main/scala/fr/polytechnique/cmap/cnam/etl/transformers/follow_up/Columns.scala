@@ -27,8 +27,4 @@ private[follow_up] object Columns {
   final val TracklossDate = "trackloss"
   final val FirstTargetDiseaseDate = "firstTargetDisease"
 
-  object EndReasons extends Enumeration {
-    val Death, Disease, Trackloss, ObservationEnd = Value
-  }
-
 }

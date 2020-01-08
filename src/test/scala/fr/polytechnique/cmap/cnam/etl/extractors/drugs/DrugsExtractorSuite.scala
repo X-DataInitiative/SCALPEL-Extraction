@@ -23,19 +23,90 @@ class DrugsExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     val inputDF = Seq(
-      ("patient1", Some("9111111111111"), Some(makeTS(2014, 5, 1))),
-      ("patient2", Some("3400935183644"), Some(makeTS(2014, 6, 1))),
-      ("patient3", Some("3400935418487"), Some(makeTS(2014, 7, 1))),
-      ("patient4", Some("3400935183644"), Some(makeTS(2014, 8, 1))),
-      ("patient8", Some("3400936889651"), Some(makeTS(2014, 9, 1)))
-    ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
+      ("patient1", Some("9111111111111"), Some(
+        makeTS(
+          2014,
+          5,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1749"),
+      ("patient2", Some("3400935183644"), Some(
+        makeTS(
+          2014,
+          6,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673200", "1759"),
+      ("patient3", Some("3400935418487"), Some(
+        makeTS(
+          2014,
+          7,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673400", "1949"),
+      ("patient4", Some("3400935183644"), Some(
+        makeTS(
+          2014,
+          8,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673500", "1733"),
+      ("patient8", Some("3400936889651"), Some(
+        makeTS(
+          2014,
+          9,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673700", "1199")
+    ).toDF(
+      "NUM_ENQ",
+      "ER_PHA_F__PHA_PRS_C13",
+      "EXE_SOI_DTD",
+      "FLX_DIS_DTD",
+      "FLX_TRT_DTD",
+      "FLX_EMT_TYP",
+      "FLX_EMT_NUM",
+      "FLX_EMT_ORD",
+      "ORG_CLE_NUM",
+      "DCT_ORD_NUM"
+    )
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient1", "9111111111111", 1, makeTS(2014, 5, 1)),
-      Drug("patient2", "3400935183644", 1, makeTS(2014, 6, 1)),
-      Drug("patient3", "3400935418487", 1, makeTS(2014, 7, 1)),
-      Drug("patient4", "3400935183644", 1, makeTS(2014, 8, 1)),
-      Drug("patient8", "3400936889651", 1, makeTS(2014, 9, 1))
+      Drug(
+        "patient1",
+        "9111111111111",
+        1,
+        "MjAxNC0wOS0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMxMDBfMTc0OQ==",
+        makeTS(2014, 5, 1)
+      ),
+      Drug(
+        "patient2",
+        "3400935183644",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMyMDBfMTc1OQ==",
+        makeTS(2014, 6, 1)
+      ),
+      Drug(
+        "patient3",
+        "3400935418487",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzM0MDBfMTk0OQ==",
+        makeTS(2014, 7, 1)
+      ),
+      Drug(
+        "patient4",
+        "3400935183644",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzM1MDBfMTczMw==",
+        makeTS(2014, 8, 1)
+      ),
+      Drug(
+        "patient8",
+        "3400936889651",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzM3MDBfMTE5OQ==",
+        makeTS(2014, 9, 1)
+      )
     ).toDS
 
     val source = new Sources(
@@ -51,9 +122,8 @@ class DrugsExtractorSuite extends SharedContext {
     )
 
     val drugConf = DrugConfig(Cip13Level, List.empty)
-
     // When
-    val result = new DrugExtractor(drugConf).extract(source, Set.empty)
+    val result: Dataset[Event[Drug]] = new DrugExtractor(drugConf).extract(source, Set.empty)
 
     // Then
     assertDSs(result, expected)
@@ -66,19 +136,78 @@ class DrugsExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     val inputDF = Seq(
-      ("patient1", Some("9111111111111"), Some(makeTS(2014, 5, 1))),
-      ("patient2", Some("3400935183644"), Some(makeTS(2014, 6, 1))),
-      ("patient3", Some("3400935418487"), Some(makeTS(2014, 7, 1))),
-      ("patient4", Some("3400935183644"), Some(makeTS(2014, 8, 1))),
-      ("patient5", Some("3400936889651"), None),
-      ("patient6", None, Some(makeTS(2014, 9, 1))),
-      ("patient8", Some("3400936889651"), Some(makeTS(2014, 9, 1)))
-    ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
+      ("patient1", Some("9111111111111"), Some(
+        makeTS(
+          2014,
+          5,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1749"),
+      ("patient2", Some("3400935183644"), Some(
+        makeTS(
+          2014,
+          6,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673200", "1759"),
+      ("patient3", Some("3400935418487"), Some(
+        makeTS(
+          2014,
+          7,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673400", "1949"),
+      ("patient4", Some("3400935183644"), Some(
+        makeTS(
+          2014,
+          8,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673500", "1733"),
+      ("patient5", Some("3400936889651"), None, "2014-08-01", "2014-07-17", "1", "17", "0", "01C673700", "1199"),
+      ("patient6", None, Some(makeTS(2014, 9, 1)), "2014-08-01", "2014-07-11", "1", "17", "0", "01C673700", "1399"),
+      ("patient8", Some("3400936889651"), Some(
+        makeTS(
+          2014,
+          9,
+          1
+        )
+      ), "2014-08-01", "2014-07-12", "1", "17", "0", "01C673700", "1699")
+    ).toDF(
+      "NUM_ENQ",
+      "ER_PHA_F__PHA_PRS_C13",
+      "EXE_SOI_DTD",
+      "FLX_DIS_DTD",
+      "FLX_TRT_DTD",
+      "FLX_EMT_TYP",
+      "FLX_EMT_NUM",
+      "FLX_EMT_ORD",
+      "ORG_CLE_NUM",
+      "DCT_ORD_NUM"
+    )
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient2", "Antidepresseurs", 1, makeTS(2014, 6, 1)),
-      Drug("patient4", "Antidepresseurs", 1, makeTS(2014, 8, 1)),
-      Drug("patient8", "Antidepresseurs", 1, makeTS(2014, 9, 1))
+      Drug(
+        "patient2",
+        "Antidepresseurs",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMyMDBfMTc1OQ==",
+        makeTS(2014, 6, 1)
+      ),
+      Drug(
+        "patient4",
+        "Antidepresseurs",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzM1MDBfMTczMw==",
+        makeTS(2014, 8, 1)
+      ),
+      Drug(
+        "patient8",
+        "Antidepresseurs",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTEyXzFfMTdfMF8wMUM2NzM3MDBfMTY5OQ==",
+        makeTS(2014, 9, 1)
+      )
     ).toDS
 
     val source = new Sources(
@@ -109,13 +238,48 @@ class DrugsExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     val inputDF = Seq(
-      ("patient1", Some("9111111111111"), Some(makeTS(2014, 5, 1))),
-      ("patient2", Some("3400930023648"), Some(makeTS(2014, 6, 1))),
-      ("patient3", Some("3400935183644"), Some(makeTS(2014, 7, 1)))
-    ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
+      ("patient1", Some("9111111111111"), Some(
+        makeTS(
+          2014,
+          5,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1749"),
+      ("patient2", Some("3400930023648"), Some(
+        makeTS(
+          2014,
+          6,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673200", "1759"),
+      ("patient3", Some("3400935183644"), Some(
+        makeTS(
+          2014,
+          7,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673400", "1949")
+    ).toDF(
+      "NUM_ENQ",
+      "ER_PHA_F__PHA_PRS_C13",
+      "EXE_SOI_DTD",
+      "FLX_DIS_DTD",
+      "FLX_TRT_DTD",
+      "FLX_EMT_TYP",
+      "FLX_EMT_NUM",
+      "FLX_EMT_ORD",
+      "ORG_CLE_NUM",
+      "DCT_ORD_NUM"
+    )
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient2", "Neuroleptiques", 2, makeTS(2014, 6, 1))
+      Drug(
+        "patient2",
+        "Neuroleptiques",
+        2,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMyMDBfMTc1OQ==",
+        makeTS(2014, 6, 1)
+      )
     ).toDS
 
     val source = new Sources(
@@ -144,13 +308,48 @@ class DrugsExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     val inputDF = Seq(
-      ("patient1", Some("3400930081143"), Some(makeTS(2014, 6, 1))),
-      ("patient2", Some("3400936099777"), Some(makeTS(2014, 7, 1)))
-    ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
+      ("patient1", Some("3400930081143"), Some(
+        makeTS(
+          2014,
+          6,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1749"),
+      ("patient2", Some("3400936099777"), Some(
+        makeTS(
+          2014,
+          7,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673200", "1759")
+    ).toDF(
+      "NUM_ENQ",
+      "ER_PHA_F__PHA_PRS_C13",
+      "EXE_SOI_DTD",
+      "FLX_DIS_DTD",
+      "FLX_TRT_DTD",
+      "FLX_EMT_TYP",
+      "FLX_EMT_NUM",
+      "FLX_EMT_ORD",
+      "ORG_CLE_NUM",
+      "DCT_ORD_NUM"
+    )
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient1", "Hypnotiques", 2, makeTS(2014, 6, 1)),
-      Drug("patient2", "Hypnotiques", 1, makeTS(2014, 7, 1))
+      Drug(
+        "patient1",
+        "Hypnotiques",
+        2,
+        "MjAxNC0wOS0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMxMDBfMTc0OQ==",
+        makeTS(2014, 6, 1)
+      ),
+      Drug(
+        "patient2",
+        "Hypnotiques",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMyMDBfMTc1OQ==",
+        makeTS(2014, 7, 1)
+      )
     ).toDS
 
     val source = new Sources(
@@ -178,12 +377,41 @@ class DrugsExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     val inputDF = Seq(
-      ("patient1", Some("3400937354004"), Some(makeTS(2014, 6, 1))),
-      ("patient2", Some("3400936099777"), Some(makeTS(2014, 7, 1)))
-    ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
+      ("patient1", Some("3400937354004"), Some(
+        makeTS(
+          2014,
+          6,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1749"),
+      ("patient2", Some("3400936099777"), Some(
+        makeTS(
+          2014,
+          7,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673200", "1759")
+    ).toDF(
+      "NUM_ENQ",
+      "ER_PHA_F__PHA_PRS_C13",
+      "EXE_SOI_DTD",
+      "FLX_DIS_DTD",
+      "FLX_TRT_DTD",
+      "FLX_EMT_TYP",
+      "FLX_EMT_NUM",
+      "FLX_EMT_ORD",
+      "ORG_CLE_NUM",
+      "DCT_ORD_NUM"
+    )
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient1", "Antihypertenseurs", 1, makeTS(2014, 6, 1))
+      Drug(
+        "patient1",
+        "Antihypertenseurs",
+        1,
+        "MjAxNC0wOS0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMxMDBfMTc0OQ==",
+        makeTS(2014, 6, 1)
+      )
     ).toDS
 
 
@@ -213,22 +441,99 @@ class DrugsExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     val inputDF = Seq(
-      ("patient1", Some("9111111111111"), Some(makeTS(2014, 5, 1))),
-      ("patient2", Some("3400935183644"), Some(makeTS(2014, 6, 1))),
-      ("patient3", Some("3400935418487"), Some(makeTS(2014, 7, 1))),
-      ("patient4", Some("3400935183644"), Some(makeTS(2014, 8, 1))),
-      ("patient5", Some("3400936889651"), None),
-      ("patient6", None, Some(makeTS(2014, 9, 1))),
-      ("patient8", Some("3400936889651"), Some(makeTS(2014, 9, 1))),
-      ("patient1", Some("9111111111111"), Some(makeTS(2014, 5, 1))),
-      ("patient2", Some("3400930023648"), Some(makeTS(2014, 6, 1)))
-    ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
+      ("patient1", Some("9111111111111"), Some(
+        makeTS(
+          2014,
+          5,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1749"),
+      ("patient2", Some("3400935183644"), Some(
+        makeTS(
+          2014,
+          6,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673200", "1759"),
+      ("patient3", Some("3400935418487"), Some(
+        makeTS(
+          2014,
+          7,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673400", "1949"),
+      ("patient4", Some("3400935183644"), Some(
+        makeTS(
+          2014,
+          8,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673500", "1733"),
+      ("patient5", Some("3400936889651"), None, "2014-08-01", "2014-07-17", "1", "17", "0", "01C673700", "1199"),
+      ("patient6", None, Some(makeTS(2014, 9, 1)), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1959"),
+      ("patient8", Some("3400936889651"), Some(
+        makeTS(
+          2014,
+          9,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "2749"),
+      ("patient1", Some("9111111111111"), Some(
+        makeTS(
+          2014,
+          5,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1749"),
+      ("patient2", Some("3400930023648"), Some(
+        makeTS(
+          2014,
+          6,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673200", "1759")
+    ).toDF(
+      "NUM_ENQ",
+      "ER_PHA_F__PHA_PRS_C13",
+      "EXE_SOI_DTD",
+      "FLX_DIS_DTD",
+      "FLX_TRT_DTD",
+      "FLX_EMT_TYP",
+      "FLX_EMT_NUM",
+      "FLX_EMT_ORD",
+      "ORG_CLE_NUM",
+      "DCT_ORD_NUM"
+    )
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient2", "Antidepresseurs", 1, makeTS(2014, 6, 1)),
-      Drug("patient4", "Antidepresseurs", 1, makeTS(2014, 8, 1)),
-      Drug("patient8", "Antidepresseurs", 1, makeTS(2014, 9, 1)),
-      Drug("patient2", "Neuroleptiques", 1, makeTS(2014, 6, 1))
+      Drug(
+        "patient2",
+        "Antidepresseurs",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMyMDBfMTc1OQ==",
+        makeTS(2014, 6, 1)
+      ),
+      Drug(
+        "patient4",
+        "Antidepresseurs",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzM1MDBfMTczMw==",
+        makeTS(2014, 8, 1)
+      ),
+      Drug(
+        "patient8",
+        "Antidepresseurs",
+        1,
+        "MjAxNC0wOS0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMxMDBfMjc0OQ==",
+        makeTS(2014, 9, 1)
+      ),
+      Drug(
+        "patient2",
+        "Neuroleptiques",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMyMDBfMTc1OQ==",
+        makeTS(2014, 6, 1)
+      )
     ).toDS
 
     val source = new Sources(
@@ -249,7 +554,6 @@ class DrugsExtractorSuite extends SharedContext {
     val drugConf = DrugConfig(TherapeuticLevel, List(drugConfigAntidepresseurs, drugConfigNeuroleptiques))
     // When
     val result = new DrugExtractor(drugConf).extract(source, Set.empty)
-
     // Then
     assertDSs(result, expected)
   }
@@ -261,22 +565,99 @@ class DrugsExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     val inputDF = Seq(
-      ("patient1", Some("9111111111111"), Some(makeTS(2014, 5, 1))),
-      ("patient2", Some("3400935183644"), Some(makeTS(2014, 6, 1))),
-      ("patient3", Some("3400935418487"), Some(makeTS(2014, 7, 1))),
-      ("patient4", Some("3400935183644"), Some(makeTS(2014, 8, 1))),
-      ("patient5", Some("3400936889651"), None),
-      ("patient6", None, Some(makeTS(2014, 9, 1))),
-      ("patient8", Some("3400936889651"), Some(makeTS(2014, 9, 1))),
-      ("patient1", Some("9111111111111"), Some(makeTS(2014, 5, 1))),
-      ("patient2", Some("3400930023648"), Some(makeTS(2014, 6, 1)))
-    ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
+      ("patient1", Some("9111111111111"), Some(
+        makeTS(
+          2014,
+          5,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1749"),
+      ("patient2", Some("3400935183644"), Some(
+        makeTS(
+          2014,
+          6,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673200", "1759"),
+      ("patient3", Some("3400935418487"), Some(
+        makeTS(
+          2014,
+          7,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673400", "1949"),
+      ("patient4", Some("3400935183644"), Some(
+        makeTS(
+          2014,
+          8,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673500", "1733"),
+      ("patient5", Some("3400936889651"), None, "2014-08-01", "2014-07-17", "1", "17", "0", "01C673700", "1199"),
+      ("patient6", None, Some(makeTS(2014, 9, 1)), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1959"),
+      ("patient8", Some("3400936889651"), Some(
+        makeTS(
+          2014,
+          9,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "2749"),
+      ("patient1", Some("9111111111111"), Some(
+        makeTS(
+          2014,
+          5,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1749"),
+      ("patient2", Some("3400930023648"), Some(
+        makeTS(
+          2014,
+          6,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673200", "1759")
+    ).toDF(
+      "NUM_ENQ",
+      "ER_PHA_F__PHA_PRS_C13",
+      "EXE_SOI_DTD",
+      "FLX_DIS_DTD",
+      "FLX_TRT_DTD",
+      "FLX_EMT_TYP",
+      "FLX_EMT_NUM",
+      "FLX_EMT_ORD",
+      "ORG_CLE_NUM",
+      "DCT_ORD_NUM"
+    )
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient2", "Antidepresseurs_Tricycliques", 1, makeTS(2014, 6, 1)),
-      Drug("patient4", "Antidepresseurs_Tricycliques", 1, makeTS(2014, 8, 1)),
-      Drug("patient8", "Antidepresseurs_ISRS", 1, makeTS(2014, 9, 1)),
-      Drug("patient2", "Neuroleptiques_Autres_neuroleptiques", 1, makeTS(2014, 6, 1))
+      Drug(
+        "patient2",
+        "Antidepresseurs_Tricycliques",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMyMDBfMTc1OQ==",
+        makeTS(2014, 6, 1)
+      ),
+      Drug(
+        "patient4",
+        "Antidepresseurs_Tricycliques",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzM1MDBfMTczMw==",
+        makeTS(2014, 8, 1)
+      ),
+      Drug(
+        "patient8",
+        "Antidepresseurs_ISRS",
+        1,
+        "MjAxNC0wOS0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMxMDBfMjc0OQ==",
+        makeTS(2014, 9, 1)
+      ),
+      Drug(
+        "patient2",
+        "Neuroleptiques_Autres_neuroleptiques",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMyMDBfMTc1OQ==",
+        makeTS(2014, 6, 1)
+      )
     ).toDS
 
     val source = new Sources(
@@ -309,22 +690,99 @@ class DrugsExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     val inputDF = Seq(
-      ("patient1", Some("9111111111111"), Some(makeTS(2014, 5, 1))),
-      ("patient2", Some("3400935183644"), Some(makeTS(2014, 6, 1))),
-      ("patient3", Some("3400935418487"), Some(makeTS(2014, 7, 1))),
-      ("patient4", Some("3400935183644"), Some(makeTS(2014, 8, 1))),
-      ("patient5", Some("3400936889651"), None),
-      ("patient6", None, Some(makeTS(2014, 9, 1))),
-      ("patient8", Some("3400936889651"), Some(makeTS(2014, 9, 1))),
-      ("patient1", Some("9111111111111"), Some(makeTS(2014, 5, 1))),
-      ("patient2", Some("3400930023648"), Some(makeTS(2014, 6, 1)))
-    ).toDF("NUM_ENQ", "ER_PHA_F__PHA_PRS_C13", "EXE_SOI_DTD")
+      ("patient1", Some("9111111111111"), Some(
+        makeTS(
+          2014,
+          5,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1749"),
+      ("patient2", Some("3400935183644"), Some(
+        makeTS(
+          2014,
+          6,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673200", "1759"),
+      ("patient3", Some("3400935418487"), Some(
+        makeTS(
+          2014,
+          7,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673400", "1949"),
+      ("patient4", Some("3400935183644"), Some(
+        makeTS(
+          2014,
+          8,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673500", "1733"),
+      ("patient5", Some("3400936889651"), None, "2014-08-01", "2014-07-17", "1", "17", "0", "01C673700", "1199"),
+      ("patient6", None, Some(makeTS(2014, 9, 1)), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1959"),
+      ("patient8", Some("3400936889651"), Some(
+        makeTS(
+          2014,
+          9,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "2749"),
+      ("patient1", Some("9111111111111"), Some(
+        makeTS(
+          2014,
+          5,
+          1
+        )
+      ), "2014-09-01", "2014-07-17", "1", "17", "0", "01C673100", "1749"),
+      ("patient2", Some("3400930023648"), Some(
+        makeTS(
+          2014,
+          6,
+          1
+        )
+      ), "2014-08-01", "2014-07-17", "1", "17", "0", "01C673200", "1759")
+    ).toDF(
+      "NUM_ENQ",
+      "ER_PHA_F__PHA_PRS_C13",
+      "EXE_SOI_DTD",
+      "FLX_DIS_DTD",
+      "FLX_TRT_DTD",
+      "FLX_EMT_TYP",
+      "FLX_EMT_NUM",
+      "FLX_EMT_ORD",
+      "ORG_CLE_NUM",
+      "DCT_ORD_NUM"
+    )
 
     val expected: Dataset[Event[Drug]] = Seq(
-      Drug("patient2", "N06AA04", 1, makeTS(2014, 6, 1)),
-      Drug("patient4", "N06AA04", 1, makeTS(2014, 8, 1)),
-      Drug("patient8", "DEXTROPROPOXYPHENE_PARACETAMOL_CAFEINE", 1, makeTS(2014, 9, 1)),
-      Drug("patient2", "INSULINE LISPRO (PROTAMINE)", 1, makeTS(2014, 6, 1))
+      Drug(
+        "patient2",
+        "N06AA04",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMyMDBfMTc1OQ==",
+        makeTS(2014, 6, 1)
+      ),
+      Drug(
+        "patient4",
+        "N06AA04",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzM1MDBfMTczMw==",
+        makeTS(2014, 8, 1)
+      ),
+      Drug(
+        "patient8",
+        "DEXTROPROPOXYPHENE_PARACETAMOL_CAFEINE",
+        1,
+        "MjAxNC0wOS0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMxMDBfMjc0OQ==",
+        makeTS(2014, 9, 1)
+      ),
+      Drug(
+        "patient2",
+        "INSULINE LISPRO (PROTAMINE)",
+        1,
+        "MjAxNC0wOC0wMV8yMDE0LTA3LTE3XzFfMTdfMF8wMUM2NzMyMDBfMTc1OQ==",
+        makeTS(2014, 6, 1)
+      )
     ).toDS
 
     val irPha = Seq(
@@ -373,4 +831,6 @@ class DrugsExtractorSuite extends SharedContext {
     // Then
     assert(result == expected)
   }
+
+
 }
