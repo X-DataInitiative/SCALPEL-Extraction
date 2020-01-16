@@ -58,18 +58,4 @@ class SsrSourceSuite extends SharedContext {
     // Then
     assertDFs(result, expected)
   }
-
-  "readAnnotateJoin"  should "return annotated joined SSR given SSR_C and SSR_SEJ" in {
-    val sqlCtx = sqlContext
-
-    val ssrSejPath = "src/test/resources/test-input/SSR_SEJ.parquet"
-    val ssrCPath = "src/test/resources/test-input/SSR_C.parquet"
-    val expected = sqlCtx.read.parquet("src/test/resources/test-joined/SSR.parquet")
-    val result = SsrSource.readAnnotateJoin(
-      sqlCtx,
-      List(ssrSejPath, ssrCPath),
-    "SSR_C")
-
-    assertDFs(result, expected)
-  }
 }

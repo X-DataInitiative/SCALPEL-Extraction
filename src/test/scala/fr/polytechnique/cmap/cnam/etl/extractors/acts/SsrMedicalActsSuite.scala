@@ -13,7 +13,7 @@ class SsrMedicalActsSuite extends SharedContext {
 
     // Given
     val ccamCodes = Set("AHQP001")
-    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
+    val ssr = spark.read.parquet("src/test/resources/test-input/SSR.parquet")
     val expected = Seq[Event[MedicalAct]](
       SsrCCAMAct("Patient_02", "10000123_30000546_200_2019", "AHQP001", makeTS(2019, 8, 11)),
       SsrCCAMAct("Patient_02", "10000123_30000546_300_2019", "AHQP001", makeTS(2019, 8, 11))
@@ -32,7 +32,7 @@ class SsrMedicalActsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
+    val ssr = spark.read.parquet("src/test/resources/test-input/SSR.parquet")
     val expected = Seq[Event[MedicalAct]](
       SsrCCAMAct("Patient_02", "10000123_30000546_200_2019", "AHQP001", makeTS(2019, 8, 11)),
       SsrCCAMAct("Patient_01", "10000123_30000801_100_2019", "AHQP005", makeTS(2019, 10, 20)),

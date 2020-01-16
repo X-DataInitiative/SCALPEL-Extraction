@@ -7,7 +7,7 @@ import org.apache.spark.sql.{Column, DataFrame}
 private[patients] object SsrPatients {
 
   val inputColumns: List[Column] = List(
-    col("SSR_C__NUM_ENQ").as("patientID")
+    col("NUM_ENQ").as("patientID")
     //col("MCO_B__SOR_MOD").as("SOR_MOD"),
     //col("SOR_MOI"),
     //col("SOR_ANN")
