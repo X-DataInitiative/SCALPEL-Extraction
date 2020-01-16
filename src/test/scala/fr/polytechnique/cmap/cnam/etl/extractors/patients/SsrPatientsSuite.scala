@@ -17,7 +17,7 @@ class SsrPatientsSuite extends SharedContext {
       ("Patient_03"),
       ("Patient_03"),
       ("Patient_04")
-    ).toDF("SSR_C__NUM_ENQ")
+    ).toDF("NUM_ENQ")
 
     val expected: DataFrame = Seq(
       ("Patient_01"),
@@ -38,7 +38,7 @@ class SsrPatientsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
+    val ssr = spark.read.parquet("src/test/resources/test-input/SSR.parquet")
 
     val result = SsrPatients.extract(ssr)
 

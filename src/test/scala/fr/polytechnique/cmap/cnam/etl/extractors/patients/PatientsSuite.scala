@@ -59,7 +59,7 @@ class PatientsSuite extends SharedContext {
     val ssrDf: DataFrame = Seq(
       ("Patient_01"),
       ("Patient_05")
-    ).toDF("SSR_C__NUM_ENQ")
+    ).toDF("NUM_ENQ")
 
     val hadDf: DataFrame = Seq(
       ("Patient_01", 1, 2, 1985),
