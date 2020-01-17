@@ -37,7 +37,8 @@ class ExposureTransformerSuite extends SharedContext {
           0.days,
           15.days,
           90.days,
-          30.days
+          30.days,
+          PurchaseCountBased
         )
       )
     )
@@ -70,7 +71,8 @@ class ExposureTransformerSuite extends SharedContext {
           0.days,
           15.days,
           90.days,
-          30.days
+          30.days,
+          PurchaseCountBased
         )
       )
     )
@@ -103,7 +105,8 @@ class ExposureTransformerSuite extends SharedContext {
           0.days,
           15.days,
           90.days,
-          30.days
+          30.days,
+          PurchaseCountBased
         )
       )
     )
@@ -133,7 +136,8 @@ class ExposureTransformerSuite extends SharedContext {
           0.days,
           15.days,
           90.days,
-          30.days
+          30.days,
+          PurchaseCountBased
         )
       )
     )
@@ -163,7 +167,8 @@ class ExposureTransformerSuite extends SharedContext {
           0.days,
           15.days,
           90.days,
-          30.days
+          30.days,
+          PurchaseCountBased
         )
       )
     )

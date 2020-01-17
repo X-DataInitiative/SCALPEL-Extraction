@@ -3,10 +3,10 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 
 import cats.syntax.functor._
-import fr.polytechnique.cmap.cnam.etl.datatypes.{NullRemainingPeriod, Period, Remainable, RemainingPeriod}
+import fr.polytechnique.cmap.cnam.etl.datatypes.{NullRemainingPeriod, Period, Subtractable, RemainingPeriod}
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Interaction}
 
-case class ExposureN(patientID: String, values: Set[String], period: Period) extends Remainable[ExposureN] {
+case class ExposureN(patientID: String, values: Set[String], period: Period) extends Subtractable[ExposureN] {
   self =>
 
   def intersect(other: ExposureN): Option[ExposureN] = {

@@ -3,7 +3,7 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 
 import org.apache.spark.sql.{Dataset, functions}
-import fr.polytechnique.cmap.cnam.etl.datatypes.{LeftRemainingPeriod, Period, RemainingPeriod, RightRemainingPeriod}
+import fr.polytechnique.cmap.cnam.etl.datatypes._
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Exposure, Interaction}
 import fr.polytechnique.cmap.cnam.util.functions._
 
@@ -68,7 +68,7 @@ case class NLevelInteractionTransformer(config: InteractionTransformerConfig) ex
           .flatMapGroups(
             (e, i) => {
               val sortedPeriods = i.map(_._2).toList.sortBy(_.period.start)
-              RemainingPeriod.delimitPeriods(
+              Subtractable.combineSubtracables(
                 RightRemainingPeriod(e),
                 sortedPeriods.map(e => LeftRemainingPeriod[ExposureN](e)),
                 List.empty[LeftRemainingPeriod[ExposureN]]

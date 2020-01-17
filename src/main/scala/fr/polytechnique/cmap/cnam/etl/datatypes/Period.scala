@@ -6,7 +6,7 @@ import java.sql.Timestamp
 import fr.polytechnique.cmap.cnam.etl.transformers.interaction._
 import fr.polytechnique.cmap.cnam.util.functions._
 
-case class Period(start: Timestamp, end: Timestamp) extends Remainable[Period] with Addable[Period]{
+case class Period(start: Timestamp, end: Timestamp) extends Subtractable[Period] with Addable[Period]{
   self =>
 
   def & (other: Period): Boolean = {
