@@ -81,7 +81,8 @@ object FallConfig extends FallConfigLoader with FractureCodes {
       startDelay = 0.days,
       15.days,
       90.days,
-      30.days
+      30.days,
+      PurchaseCountBased
     )
   ) extends ExposuresTransformerConfig(exposurePeriodAdder = exposurePeriodAdder)
 

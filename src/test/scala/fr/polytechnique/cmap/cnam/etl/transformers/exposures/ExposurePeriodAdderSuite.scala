@@ -32,7 +32,7 @@ class ExposurePeriodAdderSuite extends SharedContext{
     val expected: Dataset[Event[Exposure]] = Seq[Event[Exposure]](
       Exposure("patient", "NA", "Antidepresseurs", 1, makeTS(2014, 1, 8), Some(makeTS(2014, 6, 7)))
     ).toDS()
-    val exposureAdder = LimitedExposureAdder(0.days, 15.days, 90.days, 30.days)
+    val exposureAdder = LimitedExposureAdder(0.days, 15.days, 90.days, 30.days, PurchaseCountBased)
 
     val result = exposureAdder.toExposure(followUp)(input)
     assertDSs(result, expected)

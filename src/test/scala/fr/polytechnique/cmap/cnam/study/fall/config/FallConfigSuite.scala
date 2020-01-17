@@ -6,12 +6,12 @@ import java.io.File
 import java.nio.file.Paths
 import java.time.LocalDate
 import com.typesafe.config.ConfigFactory
-import org.scalatest.flatspec.AnyFlatSpec
 import me.danielpes.spark.datetime.implicits._
-import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
+import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
+import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.PharmacologicalLevel
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.LimitedExposureAdder
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{LatestPurchaseBased, LimitedExposureAdder}
 
 class FallConfigSuite extends AnyFlatSpec {
 
@@ -62,6 +62,7 @@ class FallConfigSuite extends AnyFlatSpec {
         |      end_delay = 1 days
         |      end_threshold_gc = 900 days
         |      end_threshold_ngc = 300 days
+        |      to_exposure_strategy  = "latest_purchase_based"
         |    }
         |  }
         |  interaction {
@@ -83,18 +84,23 @@ class FallConfigSuite extends AnyFlatSpec {
         |  }
         |  """.trim.stripMargin
 
-    val expected = defaultConf.copy(input = defaultConf.input.copy(
-            mco = Some("new/in/path")
-          ), output = defaultConf.output.copy(
-            root = "new/out/path"
-          ), exposures = defaultConf.exposures.copy(LimitedExposureAdder(
-            startDelay = 10.days,
-            endDelay = 1.days,
-            endThresholdNgc = 300.days,
-            endThresholdGc = 900.days
-          )), drugs = defaultConf.drugs.copy(
-            level = PharmacologicalLevel
-          ), runParameters = defaultConf.runParameters.copy(exposure = List("Patients", "DrugPurchases", "Exposures")))
+    val expected = defaultConf.copy(
+      input = defaultConf.input.copy(
+        mco = Some("new/in/path")
+      ), output = defaultConf.output.copy(
+        root = "new/out/path"
+      ), exposures = defaultConf.exposures.copy(
+        LimitedExposureAdder(
+          startDelay = 10.days,
+          endDelay = 1.days,
+          endThresholdNgc = 300.days,
+          endThresholdGc = 900.days,
+          toExposureStrategy = LatestPurchaseBased
+        )
+      ), drugs = defaultConf.drugs.copy(
+        level = PharmacologicalLevel
+      ), runParameters = defaultConf.runParameters.copy(exposure = List("Patients", "DrugPurchases", "Exposures"))
+    )
     //When
     pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(stringConfig), Paths.get(tempPath), true)
     val result = FallConfig.load(tempPath, "test")
