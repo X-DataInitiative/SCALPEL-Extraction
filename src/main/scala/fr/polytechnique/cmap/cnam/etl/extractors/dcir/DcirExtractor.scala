@@ -48,8 +48,8 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
     * FLX_DIS_DTD,FLX_TRT_DTD,FLX_EMT_TYP,FLX_EMT_NUM,FLX_EMT_ORD,ORG_CLE_NUM,DCT_ORD_NUM.
     * They are the 7 columns that identifies prescriptions in a unique way.
     *
-    * @param r The Row object itself
-    * @return A hash Id unique in a string format
+    * @param r The Row object itself.
+    * @return A hash Id unique in a string format.
     */
   override def extractGroupId(r: Row): String = {
     Base64.encodeBase64(
