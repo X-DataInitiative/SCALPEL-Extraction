@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.dcir
 
 import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
 
+/** Trait to retrieve the columns of dcir dataframe. */
 trait DcirSource extends ColumnNames {
 
   final object ColNames extends Serializable {
