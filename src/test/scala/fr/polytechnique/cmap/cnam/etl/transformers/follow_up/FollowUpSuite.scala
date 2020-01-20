@@ -11,8 +11,6 @@ class FollowUpSuite extends SharedContext {
 
   "isValid" should "return true for FollowUps where start < stop, false otherwise" in {
 
-    import FollowUpTransformer.FollowUpDataset
-
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
@@ -28,7 +26,7 @@ class FollowUpSuite extends SharedContext {
     ).toDS
 
     // When
-    val result: Dataset[Event[FollowUp]] = followUpPeriods.cleanFollowUps()
+    val result: Dataset[Event[FollowUp]] = followUpPeriods.filter(e => e.start.before(e.end.get))
 
     //Then
     assertDSs(result, expected)

@@ -6,13 +6,13 @@ import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.{Event, FollowUp, Outcome}
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposureTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.interaction.NLevelInteractionTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
@@ -20,6 +20,7 @@ import fr.polytechnique.cmap.cnam.study.fall.extractors._
 import fr.polytechnique.cmap.cnam.study.fall.follow_up.FallStudyFollowUps
 import fr.polytechnique.cmap.cnam.study.fall.fractures.FracturesTransformer
 import fr.polytechnique.cmap.cnam.study.fall.liberalActs.LiberalActsTransformer
+import fr.polytechnique.cmap.cnam.study.fall.statistics.DiagnosisCounter
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
@@ -39,7 +40,9 @@ object FallMain extends Main with FractureCodes {
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
 
-    val operationsMetadata = computeExposures(sources, fallConfig)
+    val operationsMetadata = computeControls(sources, fallConfig) ++
+      computeExposures(sources, fallConfig) ++
+      computeOutcomes(sources, fallConfig)
 
     dcir.unpersist()
     mco.unpersist()
@@ -57,7 +60,7 @@ object FallMain extends Main with FractureCodes {
   def computeHospitalStays(sources: Sources, fallConfig: FallConfig): mutable.Buffer[OperationMetadata] = {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
     if (fallConfig.runParameters.hospitalStays) {
-      val hospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
+      val hospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
 
       operationsMetadata += {
         OperationReporter
@@ -167,8 +170,8 @@ object FallMain extends Main with FractureCodes {
             )
         }
 
-        val controlDrugExposures = new ExposuresTransformer(definition)
-          .transform(patientsWithFollowUp, controlDrugPurchases)
+        val controlDrugExposures = new ExposureTransformer(definition)
+          .transform(patientsWithFollowUp.map(_._2))(controlDrugPurchases)
         operationsMetadata += {
           OperationReporter
             .report(
@@ -181,7 +184,8 @@ object FallMain extends Main with FractureCodes {
             )
         }
 
-        new ExposuresTransformer(definition).transform(patientsWithFollowUp, optionDrugPurchases.get)
+        new ExposureTransformer(definition)
+          .transform(patientsWithFollowUp.map(_._2).distinct())(optionDrugPurchases.get)
       }
       operationsMetadata += {
         OperationReporter
@@ -219,13 +223,14 @@ object FallMain extends Main with FractureCodes {
     val optionDiagnoses = if (fallConfig.runParameters.diagnoses) {
       logger.info("diagnoses")
       val diagnoses = new DiagnosisExtractor(fallConfig.diagnoses).extract(sources).persist()
+      val diagnosesPopulation = DiagnosisCounter.process(diagnoses)
       operationsMetadata += {
-        OperationReporter
-          .report(
+        OperationReporter.reportDataAndPopulationAsDataSet(
             "diagnoses",
             List("MCO", "IR_IMB_R"),
             OperationTypes.Diagnosis,
-            diagnoses.toDF,
+            diagnoses,
+            diagnosesPopulation,
             Path(fallConfig.output.outputSavePath),
             fallConfig.output.saveMode
           )

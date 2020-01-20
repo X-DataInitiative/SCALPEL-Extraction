@@ -4,11 +4,14 @@ package fr.polytechnique.cmap.cnam.study.fall.config
 
 import java.io.File
 import java.nio.file.Paths
+import java.time.LocalDate
 import com.typesafe.config.ConfigFactory
 import me.danielpes.spark.datetime.implicits._
 import org.scalatest.flatspec.AnyFlatSpec
+import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.PharmacologicalLevel
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{LatestPurchaseBased, LimitedExposureAdder}
 
 class FallConfigSuite extends AnyFlatSpec {
 
@@ -24,16 +27,23 @@ class FallConfigSuite extends AnyFlatSpec {
   val outputPaths = OutputPaths(
     root = "target/test/output"
   )
+
+  val base = new BaseConfig(
+    ageReferenceDate = LocalDate.of(2015, 1, 1),
+    studyStart = LocalDate.of(2014, 1, 1),
+    studyEnd = LocalDate.of(2032, 1, 1)
+  )
+
   "load" should "load default config file" in {
     //Given
-    val expected = FallConfig(inputPaths, outputPaths)
+    val expected = FallConfig(inputPaths, outputPaths, base)
     //When
     val result = FallConfig.load("", "test")
     //Then
     assert(result == expected)
   }
 
-  it should "load the correct config file" in {
+  "load" should "load the correct config file" in {
     //Given
     val defaultConf = FallConfig.load("", "test")
     val tempPath = "target/test.conf"
@@ -46,12 +56,17 @@ class FallConfigSuite extends AnyFlatSpec {
         |   root: "new/out/path"
         | }
         | exposures {
-        |    min_purchases: 2           // 1+ (Usually 1 or 2)
-        |    start_delay: 0 months      // 0+ (Usually between 0 and 3). Represents the delay in months between a dispensation and its exposure start date.
-        |    purchases_window: 0 months // 0+ (Usually 0 or 6) Represents the window size in months. Ignored when min_purchases=1.
-        |    end_threshold_gc: 90 days  // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
-        |    end_threshold_ngc: 30 days // If periodStrategy="limited", represents the period without purchases for an exposure to be considered "finished".
-        |    end_delay: 30 days         // Number of periods that we add to the exposure end to delay it (lag).
+        |    exposure_period_adder: {
+        |      exposure-adder-strategy = "n-limited-exposure-adder"
+        |      start_delay = 10 days
+        |      end_delay = 1 days
+        |      end_threshold_gc = 900 days
+        |      end_threshold_ngc = 300 days
+        |      to_exposure_strategy  = "latest_purchase_based"
+        |    }
+        |  }
+        |  interaction {
+        |    level: 5
         |  }
         |  patients {
         |  start_gap_in_months: 2
@@ -72,18 +87,19 @@ class FallConfigSuite extends AnyFlatSpec {
     val expected = defaultConf.copy(
       input = defaultConf.input.copy(
         mco = Some("new/in/path")
-      ),
-      output = defaultConf.output.copy(
+      ), output = defaultConf.output.copy(
         root = "new/out/path"
-      ),
-      exposures = defaultConf.exposures.copy(
-        minPurchases = 2,
-        endThresholdNgc = Some(30.days)
-      ),
-      drugs = defaultConf.drugs.copy(
+      ), exposures = defaultConf.exposures.copy(
+        LimitedExposureAdder(
+          startDelay = 10.days,
+          endDelay = 1.days,
+          endThresholdNgc = 300.days,
+          endThresholdGc = 900.days,
+          toExposureStrategy = LatestPurchaseBased
+        )
+      ), drugs = defaultConf.drugs.copy(
         level = PharmacologicalLevel
-      ),
-      runParameters = defaultConf.runParameters.copy(exposure = List("Patients", "DrugPurchases", "Exposures"))
+      ), runParameters = defaultConf.runParameters.copy(exposure = List("Patients", "DrugPurchases", "Exposures"))
     )
     //When
     pureconfig.saveConfigAsPropertyFile(ConfigFactory.parseString(stringConfig), Paths.get(tempPath), true)

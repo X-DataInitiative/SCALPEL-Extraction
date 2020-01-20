@@ -11,7 +11,7 @@ class HospitalizedFracturesSuite extends SharedContext {
 
   "isInCodeList" should "return yes if there is a code with the right start" in {
     // Given
-    val event = MainDiagnosis("Pierre", "3", "jambe cassée", makeTS(2017, 7, 18))
+    val event = McoMainDiagnosis("Pierre", "3", "jambe cassée", makeTS(2017, 7, 18))
     val codes = Set("jam", "bon", "de", "bayonne")
 
     // When
@@ -23,7 +23,7 @@ class HospitalizedFracturesSuite extends SharedContext {
 
   it should "return yes if there is an exact same code" in {
     // Given
-    val event = MainDiagnosis("Pierre", "3", "jambe cassée", makeTS(2017, 7, 18))
+    val event = McoMainDiagnosis("Pierre", "3", "jambe cassée", makeTS(2017, 7, 18))
     val codes = Set("jambe cassée", "bon", "de", "bayonne")
 
     // When
@@ -35,7 +35,7 @@ class HospitalizedFracturesSuite extends SharedContext {
 
   it should "return no if there is no correct code" in {
     // Given
-    val event = MainDiagnosis("Pierre", "3", "jambe cassée", makeTS(2017, 7, 18))
+    val event = McoMainDiagnosis("Pierre", "3", "jambe cassée", makeTS(2017, 7, 18))
     val codes = Set("avada kedavra", "bon", "de", "bayonne")
 
     // When
@@ -47,7 +47,7 @@ class HospitalizedFracturesSuite extends SharedContext {
 
   "isFractureDiagnosis" should "return yes for correct CIM10 code" in {
     // Given
-    val event = MainDiagnosis("Pierre", "3", "S02.35", makeTS(2017, 7, 18))
+    val event = McoMainDiagnosis("Pierre", "3", "S02.35", makeTS(2017, 7, 18))
 
     // When
     val result = HospitalizedFractures.isFractureDiagnosis(event, AllSites.codesCIM10)
@@ -58,7 +58,7 @@ class HospitalizedFracturesSuite extends SharedContext {
 
   "isMainDiagnosis" should "return yes for correct DP code" in {
     // Given
-    val event = MainDiagnosis("Pierre", "3", "whatever", makeTS(2017, 7, 18))
+    val event = McoMainDiagnosis("Pierre", "3", "whatever", makeTS(2017, 7, 18))
 
     // When
     val result = HospitalizedFractures.isMainOrDASDiagnosis(event)
@@ -69,7 +69,7 @@ class HospitalizedFracturesSuite extends SharedContext {
 
   it should "return no for other code" in {
     // Given
-    val event = LinkedDiagnosis("Pierre", "3", "whatever", makeTS(2017, 7, 18))
+    val event = McoLinkedDiagnosis("Pierre", "3", "whatever", makeTS(2017, 7, 18))
 
     // When
     val result = HospitalizedFractures.isMainOrDASDiagnosis(event)
@@ -95,8 +95,8 @@ class HospitalizedFracturesSuite extends SharedContext {
 
     // Given
     val input = List(
-      MainDiagnosis("Paul", "1", "hemorroides", makeTS(2017, 7, 20)),
-      MainDiagnosis("Pierre", "3", "jambe cassée", makeTS(2017, 7, 18))
+      McoMainDiagnosis("Paul", "1", "hemorroides", makeTS(2017, 7, 20)),
+      McoMainDiagnosis("Pierre", "3", "jambe cassée", makeTS(2017, 7, 18))
     ).toDS
 
     val badStays = Seq(
@@ -104,7 +104,7 @@ class HospitalizedFracturesSuite extends SharedContext {
     ).toDS
 
     val expected = List(
-      MainDiagnosis("Paul", "1", "hemorroides", makeTS(2017, 7, 20))
+      McoMainDiagnosis("Paul", "1", "hemorroides", makeTS(2017, 7, 20))
     ).toDS
 
     // When
@@ -120,10 +120,10 @@ class HospitalizedFracturesSuite extends SharedContext {
 
     // Given
     val diagnoses = Seq(
-      MainDiagnosis("Pierre", "3", "S02.42", makeTS(2017, 7, 18)),
-      MainDiagnosis("Paul", "1", "S42.54678", makeTS(2017, 7, 20)),
-      MainDiagnosis("Paul", "7", "hemorroides", makeTS(2017, 1, 2)),
-      AssociatedDiagnosis("Jacques", "8", "qu'est-ce-que tu fais là?", makeTS(2017, 7, 18))
+      McoMainDiagnosis("Pierre", "3", "S02.42", makeTS(2017, 7, 18)),
+      McoMainDiagnosis("Paul", "1", "S42.54678", makeTS(2017, 7, 20)),
+      McoMainDiagnosis("Paul", "7", "hemorroides", makeTS(2017, 1, 2)),
+      McoAssociatedDiagnosis("Jacques", "8", "qu'est-ce-que tu fais là?", makeTS(2017, 7, 18))
     ).toDS
 
     val medicalActs = Seq(
@@ -146,12 +146,12 @@ class HospitalizedFracturesSuite extends SharedContext {
 
     // Given
     val diagnoses = Seq(
-      MainDiagnosis("Pierre", "3", "S02.42", 2.0, makeTS(2017, 7, 18)),
-      MainDiagnosis("Jean", "2", "S02.42", 3.0, makeTS(2017, 7, 18)),
-      MainDiagnosis("Kevin", "4", "S02.42", 4.0, makeTS(2017, 7, 18)),
-      MainDiagnosis("Paul", "1", "S42.54678", 2.0, makeTS(2017, 7, 20)),
-      MainDiagnosis("Paul", "7", "hemorroides", 2.0, makeTS(2017, 1, 2)),
-      AssociatedDiagnosis("Jacques", "8", "qu'est-ce-que tu fais là?", 2.0, makeTS(2017, 7, 18))
+      McoMainDiagnosis("Pierre", "3", "S02.42", 2.0, makeTS(2017, 7, 18)),
+      McoMainDiagnosis("Jean", "2", "S02.42", 3.0, makeTS(2017, 7, 18)),
+      McoMainDiagnosis("Kevin", "4", "S02.42", 4.0, makeTS(2017, 7, 18)),
+      McoMainDiagnosis("Paul", "1", "S42.54678", 2.0, makeTS(2017, 7, 20)),
+      McoMainDiagnosis("Paul", "7", "hemorroides", 2.0, makeTS(2017, 1, 2)),
+      McoAssociatedDiagnosis("Jacques", "8", "qu'est-ce-que tu fais là?", 2.0, makeTS(2017, 7, 18))
     ).toDS
 
     val medicalActs = Seq(

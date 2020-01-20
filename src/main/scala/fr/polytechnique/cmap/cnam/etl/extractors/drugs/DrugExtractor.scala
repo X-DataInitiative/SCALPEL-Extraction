@@ -4,6 +4,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.drugs
 
 import java.sql.Timestamp
 import scala.reflect.runtime.universe
+import org.apache.commons.codec.binary.Base64
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions.{col, when}
 import org.apache.spark.sql.types.{StringType, TimestampType}
@@ -32,6 +33,25 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
     }.flatMap(builder _).distinct()
 
   }
+
+
+
+   def extractGroupId(r: Row): String = {
+    Base64.encodeBase64(s"${r.getAs[String](ColNames.FluxDate)}_${r.getAs[String](ColNames.FluxProcessingDate)}_${
+      r.getAs[String](
+        ColNames
+          .EmitterType
+      )
+    }_${r.getAs[String](ColNames.EmitterId)}_${r.getAs[String](ColNames.FluxSeqNumber)}_${
+      r.getAs[String](
+        ColNames
+          .OrganisationOldId
+      )
+    }_${r.getAs[String](ColNames.OrganisationDecompteNumber)}".getBytes()).map(_.toChar).mkString
+
+
+  }
+
 
   override def isInStudy(codes: Set[String])
     (row: Row): Boolean = drugConfig.level.isInFamily(drugConfig.families, row)
@@ -81,6 +101,14 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
     val Conditioning = "conditioning"
     val Date = "eventDate"
     val Cip13 = "CIP13"
+
+    lazy val FluxDate = "FLX_DIS_DTD"
+    lazy val FluxProcessingDate = "FLX_TRT_DTD"
+    lazy val EmitterType = "FLX_EMT_TYP"
+    lazy val EmitterId = "FLX_EMT_NUM"
+    lazy val FluxSeqNumber = "FLX_EMT_ORD"
+    lazy val OrganisationOldId = "ORG_CLE_NUM"
+    lazy val OrganisationDecompteNumber = "DCT_ORD_NUM"
   }
 
 }

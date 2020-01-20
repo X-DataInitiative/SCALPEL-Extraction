@@ -3,6 +3,7 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import java.time.LocalDate
+import pureconfig.generic.auto._
 import me.danielpes.spark.datetime.Period
 import me.danielpes.spark.datetime.implicits._
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
@@ -11,7 +12,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchasesConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.PatientsConfig
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{ExposurePeriodStrategy, ExposuresTransformerConfig, WeightAggStrategy}
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures._
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformerConfig
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformerConfig
 import fr.polytechnique.cmap.cnam.etl.transformers.outcomes.OutcomesTransformerConfig
@@ -51,26 +52,12 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
 
   /** Parameters needed for the Exposures transformer. */
   case class ExposuresConfig(
-    override val minPurchases: Int = 2,
-    override val startDelay: Period = 3.month,
-    override val purchasesWindow: Period = 6.months) extends ExposuresTransformerConfig(
-
-    minPurchases = minPurchases,
-    startDelay = startDelay,
-    purchasesWindow = purchasesWindow,
-
-    periodStrategy = ExposurePeriodStrategy.Unlimited,
-    endThresholdGc = None,
-    endThresholdNgc = None,
-    endDelay = None,
-
-    weightAggStrategy = WeightAggStrategy.NonCumulative,
-    cumulativeExposureWindow = None,
-    cumulativeStartThreshold = None,
-    cumulativeEndThreshold = None,
-    dosageLevelIntervals = None,
-    purchaseIntervals = None
-  )
+    override val exposurePeriodAdder: ExposurePeriodAdder = UnlimitedExposureAdder(
+      3.months,
+      2,
+      6.months
+    )
+  ) extends ExposuresTransformerConfig(exposurePeriodAdder = exposurePeriodAdder)
 
   /** Parameters needed for the Outcomes transformer. */
   case class OutcomesConfig(
@@ -119,7 +106,11 @@ object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
     dcirCodes = dcirCCAMActCodes,
     mcoCIMCodes = mcoCIM10ActCodes,
     mcoCCAMCodes = mcoCCAMActCodes,
-    mcoCECodes = List()
+    mcoCECodes = List(),
+    ssrCCAMCodes = List(),
+    ssrCSARRCodes = List(),
+    ssrCECodes = List(),
+    hadCCAMCodes = List()
   )
 
   /** Fixed parameters needed for the ObservationPeriod transformer. */

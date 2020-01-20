@@ -10,7 +10,9 @@ import me.danielpes.spark.datetime.Period
 import me.danielpes.spark.datetime.implicits._
 import pureconfig._
 import pureconfig.configurable.{localDateConfigConvert, localDateTimeConfigConvert}
+import pureconfig.generic.{CoproductHint, EnumCoproductHint, FieldCoproductHint, ProductHint}
 import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.DrugClassificationLevel
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposurePeriodAdder
 
 trait ConfigLoader {
 
@@ -47,6 +49,13 @@ trait ConfigLoader {
       DrugClassificationLevel.fromString(level)
   )
 
+  //For reading Exposure Period Adder Config
+  implicit val exposurePeriodAdderReader: FieldCoproductHint[ExposurePeriodAdder] = new FieldCoproductHint[ExposurePeriodAdder](
+    "exposure_adder_strategy"
+  ) {
+    override protected def fieldValue(name: String): String = ConfigFieldMapping(PascalCase, SnakeCase)(name)
+  }
+
   /*
    * Internal method for loading and merging the user config file + the default config
    * Explanation for the type parameter: https://github.com/pureconfig/pureconfig/issues/358
@@ -60,6 +69,6 @@ trait ConfigLoader {
 
     val defaultConfig = ConfigFactory.parseResources(defaultsPath).resolve.getConfig(env)
     val config = ConfigFactory.parseFile(new java.io.File(configPath)).resolve.withFallback(defaultConfig).resolve
-    pureconfig.loadConfigOrThrow[C](config)
+    ConfigSource.fromConfig(config).loadOrThrow[C]
   }
 }

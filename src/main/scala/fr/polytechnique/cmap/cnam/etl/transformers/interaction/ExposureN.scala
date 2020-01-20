@@ -2,15 +2,16 @@
 
 package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 
-import fr.polytechnique.cmap.cnam.etl.events.{Event, Interaction}
 import cats.syntax.functor._
+import fr.polytechnique.cmap.cnam.etl.datatypes.{NullRemainingPeriod, Period, Subtractable, RemainingPeriod}
+import fr.polytechnique.cmap.cnam.etl.events.{Event, Interaction}
 
-case class ExposureN(patientID: String, values: Set[String], period: Period) extends Remainable[ExposureN] {
+case class ExposureN(patientID: String, values: Set[String], period: Period) extends Subtractable[ExposureN] {
   self =>
 
   def intersect(other: ExposureN): Option[ExposureN] = {
     if (self.patientID.equals(other.patientID) &&
-      self.values.intersect(other.values).isEmpty){
+      self.values.intersect(other.values).isEmpty) {
       self.period.intersect(other.period).map(p => ExposureN(patientID, self.values ++ other.values, p))
     } else {
       None
@@ -30,7 +31,7 @@ case class ExposureN(patientID: String, values: Set[String], period: Period) ext
     self.values.subsets(self.values.size - 1).map(vs => ExposureN(self.patientID, vs, self.period))
   }
 
-  override def - (other: ExposureN): RemainingPeriod[ExposureN] = ExposureN.minus(self, other)
+  override def -(other: ExposureN): RemainingPeriod[ExposureN] = ExposureN.minus(self, other)
 }
 
 object ExposureN extends Ordering[ExposureN] {

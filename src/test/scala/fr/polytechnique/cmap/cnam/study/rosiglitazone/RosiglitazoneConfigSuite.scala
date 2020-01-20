@@ -8,6 +8,7 @@ import com.typesafe.config.ConfigFactory
 import me.danielpes.spark.datetime.implicits._
 import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.UnlimitedExposureAdder
 import fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes.OutcomeDefinition
 
 class RosiglitazoneConfigSuite extends AnyFlatSpec {
@@ -64,8 +65,11 @@ class RosiglitazoneConfigSuite extends AnyFlatSpec {
         root = "new/out/path"
       ),
       exposures = default.exposures.copy(
-        minPurchases = 2,
-        purchasesWindow = 6.months
+        UnlimitedExposureAdder(
+          3.months,
+          minPurchases = 2,
+          6.months
+        )
       ),
       outcomes = default.outcomes.copy(
         outcomeDefinition = OutcomeDefinition.HeartFailure

@@ -42,7 +42,7 @@ val testDependencies = List(
 
 val additionalDependencies = List(
   "danielpes" % "spark-datetime-lite" % "0.2.0-s_2.11",
-  "com.github.pureconfig" %% "pureconfig" % "0.9.0",
+  "com.github.pureconfig" %% "pureconfig" % "0.12.0",
   "org.scalactic" %% "scalactic" % "3.1.0" //recommended by ScalaTest
 )
 

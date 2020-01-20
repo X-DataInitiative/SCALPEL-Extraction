@@ -6,7 +6,7 @@ import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.DcirAct
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
@@ -14,6 +14,7 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.extractors._
+import fr.polytechnique.cmap.cnam.study.fall.statistics.DiagnosisCounter
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.reporting._
 
@@ -42,7 +43,7 @@ object FallMainExtract extends Main with FractureCodes {
   mutable.HashMap[String, OperationMetadata] = {
 
     if (fallConfig.runParameters.hospitalStays) {
-      val hospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
+      val hospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
       meta += {
         "extract_hospital_stays" ->
           OperationReporter
@@ -115,11 +116,13 @@ object FallMainExtract extends Main with FractureCodes {
     if (fallConfig.runParameters.diagnoses) {
       logger.info("diagnoses")
       val diagnoses = new DiagnosisExtractor(fallConfig.diagnoses).extract(sources).persist()
-      val diagnoses_report = OperationReporter.reportAsDataSet(
+      val diagnosesPopulation = DiagnosisCounter.process(diagnoses)
+      val diagnoses_report = OperationReporter.reportDataAndPopulationAsDataSet(
         "diagnoses",
         List("MCO", "IR_IMB_R"),
         OperationTypes.Diagnosis,
         diagnoses,
+        diagnosesPopulation,
         Path(fallConfig.output.outputSavePath),
         fallConfig.output.saveMode
       )

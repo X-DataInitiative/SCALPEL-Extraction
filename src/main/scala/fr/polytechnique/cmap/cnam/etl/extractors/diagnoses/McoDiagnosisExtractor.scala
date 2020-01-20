@@ -1,29 +1,25 @@
-// License: BSD 3 clause
-
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoExtractor
 
-class MainDiagnosisExtractor extends McoExtractor[Diagnosis] {
+class McoMainDiagnosisExtractor extends McoExtractor[Diagnosis] {
   final override val columnName: String = ColNames.DP
-  override val eventBuilder: EventBuilder = MainDiagnosis
+  override val eventBuilder: EventBuilder = McoMainDiagnosis
 }
 
-object MainDiagnosisExtractor extends MainDiagnosisExtractor
+object McoMainDiagnosisExtractor extends McoMainDiagnosisExtractor
 
-
-class AssociatedDiagnosisExtractor extends McoExtractor[Diagnosis] {
+class McoAssociatedDiagnosisExtractor extends McoExtractor[Diagnosis] {
   final override val columnName: String = ColNames.DA
-  override val eventBuilder: EventBuilder = AssociatedDiagnosis
+  override val eventBuilder: EventBuilder = McoAssociatedDiagnosis
 }
 
-object AssociatedDiagnosisExtractor extends AssociatedDiagnosisExtractor
+object McoAssociatedDiagnosisExtractor extends McoAssociatedDiagnosisExtractor
 
-
-class LinkedDiagnosisExtractor extends McoExtractor[Diagnosis] {
+class McoLinkedDiagnosisExtractor extends McoExtractor[Diagnosis] {
   final override val columnName: String = ColNames.DR
-  override val eventBuilder: EventBuilder = LinkedDiagnosis
+  override val eventBuilder: EventBuilder = McoLinkedDiagnosis
 }
 
-object LinkedDiagnosisExtractor extends LinkedDiagnosisExtractor
+object McoLinkedDiagnosisExtractor extends McoLinkedDiagnosisExtractor

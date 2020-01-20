@@ -3,62 +3,37 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.observation
 
 import java.sql.Timestamp
-import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.TimestampType
-import org.apache.spark.sql.{DataFrame, Dataset}
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, ObservationPeriod}
+import org.apache.spark.sql.Dataset
+import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, Molecule, ObservationPeriod}
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 
 class ObservationPeriodTransformer(config: ObservationPeriodTransformerConfig) {
 
   import Columns._
 
-  val outputColumns = List(
-    col("patientID"),
-    col("observationStart").as("start"),
-    col("observationEnd").as("end")
-  )
-
-  def computeObservationStart(data: DataFrame): DataFrame = {
-    val studyStart: Timestamp = config.studyStart
-    val window = Window.partitionBy("patientID")
-    val correctedStart = when(
-      lower(col("category")) === "molecule" && (col("start") >= studyStart), col("start")
-    )
-    data.withColumn("observationStart", min(correctedStart).over(window).cast(TimestampType))
-  }
-
-  def computeObservationEnd(data: DataFrame): DataFrame = {
-    val studyEnd: Timestamp = config.studyEnd
-    data.withColumn("observationEnd", lit(studyEnd))
-  }
-
-
-  implicit class ObservationDataFrame(data: DataFrame) {
-    def withObservationStart: DataFrame = computeObservationStart(data)
-
-    def withObservationEnd: DataFrame = computeObservationEnd(data)
-  }
-
   def transform(events: Dataset[Event[AnyEvent]]): Dataset[Event[ObservationPeriod]] = {
+
+    val studyStart: Timestamp = config.studyStart
+
+    val studyEnd = config.studyEnd
 
     import events.sqlContext.implicits._
 
-    val observation = events.toDF
-      .withObservationStart
-      .withObservationEnd
-      .dropDuplicates(Seq("patientID"))
+    events.filter(
+      e => e.category == Molecule.category && (e.start
+        .compareTo(studyStart) >= 0)
+    )
+      .groupBy(PatientID)
+      .agg(min(Start).alias(Start))
       .map(
-        ObservationPeriod.fromRow(
-          _,
-          patientIDCol = PatientID,
-          startCol = ObservationStart,
-          endCol = ObservationEnd
+        e => ObservationPeriod(
+          e.getAs[String](PatientID),
+          e.getAs[Timestamp](Start),
+          studyEnd
         )
+
       )
 
-    observation.as
-      [Event[ObservationPeriod]]
   }
 }

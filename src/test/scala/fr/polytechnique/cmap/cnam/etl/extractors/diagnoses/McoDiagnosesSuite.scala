@@ -3,9 +3,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.events.McoMainDiagnosis
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.study.fall.extractors.{AssociatedDiagnosisFallExtractor, LinkedDiagnosisFallExtractor, MainDiagnosisFallExtractor}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class McoDiagnosesSuite extends SharedContext {
@@ -20,19 +20,17 @@ class McoDiagnosesSuite extends SharedContext {
     val sources = Sources(mco = Some(mco))
 
     val expected = Seq[Event[Diagnosis]](
-      MainDiagnosis("Patient_02", "10000123_20000123_2007", "C670", 2.0, makeTS(2007, 1, 29)),
-      MainDiagnosis("Patient_02", "10000123_20000345_2007", "C671", 2.0, makeTS(2007, 1, 29)),
-      MainDiagnosis("Patient_02", "10000123_10000987_2006", "C670", 2.0, makeTS(2005, 12, 29)),
-      MainDiagnosis("Patient_02", "10000123_10000543_2006", "C671", 2.0, makeTS(2005, 12, 24)),
-      MainDiagnosis("Patient_02", "10000123_30000546_2008", "C670", 2.0, makeTS(2008, 3, 8)),
-      MainDiagnosis("Patient_02", "10000123_30000852_2008", "C671", 2.0, makeTS(2008, 3, 15)),
-      MainDiagnosis("Patient_02", "10000123_30000852_2008", "C671", 4.0, makeTS(2008, 3, 15)),
-      MainDiagnosis("Patient_02", "10000123_30000852_2008", "C671", 3.0, makeTS(2008, 3, 15))
+      McoMainDiagnosis("Patient_02", "10000123_20000123_2007", "C670", makeTS(2007, 1, 29)),
+      McoMainDiagnosis("Patient_02", "10000123_20000345_2007", "C671", makeTS(2007, 1, 29)),
+      McoMainDiagnosis("Patient_02", "10000123_10000987_2006", "C670", makeTS(2005, 12, 29)),
+      McoMainDiagnosis("Patient_02", "10000123_10000543_2006", "C671", makeTS(2005, 12, 24)),
+      McoMainDiagnosis("Patient_02", "10000123_30000546_2008", "C670", makeTS(2008, 3, 8)),
+      McoMainDiagnosis("Patient_02", "10000123_30000852_2008", "C671", makeTS(2008, 3, 15))
     ).toDS
 
 
     // When
-    val result = MainDiagnosisFallExtractor.extract(sources, dpCodes)
+    val result = McoMainDiagnosisExtractor.extract(sources, dpCodes)
 
     // Then
     assertDSs(result, expected)
@@ -48,12 +46,12 @@ class McoDiagnosesSuite extends SharedContext {
     val sources = Sources(mco = Some(mco))
 
     val expected = Seq[Event[Diagnosis]](
-      LinkedDiagnosis("Patient_02", "10000123_20000123_2007", "E05", 2.0, makeTS(2007, 1, 29)),
-      LinkedDiagnosis("Patient_02", "10000123_10000543_2006", "E08", 2.0, makeTS(2005, 12, 24))
+      McoLinkedDiagnosis("Patient_02", "10000123_20000123_2007", "E05", makeTS(2007, 1, 29)),
+      McoLinkedDiagnosis("Patient_02", "10000123_10000543_2006", "E08", makeTS(2005, 12, 24))
     ).toDS
 
     // When
-    val result = LinkedDiagnosisFallExtractor.extract(sources, linkedCodes)
+    val result = McoLinkedDiagnosisExtractor.extract(sources, linkedCodes)
 
     // Then
     assertDSs(result, expected)
@@ -69,12 +67,12 @@ class McoDiagnosesSuite extends SharedContext {
     val sources = Sources(mco = Some(mco))
 
     val expected = Seq[Event[Diagnosis]](
-      AssociatedDiagnosis("Patient_02", "10000123_20000123_2007", "C66.5", 2.0, makeTS(2007, 1, 29)),
-      AssociatedDiagnosis("Patient_02", "10000123_10000543_2006", "C66.9", 2.0, makeTS(2005, 12, 24))
+      McoAssociatedDiagnosis("Patient_02", "10000123_20000123_2007", "C66.5", makeTS(2007, 1, 29)),
+      McoAssociatedDiagnosis("Patient_02", "10000123_10000543_2006", "C66.9", makeTS(2005, 12, 24))
     ).toDS
 
     // When
-    val result = AssociatedDiagnosisFallExtractor.extract(sources, associatedDiagnosis)
+    val result = McoAssociatedDiagnosisExtractor.extract(sources, associatedDiagnosis)
 
     // Then
     assertDSs(result, expected)

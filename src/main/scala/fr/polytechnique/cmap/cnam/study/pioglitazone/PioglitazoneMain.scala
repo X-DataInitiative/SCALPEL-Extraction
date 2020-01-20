@@ -8,7 +8,7 @@ import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.Patients
 import fr.polytechnique.cmap.cnam.etl.extractors.tracklosses.{Tracklosses, TracklossesConfig}
@@ -16,9 +16,8 @@ import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposuresTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposureTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
-import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer.FollowUpDataset
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
 import fr.polytechnique.cmap.cnam.study.pioglitazone.extractors.{Diagnoses, MedicalActs}
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes._
@@ -119,7 +118,7 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val rawHospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
+    val rawHospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
     operationsMetadata += {
       OperationReporter.report(
         "extract_hospital_stays",
@@ -302,8 +301,8 @@ object PioglitazoneMain extends Main {
       } else {
         firstFilterResult
       }
-
-      val cleanFollowUps = followups.cleanFollowUps() // Keep only followups for which start < stop
+      val cleanFollowUps = followups
+        .filter(e => e.start.before(e.end.get)) // Keep only followups for which start < stop
       operationsMetadata += {
         OperationReporter
           .report(
@@ -335,8 +334,11 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val exposures = new ExposuresTransformer(config.exposures)
-      .transform(cnamPaperBaseCohort, drugPurchases)
+    val exposures = new ExposureTransformer(config.exposures)
+      .transform(cnamPaperBaseCohort.map(_._2))(
+        drugPurchases
+          .map(m => Drug(m.patientID, m.groupID, m.value, m.weight, m.start, m.end))
+      )
     operationsMetadata += {
       OperationReporter
         .report(

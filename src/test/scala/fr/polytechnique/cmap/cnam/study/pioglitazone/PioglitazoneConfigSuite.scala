@@ -7,6 +7,7 @@ import com.typesafe.config.ConfigFactory
 import me.danielpes.spark.datetime.implicits._
 import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
+import fr.polytechnique.cmap.cnam.etl.transformers.exposures.UnlimitedExposureAdder
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes.CancerDefinition
 
 class PioglitazoneConfigSuite extends AnyFlatSpec {
@@ -46,8 +47,10 @@ class PioglitazoneConfigSuite extends AnyFlatSpec {
         |   root: "new/out/path"
         | }
         | exposures {
-        |   min_purchases: 1
-        |   purchases_window: 3 months
+        |   exposure_period_adder {
+        |     min_purchases: 1
+        |     purchases_window: 3 months
+        |   }
         | }
         | outcomes {
         |   cancer_definition: "narrow"
@@ -63,8 +66,11 @@ class PioglitazoneConfigSuite extends AnyFlatSpec {
         root = "new/out/path"
       ),
       exposures = default.exposures.copy(
-        minPurchases = 1,
-        purchasesWindow = 3.months
+        UnlimitedExposureAdder(
+          3.months,
+          1,
+          3.months
+        )
       ),
       outcomes = default.outcomes.copy(
         cancerDefinition = CancerDefinition.Narrow

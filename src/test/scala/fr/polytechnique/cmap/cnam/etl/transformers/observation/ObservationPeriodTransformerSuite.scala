@@ -15,39 +15,6 @@ class ObservationPeriodTransformerSuite extends SharedContext {
     studyEnd = LocalDate.of(2010, 1, 1)
   )
 
-  "withObservationStart" should "add a column with the start of the observation period" in {
-    val sqlCtx = sqlContext
-    import sqlCtx.implicits._
-
-    // Given
-    val input = Seq(
-      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 20)),
-      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 1)),
-      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 10)),
-      ("Patient_A", "disease", "Hello World!", makeTS(2007, 1, 1)),
-      ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2009, 1, 1)),
-      ("Patient_B", "disease", "Hello World!", makeTS(2007, 1, 1))
-    ).toDF("patientID", "category", "eventId", "start")
-
-    val expected = Seq(
-      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 20), makeTS(2008, 1, 1)),
-      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 1), makeTS(2008, 1, 1)),
-      ("Patient_A", "molecule", "PIOGLITAZONE", makeTS(2008, 1, 10), makeTS(2008, 1, 1)),
-      ("Patient_A", "disease", "Hello World!", makeTS(2007, 1, 1), makeTS(2008, 1, 1)),
-      ("Patient_B", "molecule", "PIOGLITAZONE", makeTS(2009, 1, 1), makeTS(2009, 1, 1)),
-      ("Patient_B", "disease", "Hello World!", makeTS(2007, 1, 1), makeTS(2009, 1, 1))
-    ).toDF("patientID", "category", "eventId", "start", "observationStart")
-
-    val transformer = new ObservationPeriodTransformer(testConfig)
-
-    // When
-    import transformer._
-    val result = input.withObservationStart
-
-    // Then
-    assertDFs(result, expected)
-  }
-
   "transform" should "return a Dataset[Event[ObservationPeriod]] with the observation events of each patient" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._

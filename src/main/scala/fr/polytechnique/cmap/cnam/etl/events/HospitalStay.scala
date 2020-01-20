@@ -28,3 +28,21 @@ trait HospitalStay extends AnyEvent with EventBuilder {
 }
 
 object HospitalStay extends HospitalStay
+
+object McoHospitalStay extends HospitalStay {
+  override val category: EventCategory[HospitalStay] = "mco_hospital_stay"
+}
+
+/** Hospital Stay in the SSR PMSI are one type of hospital stays,  see :
+  *  https://documentation-snds.health-data-hub.fr/glossaire/ssr.html
+  */
+object SsrHospitalStay extends HospitalStay {
+  override val category: EventCategory[HospitalStay] = "ssr_hospital_stay"
+}
+
+/** HAD Hospital Stay in the HAD PMSI are one type of hospital stays, see :
+  * https://documentation-snds.health-data-hub.fr/glossaire/had.html
+  */
+object HadHospitalStay extends HospitalStay {
+  override val category: EventCategory[HospitalStay] = "had_hospital_stay"
+}
