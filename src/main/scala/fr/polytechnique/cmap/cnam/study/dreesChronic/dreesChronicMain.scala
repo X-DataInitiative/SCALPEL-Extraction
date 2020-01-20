@@ -1,7 +1,6 @@
 package fr.polytechnique.cmap.cnam.study.dreesChronic
 
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.extractors.takeOverReasons.HadMainTakeOverExtractor
 import org.apache.spark.sql.{Dataset, SQLContext}
 
 import scala.collection.mutable
@@ -14,6 +13,7 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.dreesChronic.codes._
 import fr.polytechnique.cmap.cnam.study.dreesChronic.config.DreesChronicConfig
 import fr.polytechnique.cmap.cnam.study.dreesChronic.extractors._
+import fr.polytechnique.cmap.cnam.study.dreesChronic.extractors.TakeOverReasonExtractor
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
@@ -168,17 +168,21 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
-    val aldDiagnoses = ImbDiagnosisExtractor.extract(sources, dreesChronicConfig.diagnoses.imbCodes.toSet)//.cache()
+    if (dreesChronicConfig.runParameters.aldDiagnoses) {
+      val aldDiagnoses = ImbDiagnosisExtractor.extract(sources, dreesChronicConfig.diagnoses.imbCodes.toSet)//.cache()
 
-    operationsMetadata += {
-      OperationReporter.report(
-        "aldDiagnoses",
-        List("IR_IMB"),
-        OperationTypes.aldDiagnosis,
-        aldDiagnoses.toDF,
-        Path(dreesChronicConfig.output.outputSavePath),
-        dreesChronicConfig.output.saveMode
-      )
+      operationsMetadata += {
+        OperationReporter.report(
+          "aldDiagnoses",
+          List("IR_IMB"),
+          OperationTypes.aldDiagnosis,
+          aldDiagnoses.toDF,
+          Path(dreesChronicConfig.output.outputSavePath),
+          dreesChronicConfig.output.saveMode
+        )
+      }
+    } else {
+      None
     }
 
     if (dreesChronicConfig.runParameters.ghmGroups) {
@@ -239,17 +243,21 @@ object dreesChronicMain extends Main with BpcoCodes {
       None
     }
 
-    val hadMainTakeOverReason = HadMainTakeOverExtractor.extract(sources, Set.empty)//.cache()
+    if (dreesChronicConfig.runParameters.hadTakeOverReasons) {
+    val hadTakeOverReason = new TakeOverReasonExtractor().extract(sources)//.cache()
 
     operationsMetadata += {
       OperationReporter.report(
-        "HadMainTakeOverReason",
+        "hadTakeOverReason",
         List("HAD"),
         OperationTypes.Diagnosis,
-        hadMainTakeOverReason.toDF,
+        hadTakeOverReason.toDF,
         Path(dreesChronicConfig.output.outputSavePath),
         dreesChronicConfig.output.saveMode
       )
+    }
+    } else {
+      None
     }
     operationsMetadata
   }

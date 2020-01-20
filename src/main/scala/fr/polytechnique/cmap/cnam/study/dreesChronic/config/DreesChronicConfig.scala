@@ -66,9 +66,9 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
 
   final object NgapActConfig extends NgapActConfig(
     acts_categories = List(
-      Amc,
-      Amk,
-      Ams
+      //Amc,
+      //Amk,
+      //Ams
     )
   )
 
@@ -98,10 +98,10 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
 
   /** Parameters if run the calculation of outcome or exposure **/
   case class RunConfig(
-    outcome: List[String] = List("Acts", "Diagnoses", "Outcomes", "GhmGroups"),
+    outcome: List[String] = List("Acts", "Diagnoses", "Outcomes", "GhmGroups", "hadTakeOverReasons", "aldDiagnoses"),
     exposure: List[String] = List("Patients", "StartGapPatients", "DrugPurchases", "Exposures"),
     hospitalStay: List[String] = List("HospitalStay"),
-    prestation: List[String] =  List("Specialities", "NgapAct")) {
+    prestation: List[String] =  List("Specialities", "NgapActs")) {
 
     //exposures
     val patients: Boolean = exposure contains "Patients"
@@ -110,12 +110,15 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
     val startGapPatients: Boolean = List("DrugPurchases", "Patients", "StartGapPatients").forall(exposure.contains)
     //outcomes
     val diagnoses: Boolean = outcome contains "Diagnoses"
+    val aldDiagnoses: Boolean = outcome contains "aldDiagnoses"
+
     val acts: Boolean = outcome contains "Acts"
     // prestations
     val practionnerClaimSpeciality: Boolean = prestation contains "Specialities"
-    val ngapActs: Boolean = prestation contains "NgapAct"
+    val ngapActs: Boolean = prestation contains "NgapActs"
     val outcomes: Boolean = List("Diagnoses", "Acts", "Outcomes").forall(outcome.contains)
     val ghmGroups: Boolean = outcome contains "GhmGroups"
+    val hadTakeOverReasons: Boolean = outcome contains "hadTakeOverReasons"
   }
 
   /**
