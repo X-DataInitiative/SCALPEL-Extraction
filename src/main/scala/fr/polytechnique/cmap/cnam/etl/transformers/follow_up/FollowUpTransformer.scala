@@ -15,11 +15,11 @@ import fr.polytechnique.cmap.cnam.etl.patients.Patient
  * Dataset[Event[Outcome]]( This dataset is not used in the treatment and it should be removed in further versions) and
  * Dataset[Event[Trackloss]].
  *
- * @param config A config file tha contains the need values to set the parameters of study.
+ * @param config A config object that contains the need values to set the parameters of study.
  */
 class FollowUpTransformer(config: FollowUpTransformerConfig) {
 
-  /** The main method in this transformation class, it allows the transformation into a FollowUp dataset.
+  /** The main method in this transformation class, It combines multiple basic Events to form a FollowUp Dataset.
    *
    * @param patients      A dataset that contains a dataset of [[fr.polytechnique.cmap.cnam.etl.patients.Patient]] joined with
    *                      a dataset of [[fr.polytechnique.cmap.cnam.etl.events.ObservationPeriod]].
