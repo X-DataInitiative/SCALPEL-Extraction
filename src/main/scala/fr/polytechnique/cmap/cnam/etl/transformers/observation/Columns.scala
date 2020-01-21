@@ -2,7 +2,10 @@ package fr.polytechnique.cmap.cnam.etl.transformers.observation
 
 import fr.polytechnique.cmap.cnam.etl.events.Event
 
-private[observation] object  Columns {
+/** Private object for the package [[fr.polytechnique.cmap.cnam.etl.transformers.observation]]
+  * to retrieve the columns of event object of type ObservationPeriod.
+  * */
+private[observation] object Columns {
 
   final val PatientID = Event.Columns.PatientID
   final val Start = Event.Columns.Start

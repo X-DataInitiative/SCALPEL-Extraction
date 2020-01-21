@@ -44,19 +44,27 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
 
   def extractFluxDate(r: Row): Timestamp = r.getAs[java.util.Date](ColNames.DcirFluxDate).toTimestamp
 
+  /** Method to generate a hash value in a string format for the groupID value from a row with these values
+    * FLX_DIS_DTD,FLX_TRT_DTD,FLX_EMT_TYP,FLX_EMT_NUM,FLX_EMT_ORD,ORG_CLE_NUM,DCT_ORD_NUM.
+    * They are the 7 columns that identifies prescriptions in a unique way.
+    *
+    * @param r The Row object itself.
+    * @return A hash Id unique in a string format.
+    */
   override def extractGroupId(r: Row): String = {
-    Base64.encodeBase64(s"${r.getAs[String](ColNames.DateStart)}_${r.getAs[String](ColNames.DateEntry)}_${
-      r.getAs[String](
-        ColNames
-          .EmitterType
-      )
-    }_${r.getAs[String](ColNames.EmitterId)}_${r.getAs[String](ColNames.FlowNumber)}_${
-      r.getAs[String](
-        ColNames
-          .OrgId
-      )
-    }_${r.getAs[String](ColNames.OrderId)}".getBytes()).map(_.toChar).mkString
-
+    Base64.encodeBase64(
+      s"${r.getAs[String](ColNames.DateStart)}_${r.getAs[String](ColNames.DateEntry)}_${
+        r.getAs[String](
+          ColNames
+            .EmitterType
+        )
+      }_${r.getAs[String](ColNames.EmitterId)}_${r.getAs[String](ColNames.FlowNumber)}_${
+        r.getAs[String](
+          ColNames
+            .OrgId
+        )
+      }_${r.getAs[String](ColNames.OrderId)}".getBytes()
+    ).map(_.toChar).mkString
 
   }
 }
