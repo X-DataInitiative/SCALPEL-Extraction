@@ -12,7 +12,7 @@ import org.apache.spark.sql.functions.col
 
 class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[NgapAct] {
 
-  override val columnName: String = ColNames.NgapCoefficient
+  override val columnName: String = ColNames.NaturePrestation
   val ngapKeyLetter: String = "PRS_NAT_CB2"
 
   override val eventBuilder: EventBuilder = NgapAct
@@ -24,9 +24,6 @@ class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[
       ColNames.Date, ColNames.ExecPSNum, ColNames.DcirFluxDate, ngapKeyLetter
     ).map(colName => col(colName))
 
-    sources.dcir.get.select(
-
-    )
 
     lazy val irNat = sources.irNat.get
     lazy val dcir = sources.dcir.get
@@ -41,15 +38,16 @@ class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[
   }
 
   override def isInStudy(codes: Set[String])(row: Row): Boolean = {
-    ngapActsConfig.isInCategory(
+    ngapActsConfig.dcirIsInCategory(
       ngapActsConfig.acts_categories,
       row
     )
   }
 
   override def code: Row => String = (row: Row) => {
-    row.getAs[String](ngapKeyLetter) + "_" +
-      row.getAs[Double](columnName).toString
+    row.getAs[Int](ColNames.NaturePrestation).toString + "_" +
+      row.getAs[String](ngapKeyLetter) + "_" +
+      row.getAs[Double](ColNames.NgapCoefficient).toString
   }
 
   override def extractStart(r: Row): Timestamp = {

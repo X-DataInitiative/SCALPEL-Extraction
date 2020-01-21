@@ -8,4 +8,5 @@ trait NgapActClassConfig extends Serializable {
     //val name: String
     val ngapKeyLetters: Seq[String]
     val ngapCoefficients: Seq[String]
+    val ngapPrsNatRefs: Seq[String] = Seq()
 }
