@@ -23,23 +23,4 @@ class FollowUpSuite extends AnyFlatSpec {
     // Then
     assert(result == expected)
   }
-
-  "fromRow" should "allow creation of a FollowUp event from a row object" in {
-    // Given
-    val schema = StructType(
-        StructField("pID", StringType) ::
-        StructField("endR", StringType) ::
-        StructField("start", TimestampType) ::
-        StructField("end", TimestampType) :: Nil
-    )
-    val values = Array[Any]("Patient01", "any_reason",  makeTS(2010, 1, 1), makeTS(2010, 2, 1))
-    val r = new GenericRowWithSchema(values, schema)
-    val expected = FollowUp("Patient01", "any_reason",  makeTS(2010, 1, 1), makeTS(2010, 2, 1))
-
-    // When
-    val result = FollowUp.fromRow(r, "pID", "endR", "start", "end")
-
-    // Then
-    assert(result == expected)
-  }
 }
