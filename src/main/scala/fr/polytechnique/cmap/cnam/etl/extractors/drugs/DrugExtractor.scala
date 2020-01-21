@@ -39,8 +39,8 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
     * It allows to identify each prescription in a unique way, it can be used to identify
     * the possible interactions of molecules prescript in the same period.
     *
-    * @param r The Row object itself
-    * @return A hash Id unique in a string format
+    * @param r The Row object itself.
+    * @return A hash Id unique in a string format.
     */
   def extractGroupId(r: Row): String = {
     Base64.encodeBase64(
