@@ -3,7 +3,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.prestations
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.{Event, MedicalPractitionerClaim, NonMedicalPractitionerClaim, PractitionerClaimSpeciality}
+import fr.polytechnique.cmap.cnam.etl.events.{Event, McoCeFbstcMedicalPractitionerClaim, McoCeFcstcMedicalPractitionerClaim, MedicalPractitionerClaim, NonMedicalPractitionerClaim, PractitionerClaimSpeciality}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
@@ -115,18 +115,18 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
     val sources = Sources(mcoCe = Some(input))
 
     val expected = Seq[Event[PractitionerClaimSpeciality]](
-      MedicalPractitionerClaim("2004100010", "390780146_00064268_2014", "1", makeTS(2014, 7, 18))
+      McoCeFbstcMedicalPractitionerClaim("2004100010", "390780146_00064268_2014", "1", makeTS(2014, 7, 18))
     ).toDS
 
 
     // When
-    val result = McoCeSpecialtyExtractor.extract(sources, medicalSpeCodes.toSet)
+    val result = McoCeFbstcSpecialtyExtractor.extract(sources, medicalSpeCodes.toSet)
 
     // Then
     assertDSs(result, expected)
   }
 
-  "extract" should "extract all health care related services provided by medical practitioner in McoCe" in {
+  "extract" should "extract all health care related services provided by medical practitioner in McoCe__Fbstc" in {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -137,13 +137,37 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
     val sources = Sources(mcoCe = Some(input))
 
     val expected = Seq[Event[PractitionerClaimSpeciality]](
-      MedicalPractitionerClaim("2004100010", "390780146_00064268_2014", "1", makeTS(2014, 7, 18)),
-      MedicalPractitionerClaim("2004100010", "390780146_00114237_2014", "22", makeTS(2014, 12, 12))
+      McoCeFbstcMedicalPractitionerClaim("2004100010", "390780146_00064268_2014", "1", makeTS(2014, 7, 18)),
+      McoCeFbstcMedicalPractitionerClaim("2004100010", "390780146_00114237_2014", "22", makeTS(2014, 12, 12))
     ).toDS
 
 
     // When
-    val result = McoCeSpecialtyExtractor.extract(sources, medicalSpeCodes.toSet)
+    val result = McoCeFbstcSpecialtyExtractor.extract(sources, medicalSpeCodes.toSet)
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "extract" should "extract all health care related services provided by medical practitioner in McoCe__Fcstc" in {
+
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val medicalSpeCodes = List.empty
+    val input = spark.read.parquet("src/test/resources/test-input/MCO_CE.parquet")
+    val sources = Sources(mcoCe = Some(input))
+
+    val expected = Seq[Event[PractitionerClaimSpeciality]](
+      McoCeFcstcMedicalPractitionerClaim("2004100010", "390780146_00114237_2014", "1", makeTS(2014, 12, 12)),
+      McoCeFcstcMedicalPractitionerClaim("2004100010", "710780214_00000130_2014", "25", makeTS(2014, 4, 15)),
+      McoCeFcstcMedicalPractitionerClaim("2004100010", "390780146_00026744_2014", "13", makeTS(2014, 4, 4))
+    ).toDS
+
+
+    // When
+    val result = McoCeFcstcSpecialtyExtractor.extract(sources, medicalSpeCodes.toSet)
 
     // Then
     assertDSs(result, expected)

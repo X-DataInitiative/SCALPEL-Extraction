@@ -13,8 +13,14 @@ class PractitionnerClaimSpecialityExtractor(config: PractitionerClaimSpecialityC
 
     val nonMedicalSpeciality = NonMedicalPractitionerClaimExtractor.extract(sources, config.nonMedicalSpeCodes.toSet)
     val medicalSpeciality = MedicalPractitionerClaimExtractor.extract(sources, config.medicalSpeCodes.toSet)
+    val mcoCeFbstcSpecialty = McoCeFbstcSpecialtyExtractor.extract(sources, config.medicalSpeCodes.toSet)
+    val mcoCeFcstcSpecialty = McoCeFcstcSpecialtyExtractor.extract(sources, config.medicalSpeCodes.toSet)
 
-    unionDatasets(nonMedicalSpeciality, medicalSpeciality)
-
+    unionDatasets(
+      nonMedicalSpeciality,
+      medicalSpeciality,
+      mcoCeFbstcSpecialty,
+      mcoCeFcstcSpecialty
+    )
   }
 }

@@ -67,14 +67,14 @@ object NonMedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerCl
                         (row: Row): Boolean = codes.contains(code(row))
 }
 
-// TODO: Aller voir si MCO_FCSTC__EXE_SPE contient plus d'information sur la spécialité que MCO_FBSTC__EXE_SPE
+
 /**
-  * Get specialties of the non medical practitioners in the Dcir:
-  * If a specialty is available, it extracts the specialty using MCO_FBSTC_ _EXE_SPE and the
-  * practitioner identifier from the database
+  * Get specialties of the non medical practitioners in the MCO_CE:
+  * If a specialty is available, it extracts the specialty using MCO_FBSTC_ _EXE_SPE and MCO_FCSTC_ _EXE_SPE.
+  * These two columns are complementary as described here :
+  * https://documentation-snds.health-data-hub.fr/fiches/actes_consult_externes.html#les-tables-du-pmsi-version-snds-pour-les-ace
   **/
-object McoCeSpecialtyExtractor extends McoCeExtractor[PractitionerClaimSpeciality] {
-  override val columnName: String = ColNames.PractitionnerSpecialty
+trait McoCeSpecialtyExtractor extends McoCeExtractor[PractitionerClaimSpeciality] {
   override val eventBuilder: EventBuilder = MedicalPractitionerClaim
 
   override def code: Row => String = (row: Row) => row.getAs[Int](columnName).toString
@@ -86,4 +86,15 @@ object McoCeSpecialtyExtractor extends McoCeExtractor[PractitionerClaimSpecialit
   override def isInExtractorScope(row: Row): Boolean = {
     (!row.isNullAt(row.fieldIndex(columnName))) & (row.getAs[Integer](columnName) != 0)
   }
+}
+
+object McoCeFbstcSpecialtyExtractor extends McoCeSpecialtyExtractor {
+  override val columnName: String = ColNames.PractitionnerSpecialtyFbstc
+  override val eventBuilder: EventBuilder = McoCeFbstcMedicalPractitionerClaim
+}
+
+
+object McoCeFcstcSpecialtyExtractor extends McoCeSpecialtyExtractor {
+  override val columnName: String = ColNames.PractitionnerSpecialtyFcstc
+  override val eventBuilder: EventBuilder = McoCeFcstcMedicalPractitionerClaim
 }

@@ -14,12 +14,19 @@ trait McoCeSource extends ColumnNames {
     val SeqNum : ColName = "SEQ_NUM"
     val CamCode = "MCO_FMSTC__CCAM_COD"
     val Date = "EXE_SOI_DTD"
-    val NgapKeyLetter = "MCO_FBSTC__ACT_COD"
-    val NgapCoefficient = "MCO_FBSTC__ACT_COE"
-    val PractitionnerSpecialty = "MCO_FBSTC__EXE_SPE"
+    val NgapKeyLetterFbstc = "MCO_FBSTC__ACT_COD"
+    val NgapCoefficientFbstc = "MCO_FBSTC__ACT_COE"
+    val PractitionnerSpecialtyFbstc = "MCO_FBSTC__EXE_SPE"
+    val NgapKeyLetterFcstc = "MCO_FCSTC__ACT_COD"
+    val NgapCoefficientFcstc = "MCO_FCSTC__ACT_COE"
+    val PractitionnerSpecialtyFcstc = "MCO_FCSTC__EXE_SPE"
     val Year = "year"
 
-    val all = List(PatientID, EtaNum, SeqNum, Year, CamCode, Date, NgapKeyLetter, NgapCoefficient, PractitionnerSpecialty)
+    val all = List(
+      PatientID, EtaNum, SeqNum, Year, CamCode, Date,
+      NgapKeyLetterFbstc, NgapCoefficientFbstc, PractitionnerSpecialtyFbstc,
+      NgapKeyLetterFcstc, NgapCoefficientFcstc, PractitionnerSpecialtyFcstc
+    )
   }
 
 }
