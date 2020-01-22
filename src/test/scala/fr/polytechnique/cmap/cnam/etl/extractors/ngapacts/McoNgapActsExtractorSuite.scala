@@ -28,7 +28,7 @@ class McoNgapActsExtractorSuite extends SharedContext {
     val source = new Sources(mcoCe = Some(mcoCe))
 
     val expected = Seq[Event[NgapAct]](
-      NgapAct("200410", "190000059_00022621_2014", "PmsiCe_ABG_42.0", makeTS(2014, 4, 18))
+      McoCeFbstcNgapAct("200410", "190000059_00022621_2014", "PmsiCe_ABG_42.0", makeTS(2014, 4, 18))
     ).toDS
 
     val ngapConf = NgapActConfig(
@@ -37,7 +37,7 @@ class McoNgapActsExtractorSuite extends SharedContext {
       )
     )
     // When
-    val result = new McoCeNgapActExtractor(ngapConf).extract(source, Set.empty)
+    val result = new McoCeFbstcNgapActExtractor(ngapConf).extract(source, Set.empty)
     // Then
     assertDSs(result, expected)
   }
@@ -52,7 +52,7 @@ class McoNgapActsExtractorSuite extends SharedContext {
     val source = new Sources(mcoCe = Some(mcoCe))
 
     val expected = Seq[Event[NgapAct]](
-      NgapAct("2004100010", "390780146_00064268_2014", "PmsiCe_ABC_1.0", makeTS(2014, 7, 18))
+      McoCeFbstcNgapAct("2004100010", "390780146_00064268_2014", "PmsiCe_ABC_1.0", makeTS(2014, 7, 18))
     ).toDS
 
     val ngapConf = NgapActConfig(
@@ -61,12 +61,12 @@ class McoNgapActsExtractorSuite extends SharedContext {
       )
     )
     // When
-    val result = new McoCeNgapActExtractor(ngapConf).extract(source, Set.empty)
+    val result = new McoCeFbstcNgapActExtractor(ngapConf).extract(source, Set.empty)
     // Then
     assertDSs(result, expected)
   }
 
-  "extract from prsNatRef" should "extract all ngap acts events from raw data " in {
+  "extract from prsNatRef" should "extract all ngap acts events from raw MCO_FBSTC data " in {
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -75,16 +75,40 @@ class McoNgapActsExtractorSuite extends SharedContext {
     val source = new Sources(mcoCe = Some(mcoCe))
 
     val expected = Seq[Event[NgapAct]](
-      NgapAct("2004100010", "390780146_00064268_2014", "PmsiCe_ABC_1.0", makeTS(2014, 7, 18)),
-      NgapAct("200410", "190000059_00022621_2014", "PmsiCe_ABG_42.0", makeTS(2014, 4, 18)),
-      NgapAct("2004100010", "390780146_00114237_2014", "PmsiCe_ACO_0", makeTS(2014, 12, 12))
+      McoCeFbstcNgapAct("2004100010", "390780146_00064268_2014", "PmsiCe_ABC_1.0", makeTS(2014, 7, 18)),
+      McoCeFbstcNgapAct("200410", "190000059_00022621_2014", "PmsiCe_ABG_42.0", makeTS(2014, 4, 18)),
+      McoCeFbstcNgapAct("2004100010", "390780146_00114237_2014", "PmsiCe_ACO_0", makeTS(2014, 12, 12))
     ).toDS
 
     val ngapConf = NgapActConfig(
       acts_categories = List.empty
     )
     // When
-    val result = new McoCeNgapActExtractor(ngapConf).extract(source, Set.empty)
+    val result = new McoCeFbstcNgapActExtractor(ngapConf).extract(source, Set.empty)
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "extract from prsNatRef" should "extract all ngap acts events from raw MCO_FCSTC data " in {
+
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+    // Given
+    val mcoCe: DataFrame = sqlCtx.read.load("src/test/resources/test-input/MCO_CE.parquet")
+    val source = new Sources(mcoCe = Some(mcoCe))
+
+    val expected = Seq[Event[NgapAct]](
+      McoCeFcstcNgapAct("2004100010", "390780146_00026744_2014", "PmsiCe_A   F_126936.43", makeTS(2014, 4, 4)),
+      McoCeFcstcNgapAct("2004100010", "390780146_00114237_2014", "PmsiCe_ADE_802770.97", makeTS(2014, 12, 12)),
+      McoCeFcstcNgapAct("2004100010", "710780214_00000130_2014", "PmsiCe_ADC_420416.2", makeTS(2014, 4, 15))
+    ).toDS
+
+    val ngapConf = NgapActConfig(
+      acts_categories = List.empty
+    )
+    // When
+    val result = new McoCeFcstcNgapActExtractor(ngapConf).extract(source, Set.empty)
 
     // Then
     assertDSs(result, expected)

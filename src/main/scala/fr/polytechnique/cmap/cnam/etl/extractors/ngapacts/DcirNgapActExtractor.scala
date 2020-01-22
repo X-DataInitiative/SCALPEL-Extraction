@@ -5,7 +5,7 @@ import java.sql.Timestamp
 import scala.reflect.runtime.universe._
 import scala.util.Try
 import org.apache.spark.sql.{Column, DataFrame, Dataset, Row}
-import fr.polytechnique.cmap.cnam.etl.events.{Event, EventBuilder, NgapAct}
+import fr.polytechnique.cmap.cnam.etl.events.{DcirNgapAct, Event, EventBuilder, NgapAct}
 import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import org.apache.spark.sql.functions.col
@@ -15,7 +15,7 @@ class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[
   override val columnName: String = ColNames.NaturePrestation
   val ngapKeyLetter: String = "PRS_NAT_CB2"
 
-  override val eventBuilder: EventBuilder = NgapAct
+  override val eventBuilder: EventBuilder = DcirNgapAct
 
 
   override def getInput(sources: Sources): DataFrame = {

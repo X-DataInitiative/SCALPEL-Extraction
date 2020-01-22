@@ -39,9 +39,9 @@ class DcirNgapActsExtractorSuite extends SharedContext {
     val source = new Sources(dcir = Some(dcir), irNat = Some(irNat))
 
     val expected = Seq[Event[NgapAct]](
-      NgapAct("Patient_01", "A10000001", "1111_C_0.42", makeTS(2006, 2, 1)),
-      NgapAct("Patient_01", "A10000001", "1111_C_0.42", makeTS(2006, 1, 15)),
-      NgapAct("Patient_01", "A10000001", "1111_C_0.42", makeTS(2006, 1, 30))
+      DcirNgapAct("Patient_01", "A10000001", "1111_C_0.42", makeTS(2006, 2, 1)),
+      DcirNgapAct("Patient_01", "A10000001", "1111_C_0.42", makeTS(2006, 1, 15)),
+      DcirNgapAct("Patient_01", "A10000001", "1111_C_0.42", makeTS(2006, 1, 30))
     ).toDS
 
     val ngapConf = NgapActConfig(
@@ -69,9 +69,9 @@ class DcirNgapActsExtractorSuite extends SharedContext {
     val source = new Sources(dcir = Some(dcir), irNat = Some(irNat))
 
     val expected = Seq[Event[NgapAct]](
-      NgapAct("Patient_01", "A10000001", "1111_C_0.42", makeTS(2006, 2, 1)),
-      NgapAct("Patient_01", "A10000001", "1111_C_0.42", makeTS(2006, 1, 15)),
-      NgapAct("Patient_01", "A10000001", "1111_C_0.42", makeTS(2006, 1, 30))
+      DcirNgapAct("Patient_01", "A10000001", "1111_C_0.42", makeTS(2006, 2, 1)),
+      DcirNgapAct("Patient_01", "A10000001", "1111_C_0.42", makeTS(2006, 1, 15)),
+      DcirNgapAct("Patient_01", "A10000001", "1111_C_0.42", makeTS(2006, 1, 30))
     ).toDS
 
     val ngapConf = NgapActConfig(

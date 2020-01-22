@@ -1,33 +1,34 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.ngapacts
 
-import fr.polytechnique.cmap.cnam.etl.events.{Event, EventBuilder, NgapAct}
+import fr.polytechnique.cmap.cnam.etl.events.{Event, EventBuilder, McoCeFbstcNgapAct, McoCeFcstcNgapAct, NgapAct}
 import fr.polytechnique.cmap.cnam.etl.extractors.mcoCe.McoCeExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import scala.reflect.runtime.universe._
 import org.apache.spark.sql.{DataFrame, Dataset, Row}
 
+import scala.reflect.runtime.universe._
 import scala.util.Try
 
-class McoCeNgapActExtractor(ngapActsConfig: NgapActConfig) extends McoCeExtractor[NgapAct] {
+trait McoCeNgapActExtractor extends McoCeExtractor[NgapAct] {
+  val ngapActsConfig: NgapActConfig
+  val keyLetterColumn: String
+  val coeffColumn: String
 
-  val columnName: String = ColNames.NgapKeyLetter
-
-  override val eventBuilder: EventBuilder = NgapAct
+  val columnName: String = keyLetterColumn
 
   override def isInStudy(codes: Set[String])(row: Row): Boolean = {
     ngapActsConfig.pmsiIsInCategories(
       ngapActsConfig.acts_categories,
-      ColNames.NgapKeyLetter,
-      ColNames.NgapCoefficient,
+      keyLetterColumn,
+      coeffColumn,
       row
     )
   }
 
   override def code: Row => String = (row: Row) => {
-    val coeff = Try(row.getAs[Double](ColNames.NgapCoefficient).toString) recover {
+    val coeff = Try(row.getAs[Double](coeffColumn).toString) recover {
       case _: NullPointerException => "0"
     }
-    "PmsiCe_" + row.getAs[String](ColNames.NgapKeyLetter) + "_" + coeff.get
+    "PmsiCe_" + row.getAs[String](keyLetterColumn) + "_" + coeff.get
   }
 
   override def extractGroupId(r: Row): String = {
@@ -54,4 +55,20 @@ class McoCeNgapActExtractor(ngapActsConfig: NgapActConfig) extends McoCeExtracto
       }
       }.flatMap(builder _).distinct()
   }
+}
+
+class McoCeFbstcNgapActExtractor(ngapConfig: NgapActConfig) extends McoCeNgapActExtractor {
+  val ngapActsConfig: NgapActConfig = ngapConfig
+  val keyLetterColumn: String = ColNames.NgapKeyLetterFbstc
+  val coeffColumn: String = ColNames.NgapCoefficientFbstc
+  override val columnName: String = keyLetterColumn
+  override val eventBuilder: EventBuilder = McoCeFbstcNgapAct
+}
+
+class McoCeFcstcNgapActExtractor(ngapConfig: NgapActConfig) extends McoCeNgapActExtractor {
+  val ngapActsConfig: NgapActConfig = ngapConfig
+  val keyLetterColumn: String = ColNames.NgapKeyLetterFcstc
+  val coeffColumn: String = ColNames.NgapCoefficientFcstc
+  override val columnName: String = keyLetterColumn
+  override val eventBuilder: EventBuilder = McoCeFcstcNgapAct
 }

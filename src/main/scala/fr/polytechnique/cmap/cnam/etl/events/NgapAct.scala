@@ -3,8 +3,6 @@ package fr.polytechnique.cmap.cnam.etl.events
 import java.sql.Timestamp
 import org.apache.spark.sql.Row
 
-object NgapAct extends NgapAct
-
 trait NgapAct extends AnyEvent with EventBuilder {
 
    override val category: EventCategory[NgapAct] = "ngap_act"
@@ -27,3 +25,15 @@ trait NgapAct extends AnyEvent with EventBuilder {
     )
 }
 
+
+object DcirNgapAct extends NgapAct {
+  override val category: EventCategory[Diagnosis] = "dcir_ngap_act"
+}
+
+object McoCeFbstcNgapAct extends NgapAct {
+  override val category: EventCategory[Diagnosis] = "mco_ce_fbstc_act"
+}
+
+object McoCeFcstcNgapAct extends NgapAct {
+  override val category: EventCategory[Diagnosis] = "mco_ce_fcstc_act"
+}
