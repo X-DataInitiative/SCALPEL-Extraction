@@ -11,14 +11,6 @@ trait Trackloss extends AnyEvent with EventBuilder {
 
   val category: EventCategory[Trackloss] = "trackloss"
 
-  def fromRow(
-    r: Row,
-    patientIDCol: String = "patientID",
-    dateCol: String = "eventDate"): Event[Trackloss] = {
-
-    Trackloss(r.getAs[String](patientIDCol), r.getAs[Timestamp](dateCol))
-  }
-
   def apply(patientID: String, timestamp: Timestamp): Event[Trackloss] = {
     Event(patientID, category, groupID = "NA", "trackloss", 0.0, timestamp, None)
   }

@@ -7,22 +7,6 @@ trait MedicalTakeOverReason extends AnyEvent with EventBuilder {
 
   override val category: EventCategory[MedicalTakeOverReason]
 
-  def fromRow(
-    r: Row,
-    patientIDCol: String = "patientID",
-    groupIDCol: String = "groupID",
-    codeCol: String = "code",
-    weightCol: String = "weight",
-    dateCol: String = "eventDate"): Event[MedicalTakeOverReason] = {
-    this.apply(
-      r.getAs[String](patientIDCol),
-      r.getAs[String](groupIDCol),
-      r.getAs[String](codeCol),
-      r.getAs[Double](weightCol),
-      r.getAs[Timestamp](dateCol)
-    )
-  }
-
   def apply(patientID: String, groupID: String, code: String, weight: Double, date: Timestamp): Event[MedicalTakeOverReason] = {
     Event(patientID, category, groupID, code, weight, date, None)
   }
