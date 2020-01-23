@@ -9,19 +9,6 @@ trait PractitionerClaimSpeciality extends AnyEvent with EventBuilder {
 
   val category: EventCategory[PractitionerClaimSpeciality]
 
-  def fromRow(
-    r: Row,
-    patientIDCol: String = "patientID",
-    pfsIDCol: String = "groupID",
-    pfsSpeCol: String = "code",
-    dateCol: String = "eventDate"): Event[PractitionerClaimSpeciality] =
-    apply(
-      r.getAs[String](patientIDCol),
-      r.getAs[String](pfsIDCol),
-      r.getAs[String](pfsSpeCol),
-      r.getAs[Timestamp](dateCol)
-    )
-
   def apply(patientID: String, groupID: String, pfsSpe: String, date: Timestamp): Event[PractitionerClaimSpeciality] = {
     Event(patientID, category, groupID, pfsSpe, 0.0, date, None)
   }
