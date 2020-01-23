@@ -26,7 +26,8 @@ class Tracklosses(config: TracklossesConfig) {
       .withInterval(config.studyEnd)
       .filterTrackLosses(config.emptyMonths)
       .withTrackLossDate(config.tracklossMonthDelay)
-      .map(Trackloss.fromRow(_, dateCol = "tracklossDate"))
+      .map(e => Trackloss(e.getAs[String]("patientID"),
+        e.getAs[Timestamp]("tracklossDate")))
   }
 }
 

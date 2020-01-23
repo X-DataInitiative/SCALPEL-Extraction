@@ -36,41 +36,4 @@ class OutcomeSuite extends AnyFlatSpec {
     // Then
     assert(result == expected)
   }
-
-  "fromRow" should "allow creation of a Outcome event from a row object" in {
-    // Given
-    val schema = StructType(
-      StructField("pID", StringType) ::
-        StructField("name", StringType) ::
-        StructField("date", TimestampType) :: Nil
-    )
-    val values = Array[Any]("Patient01", "bladder_cancer", makeTS(2010, 1, 1))
-    val r = new GenericRowWithSchema(values, schema)
-    val expected = Outcome("Patient01", "bladder_cancer", makeTS(2010, 1, 1))
-
-    // When
-    val result = Outcome.fromRow(r, "pID", "name", "date")
-
-    // Then
-    assert(result == expected)
-  }
-
-  "fromRow" should "have severity" in {
-    // Given
-    val schema = StructType(
-      StructField("pID", StringType) ::
-        StructField("name", StringType) ::
-        StructField("weight", DoubleType) ::
-        StructField("date", TimestampType) :: Nil
-    )
-    val values = Array[Any]("Patient01", "bladder_cancer", 4.0, makeTS(2010, 1, 1))
-    val r = new GenericRowWithSchema(values, schema)
-    val expected = Outcome("Patient01", "bladder_cancer", 4.0, makeTS(2010, 1, 1))
-
-    // When
-    val result = Outcome.fromRow(r, "pID", "name", "weight", "date")
-
-    // Then
-    assert(result == expected)
-  }
 }
