@@ -5,13 +5,14 @@ package fr.polytechnique.cmap.cnam.study.fall
 import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.events.{Event, FollowUp, Outcome}
+import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event, FollowUp, Outcome}
 import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.etl.transformers.drugprescription.DrugPrescriptionTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposureTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.interaction.NLevelInteractionTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
@@ -184,6 +185,34 @@ object FallMain extends Main with FractureCodes {
             )
         }
 
+        val prescriptions = new DrugPrescriptionTransformer().transform(optionDrugPurchases.get).cache()
+
+        operationsMetadata += {
+          OperationReporter
+            .report(
+              "prescriptions",
+              List("drug_purchases"),
+              OperationTypes.Dispensations,
+              prescriptions.toDF,
+              Path(fallConfig.output.outputSavePath),
+              fallConfig.output.saveMode
+            )
+        }
+
+        val prescriptionsExposures = new ExposureTransformer(definition)
+          .transform(patientsWithFollowUp.map(_._2).distinct())(prescriptions.as[Event[Drug]]).cache()
+        operationsMetadata += {
+          OperationReporter
+            .report(
+              "prescriptions_exposures",
+              List("prescriptions", "follow_up"),
+              OperationTypes.Exposures,
+              prescriptionsExposures.toDF,
+              Path(fallConfig.output.outputSavePath),
+              fallConfig.output.saveMode
+            )
+        }
+
         new ExposureTransformer(definition)
           .transform(patientsWithFollowUp.map(_._2).distinct())(optionDrugPurchases.get)
       }
@@ -211,6 +240,8 @@ object FallMain extends Main with FractureCodes {
             fallConfig.output.saveMode
           )
       }
+
+
     }
 
     operationsMetadata

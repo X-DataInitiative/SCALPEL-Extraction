@@ -8,6 +8,7 @@ import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.transformers.drugprescription.DrugPrescriptionTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposureTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.interaction.NLevelInteractionTransformer
 import fr.polytechnique.cmap.cnam.study.fall.codes._
@@ -111,6 +112,37 @@ object FallMainTransform extends Main with FractureCodes {
                 fallConfig.output.saveMode
               )
         }
+
+        val prescriptions = new DrugPrescriptionTransformer().transform(drugPurchases).cache()
+
+        meta += {
+          "prescriptions" ->
+            OperationReporter
+              .report(
+                "prescriptions",
+                List("drug_purchases"),
+                OperationTypes.Dispensations,
+                prescriptions.toDF,
+                Path(fallConfig.output.outputSavePath),
+                fallConfig.output.saveMode
+              )
+        }
+
+        val prescriptionsExposures = new ExposureTransformer(definition)
+          .transform(patientsWithFollowUp.map(_._2).distinct())(prescriptions.as[Event[Drug]]).cache()
+        meta += {
+          "prescriptions_exposures" ->
+            OperationReporter
+              .report(
+                "prescriptions_exposures",
+                List("prescriptions", "follow_up"),
+                OperationTypes.Exposures,
+                prescriptionsExposures.toDF,
+                Path(fallConfig.output.outputSavePath),
+                fallConfig.output.saveMode
+              )
+        }
+
         new ExposureTransformer(definition).transform(patientsWithFollowUp.map(_._2))(drugPurchases).cache()
       }
       val exposuresReport = OperationReporter.reportAsDataSet(
