@@ -10,7 +10,6 @@ import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.Patients
-import fr.polytechnique.cmap.cnam.etl.extractors.tracklosses.{Tracklosses, TracklossesConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
@@ -18,6 +17,7 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposureTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.tracklosses.{TracklossTransformer, TracklossesConfig}
 import fr.polytechnique.cmap.cnam.study.rosiglitazone.extractors.Diagnoses
 import fr.polytechnique.cmap.cnam.study.rosiglitazone.outcomes.RosiglitazoneOutcomeTransformer
 import fr.polytechnique.cmap.cnam.util.Path
@@ -119,7 +119,7 @@ object RosiglitazoneMain extends Main {
       //Extract Trackloss
       val tracklosses = {
         val tracklossConfig = TracklossesConfig(studyEnd = config.base.studyEnd)
-        new Tracklosses(tracklossConfig).extract(sources).cache()
+        new TracklossTransformer(tracklossConfig).transform(drugPurchases).cache()
       }
       operationsMetadata += {
         OperationReporter
