@@ -38,4 +38,23 @@ class HadFiltersSuite extends SharedContext {
     assertDFs(result, expected)
   }
 
+  "filterSpecialHospitals" should "remove lines containing any of the specific hospital codes" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val colName = HadSource.ETA_NUM_EPMSI.toString
+
+    val input = Seq("1", "2", "42", "690784178", "910100023", "940019144").toDF(colName)
+
+    val expected = Seq("1", "2", "42").toDF(colName)
+
+    // When
+    val instance = new HadFilters(input)
+    val result = instance.filterSpecialHospitals
+
+    // Then
+    assertDFs(result, expected)
+  }
+
 }

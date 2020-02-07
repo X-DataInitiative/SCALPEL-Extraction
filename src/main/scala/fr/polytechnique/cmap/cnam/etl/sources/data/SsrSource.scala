@@ -20,7 +20,7 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
   val MOI_ANN_SOR_SEJ: Column = col("SSR_B__MOI_ANN_SOR_SEJ")
   val RHS_ANT_SEJ_ENT: Column = col("SSR_B__RHS_ANT_SEJ_ENT")
   val FP_PEC: Column = col("SSR_B__FP_PEC")
-
+  val GRG_GME: Column = col("SSR_B__GRG_GME")
   val NIR_RET: Column = col("NIR_RET")
   val SEJ_RET: Column = col("SEJ_RET")
   val FHO_RET: Column = col("FHO_RET")
@@ -40,6 +40,7 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
       * https://datainitiative.atlassian.net/wiki/pages/viewpage.action?pageId=40304642
       */
     rawSsr
+      .filterSpecialHospitals
       .filterSsrCorruptedHospitalStays
   }
 }
