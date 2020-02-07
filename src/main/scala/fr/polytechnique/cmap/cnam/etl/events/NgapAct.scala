@@ -27,13 +27,13 @@ trait NgapAct extends AnyEvent with EventBuilder {
 
 
 object DcirNgapAct extends NgapAct {
-  override val category: EventCategory[Diagnosis] = "dcir_ngap_act"
+  override val category: EventCategory[NgapAct] = "dcir_ngap_act"
 }
 
 object McoCeFbstcNgapAct extends NgapAct {
-  override val category: EventCategory[Diagnosis] = "mco_ce_fbstc_act"
+  override val category: EventCategory[NgapAct] = "mco_ce_fbstc_act"
 }
 
 object McoCeFcstcNgapAct extends NgapAct {
-  override val category: EventCategory[Diagnosis] = "mco_ce_fcstc_act"
+  override val category: EventCategory[NgapAct] = "mco_ce_fcstc_act"
 }
