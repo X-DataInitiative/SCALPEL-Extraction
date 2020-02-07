@@ -20,8 +20,8 @@ class SsrSourceSuite extends SharedContext with SsrSource {
       ("Patient3", Some("C679"), Some("B672"), Some("C673"), None, Some(2011), Some(5)),
       ("MustBeDropped1", None, None, None, Some("31122011"), Some(2011), Some(12))
     ).toDF(
-      "SSR_C__NUM_ENQ", "MOR_PRP", "ETL_AFF", "SSR_D__DGN_COD",
-      "SSR_C__ENT_DAT", "SSR_C__ANN_LUN_1S", "SSR_C__MOI_LUN_1S"
+      "NUM_ENQ", "SSR_B__MOR_PRP", "SSR_B__ETL_AFF", "SSR_D__DGN_COD",
+      "ENT_DAT", "ANN_LUN_1S", "MOI_LUN_1S"
     )
   }
 
