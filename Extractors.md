@@ -2,7 +2,7 @@
 
 # Extractors
 
-Extractors are a kind of jobs that allows to extract the required columns from the sources and maps them to the `Event` it is extracting. 
+Extractors are a kind of jobs that allows to extract the required columns from the sources and maps them to the `Event` ([Events](Events.md)) it is extracting. 
 An extractor is composed of several basic components that are grouped to give all the functionalities to the extractors. 
 From a point of view hierarchical we have:
 
