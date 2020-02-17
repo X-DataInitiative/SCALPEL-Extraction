@@ -9,26 +9,26 @@ import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 trait SsrSource extends ColumnNames {
 
   final object ColNames extends Serializable {
-    val PatientID: ColName = "SSR_C__NUM_ENQ"
-    val DP: ColName = "MOR_PRP"
-    val DR: ColName = "ETL_AFF"
+    val PatientID: ColName = "NUM_ENQ"
+    val DP: ColName = "SSR_B__MOR_PRP"
+    val DR: ColName = "SSR_B__ETL_AFF"
     val DA: ColName = "SSR_D__DGN_COD"
     val CCAM: ColName = "SSR_CCAM__CCAM_ACT" // present only in 2014-2015-2016, should be addeed for the studies on the echantillon
     val CSARR: ColName = "SSR_CSARR__CSARR_COD"
-    val FP_PEC: ColName = "FP_PEC"
+    val FP_PEC: ColName = "SSR_B__FP_PEC"
     // MOI_ANN_SOR_SEJ ?
     //val GHM: ColName = "SSR_B__GRG_GHM" -> GME TODO
     val EtaNum: ColName = "ETA_NUM"
     val RhaNum: ColName = "RHA_NUM"
     val RhsNum: ColName = "RHS_NUM"
     val Year: ColName = "year"
-    val StayStartMonth: ColName = "SSR_C__MOI_LUN_1S"
-    val StayStartYear: ColName = "SSR_C__ANN_LUN_1S"
-    val StayLength: ColName = "RHS_ANT_SEJ_ENT"
-    val StayStartDate: ColName = "SSR_C__ENT_DAT"
-    val StayEndDate: ColName = "SSR_C__SOR_DAT"
-    val StartDate: ColName = "SSR_C__EXE_SOI_DTD"
-    val EndDate: ColName = "SSR_C__EXE_SOI_DTF"
+    val StayStartMonth: ColName = "MOI_LUN_1S"
+    val StayStartYear: ColName = "ANN_LUN_1S"
+    val StayLength: ColName = "SSR_B__RHS_ANT_SEJ_ENT"
+    val StayStartDate: ColName = "ENT_DAT"
+    val StayEndDate: ColName = "SOR_DAT"
+    val StartDate: ColName = "EXE_SOI_DTD"
+    val EndDate: ColName = "EXE_SOI_DTF"
     val all = List(
       PatientID, DP, DR, DA, CCAM, CSARR, FP_PEC, EtaNum, RhaNum, RhsNum, StayLength, //CSARR,
       StayStartDate, StayEndDate, StartDate, EndDate, Year, StayStartMonth, StayStartYear

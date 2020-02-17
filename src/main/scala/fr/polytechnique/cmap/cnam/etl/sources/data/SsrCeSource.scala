@@ -16,6 +16,7 @@ object SsrCeSource extends DataSourceManager with SsrSourceSanitizer {
 
   override def sanitize(ssrCe: DataFrame): DataFrame = {
     ssrCe
+      .filterSpecialHospitals
       .filterSsrCeCorruptedHospitalStays
   }
 }

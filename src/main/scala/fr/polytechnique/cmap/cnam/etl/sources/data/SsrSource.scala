@@ -15,22 +15,22 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
   val ETA_NUM: Column = col("ETA_NUM")
   val RHA_NUM: Column = col("RHA_NUM")
   val RHS_NUM: Column = col("RHS_NUM")
-  val MOR_PRP: Column = col("MOR_PRP")
-  val ETL_AFF: Column = col("ETL_AFF")
-  val MOI_ANN_SOR_SEJ: Column = col("MOI_ANN_SOR_SEJ")
-  val RHS_ANT_SEJ_ENT: Column = col("RHS_ANT_SEJ_ENT")
-  val FP_PEC: Column = col("FP_PEC")
-
-  val NIR_RET: Column = col("SSR_C__NIR_RET")
-  val SEJ_RET: Column = col("SSR_C__SEJ_RET")
-  val FHO_RET: Column = col("SSR_C__FHO_RET")
-  val PMS_RET: Column = col("SSR_C__PMS_RET")
-  val DAT_RET: Column = col("SSR_C__DAT_RET")
-  val ENT_DAT: Column = col("SSR_C__ENT_DAT")
-  val SOR_DAT: Column = col("SSR_C__SOR_DAT")
+  val MOR_PRP: Column = col("SSR_B__MOR_PRP")
+  val ETL_AFF: Column = col("SSR_B__ETL_AFF")
+  val MOI_ANN_SOR_SEJ: Column = col("SSR_B__MOI_ANN_SOR_SEJ")
+  val RHS_ANT_SEJ_ENT: Column = col("SSR_B__RHS_ANT_SEJ_ENT")
+  val FP_PEC: Column = col("SSR_B__FP_PEC")
+  val GRG_GME: Column = col("SSR_B__GRG_GME")
+  val NIR_RET: Column = col("NIR_RET")
+  val SEJ_RET: Column = col("SEJ_RET")
+  val FHO_RET: Column = col("FHO_RET")
+  val PMS_RET: Column = col("PMS_RET")
+  val DAT_RET: Column = col("DAT_RET")
+  val ENT_DAT: Column = col("ENT_DAT")
+  val SOR_DAT: Column = col("SOR_DAT")
   val Year: Column = col("year")
 
-  override val EXE_SOI_DTD: Column = col("SSR_C__EXE_SOI_DTD")
+  override val EXE_SOI_DTD: Column = col("EXE_SOI_DTD")
 
   val foreignKeys: List[String] = List("ETA_NUM", "RHA_NUM", "year")
 
@@ -40,28 +40,7 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
       * https://datainitiative.atlassian.net/wiki/pages/viewpage.action?pageId=40304642
       */
     rawSsr
+      .filterSpecialHospitals
       .filterSsrCorruptedHospitalStays
-  }
-
-  def read(sqlContext: SQLContext, path: List[String]): DataFrame  = {
-    readAnnotateJoin(sqlContext, path, "SSR_C")
-  }
-
-  private def readAnnotateJoin(sqlContext: SQLContext, paths: List[String], joinedTableName: String): DataFrame  = {
-    val ssrSej = sqlContext.read.parquet(paths.head)
-    val ssrC = sqlContext.read.parquet(paths(1))
-    ssrSej.join(
-      ssrC.addPrefixYear(joinedTableName, foreignKeys), foreignKeys, "left_outer")
-  }
-
-  implicit class TableHelper(df: DataFrame) {
-
-     def addPrefixYear(prefix: String, except: List[String]): DataFrame = {
-      val renamedColumns = df.columns.map {
-        case colName if !except.contains(colName) => prefix + "__" + colName
-        case keyCol => keyCol
-      }
-      df.toDF(renamedColumns: _*).withColumn("year", year(to_date(col("SSR_C__EXE_SOI_DTD"))))
-    }
   }
 }

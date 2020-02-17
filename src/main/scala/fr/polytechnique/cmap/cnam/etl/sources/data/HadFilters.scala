@@ -1,13 +1,13 @@
 package fr.polytechnique.cmap.cnam.etl.sources.data
 
+import fr.polytechnique.cmap.cnam.etl.sources.data.DoublonFinessPmsi.specialHospitalCodes
 import org.apache.spark.sql.{Column, DataFrame}
 
 private[data] class HadFilters(rawHad: DataFrame) {
-
-  /** Removing return codes which significate error in the PMSI
-   *
-   * This is a classic filter for all PMSI products. Other filters may be implemented in the future.
-   * */
+  /** Filter out Had corrupted stays as returned by the ATIH.
+    *
+    * @return
+    */
   def filterHadCorruptedHospitalStays: DataFrame = {
     val fictionalAndFalseHospitalStaysFilter: Column = HadSource
       .NIR_RET === "0" and HadSource.SEJ_RET === "0" and HadSource
@@ -17,5 +17,12 @@ private[data] class HadFilters(rawHad: DataFrame) {
     rawHad.filter(fictionalAndFalseHospitalStaysFilter)
   }
 
+  /** Remove geographic finess doublons from APHP, APHM and HCL.
+    *
+    * @return
+    */
+  def filterSpecialHospitals: DataFrame = {
+    rawHad.where(!HadSource.ETA_NUM_EPMSI.isin(specialHospitalCodes: _*))
+  }
 }
 
