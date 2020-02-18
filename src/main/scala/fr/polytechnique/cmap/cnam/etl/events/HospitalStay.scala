@@ -20,6 +20,10 @@ object McoHospitalStay extends HospitalStay {
   override val category: EventCategory[HospitalStay] = "mco_hospital_stay"
 }
 
+object McoceEmergency extends HospitalStay {
+  override val category: EventCategory[HospitalStay] = "mco_ce_emergency"
+}
+
 /** Hospital Stay in the SSR PMSI are one type of hospital stays,  see :
   *  https://documentation-snds.health-data-hub.fr/glossaire/ssr.html
   */
