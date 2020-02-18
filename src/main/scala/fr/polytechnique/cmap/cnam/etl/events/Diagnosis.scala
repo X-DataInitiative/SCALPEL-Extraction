@@ -13,6 +13,10 @@ trait Diagnosis extends AnyEvent with EventBuilder {
     Event(patientID, category, groupID = "NA", code, 0.0, date, None)
   }
 
+  def apply(patientID: String, code: String, date: Timestamp, endDate: Option[Timestamp]): Event[Diagnosis] = {
+    Event(patientID, category, groupID = "NA", code, 0.0, date, endDate)
+  }
+
   def apply(patientID: String, groupID: String, code: String, date: Timestamp): Event[Diagnosis] = {
     Event(patientID, category, groupID, code, 0.0, date, None)
   }
@@ -20,6 +24,7 @@ trait Diagnosis extends AnyEvent with EventBuilder {
   def apply(patientID: String, groupID: String, code: String, weight: Double, date: Timestamp): Event[Diagnosis] = {
     Event(patientID, category, groupID, code, weight, date, None)
   }
+
 }
 
 object McoMainDiagnosis extends Diagnosis {
