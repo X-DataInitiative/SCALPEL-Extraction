@@ -22,6 +22,11 @@ object NonMedicalPractitionerClaim extends PractitionerClaimSpeciality {
   override val category: EventCategory[PractitionerClaimSpeciality] = "non_medical_practitioner_claim"
 }
 
+/**
+ * Tables of hospital services (FBSTC) and procedures (FCSTC) are not completed for each stay and are complementary.
+ * All the details are in the collaborative documentation on the SNDS here :
+ * https://documentation-snds.health-data-hub.fr/fiches/actes_consult_externes.html#reperage-des-ace-dans-la-table-des-prestations-dcir
+ */
 object McoCeFbstcMedicalPractitionerClaim extends PractitionerClaimSpeciality {
   override val category: EventCategory[PractitionerClaimSpeciality] = "mco_ce__fbstc_practitioner_claim"
 }

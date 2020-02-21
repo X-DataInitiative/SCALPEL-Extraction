@@ -3,8 +3,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.dcir
 
 import java.sql.Timestamp
-import org.apache.commons.codec.binary.Base64
 import scala.util.Try
+import org.apache.commons.codec.binary.Base64
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.{DataFrame, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder}
@@ -41,11 +41,12 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
     r.getAs[String](ColNames.PatientID)
   }
 
-   /** Trying to catch unknown dates (example : IJ = Indemnité Journalière)
-   *
-   * @param r The Row object itself
-   * @return The date of the event or the flux date if it doesn't exist
-   */
+   /** Trying to catch unknown dates
+    * example of unknown dates situation : IJ = Indemnité Journalière which are a replacement income
+    * paid by the HealthCare Insurance during a sick leave.
+    * @param r The Row object itself
+    * @return The date of the event or the flux date if it doesn't exist
+    */
   def extractStart(r: Row): Timestamp = {
     Try(r.getAs[java.util.Date](ColNames.Date).toTimestamp) recover {
       case _: NullPointerException => extractFluxDate(r)

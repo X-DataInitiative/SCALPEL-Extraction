@@ -38,9 +38,15 @@ trait McoCeExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Mc
     r.getAs[String](ColNames.PatientID)
   }
 
+  /** Return groupID as hospital stay ID
+   *
+   * @param r
+   * @return groupId which is the unique ID of the hospital stay
+   */
   override def extractGroupId(r: Row): String = {
     r.getAs[String](ColNames.EtaNum) + "_" +
-      r.getAs[String](ColNames.SeqNum) + "_" + r.getAs[Int](ColNames.Year).toString
+      r.getAs[String](ColNames.SeqNum) + "_" +
+      r.getAs[Int](ColNames.Year).toString
   }
 
   def extractStart(r: Row): Timestamp = r.getAs[Timestamp](ColNames.Date).toTimestamp
