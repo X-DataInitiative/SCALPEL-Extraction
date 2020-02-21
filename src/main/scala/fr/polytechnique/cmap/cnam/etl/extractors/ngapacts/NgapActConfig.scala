@@ -1,10 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.ngapacts
 
-import org.apache.spark.sql.Row
-import fr.polytechnique.cmap.cnam.etl.extractors.ExtractorConfig
-
 import scala.util.Try
 import org.apache.spark.sql.Row
+import fr.polytechnique.cmap.cnam.etl.extractors.ExtractorConfig
 
 /**
   * NgapActConfig defines three different ways to filter for specific ngap acts in the SNDS :
@@ -23,59 +21,14 @@ import org.apache.spark.sql.Row
   * search where ngapCoefficient is available
   *   - if a list of ngapKeyLetters and a list of ngapCoefficients is given, it extracts all combination of (keyLetter, coefficient)
   *   - if the list of ngapCoefficients is empty, extract all acts where coeff is in ngapCoefficient
-  * @param acts_categories List of configuration to get specific NgapActs
+  * @param actsCategories List of configuration to get specific NgapActs
   */
 class NgapActConfig(
-  val acts_categories: List[NgapActClassConfig]) extends ExtractorConfig with Serializable {
-
-  def dcirIsInCategory(
-    categories: List[NgapActClassConfig],
-    row: Row): Boolean = {
-
-    val ngapKeyLetter : String = row.getAs[String]("PRS_NAT_CB2")
-    val ngapCoefficient : String = row.getAs[Double]("PRS_ACT_CFT").toString
-    val prsNatRef: String = row.getAs[Int]("PRS_NAT_REF").toString
-
-    categories
-      .exists(category =>
-        (category.ngapKeyLetters.contains(ngapKeyLetter) &&
-          category.ngapCoefficients.contains(ngapCoefficient)) ||
-        category.ngapPrsNatRefs.contains(prsNatRef)
-      )
-  }
-
-  def pmsiIsInCategories(
-    categories: List[NgapActClassConfig],
-    ngapKeyColumn: String,
-    ngapCoeffColumn: String,
-    row: Row): Boolean = {
-
-    val letter = row.getAs[String](ngapKeyColumn)
-    val coeff = Try(row.getAs[Double](ngapCoeffColumn).toString) recover {
-      case _: NullPointerException => "0"
-    }
-
-    categories
-      .exists(category => pmsiIsInCategory(category, letter, coeff.get))
-  }
-
-  def pmsiIsInCategory(
-    category: NgapActClassConfig,
-    ngapLetter: String,
-    ngapCoeff: String): Boolean = {
-      if (category.ngapCoefficients.isEmpty) {
-        category.ngapKeyLetters.contains(ngapLetter)
-      }
-      else {
-        category.ngapCoefficients.contains(ngapCoeff) &&
-          category.ngapKeyLetters.contains(ngapLetter)
-      }
-  }
+  val actsCategories: List[NgapActClassConfig]) extends ExtractorConfig with Serializable {
 }
 
 object NgapActConfig {
-  def apply(acts_categories: List[NgapActClassConfig]): NgapActConfig= new NgapActConfig(
-    acts_categories
+  def apply(actsCategories: List[NgapActClassConfig]): NgapActConfig= new NgapActConfig(
+    actsCategories
   )
-
 }

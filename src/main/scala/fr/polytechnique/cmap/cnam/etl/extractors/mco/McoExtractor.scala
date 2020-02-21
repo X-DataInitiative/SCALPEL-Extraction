@@ -3,12 +3,11 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.mco
 
 import java.sql.Timestamp
-
+import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.{DataFrame, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder}
 import fr.polytechnique.cmap.cnam.etl.extractors.{EventRowExtractor, Extractor}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.{DataFrame, Row}
 
 trait McoExtractor[EventType <: AnyEvent] extends Extractor[EventType] with McoSource with EventRowExtractor {
 
