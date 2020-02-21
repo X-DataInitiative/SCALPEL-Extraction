@@ -14,7 +14,7 @@ class PractitionerClaimSpecialitySuite extends AnyFlatSpec {
   val patientID: String = "patientID"
   val timestamp: Timestamp = mock(classOf[Timestamp])
 
-  object MockPractionnerClaimSpeciality$ extends PractitionerClaimSpeciality {
+  object MockPractionnerClaimSpeciality extends PractitionerClaimSpeciality {
     val category: EventCategory[PractitionerClaimSpeciality] = "mock_prestationSpeciality"
   }
 
@@ -23,7 +23,7 @@ class PractitionerClaimSpecialitySuite extends AnyFlatSpec {
     // Given
     val expected = Event[PractitionerClaimSpeciality](
       patientID,
-      MockPractionnerClaimSpeciality$.category,
+      MockPractionnerClaimSpeciality.category,
       "A10000001",
       "42",
       0.0,
@@ -32,7 +32,7 @@ class PractitionerClaimSpecialitySuite extends AnyFlatSpec {
     )
 
     // When
-    val result = MockPractionnerClaimSpeciality$(patientID, "A10000001", "42", timestamp)
+    val result = MockPractionnerClaimSpeciality(patientID, "A10000001", "42", timestamp)
 
     // Then
     assert(result == expected)

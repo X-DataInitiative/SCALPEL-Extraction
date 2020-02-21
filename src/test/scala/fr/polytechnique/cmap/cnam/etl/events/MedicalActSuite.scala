@@ -18,7 +18,7 @@ class MedicalActSuite extends AnyFlatSpec {
     val category: EventCategory[MedicalAct] = "mock_act"
   }
 
-  "apply" should "allow creation of a DiagnosisBuilder event" in {
+  "apply" should "allow creation of a Medical Act event" in {
 
     // Given
     val expected = Event[MedicalAct](patientID, MockMedicalAct.category, "hosp", "C67", 0.0, timestamp, None)
