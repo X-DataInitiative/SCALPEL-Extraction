@@ -28,9 +28,10 @@ trait McoSource extends ColumnNames {
     val StayEndDate: ColName = "SOR_DAT"
     val StartDate: ColName = "EXE_SOI_DTD"
     val EndDate: ColName = "EXE_SOI_DTF"
+    val CCAMDelayDate: ColName = "MCO_A__ENT_DAT_DEL"
     val all = List(
       PatientID, DP, DR, DA, CCAM, GHM, EtaNum, RsaNum, Year, ExitMode, StayEndMonth, StayEndYear, StayLength,
-      StayStartDate, StayEndDate, StartDate, EndDate
+      StayStartDate, StayEndDate, StartDate, EndDate, CCAMDelayDate
     )
     val hospitalStayPart = List(
       PatientID, EtaNum, RsaNum, Year, StartDate, EndDate
