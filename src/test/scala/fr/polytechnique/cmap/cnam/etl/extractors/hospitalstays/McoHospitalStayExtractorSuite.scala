@@ -19,12 +19,12 @@ class McoHospitalStayExtractorSuite extends SharedContext {
     val sources = Sources(mco = Some(mco))
 
     val expected: Dataset[Event[HospitalStay]] = Seq(
-      McoHospitalStay("Patient_02", "10000123_20000123_2007", makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
-      McoHospitalStay("Patient_02", "10000123_20000345_2007", makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
-      McoHospitalStay("Patient_02", "10000123_30000546_2008", makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
-      McoHospitalStay("Patient_02", "10000123_30000852_2008", makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
-      McoHospitalStay("Patient_02", "10000123_10000987_2006", makeTS(2006, 1, 1), makeTS(2006, 1, 10)),
-      McoHospitalStay("Patient_02", "10000123_10000543_2006", makeTS(2006, 1, 1), makeTS(2006, 1, 10))
+      McoHospitalStay("Patient_02", "10000123_20000123_2007", 8.0D, makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
+      McoHospitalStay("Patient_02", "10000123_20000345_2007", 8.0D, makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
+      McoHospitalStay("Patient_02", "10000123_30000546_2008", 8.0D, makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
+      McoHospitalStay("Patient_02", "10000123_30000852_2008", 8.0D, makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
+      McoHospitalStay("Patient_02", "10000123_10000987_2006", 8.0D, makeTS(2006, 1, 1), makeTS(2006, 1, 10)),
+      McoHospitalStay("Patient_02", "10000123_10000543_2006", -1.0D, makeTS(2006, 1, 1), makeTS(2006, 1, 10))
     ).toDS()
 
     //When
@@ -43,12 +43,12 @@ class McoHospitalStayExtractorSuite extends SharedContext {
     val sources = Sources(mco = Some(mco))
 
     val expected: Dataset[Event[HospitalStay]] = Seq(
-      McoHospitalStay("Patient_02", "10000123_20000123_2007", makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
-      McoHospitalStay("Patient_02", "10000123_20000345_2007", makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
-      McoHospitalStay("Patient_02", "10000123_30000546_2008", makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
-      McoHospitalStay("Patient_02", "10000123_30000852_2008", makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
-      McoHospitalStay("Patient_02", "10000123_10000987_2006", makeTS(2006, 1, 1), makeTS(2006, 1, 10)),
-      McoHospitalStay("Patient_02", "10000123_10000543_2006", makeTS(2006, 1, 1), makeTS(2006, 1, 10))
+      McoHospitalStay("Patient_02", "10000123_20000123_2007", 8.0D, makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
+      McoHospitalStay("Patient_02", "10000123_20000345_2007", 8.0D, makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
+      McoHospitalStay("Patient_02", "10000123_30000546_2008", 8.0D, makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
+      McoHospitalStay("Patient_02", "10000123_30000852_2008", 8.0D, makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
+      McoHospitalStay("Patient_02", "10000123_10000987_2006", 8.0D, makeTS(2006, 1, 1), makeTS(2006, 1, 10)),
+      McoHospitalStay("Patient_02", "10000123_10000543_2006", -1.0D, makeTS(2006, 1, 1), makeTS(2006, 1, 10))
     ).toDS()
 
     //When
