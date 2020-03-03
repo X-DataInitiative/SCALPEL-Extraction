@@ -17,8 +17,9 @@ trait McoExtractor[EventType <: AnyEvent] extends Extractor[EventType] with McoS
 
   def getInput(sources: Sources): DataFrame = sources.mco.get.select(ColNames.all.map(col): _*).estimateStayStartTime
 
-  def isInStudy(codes: Set[String])
-    (row: Row): Boolean = codes.exists(code(row).startsWith(_))
+  def isInStudy(codes: Set[String])(row: Row): Boolean = {
+    codes.exists(code(row).startsWith(_))
+  }
 
   def isInExtractorScope(row: Row): Boolean = !row.isNullAt(row.fieldIndex(columnName))
 
