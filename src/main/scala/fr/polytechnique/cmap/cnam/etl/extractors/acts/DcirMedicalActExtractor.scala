@@ -58,7 +58,7 @@ trait DcirActExtractor extends DcirExtractor[MedicalAct] {
 
   override def extractStart(r: Row): Timestamp = {
     Try(super.extractStart(r)) recover {
-      case _: NullPointerException => functions.makeTS(1970, 1, 1)
+      case _ => functions.makeTS(1970, 1, 1)
     }
   }.get
 }

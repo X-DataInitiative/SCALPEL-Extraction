@@ -218,14 +218,15 @@ class DcirMedicalActsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val codes = Set("AAAA", "CCCC")
+    val codes = Set("AAAA", "CCCC", "DDDD")
 
     val input = Seq(
       ("Patient_A", "AAAA", "NABM1", makeTS(2010, 1, 1), None, None, None),
       ("Patient_A", "BBBB", "NABM1", makeTS(2010, 2, 1), Some(1D), Some(0D), Some(1D)),
       ("Patient_B", "CCCC", "NABM1", makeTS(2010, 3, 1), None, None, None),
       ("Patient_B", "CCCC", "NABM1", makeTS(2010, 4, 1), Some(7D), Some(0D), Some(2D)),
-      ("Patient_C", "BBBB", "NABM1", makeTS(2010, 5, 1), Some(1D), Some(0D), Some(2D))
+      ("Patient_C", "BBBB", "NABM1", makeTS(2010, 5, 1), Some(1D), Some(0D), Some(2D)),
+      ("Patient_D", "DDDD", "NABM1", null, None, None, None)
     ).toDF(
       ColNames.PatientID, ColNames.CamCode, ColNames.BioCode, ColNames.Date,
       ColNames.InstitutionCode, ColNames.GHSCode, ColNames.Sector
@@ -236,7 +237,8 @@ class DcirMedicalActsSuite extends SharedContext {
     val expected = Seq[Event[MedicalAct]](
       DcirAct("Patient_A", DcirAct.groupID.Liberal, "AAAA", 1.0, makeTS(2010, 1, 1)),
       DcirAct("Patient_B", DcirAct.groupID.Liberal, "CCCC", 1.0, makeTS(2010, 3, 1)),
-      DcirAct("Patient_B", DcirAct.groupID.PrivateAmbulatory, "CCCC", 1.0, makeTS(2010, 4, 1))
+      DcirAct("Patient_B", DcirAct.groupID.PrivateAmbulatory, "CCCC", 1.0, makeTS(2010, 4, 1)),
+      DcirAct("Patient_D", DcirAct.groupID.Liberal, "DDDD", 1.0, makeTS(1970, 1, 1))
     ).toDS
 
     // When
