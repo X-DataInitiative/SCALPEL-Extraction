@@ -69,7 +69,7 @@ object Sources {
 
   /** Read all source dataframe.
     *
-    * @param sqlContext
+    * @param sqlContext Spark Context needed to fetch data
     * @param paths
     * @return
     */

@@ -15,7 +15,7 @@ object DcirSource extends DataSourceManager with DcirSourceSanitizer {
   /** Sanitize the dcir with usual filter for analysis
     * - remove the lines without a proper *Nature de la prestation*
     * - remove the lines for information
-    * @param dcir
+    * @param dcir the data source that will be sanitized
     * @return a new instance of the Source, with the sanitized data
     */
   override def sanitize(dcir: DataFrame): DataFrame = {

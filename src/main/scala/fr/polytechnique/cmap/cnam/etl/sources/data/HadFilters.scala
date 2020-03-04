@@ -6,7 +6,7 @@ import org.apache.spark.sql.{Column, DataFrame}
 private[data] class HadFilters(rawHad: DataFrame) {
   /** Filter out Had corrupted stays as returned by the ATIH.
     *
-    * @return
+    * @return dataframe cleaned of HAD corrupted stays
     */
   def filterHadCorruptedHospitalStays: DataFrame = {
     val fictionalAndFalseHospitalStaysFilter: Column = HadSource
@@ -19,7 +19,7 @@ private[data] class HadFilters(rawHad: DataFrame) {
 
   /** Remove geographic finess doublons from APHP, APHM and HCL.
     *
-    * @return
+    * @return dataframe without finess doublons
     */
   def filterSpecialHospitals: DataFrame = {
     rawHad.where(!HadSource.ETA_NUM_EPMSI.isin(specialHospitalCodes: _*))
