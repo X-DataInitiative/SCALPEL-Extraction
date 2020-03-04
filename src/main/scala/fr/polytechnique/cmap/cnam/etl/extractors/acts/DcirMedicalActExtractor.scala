@@ -2,11 +2,13 @@
 
 package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
+import java.sql.Timestamp
 import scala.util.Try
 import org.apache.spark.sql.{DataFrame, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{BiologyDcirAct, DcirAct, EventBuilder, MedicalAct}
 import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.util.functions
 
 trait DcirActExtractor extends DcirExtractor[MedicalAct] {
 
@@ -54,10 +56,15 @@ trait DcirActExtractor extends DcirExtractor[MedicalAct] {
 
   override def extractWeight(r: Row): Double = 1.0
 
+  override def extractStart(r: Row): Timestamp = {
+    Try(super.extractStart(r)) recover {
+      case _ => functions.makeTS(1970, 1, 1)
+    }
+  }.get
 }
 
 
-object DcirMedicalActExtractor extends DcirActExtractor  {
+object DcirMedicalActExtractor extends DcirActExtractor {
   override val columnName: String = ColNames.CamCode
   override val eventBuilder: EventBuilder = DcirAct
 
@@ -68,9 +75,10 @@ object DcirMedicalActExtractor extends DcirActExtractor  {
 }
 
 
-object DcirBiologyActExtractor extends DcirActExtractor  {
+object DcirBiologyActExtractor extends DcirActExtractor {
   override val columnName: String = ColNames.BioCode
   override val eventBuilder: EventBuilder = BiologyDcirAct
+
   override def code = (row: Row) => row.getAs[Double](columnName).toString
 
   override def getInput(sources: Sources): DataFrame = sources.dcir.get.select(

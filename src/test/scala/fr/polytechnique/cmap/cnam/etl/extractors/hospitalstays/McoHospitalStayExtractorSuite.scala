@@ -19,12 +19,12 @@ class McoHospitalStayExtractorSuite extends SharedContext {
     val sources = Sources(mco = Some(mco))
 
     val expected: Dataset[Event[HospitalStay]] = Seq(
-      McoHospitalStay("Patient_02", "10000123_20000123_2007", makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
-      McoHospitalStay("Patient_02", "10000123_20000345_2007", makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
-      McoHospitalStay("Patient_02", "10000123_30000546_2008", makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
-      McoHospitalStay("Patient_02", "10000123_30000852_2008", makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
-      McoHospitalStay("Patient_02", "10000123_10000987_2006", makeTS(2006, 1, 1), makeTS(2006, 1, 10)),
-      McoHospitalStay("Patient_02", "10000123_10000543_2006", makeTS(2006, 1, 1), makeTS(2006, 1, 10))
+      McoHospitalStay("Patient_02", "10000123_20000123_2007", 8.0D, makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
+      McoHospitalStay("Patient_02", "10000123_20000345_2007", 8.0D, makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
+      McoHospitalStay("Patient_02", "10000123_30000546_2008", 8.0D, makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
+      McoHospitalStay("Patient_02", "10000123_30000852_2008", 8.0D, makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
+      McoHospitalStay("Patient_02", "10000123_10000987_2006", 8.0D, makeTS(2006, 1, 1), makeTS(2006, 1, 10)),
+      McoHospitalStay("Patient_02", "10000123_10000543_2006", -1.0D, makeTS(2006, 1, 1), makeTS(2006, 1, 10))
     ).toDS()
 
     //When
@@ -43,12 +43,12 @@ class McoHospitalStayExtractorSuite extends SharedContext {
     val sources = Sources(mco = Some(mco))
 
     val expected: Dataset[Event[HospitalStay]] = Seq(
-      McoHospitalStay("Patient_02", "10000123_20000123_2007", makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
-      McoHospitalStay("Patient_02", "10000123_20000345_2007", makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
-      McoHospitalStay("Patient_02", "10000123_30000546_2008", makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
-      McoHospitalStay("Patient_02", "10000123_30000852_2008", makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
-      McoHospitalStay("Patient_02", "10000123_10000987_2006", makeTS(2006, 1, 1), makeTS(2006, 1, 10)),
-      McoHospitalStay("Patient_02", "10000123_10000543_2006", makeTS(2006, 1, 1), makeTS(2006, 1, 10))
+      McoHospitalStay("Patient_02", "10000123_20000123_2007", 8.0D, makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
+      McoHospitalStay("Patient_02", "10000123_20000345_2007", 8.0D, makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
+      McoHospitalStay("Patient_02", "10000123_30000546_2008", 8.0D, makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
+      McoHospitalStay("Patient_02", "10000123_30000852_2008", 8.0D, makeTS(2008, 3, 1), makeTS(2008, 3, 10)),
+      McoHospitalStay("Patient_02", "10000123_10000987_2006", 8.0D, makeTS(2006, 1, 1), makeTS(2006, 1, 10)),
+      McoHospitalStay("Patient_02", "10000123_10000543_2006", -1.0D, makeTS(2006, 1, 1), makeTS(2006, 1, 10))
     ).toDS()
 
     //When
@@ -56,6 +56,37 @@ class McoHospitalStayExtractorSuite extends SharedContext {
 
     //Then
     assertDSs(expected, result)
+  }
+
+  "extract" should "calculate correct weight from mco sources" in {
+    //Given
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    val df = Seq(
+      ("Patient_02", "10000123", "20000123", "2007", makeTS(2007, 1, 1), makeTS(2007, 1, 10), "8", "5"),
+      ("Patient_02", "10000123", "20000345", "2007", makeTS(2007, 2, 1), makeTS(2007, 2, 10), "8", "5"),
+      ("Patient_02", "10000123", "20000546", "2007", makeTS(2007, 3, 1), makeTS(2007, 3, 10), "8", "R"),
+      ("Patient_02", "10000123", "20000852", "2007", makeTS(2007, 4, 1), makeTS(2007, 4, 10), "8", null),
+      ("Patient_02", "10000123", "20000987", "2007", makeTS(2007, 5, 1), makeTS(2007, 5, 10), null, null)
+    ).toDF("NUM_ENQ", "ETA_NUM", "RSA_NUM", "SOR_ANN", "EXE_SOI_DTD", "EXE_SOI_DTF", "MCO_B__ENT_MOD", "MCO_B__ENT_PRV")
+
+    val sources = Sources(mco = Some(df))
+
+    val expected: Dataset[Event[HospitalStay]] = Seq(
+      McoHospitalStay("Patient_02", "10000123_20000123_2007", 8.5D, makeTS(2007, 1, 1), makeTS(2007, 1, 10)),
+      McoHospitalStay("Patient_02", "10000123_20000345_2007", 8.5D, makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
+      McoHospitalStay("Patient_02", "10000123_20000546_2007", 8.8D, makeTS(2007, 3, 1), makeTS(2007, 3, 10)),
+      McoHospitalStay("Patient_02", "10000123_20000852_2007", 8.0D, makeTS(2007, 4, 1), makeTS(2007, 4, 10)),
+      McoHospitalStay("Patient_02", "10000123_20000987_2007", -1.0D, makeTS(2007, 5, 1), makeTS(2007, 5, 10))
+    ).toDS()
+
+    //When
+    val result: Dataset[Event[HospitalStay]] = McoHospitalStaysExtractor.extract(sources, Set.empty[String])
+
+    //Then
+    assertDSs(expected, result, true)
+
   }
 
 }
