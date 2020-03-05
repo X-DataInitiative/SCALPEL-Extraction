@@ -13,7 +13,7 @@ class SsrDiagnosesSuite extends SharedContext {
 
     // Given
     val dpCodes = Set("C66")
-    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
+    val ssr = spark.read.parquet("src/test/resources/test-input/SSR_C.parquet")
     val sources = Sources(ssr = Some(ssr))
 
     val expected = Seq[Event[Diagnosis]](
@@ -35,7 +35,7 @@ class SsrDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
+    val ssr = spark.read.parquet("src/test/resources/test-input/SSR_C.parquet")
     val sources = Sources(ssr = Some(ssr))
 
     val expected = Seq[Event[Diagnosis]](
@@ -58,7 +58,7 @@ class SsrDiagnosesSuite extends SharedContext {
 
     // Given
     val linkedCodes = Set("C6")
-    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
+    val ssr = spark.read.parquet("src/test/resources/test-input/SSR_C.parquet")
     val sources = Sources(ssr = Some(ssr))
 
     val expected = Seq[Event[Diagnosis]](
@@ -80,7 +80,7 @@ class SsrDiagnosesSuite extends SharedContext {
 
     // Given
     val associatedDiagnosis = Set("C6")
-    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
+    val ssr = spark.read.parquet("src/test/resources/test-input/SSR_C.parquet")
     val sources = Sources(ssr = Some(ssr))
 
     val expected = Seq[Event[Diagnosis]](
@@ -101,7 +101,7 @@ class SsrDiagnosesSuite extends SharedContext {
 
     // Given
     val cim10Codes = Set("Z100")
-    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
+    val ssr = spark.read.parquet("src/test/resources/test-input/SSR_C.parquet")
     val expected = Seq[Event[Diagnosis]](
       SsrTakingOverPurpose("Patient_02", "10000123_30000546_300_2019", "Z100", makeTS(2019, 8, 11))
     ).toDS
@@ -119,7 +119,7 @@ class SsrDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
+    val ssr = spark.read.parquet("src/test/resources/test-input/SSR_C.parquet")
     val expected = Seq[Event[Diagnosis]](
       SsrTakingOverPurpose("Patient_02", "10000123_30000546_200_2019", "Z400", makeTS(2019, 8, 11)),
       SsrTakingOverPurpose("Patient_02", "10000123_30000546_300_2019", "Z100", makeTS(2019, 8, 11)),
