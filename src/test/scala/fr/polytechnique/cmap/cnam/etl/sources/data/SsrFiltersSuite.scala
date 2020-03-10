@@ -14,20 +14,20 @@ class SsrFiltersSuite extends SharedContext {
       SsrSource.SEJ_RET,
       SsrSource.FHO_RET,
       SsrSource.PMS_RET,
-      SsrSource.DAT_RET
+      SsrSource.DAT_RET,
+      SsrSource.GRG_GME
     ).map(col => col.toString)
 
     val input = Seq(
-      ("0", "0", "0", "0", "0"),
-      ("1", "1", "1", "1", "1"),
-      ("0", "0", "0", "0", "0"),
-      ("1", "0", "0", "0", "0")
+      ("0", "0", "0", "0", "0", "900000"),
+      ("1", "1", "1", "1", "1", "600000"),
+      ("0", "0", "0", "0", "0", "800000"),
+      ("1", "0", "0", "0", "0", "900000")
     ).toDF(colNames: _*)
 
 
     val expected = Seq(
-      ("0", "0", "0", "0", "0"),
-      ("0", "0", "0", "0", "0") //filtered
+      ("0", "0", "0", "0", "0", "800000")
     ).toDF(colNames: _*)
 
     // When

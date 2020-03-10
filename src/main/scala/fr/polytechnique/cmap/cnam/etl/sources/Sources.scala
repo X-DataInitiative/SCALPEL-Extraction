@@ -3,6 +3,7 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
 import java.sql.Timestamp
+
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.InputPaths
 import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, HadSource, McoCeSource, McoSource, SsrCeSource, SsrSource}
@@ -22,7 +23,11 @@ case class Sources(
   dosages: Option[DataFrame] = None)
 
 object Sources {
-
+  /** Sanitize all sources with usual filters for snds analysis.
+    *
+    * @param sources An instance containing all available SNDS data and value tables.
+    * @return
+    */
   def sanitize(sources: Sources): Sources = {
     sources.copy(
       dcir = sources.dcir.map(DcirSource.sanitize),
@@ -39,6 +44,13 @@ object Sources {
     )
   }
 
+  /** Filter sources to keep only data concerning the study period.
+    *
+    * @param sources An instance containing all available SNDS data and value tables.
+    * @param studyStart
+    * @param studyEnd
+    * @return
+    */
   def sanitizeDates(sources: Sources, studyStart: Timestamp, studyEnd: Timestamp): Sources = {
     sources.copy(
       dcir = sources.dcir.map(DcirSource.sanitizeDates(_, studyStart, studyEnd)),
@@ -55,6 +67,12 @@ object Sources {
     )
   }
 
+  /** Read all source dataframe.
+    *
+    * @param sqlContext Spark Context needed to fetch data
+    * @param paths
+    * @return
+    */
   def read(sqlContext: SQLContext, paths: InputPaths): Sources = {
     this.read(
       sqlContext,
