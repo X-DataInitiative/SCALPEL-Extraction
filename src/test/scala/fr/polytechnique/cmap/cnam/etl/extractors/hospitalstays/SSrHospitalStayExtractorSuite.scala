@@ -13,7 +13,7 @@ class SSrHospitalStayExtractorSuite extends SharedContext {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
-    val ssr = spark.read.parquet("src/test/resources/test-input/SSR_C.parquet")
+    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val sources = Sources(ssr = Some(ssr))
 
     val expected: Dataset[Event[HospitalStay]] = Seq(
@@ -33,7 +33,7 @@ class SSrHospitalStayExtractorSuite extends SharedContext {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
-    val ssr = spark.read.parquet("src/test/resources/test-input/SSR_C.parquet")
+    val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val sources = Sources(ssr = Some(ssr))
 
     val expected: Dataset[Event[HospitalStay]] = Seq(
