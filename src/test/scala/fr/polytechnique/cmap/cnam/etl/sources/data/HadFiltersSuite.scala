@@ -38,4 +38,33 @@ class HadFiltersSuite extends SharedContext {
     assertDFs(result, expected)
   }
 
+  "filterSharedHospitalStays" should "remove lines that indicates shared hospital stays" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val colNames = List(
+      HadSource.ENT_MOD,
+      HadSource.SOR_MOD
+    ).map(col => col.toString)
+
+    val input = Seq(
+      ("2", "3"),
+      ("1", "3"),
+      ("1", "1")
+    ).toDF(colNames: _*)
+
+
+    val expected = Seq(
+      ("2", "3"),
+      ("1", "3")
+    ).toDF(colNames: _*)
+
+    // When
+    val instance = new HadFilters(input)
+    val result = instance.filterSharedHospitalStays
+
+    // Then
+    assertDFs(result, expected)
+  }
 }

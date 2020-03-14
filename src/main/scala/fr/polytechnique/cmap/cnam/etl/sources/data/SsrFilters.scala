@@ -4,6 +4,25 @@ import fr.polytechnique.cmap.cnam.etl.sources.data.DoublonFinessPmsi.specialHosp
 import org.apache.spark.sql.{Column, DataFrame}
 
 private[data] class SsrFilters(rawSsr: DataFrame) {
+  /** Filter out Finess doublons.
+    *
+    * @return
+    */
+  def filterSpecialHospitals: DataFrame = {
+    rawSsr.where(!SsrSource.ETA_NUM.isin(specialHospitalCodes: _*))
+  }
+
+  /** Filter out shared stays (between hospitals).
+    *
+    * @return
+    */
+  def filterSharedHospitalStays: DataFrame = {
+    val duplicateHospitalsFilter: Column = !(SsrSource.ENT_MOD === 1 and SsrSource.SOR_MOD === 1) or
+      (SsrSource.GRG_GME.like("28%") and !SsrSource.GRG_GME
+      .isin(SsrFilters.GRG_GHMExceptions: _*))
+    rawSsr.filter(duplicateHospitalsFilter)
+  }
+
   /** Filter out Ssr corrupted stays as returned by the ATIH.
     *
     * @return
@@ -28,14 +47,9 @@ private[data] class SsrFilters(rawSsr: DataFrame) {
 
     rawSsr.filter(fictionalAndFalseHospitalStaysFilter)
   }
-
-  /** Filter out Finess doublons.
-    *
-    * @return
-    */
-  def filterSpecialHospitals: DataFrame = {
-    rawSsr.where(!SsrSource.ETA_NUM.isin(specialHospitalCodes: _*))
-  }
 }
 
-private[data] object SsrFilters
+private[data] object SsrFilters {
+  // radiotherapie & dialyse exceptions
+  val GRG_GHMExceptions = List("28Z14Z", "28Z15Z", "28Z16Z")
+}

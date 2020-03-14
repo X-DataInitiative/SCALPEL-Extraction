@@ -11,6 +11,9 @@ import org.apache.spark.sql.{Column, DataFrame, SQLContext}
 object HadSource extends DataSourceManager with HadSourceSanitizer {
 
   val ETA_NUM_EPMSI: Column = col("ETA_NUM_EPMSI")
+
+  val ENT_MOD: Column = col("HAD_B__ENT_MOD")
+  val SOR_MOD: Column = col("HAD_B__SOR_MOD")
   val NIR_RET: Column = col("NIR_RET")
   val SEJ_RET: Column = col("SEJ_RET")
   val FHO_RET: Column = col("FHO_RET")
@@ -24,7 +27,8 @@ object HadSource extends DataSourceManager with HadSourceSanitizer {
       * https://datainitiative.atlassian.net/wiki/pages/viewpage.action?pageId=40304642
       */
     rawHad
-      .filterHadCorruptedHospitalStays
       .filterSpecialHospitals
+      .filterSharedHospitalStays
+      .filterHadCorruptedHospitalStays
   }
 }

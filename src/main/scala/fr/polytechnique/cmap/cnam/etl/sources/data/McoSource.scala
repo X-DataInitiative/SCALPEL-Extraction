@@ -19,6 +19,8 @@ object McoSource extends DataSourceManager with McoSourceSanitizer {
 
   // Exclusive columns
   val SEJ_TYP: Column = col("MCO_B__SEJ_TYP")
+  val ENT_MOD: Column = col("MCO_B__ENT_MOD")
+  val SOR_MOD: Column = col("MCO_B__SOR_MOD")
   val GRG_GHM: Column = col("MCO_B__GRG_GHM")
   val GHS_NUM: Column = col("MCO_B__GHS_NUM")
   val SEJ_RET: Column = col("SEJ_RET")

@@ -9,6 +9,8 @@ class HadSourceSuite extends SharedContext {
 
     // Given
     val colNames = List(
+      HadSource.ENT_MOD,
+      HadSource.SOR_MOD,
       HadSource.NIR_RET,
       HadSource.SEJ_RET,
       HadSource.FHO_RET,
@@ -18,15 +20,16 @@ class HadSourceSuite extends SharedContext {
     ).map(col => col.toString)
 
     val input = Seq(
-      ("1", "0", "0", "0", "0", "100000000"),
-      ("1", "1", "0", "0", "0", "100000001"),
-      ("0", "0", "0", "0", "0", "100000001"),
-      ("0", "0", "0", "0", "0", "910100015")
+      ("2", "3", "1", "0", "0", "0", "0", "100000000"),
+      ("2", "3", "1", "1", "0", "0", "0", "100000001"),
+      ("2", "3", "0", "0", "0", "0", "0", "100000001"),
+      ("2", "3", "0", "0", "0", "0", "0", "910100015"),
+      ("1", "1", "0", "0", "0", "0", "0", "100000001")
 
     ).toDF(colNames: _*)
 
     val expected = Seq(
-      ("0", "0", "0", "0", "0", "100000001")
+      ("2", "3", "0", "0", "0", "0", "0", "100000001")
     ).toDF(colNames: _*)
 
     // When
