@@ -20,7 +20,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
     // Given
     val medicalSpeCodes = List("42")
-    val input = spark.read.parquet("src/test/resources/test-input/DCIR_w_BIO.parquet")
+    val input = spark.read.parquet("src/test/resources/test-input/DCIR_ALL.parquet")
     val sources = Sources(dcir = Some(input))
 
     val expected = Seq[Event[PractitionerClaimSpeciality]](
@@ -45,7 +45,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
     // Given
     val nonMedicalSpeCodes = List("42")
-    val input = spark.read.parquet("src/test/resources/test-input/DCIR_w_BIO.parquet")
+    val input = spark.read.parquet("src/test/resources/test-input/DCIR_ALL.parquet")
     val sources = Sources(dcir = Some(input))
 
     val expected = Seq[Event[PractitionerClaimSpeciality]](
@@ -89,7 +89,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
     // Given
     val medicalSpeCodes = List()
-    val input = spark.read.parquet("src/test/resources/test-input/DCIR_w_BIO.parquet")
+    val input = spark.read.parquet("src/test/resources/test-input/DCIR_ALL.parquet")
     val sources = Sources(dcir = Some(input))
 
     val expected = Seq[Event[PractitionerClaimSpeciality]](

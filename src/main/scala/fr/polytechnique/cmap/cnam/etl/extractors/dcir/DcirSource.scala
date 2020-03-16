@@ -20,6 +20,11 @@ trait DcirSource extends ColumnNames {
     lazy val Date: String = "EXE_SOI_DTD"
     lazy val NaturePrestation: ColName = "PRS_NAT_REF"
     lazy val NgapCoefficient: ColName = "PRS_ACT_CFT"
+    lazy val LppCode: ColName = "ER_TIP_F__TIP_PRS_IDE"
+    lazy val LppQuantity: ColName = "ER_TIP_F__TIP_ACT_QSN"
+    lazy val LppPrestationType: ColName = "ER_TIP_F__TIP_PRS_TYP"
+    lazy val LppDisposalEndDate: ColName = "ER_TIP_F__TIP_ACL_DTF"
+
     lazy val all = List(
       PatientID,
       CamCode,
@@ -43,7 +48,13 @@ trait DcirSource extends ColumnNames {
    lazy val FlowNumber: ColName = "FLX_EMT_ORD"
    lazy val OrgId: ColName = "ORG_CLE_NUM"
    lazy val OrderId: ColName = "DCT_ORD_NUM"
+   lazy val PrestaOrdNum: ColName = "PRS_ORD_NUM"
+   lazy val ReimbursementType: ColName = "REM_TYP_AFF"
 
+    lazy val joinKeys = List(
+      DateStart, DateEntry, EmitterType, EmitterId, FlowNumber, OrgId, OrderId,
+      PrestaOrdNum, ReimbursementType
+    )
   }
 
 }
