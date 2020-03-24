@@ -80,15 +80,70 @@ to control study's values. There are a template to use with fall study.
 
 ```
 
-extracting from config object  paths to load sources in sources objects or parameters to filter 
+Extracting from config object  paths to load sources in sources objects or parameters to filter 
 study's data.
 Later it runs three methods that yield [OperationMetadata](https://github.com/X-DataInitiative/SCALPEL-Extraction/blob/master/src/main/scala/fr/polytechnique/cmap/cnam/util/reporting/OperationMetadata.scala).
 
-All three methods takes the same parameters `Sources` and `FallConfig`, they are:
+All three methods takes the same parameters `Sources` and `FallConfig`, these methods extract data from source for example in
+`computecontrols`:
 
-- computeControls
-- computeExposures
-- computeOutcomes
+```
+
+//computecontrols
+    val opioids = OpioidsExtractor.extract(sources).cache()
+    
+object OpioidsExtractor {
+  def extract(sources: Sources): Dataset[Event[Drug]] = {
+    new DrugExtractor(DrugConfig(MoleculeCombinationLevel, List(Opioids))).extract(sources, Set.empty)
+  }
+}
+
+//Extractor is inherited here
+class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
+
+  override def extract(
+    sources: Sources,
+    codes: Set[String])
+    (implicit ctag: universe.TypeTag[Drug]): Dataset[Event[Drug]] = {
+
+    val input: DataFrame = getInput(sources)
+
+    import input.sqlContext.implicits._
+
+    {
+      if (drugConfig.families.isEmpty) {
+        input.filter(isInExtractorScope _)
+      }
+      else {
+        input.filter(isInExtractorScope _).filter(isInStudy(codes) _)
+      }
+    }.flatMap(builder _).distinct()
+  }
+
+```
+
+and some methods as well use `Transformer` to create `Event`([Events](Events.md)), for instance `computeOutcomes` 
+extract data from sources and later if condition is true, transform them into `Outcome`'s  `Event` type.
+
+```
+   if (fallConfig.runParameters.outcomes) {
+      logger.info("Fractures")
+      val fractures: Dataset[Event[Outcome]] = new FracturesTransformer(fallConfig)
+        .transform(optionLiberalActs.get, optionActs.get, optionDiagnoses.get)
+      operationsMetadata += {
+        OperationReporter
+          .report(
+            "fractures",
+            List("acts"),
+            OperationTypes.Outcomes,
+            fractures.toDF,
+            Path(fallConfig.output.outputSavePath),
+            fallConfig.output.saveMode
+          )
+      }
+    }
+```
+
 
 Here as example the output of `computeExposures`:
 
@@ -97,8 +152,8 @@ OperationMetadata(drug_purchases,List(DCIR),dispensations,target/test/output/dru
 OperationMetadata(extract_patients,List(DCIR, MCO, IR_BEN_R, MCO_CE),patients,target/test/output/extract_patients/data,), 
 OperationMetadata(filter_patients,List(drug_purchases, extract_patients),patients,target/test/output/filter_patients/data,)
 ```
-The result of these methods, all `OperationMetadata` are stored in a value `operationsMetadata`
-and this values is stored with other descriptive values 
+The result of these methods, all `OperationMetadata`, are stored in a value `operationsMetadata`
+and this value is stored as a list with other descriptive values 
 (class name,start timestamp,end timestamp,operationsMetadata) in a case class `MainMetadata`.
 
 ```
@@ -106,9 +161,19 @@ case class MainMetadata(
   className: String,
   startTimestamp: java.util.Date,
   endTimestamp: java.util.Date,
+//This is the parameter that store the list of operationsMetadata
   operations: List[OperationMetadata])
   extends JsonSerializable
 ```
+This one is the result of the study, it's saved as Json with other values passed as parameters to
+`writeMetaData` method in [OperationReporter](https://github.com/X-DataInitiative/SCALPEL-Extraction/blob/master/src/main/scala/fr/polytechnique/cmap/cnam/util/reporting/OperationReporter.scala) 
+object.
+```
+    // Write Metadata
+    val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
+    val metadataJson: String = metadata.toJsonString()
 
-This is the result of the study, is saved as Json in a environment and path passed as parameters to
-`writeMetaData` method.
+    OperationReporter
+     .writeMetaData(metadataJson, "metadata_fall_" + format.format(startTimestamp) + ".json", argsMap("env"))
+
+```
