@@ -85,7 +85,7 @@ class McoHospitalStayExtractorSuite extends SharedContext {
     val result: Dataset[Event[HospitalStay]] = McoHospitalStaysExtractor.extract(sources, Set.empty[String])
 
     //Then
-    assertDSs(expected, result, true)
+    assertDSs(expected, result)
 
   }
 

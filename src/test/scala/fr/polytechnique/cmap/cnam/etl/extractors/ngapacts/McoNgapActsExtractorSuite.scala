@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.ngapacts
 
+import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
-import org.apache.spark.sql.DataFrame
 
 class McoNgapActsExtractorSuite extends SharedContext {
 

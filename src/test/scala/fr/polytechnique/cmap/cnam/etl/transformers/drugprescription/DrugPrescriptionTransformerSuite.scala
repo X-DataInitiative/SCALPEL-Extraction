@@ -33,7 +33,7 @@ class DrugPrescriptionTransformerSuite extends SharedContext {
 
     val result = transformer.transform(input)
 
-    assertDSs(expected.as[Event[Drug]], result.as[Event[Drug]], true)
+    assertDSs(expected.as[Event[Drug]], result.as[Event[Drug]])
 
   }
 
