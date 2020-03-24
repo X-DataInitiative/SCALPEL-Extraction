@@ -24,15 +24,15 @@ object BulkConfig extends BulkConfigLoader {
     loadConfigWithDefaults[BulkConfig](path, defaultPath, env)
   }
 
+  final case class DrugsConfig(
+    override val level: DrugClassificationLevel = Cip13Level,
+    override val families: List[DrugClassConfig] = List.empty
+  ) extends DrugConfig(level = level, families = families)
+
   final object BaseConfig extends BaseConfig(
     ageReferenceDate = LocalDate.of(2011, 1, 1),
     studyStart = LocalDate.of(2010, 1, 1),
     studyEnd = LocalDate.of(2015, 1, 1)
   )
-
-  final case class DrugsConfig(
-    override val level: DrugClassificationLevel = Cip13Level,
-    override val families: List[DrugClassConfig] = List.empty
-  ) extends DrugConfig(level = level, families = families)
 
 }

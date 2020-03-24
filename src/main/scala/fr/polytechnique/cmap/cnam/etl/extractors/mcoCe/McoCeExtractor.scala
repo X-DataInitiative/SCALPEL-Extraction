@@ -15,8 +15,6 @@ trait McoCeExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Mc
 
   val eventBuilder: EventBuilder
 
-  def getInput(sources: Sources): DataFrame = sources.mcoCe.get.select(ColNames.all.map(col): _*)
-
   def isInStudy(codes: Set[String])
     (row: Row): Boolean = codes.exists(code(row).startsWith(_))
 

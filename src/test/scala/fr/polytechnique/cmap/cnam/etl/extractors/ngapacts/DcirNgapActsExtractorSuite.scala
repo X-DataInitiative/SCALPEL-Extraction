@@ -2,10 +2,7 @@
 
 package fr.polytechnique.cmap.cnam.etl.extractors.ngapacts
 
-import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.types.{DoubleType, StringType, StructField, StructType}
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
@@ -14,19 +11,19 @@ import fr.polytechnique.cmap.cnam.util.functions.makeTS
 class DcirNgapActsExtractorSuite extends SharedContext {
 
   object ngapClassKeyLetterCoefficient extends NgapActClassConfig {
+    override val ngapPrsNatRefs: Seq[String] = Seq()
     val ngapKeyLetters: Seq[String] = Seq("C")
     val ngapCoefficients: Seq[String] = Seq(
       "0.42"
     )
-    override val ngapPrsNatRefs: Seq[String] = Seq()
   }
 
   object ngapPrsNatRef extends NgapActClassConfig {
+    override val ngapPrsNatRefs: Seq[String] = Seq("1111")
     val ngapKeyLetters: Seq[String] = Seq("D")
     val ngapCoefficients: Seq[String] = Seq(
       "0.45"
     )
-    override val ngapPrsNatRefs: Seq[String] = Seq("1111")
   }
 
   "extract" should "extract ngap acts events from raw data with a ngapClass based on key letter B2 and coefficient" in {

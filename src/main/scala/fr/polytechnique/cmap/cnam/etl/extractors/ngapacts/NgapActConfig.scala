@@ -1,7 +1,5 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.ngapacts
 
-import scala.util.Try
-import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.etl.extractors.ExtractorConfig
 
 /**
@@ -21,6 +19,7 @@ import fr.polytechnique.cmap.cnam.etl.extractors.ExtractorConfig
   * search where ngapCoefficient is available
   *   - if a list of ngapKeyLetters and a list of ngapCoefficients is given, it extracts all combination of (keyLetter, coefficient)
   *   - if the list of ngapCoefficients is empty, extract all acts where coeff is in ngapCoefficient
+  *
   * @param actsCategories List of configuration to get specific NgapActs
   */
 class NgapActConfig(
@@ -28,7 +27,7 @@ class NgapActConfig(
 }
 
 object NgapActConfig {
-  def apply(actsCategories: List[NgapActClassConfig]): NgapActConfig= new NgapActConfig(
+  def apply(actsCategories: List[NgapActClassConfig]): NgapActConfig = new NgapActConfig(
     actsCategories
   )
 }
