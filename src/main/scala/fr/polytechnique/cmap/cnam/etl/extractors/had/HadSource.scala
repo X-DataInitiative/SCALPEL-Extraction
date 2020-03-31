@@ -1,10 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.had
 
-import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
-import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
+import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
-import org.apache.spark.sql.{Column, DataFrame}
+import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
 
 trait HadSource extends ColumnNames {
 
@@ -24,12 +23,8 @@ trait HadSource extends ColumnNames {
     val StayEndDate: ColName = "SOR_DAT"
     val StartDate: ColName = "EXE_SOI_DTD"
     val EndDate: ColName = "EXE_SOI_DTF"
-    val all = List(
-      PatientID, DP, DA, CCAM, PEC_PAL, PEC_ASS, EtaNumEpmsi, RhadNum,
-      StayStartDate, StayEndDate, StartDate, EndDate
-    )
-    val hospitalStayPart = List(
-      PatientID, EtaNumEpmsi, RhadNum, StartDate, StayStartDate, StayEndDate, EndDate
+    val core: List[ColName] = List(
+      PatientID, EtaNumEpmsi, RhadNum, StayStartDate, StayEndDate, StartDate, EndDate
     )
   }
 
@@ -53,9 +48,11 @@ trait HadSource extends ColumnNames {
       val givenYear: Column = year(givenDate)
 
       df.withColumn(
-        NewColumns.EstimatedStayStart, givenDate)
+        NewColumns.EstimatedStayStart, givenDate
+      )
         .withColumn(
-          NewColumns.Year, givenYear)
+          NewColumns.Year, givenYear
+        )
     }
   }
 

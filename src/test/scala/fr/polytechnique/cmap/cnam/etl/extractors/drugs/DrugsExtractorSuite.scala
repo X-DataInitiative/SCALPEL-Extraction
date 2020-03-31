@@ -123,7 +123,7 @@ class DrugsExtractorSuite extends SharedContext {
 
     val drugConf = DrugConfig(Cip13Level, List.empty)
     // When
-    val result: Dataset[Event[Drug]] = new DrugExtractor(drugConf).extract(source, Set.empty)
+    val result: Dataset[Event[Drug]] = DrugExtractor(drugConf).extract(source)
 
     // Then
     assertDSs(result, expected)
@@ -225,7 +225,7 @@ class DrugsExtractorSuite extends SharedContext {
     val drugConf = DrugConfig(TherapeuticLevel, List(Antidepresseurs))
 
     // When
-    val result = new DrugExtractor(drugConf).extract(source, Set.empty)
+    val result = DrugExtractor(drugConf).extract(source)
 
     // Then
     assertDSs(result, expected)
@@ -295,7 +295,7 @@ class DrugsExtractorSuite extends SharedContext {
 
     val drugConf = DrugConfig(TherapeuticLevel, List(Neuroleptiques))
     // When
-    val result = new DrugExtractor(drugConf).extract(source, Set.empty)
+    val result = DrugExtractor(drugConf).extract(source)
 
     // Then
     assertDSs(result, expected)
@@ -364,7 +364,7 @@ class DrugsExtractorSuite extends SharedContext {
 
     val drugConf = DrugConfig(TherapeuticLevel, List(Hypnotiques))
     // When
-    val result = new DrugExtractor(drugConf).extract(source, Set.empty)
+    val result = DrugExtractor(drugConf).extract(source)
 
     // Then
     assertDSs(result, expected)
@@ -428,7 +428,7 @@ class DrugsExtractorSuite extends SharedContext {
     val drugConf = DrugConfig(TherapeuticLevel, List(Antihypertenseurs))
 
     // When
-    val result = new DrugExtractor(drugConf).extract(source, Set.empty)
+    val result = DrugExtractor(drugConf).extract(source)
 
     // Then
     assertDSs(result, expected)
@@ -553,7 +553,7 @@ class DrugsExtractorSuite extends SharedContext {
     val drugConfigNeuroleptiques: DrugClassConfig = Neuroleptiques
     val drugConf = DrugConfig(TherapeuticLevel, List(drugConfigAntidepresseurs, drugConfigNeuroleptiques))
     // When
-    val result = new DrugExtractor(drugConf).extract(source, Set.empty)
+    val result = new DrugExtractor(drugConf).extract(source)
     // Then
     assertDSs(result, expected)
   }
@@ -677,7 +677,7 @@ class DrugsExtractorSuite extends SharedContext {
     val drugConfigNeuroleptiques: DrugClassConfig = Neuroleptiques
     val drugConf = DrugConfig(PharmacologicalLevel, List(drugConfigAntidepresseurs, drugConfigNeuroleptiques))
     // When
-    val result = new DrugExtractor(drugConf).extract(source, Set.empty)
+    val result = DrugExtractor(drugConf).extract(source)
 
     // Then
     assertDSs(result, expected)
@@ -799,7 +799,7 @@ class DrugsExtractorSuite extends SharedContext {
     val drugConfigNeuroleptiques: DrugClassConfig = Neuroleptiques
     val drugConf = DrugConfig(MoleculeCombinationLevel, List(drugConfigAntidepresseurs, drugConfigNeuroleptiques))
     // When
-    val result = new DrugExtractor(drugConf).extract(source, Set("SHIT"))
+    val result = DrugExtractor(drugConf).extract(source)
 
     // Then
     assertDSs(result, expected)
@@ -826,7 +826,7 @@ class DrugsExtractorSuite extends SharedContext {
     val drugConf = DrugConfig(Cip13Level, List.empty)
 
     // When
-    val result = new DrugExtractor(drugConf).extractGroupId(r)
+    val result = DrugExtractor(drugConf).extractGroupId(r)
 
     // Then
     assert(result == expected)

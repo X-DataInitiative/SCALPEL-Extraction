@@ -9,7 +9,6 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class DrugsExtractor(drugConfig: DrugConfig) {
 
-  def extract(sources: Sources): Dataset[Event[Drug]] = {
-    new DrugExtractor(drugConfig).extract(sources, Set.empty)
-  }
+  def extract(sources: Sources): Dataset[Event[Drug]] = DrugExtractor(drugConfig).extract(sources)
+
 }

@@ -3,8 +3,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.McoMainDiagnosis
-import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, McoAssociatedDiagnosis, McoLinkedDiagnosis, McoMainDiagnosis}
+import fr.polytechnique.cmap.cnam.etl.extractors.BaseExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
@@ -15,7 +15,7 @@ class McoDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val dpCodes = Set("C67")
+    val dpCodes = BaseExtractorCodes(List("C67"))
     val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
     val sources = Sources(mco = Some(mco))
 
@@ -30,7 +30,7 @@ class McoDiagnosesSuite extends SharedContext {
 
 
     // When
-    val result = McoMainDiagnosisExtractor.extract(sources, dpCodes)
+    val result = McoMainDiagnosisExtractor(dpCodes).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -41,7 +41,7 @@ class McoDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val linkedCodes = Set("E05", "E08")
+    val linkedCodes = BaseExtractorCodes(List("E05", "E08"))
     val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
     val sources = Sources(mco = Some(mco))
 
@@ -51,7 +51,7 @@ class McoDiagnosesSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = McoLinkedDiagnosisExtractor.extract(sources, linkedCodes)
+    val result = McoLinkedDiagnosisExtractor(linkedCodes).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -62,7 +62,7 @@ class McoDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val associatedDiagnosis = Set("C66")
+    val associatedDiagnosis = BaseExtractorCodes(List("C66"))
     val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
     val sources = Sources(mco = Some(mco))
 
@@ -72,7 +72,7 @@ class McoDiagnosesSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = McoAssociatedDiagnosisExtractor.extract(sources, associatedDiagnosis)
+    val result = McoAssociatedDiagnosisExtractor(associatedDiagnosis).extract(sources)
 
     // Then
     assertDSs(result, expected)

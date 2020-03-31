@@ -5,12 +5,17 @@ package fr.polytechnique.cmap.cnam.study.bulk
 import java.io.PrintWriter
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
+import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirMedicalActExtractor, McoCcamActExtractor, McoCeCcamActExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GhmExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses._
+import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.bulk.extractors._
 import fr.polytechnique.cmap.cnam.util.reporting.MainMetadata
 
-object BulkMain extends Main {
+/*object BulkMain extends Main {
   override def appName: String = "BulkMain"
 
   override def run(
@@ -48,4 +53,4 @@ object BulkMain extends Main {
 
     None
   }
-}
+}*/

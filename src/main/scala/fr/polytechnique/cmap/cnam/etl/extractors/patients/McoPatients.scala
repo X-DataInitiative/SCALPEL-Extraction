@@ -2,8 +2,8 @@
 
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
-import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame}
+import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.util.functions.computeDateUsingMonthYear
 
 private[patients] object McoPatients {

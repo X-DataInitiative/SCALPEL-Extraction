@@ -6,10 +6,9 @@ import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Event, McoCeFbstcMedicalPractitionerClaim, McoCeFcstcMedicalPractitionerClaim, MedicalPractitionerClaim, NonMedicalPractitionerClaim, PractitionerClaimSpeciality}
+import fr.polytechnique.cmap.cnam.etl.extractors.BaseExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
-
-import scala.collection.immutable.Stream.Empty
 
 class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
@@ -19,7 +18,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val medicalSpeCodes = List("42")
+    val medicalSpeCodes = BaseExtractorCodes(List("42"))
     val input = spark.read.parquet("src/test/resources/test-input/DCIR_w_BIO.parquet")
     val sources = Sources(dcir = Some(input))
 
@@ -31,7 +30,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
 
     // When
-    val result = MedicalPractitionerClaimExtractor.extract(sources, medicalSpeCodes.toSet)
+    val result = MedicalPractitionerClaimExtractor(medicalSpeCodes).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -44,7 +43,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val nonMedicalSpeCodes = List("42")
+    val nonMedicalSpeCodes = BaseExtractorCodes(List("42"))
     val input = spark.read.parquet("src/test/resources/test-input/DCIR_w_BIO.parquet")
     val sources = Sources(dcir = Some(input))
 
@@ -58,7 +57,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
 
     // When
-    val result = NonMedicalPractitionerClaimExtractor.extract(sources, nonMedicalSpeCodes.toSet)
+    val result = NonMedicalPractitionerClaimExtractor(nonMedicalSpeCodes).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -75,7 +74,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
     val expected = "A10000001"
 
     // When
-    val result = NonMedicalPractitionerClaimExtractor.extractGroupId(row)
+    val result = NonMedicalPractitionerClaimExtractor(BaseExtractorCodes.empty).extractGroupId(row)
 
     // Then
     assert(result == expected)
@@ -88,7 +87,6 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val medicalSpeCodes = List()
     val input = spark.read.parquet("src/test/resources/test-input/DCIR_w_BIO.parquet")
     val sources = Sources(dcir = Some(input))
 
@@ -100,7 +98,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
 
     // When
-    val result = MedicalPractitionerClaimExtractor.extract(sources, medicalSpeCodes.toSet)
+    val result = MedicalPractitionerClaimExtractor(BaseExtractorCodes.empty).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -112,7 +110,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val medicalSpeCodes = List("1")
+    val medicalSpeCodes = BaseExtractorCodes(List("1"))
     val input = spark.read.parquet("src/test/resources/test-input/MCO_CE.parquet")
     val sources = Sources(mcoCe = Some(input))
 
@@ -122,7 +120,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
 
     // When
-    val result = McoCeFbstcSpecialtyExtractor.extract(sources, medicalSpeCodes.toSet)
+    val result = McoCeFbstcSpecialtyExtractor(medicalSpeCodes).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -134,7 +132,6 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val medicalSpeCodes = List.empty
     val input = spark.read.parquet("src/test/resources/test-input/MCO_CE.parquet")
     val sources = Sources(mcoCe = Some(input))
 
@@ -145,7 +142,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
 
     // When
-    val result = McoCeFbstcSpecialtyExtractor.extract(sources, medicalSpeCodes.toSet)
+    val result = McoCeFbstcSpecialtyExtractor(BaseExtractorCodes.empty).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -169,7 +166,7 @@ class PractitionerClaimSpecialityExtractorSuite extends SharedContext {
 
 
     // When
-    val result = McoCeFcstcSpecialtyExtractor.extract(sources, medicalSpeCodes.toSet)
+    val result = McoCeFcstcSpecialtyExtractor(BaseExtractorCodes.empty).extract(sources)
 
     // Then
     assertDSs(result, expected)

@@ -2,10 +2,10 @@
 
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
+import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.PatientUtils._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 

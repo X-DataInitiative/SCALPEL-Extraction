@@ -63,6 +63,6 @@ object SsrTakingOverPurpose extends Diagnosis {
   val category: EventCategory[Diagnosis] = "ssr_taking_over_purpose"
 }
 
-object ImbDiagnosis extends Diagnosis {
-  override val category: EventCategory[Diagnosis] = "imb_diagnosis"
+object ImbCcamDiagnosis extends Diagnosis {
+  override val category: EventCategory[Diagnosis] = "imb_ccam_diagnosis"
 }

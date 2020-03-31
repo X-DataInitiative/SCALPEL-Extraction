@@ -146,7 +146,7 @@ class DcirMoleculePurchasesSuite extends SharedContext {
 
     //when
     val extractor = new DcirMoleculePurchases(config)
-    val result = extractor.getInput(sources).filter(extractor.isInStudy(config.drugClasses.toSet) _).distinct()
+    val result = extractor.getInput(sources).filter(extractor.isInStudy _).distinct()
 
     //then
     assertDFs(result, expected)
@@ -217,7 +217,7 @@ class DcirMoleculePurchasesSuite extends SharedContext {
     val expected = Seq(Molecule("patient", "SULFONYLUREA", 2700.0, makeTS(2006, 1, 15))).toDS()
 
     // When
-    val result = new DcirMoleculePurchases(config).extract(sources, config.drugClasses.toSet)
+    val result = new DcirMoleculePurchases(config).extract(sources)
     // Then
     assertDSs(result, expected)
   }

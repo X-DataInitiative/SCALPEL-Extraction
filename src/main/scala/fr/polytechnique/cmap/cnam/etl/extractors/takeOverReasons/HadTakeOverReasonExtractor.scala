@@ -1,28 +1,27 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.takeOverReasons
 
-import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.extractors.had.HadExtractor
-import fr.polytechnique.cmap.cnam.etl.extractors.takeOverReasons.HadMainTakeOverExtractor.code
 import org.apache.spark.sql.Row
+import fr.polytechnique.cmap.cnam.etl.events.{EventBuilder, HadAssociatedTakeOver, HadMainTakeOver, MedicalTakeOverReason}
+import fr.polytechnique.cmap.cnam.etl.extractors.{BaseExtractorCodes, IsInStrategy}
+import fr.polytechnique.cmap.cnam.etl.extractors.had.HadBasicExtractor
 
-object HadMainTakeOverExtractor extends HadExtractor[MedicalTakeOverReason] {
+final case class HadMainTakeOverExtractor(codes: BaseExtractorCodes) extends HadBasicExtractor[MedicalTakeOverReason]
+  with IsInStrategy[MedicalTakeOverReason] {
 
-  final override val columnName: String = ColNames.PEC_PAL
-
+  override val columnName: String = ColNames.PEC_PAL
   override val eventBuilder: EventBuilder = HadMainTakeOver
 
-  override def isInStudy(codes: Set[String])
-               (row: Row): Boolean = codes.exists(code(row) == _)
+  override def extractValue(row: Row): String = row.getAs[Int](columnName).toString
+
+  override def getCodes: BaseExtractorCodes = codes
 }
 
-object HadAssociatedTakeOverExtractor extends HadExtractor[MedicalTakeOverReason] {
+final case class HadAssociatedTakeOverExtractor(codes: BaseExtractorCodes) extends HadBasicExtractor[MedicalTakeOverReason]
+  with IsInStrategy[MedicalTakeOverReason] {
 
-  final override val columnName: String = ColNames.PEC_ASS
-
+  override val columnName: String = ColNames.PEC_ASS
   override val eventBuilder: EventBuilder = HadAssociatedTakeOver
+  override def extractValue(row: Row): String = row.getAs[Int](columnName).toString
 
-  override def isInStudy(codes: Set[String])
-                        (row: Row): Boolean = codes.exists(code(row) == _)
+  override def getCodes: BaseExtractorCodes = codes
 }
-
-

@@ -2,7 +2,7 @@
 
 package fr.polytechnique.cmap.cnam.etl.extractors.molecules
 
-import fr.polytechnique.cmap.cnam.etl.extractors.ExtractorConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.{ExtractorCodes, ExtractorConfig}
 
 /**
   * Base definition of the config needed by the MoleculePurchases extractor.
@@ -12,7 +12,9 @@ import fr.polytechnique.cmap.cnam.etl.extractors.ExtractorConfig
   */
 class MoleculePurchasesConfig(
   val drugClasses: List[String],
-  val maxBoxQuantity: Int) extends ExtractorConfig with Serializable
+  val maxBoxQuantity: Int) extends ExtractorConfig with ExtractorCodes {
+  override def isEmpty: Boolean = drugClasses.isEmpty
+}
 
 object MoleculePurchasesConfig {
 

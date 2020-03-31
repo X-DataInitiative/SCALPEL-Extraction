@@ -5,50 +5,33 @@ package fr.polytechnique.cmap.cnam.etl.extractors.dcir
 import java.sql.Timestamp
 import scala.util.Try
 import org.apache.commons.codec.binary.Base64
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.{DataFrame, Row}
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder}
-import fr.polytechnique.cmap.cnam.etl.extractors.{EventRowExtractor, Extractor}
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import org.apache.spark.sql.Row
+import fr.polytechnique.cmap.cnam.etl.extractors.EventRowExtractor
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 
-trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with DcirSource with EventRowExtractor {
 
-  val columnName: String
+trait DcirRowExtractor extends DcirSource with EventRowExtractor {
 
-  val eventBuilder: EventBuilder
-
-  def getInput(sources: Sources): DataFrame = sources.dcir.get.select(ColNames.all.map(col): _*)
-
-  def isInStudy(codes: Set[String])
-    (row: Row): Boolean = codes.exists(code(row).startsWith(_))
-
-  def isInExtractorScope(row: Row): Boolean = !row.isNullAt(row.fieldIndex(columnName))
-
-  def builder(row: Row): Seq[Event[EventType]] = {
-    lazy val patientId = extractPatientId(row)
-    lazy val groupId = extractGroupId(row)
-    lazy val eventDate = extractStart(row)
-    lazy val endDate = extractEnd(row)
-    lazy val weight = extractWeight(row)
-
-    Seq(eventBuilder[EventType](patientId, groupId, code(row), weight, eventDate, endDate))
-  }
-
-  def code = (row: Row) => row.getAs[String](columnName)
+  override def usedColumns: List[ColName] = List(
+    ColNames.PatientID, ColNames.DcirFluxDate, ColNames.DcirEventStart,
+    ColNames.FlowDistributionDate, ColNames.FlowTreatementDate, ColNames.FlowEmitterType,
+    ColNames.FlowEmitterId, ColNames.FlowEmitterNumber,
+    ColNames.OrgId, ColNames.OrderId, ColNames.DcirEventStart
+  ) ++ super.usedColumns
 
   def extractPatientId(r: Row): String = {
     r.getAs[String](ColNames.PatientID)
   }
 
-   /** Trying to catch unknown dates
+  /** Trying to catch unknown dates
     * example of unknown dates situation : IJ = Indemnité Journalière which are a replacement income
     * paid by the HealthCare Insurance during a sick leave.
+    *
     * @param r The Row object itself
     * @return The date of the event or the flux date if it doesn't exist
     */
   def extractStart(r: Row): Timestamp = {
-    Try(r.getAs[java.util.Date](ColNames.Date).toTimestamp) recover {
+    Try(r.getAs[java.util.Date](ColNames.DcirEventStart).toTimestamp) recover {
       case _: NullPointerException => extractFluxDate(r)
     }
   }.get
@@ -65,12 +48,12 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
     */
   override def extractGroupId(r: Row): String = {
     Base64.encodeBase64(
-      s"${r.getAs[String](ColNames.DateStart)}_${r.getAs[String](ColNames.DateEntry)}_${
+      s"${r.getAs[String](ColNames.FlowDistributionDate)}_${r.getAs[String](ColNames.FlowTreatementDate)}_${
         r.getAs[String](
           ColNames
-            .EmitterType
+            .FlowEmitterType
         )
-      }_${r.getAs[String](ColNames.EmitterId)}_${r.getAs[String](ColNames.FlowNumber)}_${
+      }_${r.getAs[String](ColNames.FlowEmitterId)}_${r.getAs[String](ColNames.FlowEmitterNumber)}_${
         r.getAs[String](
           ColNames
             .OrgId
@@ -80,3 +63,4 @@ trait DcirExtractor[EventType <: AnyEvent] extends Extractor[EventType] with Dci
 
   }
 }
+

@@ -2,9 +2,9 @@
 
 package fr.polytechnique.cmap.cnam.etl.extractors.mco
 
+import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{LongType, TimestampType}
-import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
 import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 
@@ -31,6 +31,11 @@ trait McoSource extends ColumnNames {
     val CCAMDelayDate: ColName = "MCO_A__ENT_DAT_DEL"
     val StayFrom: ColName = "MCO_B__ENT_MOD"
     val StayFromType: ColName = "MCO_B__ENT_PRV"
+
+    val core = List(
+      PatientID, EtaNum, RsaNum, Year, StayEndMonth, StayEndYear, StayLength,
+      StayStartDate, StayEndDate, StartDate, EndDate
+    )
     val all = List(
       PatientID, DP, DR, DA, CCAM, GHM, EtaNum, RsaNum, Year, ExitMode, StayEndMonth, StayEndYear, StayLength,
       StayStartDate, StayEndDate, StartDate, EndDate, CCAMDelayDate

@@ -2,21 +2,11 @@ package fr.polytechnique.cmap.cnam.etl.extractors.ngapacts
 
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.events.{Event, McoCeFbstcNgapAct, McoCeFcstcNgapAct, NgapAct}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class McoNgapActsExtractorSuite extends SharedContext {
-
-  object ngapClassKeyLetterCoefficient extends NgapActClassConfig {
-    val ngapKeyLetters: Seq[String] = Seq("ABG")
-    val ngapCoefficients: Seq[String] = Seq("42.0")
-  }
-
-  object ngapKeyLetter extends NgapActClassConfig {
-    val ngapKeyLetters: Seq[String] = Seq("ABC")
-    val ngapCoefficients: Seq[String] = Seq.empty
-  }
 
   "extract" should "extract ngap acts events from raw data with a ngapClass based on key letter B2 and coefficient" in {
 
@@ -33,11 +23,14 @@ class McoNgapActsExtractorSuite extends SharedContext {
 
     val ngapConf = NgapActConfig(
       actsCategories = List(
-        ngapClassKeyLetterCoefficient
+        NgapActClassConfig(
+          ngapKeyLetters = Seq("ABG"),
+          ngapCoefficients = Seq("42.0")
+        )
       )
     )
     // When
-    val result = new McoCeFbstcNgapActExtractor(ngapConf).extract(source, Set.empty)
+    val result = McoCeFbstcNgapActExtractor(ngapConf).extract(source)
     // Then
     assertDSs(result, expected)
   }
@@ -57,11 +50,14 @@ class McoNgapActsExtractorSuite extends SharedContext {
 
     val ngapConf = NgapActConfig(
       actsCategories = List(
-        ngapKeyLetter
+        NgapActClassConfig(
+          ngapKeyLetters = Seq("ABC"),
+          ngapCoefficients = Seq.empty
+        )
       )
     )
     // When
-    val result = new McoCeFbstcNgapActExtractor(ngapConf).extract(source, Set.empty)
+    val result = McoCeFbstcNgapActExtractor(ngapConf).extract(source)
     // Then
     assertDSs(result, expected)
   }
@@ -84,7 +80,7 @@ class McoNgapActsExtractorSuite extends SharedContext {
       actsCategories = List.empty
     )
     // When
-    val result = new McoCeFbstcNgapActExtractor(ngapConf).extract(source, Set.empty)
+    val result = McoCeFbstcNgapActExtractor(ngapConf).extract(source)
 
     // Then
     assertDSs(result, expected)
@@ -108,7 +104,7 @@ class McoNgapActsExtractorSuite extends SharedContext {
       actsCategories = List.empty
     )
     // When
-    val result = new McoCeFcstcNgapActExtractor(ngapConf).extract(source, Set.empty)
+    val result = McoCeFcstcNgapActExtractor(ngapConf).extract(source)
 
     // Then
     assertDSs(result, expected)

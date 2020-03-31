@@ -1,6 +1,8 @@
+// License: BSD 3 clause
+
 package fr.polytechnique.cmap.cnam.etl.extractors.ngapacts
 
-import fr.polytechnique.cmap.cnam.etl.extractors.ExtractorConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.{ExtractorCodes, ExtractorConfig}
 
 /**
   * NgapActConfig defines three different ways to filter for specific ngap acts in the SNDS :
@@ -22,12 +24,12 @@ import fr.polytechnique.cmap.cnam.etl.extractors.ExtractorConfig
   *
   * @param actsCategories List of configuration to get specific NgapActs
   */
-class NgapActConfig(
-  val actsCategories: List[NgapActClassConfig]) extends ExtractorConfig with Serializable {
+class NgapActConfig[+C <: NgapActClassConfig](
+  val actsCategories: List[C]) extends ExtractorConfig with ExtractorCodes {
+  override def isEmpty: Boolean = actsCategories.isEmpty
 }
 
 object NgapActConfig {
-  def apply(actsCategories: List[NgapActClassConfig]): NgapActConfig = new NgapActConfig(
-    actsCategories
-  )
+
+  def apply[C <: NgapActClassConfig](actsCategories: List[C]): NgapActConfig[C] = new NgapActConfig[C](actsCategories)
 }

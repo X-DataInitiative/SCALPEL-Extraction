@@ -17,6 +17,6 @@ object ControlDrugs {
         List(Antihypertenseurs, Opioids, Cardiac, ProtonPumpInhibitors, Antiepileptics)
       )
     )
-      .extract(sources, Set.empty)
+      .extract(sources)
   }
 }

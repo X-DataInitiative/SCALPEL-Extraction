@@ -1,9 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.ssr
 
+import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions._
 
 class SsrSourceSuite extends SharedContext with SsrSource {
 
@@ -11,21 +10,21 @@ class SsrSourceSuite extends SharedContext with SsrSource {
 
     val fakeSsrData = {
 
-    val sqlCtx = sqlContext
-    import sqlCtx.implicits._
+      val sqlCtx = sqlContext
+      import sqlCtx.implicits._
 
-    Seq(
-      ("Patient1", Some("C669"), Some("C672"), Some("C643"), Some("12122011"), Some(2011), Some(12)),
-      ("Patient1", Some("C679"), Some("C691"), Some("C643"), Some("01122011"), Some(2011), Some(12)),
-      ("Patient1", Some("C679"), Some("C691"), Some("C643"), Some("15012012"), Some(2012), Some(1)),
-      ("Patient2", Some("C669"), Some("C672"), Some("C643"), None, Some(2011), Some(11)),
-      ("Patient3", Some("C679"), Some("B672"), Some("C673"), None, Some(2011), Some(5)),
-      ("MustBeDropped1", None, None, None, Some("31122011"), Some(2011), Some(12))
-    ).toDF(
-      "NUM_ENQ", "SSR_B__MOR_PRP", "SSR_B__ETL_AFF", "SSR_D__DGN_COD",
-      "ENT_DAT", "ANN_LUN_1S", "MOI_LUN_1S"
-    )
-  }
+      Seq(
+        ("Patient1", Some("C669"), Some("C672"), Some("C643"), Some("12122011"), Some(2011), Some(12)),
+        ("Patient1", Some("C679"), Some("C691"), Some("C643"), Some("01122011"), Some(2011), Some(12)),
+        ("Patient1", Some("C679"), Some("C691"), Some("C643"), Some("15012012"), Some(2012), Some(1)),
+        ("Patient2", Some("C669"), Some("C672"), Some("C643"), None, Some(2011), Some(11)),
+        ("Patient3", Some("C679"), Some("B672"), Some("C673"), None, Some(2011), Some(5)),
+        ("MustBeDropped1", None, None, None, Some("31122011"), Some(2011), Some(12))
+      ).toDF(
+        "NUM_ENQ", "SSR_B__MOR_PRP", "SSR_B__ETL_AFF", "SSR_D__DGN_COD",
+        "ENT_DAT", "ANN_LUN_1S", "MOI_LUN_1S"
+      )
+    }
 
     val sqlCtx = sqlContext
     import sqlCtx.implicits._

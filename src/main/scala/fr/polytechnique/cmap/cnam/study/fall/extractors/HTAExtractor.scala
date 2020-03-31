@@ -11,6 +11,6 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 object HTAExtractor {
   def extract(sources: Sources): Dataset[Event[Drug]] = {
-    new DrugExtractor(DrugConfig(TherapeuticLevel, List(Antihypertenseurs))).extract(sources, Set.empty)
+    new DrugExtractor(DrugConfig(TherapeuticLevel, List(Antihypertenseurs))).extract(sources)
   }
 }

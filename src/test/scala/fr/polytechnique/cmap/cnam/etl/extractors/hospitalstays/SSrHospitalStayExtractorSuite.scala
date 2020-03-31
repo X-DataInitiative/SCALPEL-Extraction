@@ -1,10 +1,10 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays
 
+import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Event, HospitalStay, SsrHospitalStay}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
-import org.apache.spark.sql.Dataset
 
 class SSrHospitalStayExtractorSuite extends SharedContext {
 
@@ -22,7 +22,7 @@ class SSrHospitalStayExtractorSuite extends SharedContext {
     ).toDS()
 
     //When
-    val result: Dataset[Event[HospitalStay]] = SsrHospitalStaysExtractor.extract(sources, Set.empty)
+    val result: Dataset[Event[HospitalStay]] = SsrHospitalStaysExtractor.extract(sources)
 
     //Then
     assertDSs(expected, result)
@@ -42,7 +42,7 @@ class SSrHospitalStayExtractorSuite extends SharedContext {
     ).toDS()
 
     //When
-    val result: Dataset[Event[HospitalStay]] = SsrHospitalStaysExtractor.extract(sources, Set("Test"))
+    val result: Dataset[Event[HospitalStay]] = SsrHospitalStaysExtractor.extract(sources)
 
     //Then
     assertDSs(expected, result)

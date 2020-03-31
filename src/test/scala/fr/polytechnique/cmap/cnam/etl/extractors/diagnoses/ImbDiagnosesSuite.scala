@@ -3,7 +3,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.ImbDiagnosis
+import fr.polytechnique.cmap.cnam.etl.events.ImbCcamDiagnosis
+import fr.polytechnique.cmap.cnam.etl.extractors.BaseExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
@@ -15,11 +16,11 @@ class ImbDiagnosesSuite extends SharedContext {
 
     // Given
     val imb = sqlContext.read.load("src/test/resources/test-input/IR_IMB_R.parquet")
-    val expected = Seq(ImbDiagnosis("Patient_02", "C67", makeTS(2006, 3, 13), Some(makeTS(2016, 3, 13)))).toDS
+    val expected = Seq(ImbCcamDiagnosis("Patient_02", "C67", makeTS(2006, 3, 13), Some(makeTS(2016, 3, 13)))).toDS
 
     val sources = Sources(irImb = Some(imb))
     // When
-    val output = ImbDiagnosisExtractor.extract(sources, Set("C67"))
+    val output = ImbCimDiagnosisExtractor(BaseExtractorCodes(List("C67"))).extract(sources)
 
     // Then
     assertDSs(expected, output)
@@ -32,14 +33,14 @@ class ImbDiagnosesSuite extends SharedContext {
     // Given
     val imb = sqlContext.read.load("src/test/resources/test-input/IR_IMB_R.parquet")
     val expected = Seq(
-      ImbDiagnosis("Patient_02", "E11", makeTS(2006, 1, 25), Some(makeTS(2011, 1, 24))),
-      ImbDiagnosis("Patient_02", "C67", makeTS(2006, 3, 13), Some(makeTS(2016, 3, 13))),
-      ImbDiagnosis("Patient_02", "9999", makeTS(2006, 4, 25), Some(makeTS(2016, 4, 25)))
+      ImbCcamDiagnosis("Patient_02", "E11", makeTS(2006, 1, 25), Some(makeTS(2011, 1, 24))),
+      ImbCcamDiagnosis("Patient_02", "C67", makeTS(2006, 3, 13), Some(makeTS(2016, 3, 13))),
+      ImbCcamDiagnosis("Patient_02", "9999", makeTS(2006, 4, 25), Some(makeTS(2016, 4, 25)))
     ).toDS
 
     val sources = Sources(irImb = Some(imb))
     // When
-    val output = ImbDiagnosisExtractor.extract(sources, Set.empty).orderBy($"start".asc)
+    val output = ImbCimDiagnosisExtractor(BaseExtractorCodes.empty).extract(sources)
 
     // Then
     assertDSs(expected, output)
@@ -59,15 +60,15 @@ class ImbDiagnosesSuite extends SharedContext {
     ).toDF("NUM_ENQ", "MED_NCL_IDT", "MED_MTF_COD", "IMB_ALD_DTD", "IMB_ALD_DTF")
 
     val expected = Seq(
-      ImbDiagnosis("Patient_02", "E11", makeTS(2006, 1, 25), Some(makeTS(2011, 1, 24))),
-      ImbDiagnosis("Patient_02", "C67", makeTS(2006, 3, 13), None),
-      ImbDiagnosis("Patient_03", "C67", makeTS(2006, 3, 13), None),
-      ImbDiagnosis("Patient_02", "9999", makeTS(2006, 4, 25), Some(makeTS(2016, 4, 25)))
+      ImbCcamDiagnosis("Patient_02", "E11", makeTS(2006, 1, 25), Some(makeTS(2011, 1, 24))),
+      ImbCcamDiagnosis("Patient_02", "C67", makeTS(2006, 3, 13), None),
+      ImbCcamDiagnosis("Patient_03", "C67", makeTS(2006, 3, 13), None),
+      ImbCcamDiagnosis("Patient_02", "9999", makeTS(2006, 4, 25), Some(makeTS(2016, 4, 25)))
     ).toDS
 
     val sources = Sources(irImb = Some(imb))
     // When
-    val output = ImbDiagnosisExtractor.extract(sources, Set.empty).orderBy($"start".asc)
+    val output = ImbCimDiagnosisExtractor(BaseExtractorCodes.empty).extract(sources)
 
     // Then
     assertDSs(expected, output)

@@ -1,7 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, HadAssociatedDiagnosis, HadMainDiagnosis}
+import fr.polytechnique.cmap.cnam.etl.extractors.BaseExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
@@ -12,7 +13,7 @@ class HadDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val dpCodes = Set("G970")
+    val dpCodes = BaseExtractorCodes(List("G970"))
     val had = spark.read.parquet("src/test/resources/test-input/HAD.parquet")
     val sources = Sources(had = Some(had))
 
@@ -22,7 +23,7 @@ class HadDiagnosesSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = HadMainDiagnosisExtractor.extract(sources, dpCodes)
+    val result = HadMainDiagnosisExtractor(dpCodes).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -43,7 +44,7 @@ class HadDiagnosesSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = HadMainDiagnosisExtractor.extract(sources, Set.empty)
+    val result = HadMainDiagnosisExtractor(BaseExtractorCodes.empty).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -54,7 +55,7 @@ class HadDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val associatedDiagnosis = Set("G9")
+    val associatedDiagnosis = BaseExtractorCodes(List("G9"))
     val had = spark.read.parquet("src/test/resources/test-input/HAD.parquet")
     val sources = Sources(had = Some(had))
 
@@ -65,7 +66,7 @@ class HadDiagnosesSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = HadAssociatedDiagnosisExtractor.extract(sources, associatedDiagnosis)
+    val result = HadAssociatedDiagnosisExtractor(associatedDiagnosis).extract(sources)
 
     // Then
     assertDSs(result, expected)

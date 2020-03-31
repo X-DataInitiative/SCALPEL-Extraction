@@ -3,104 +3,55 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.prestations
 
 import java.sql.Timestamp
-import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirExtractor
-import fr.polytechnique.cmap.cnam.etl.extractors.mcoCe.McoCeExtractor
-import org.apache.spark.sql.{DataFrame, Row}
 import scala.util.Try
-import org.apache.spark.sql.functions.col
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import org.apache.spark.sql.Row
+import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.extractors.{BaseExtractorCodes, IsInStrategy}
+import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirBasicExtractor
+
+sealed abstract class DcirPractitionerSpecialityExtractor(codes: BaseExtractorCodes)
+  extends DcirBasicExtractor[PractitionerClaimSpeciality] with IsInStrategy[PractitionerClaimSpeciality] {
+
+  override def usedColumns: List[ColName] = ColNames.ExecPSNum :: super.usedColumns
+
+  override def extractStart(r: Row): Timestamp = {
+    Try(super.extractStart(r)) recover {
+      case _: NullPointerException => extractFluxDate(r)
+    }
+  }.get
+
+  override def extractGroupId(r: Row): String = {
+    r.getAs[String](ColNames.ExecPSNum)
+  }
+
+  override def extractValue(row: Row): String = row.getAs[Integer](columnName).toString
+
+  override def isInExtractorScope(row: Row): Boolean = {
+    (!row.isNullAt(row.fieldIndex(columnName))) & (row.getAs[Integer](columnName) != 0)
+  }
+
+  override def getCodes: BaseExtractorCodes = codes
+}
 
 /**
-  * Get specialties of medical practitionner in the Dcir:
+  * Get specialties of medical practitioners in the Dcir:
   * If a specialty is available, it extracts the specialty using PSE_SPE_COD and the practitioner
   * identifier from the database.
   */
-object MedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerClaimSpeciality] {
+final case class MedicalPractitionerClaimExtractor(codes: BaseExtractorCodes)
+  extends DcirPractitionerSpecialityExtractor(codes) {
   override val columnName: String = ColNames.MSpe
   override val eventBuilder: EventBuilder = MedicalPractitionerClaim
-
-  override def code: Row => String = (row: Row) => row.getAs[Integer](columnName).toString
-
-  override def extractStart(r: Row): Timestamp = {
-    Try(super.extractStart(r)) recover {
-      case _: NullPointerException => extractFluxDate(r)
-    }
-  }.get
-
-  override def extractGroupId(r: Row): String = {
-    r.getAs[String](ColNames.ExecPSNum)
-  }
-
-  override def isInStudy(codes: Set[String])
-                        (row: Row): Boolean = codes.contains(code(row))
-
-  override def isInExtractorScope(row: Row): Boolean = {
-    (!row.isNullAt(row.fieldIndex(columnName))) & (row.getAs[Integer](columnName) != 0)
-  }
 }
 
+
 /**
-  * Get specialties of the non medical practitionners in the Dcir:
+  * Get specialties of the non medical practitioners in the Dcir:
   * If a specialty is available, it extracts the specialty using PSE_ACT_NAT and the practitioner
   * identifier from the database.
   */
-object NonMedicalPractitionerClaimExtractor extends DcirExtractor[PractitionerClaimSpeciality] {
+final case class NonMedicalPractitionerClaimExtractor(codes: BaseExtractorCodes)
+  extends DcirPractitionerSpecialityExtractor(codes) {
   override val columnName: String = ColNames.NonMSpe
   override val eventBuilder: EventBuilder = NonMedicalPractitionerClaim
-
-  override def code: Row => String = (row: Row) => row.getAs[Integer](columnName).toString
-
-  override def extractStart(r: Row): Timestamp = {
-    Try(super.extractStart(r)) recover {
-      case _: NullPointerException => extractFluxDate(r)
-    }
-  }.get
-
-  override def extractGroupId(r: Row): String = {
-    r.getAs[String](ColNames.ExecPSNum)
-  }
-
-  override def isInExtractorScope(row: Row): Boolean = {
-    (!row.isNullAt(row.fieldIndex(columnName))) & (row.getAs[Integer](columnName) != 0)
-  }
-
-  override def isInStudy(codes: Set[String])
-                        (row: Row): Boolean = codes.contains(code(row))
-}
-
-
-/**
-  * Get specialties of the non medical practitioners in the MCO_CE:
-  * If a specialty is available, it extracts the specialty using MCO_FBSTC_ _EXE_SPE and MCO_FCSTC_ _EXE_SPE.
-  * These two columns are complementary as described here :
-  * https://documentation-snds.health-data-hub.fr/fiches/actes_consult_externes.html#les-tables-du-pmsi-version-snds-pour-les-ace
-  **/
-trait McoCeSpecialtyExtractor extends McoCeExtractor[PractitionerClaimSpeciality] {
-  override val eventBuilder: EventBuilder = MedicalPractitionerClaim
-
-  override def code: Row => String = (row: Row) => row.getAs[Int](columnName).toString
-
-
-  override def isInStudy(codes: Set[String])
-                        (row: Row): Boolean = codes.contains(code(row))
-
-  override def isInExtractorScope(row: Row): Boolean = {
-    (!row.isNullAt(row.fieldIndex(columnName))) & (row.getAs[Integer](columnName) != 0)
-  }
-
-  override def getInput(sources: Sources): DataFrame = {
-    sources.mcoCe.get.select((columnName :: ColNames.core).map(col): _*)
-  }
-}
-
-object McoCeFbstcSpecialtyExtractor extends McoCeSpecialtyExtractor {
-  override val columnName: String = ColNames.PractitionnerSpecialtyFbstc
-  override val eventBuilder: EventBuilder = McoCeFbstcMedicalPractitionerClaim
-}
-
-
-object McoCeFcstcSpecialtyExtractor extends McoCeSpecialtyExtractor {
-  override val columnName: String = ColNames.PractitionnerSpecialtyFcstc
-  override val eventBuilder: EventBuilder = McoCeFcstcMedicalPractitionerClaim
 }

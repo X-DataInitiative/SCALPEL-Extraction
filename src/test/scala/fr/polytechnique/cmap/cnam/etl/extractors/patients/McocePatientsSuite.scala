@@ -5,8 +5,8 @@ package fr.polytechnique.cmap.cnam.etl.extractors.patients
 import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.types.TimestampType
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.extractors.patients.McocePatients.McocePatientsImplicit
 import fr.polytechnique.cmap.cnam.etl.implicits
+import fr.polytechnique.cmap.cnam.etl.extractors.patients.McocePatients.McocePatientsImplicit
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.util.functions.makeTS

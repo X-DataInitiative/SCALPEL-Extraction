@@ -7,6 +7,7 @@ import org.apache.spark.sql.Row
 
 trait EventRowExtractor {
   self: ColumnNames =>
+  def usedColumns: List[String] = List.empty
 
   def extractPatientId(r: Row): String
 

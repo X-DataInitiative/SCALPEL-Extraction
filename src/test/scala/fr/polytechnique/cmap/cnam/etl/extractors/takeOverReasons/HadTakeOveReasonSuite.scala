@@ -1,18 +1,19 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.takeOverReasons
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.events.{Event, HadAssociatedTakeOver, HadMainTakeOver, MedicalTakeOverReason}
+import fr.polytechnique.cmap.cnam.etl.extractors.BaseExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
 
 class HadTakeOveReasonSuite extends SharedContext {
-  
+
   "extract" should "return a DataSet of HadMainTakeOveReasons" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val takeOverReasonCodes = Set("1")
+    val takeOverReasonCodes = BaseExtractorCodes(List("1"))
     val had = spark.read.parquet("src/test/resources/test-input/HAD.parquet")
     val expected = Seq[Event[MedicalTakeOverReason]](
       HadMainTakeOver("patient01", "10000123_30000123_2019", "1", makeTS(2019, 11, 21))
@@ -20,7 +21,7 @@ class HadTakeOveReasonSuite extends SharedContext {
 
     val input = Sources(had = Some(had))
     // When
-    val result = HadMainTakeOverExtractor.extract(input, takeOverReasonCodes)
+    val result = HadMainTakeOverExtractor(takeOverReasonCodes).extract(input)
 
     // Then
     assertDSs(result, expected)
@@ -40,7 +41,7 @@ class HadTakeOveReasonSuite extends SharedContext {
 
     val input = Sources(had = Some(had))
     // When
-    val result = HadMainTakeOverExtractor.extract(input, Set.empty)
+    val result = HadMainTakeOverExtractor(BaseExtractorCodes.empty).extract(input)
 
     // Then
     assertDSs(result, expected)
@@ -60,7 +61,7 @@ class HadTakeOveReasonSuite extends SharedContext {
 
     val input = Sources(had = Some(had))
     // When
-    val result = HadAssociatedTakeOverExtractor.extract(input, Set.empty)
+    val result = HadAssociatedTakeOverExtractor(BaseExtractorCodes.empty).extract(input)
 
     // Then
     assertDSs(result, expected)

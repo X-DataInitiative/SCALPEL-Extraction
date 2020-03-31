@@ -24,9 +24,9 @@ class FracturesTransformerSuite extends SharedContext {
     val testConf = defaultConf.copy(outcomes = FracturesConfig(fallFrame = 3.months))
     val acts: Dataset[Event[MedicalAct]] = Seq(
       //pubic ambulatory acts
-      McoCEAct("georgette", DcirAct.groupID.PublicAmbulatory, "MZMP007", 1.0, makeTS(2010, 2, 6)),
-      McoCEAct("georgettebis", DcirAct.groupID.PublicAmbulatory, "MZMP007", 1.0, makeTS(2010, 2, 6)),
-      McoCEAct("george", DcirAct.groupID.PublicAmbulatory, "whatever", 1.0, makeTS(2010, 2, 6)),
+      McoCeCcamAct("georgette", DcirAct.groupID.PublicAmbulatory, "MZMP007", 1.0, makeTS(2010, 2, 6)),
+      McoCeCcamAct("georgettebis", DcirAct.groupID.PublicAmbulatory, "MZMP007", 1.0, makeTS(2010, 2, 6)),
+      McoCeCcamAct("george", DcirAct.groupID.PublicAmbulatory, "whatever", 1.0, makeTS(2010, 2, 6)),
       DcirAct("john", DcirAct.groupID.PublicAmbulatory, "MZMP007", 1.0, makeTS(2010, 2, 6)),
       //private ambulatory acts
       DcirAct("riri", DcirAct.groupID.PrivateAmbulatory, "NBEP002", 1.0, makeTS(2007, 1, 1)),
