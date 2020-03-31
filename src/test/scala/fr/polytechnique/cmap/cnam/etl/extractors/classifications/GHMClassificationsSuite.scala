@@ -4,6 +4,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.classifications
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.GHMClassification
+import fr.polytechnique.cmap.cnam.etl.extractors.BaseExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
 
@@ -15,7 +16,7 @@ class GHMClassificationsSuite extends SharedContext {
 
     // Given
     val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
-    val ghmCodes = Set("12H50L")
+    val ghmCodes = BaseExtractorCodes(List("12H50L"))
 
     val expected = Seq(
       GHMClassification("Patient_02", "10000123_20000123_2007", "12H50L", makeTS(2007, 1, 29)),
@@ -25,7 +26,7 @@ class GHMClassificationsSuite extends SharedContext {
     val sources = Sources(mco = Some(mco))
 
     // When
-    val result = GhmExtractor.extract(sources, ghmCodes)
+    val result = GhmExtractor(ghmCodes).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -50,7 +51,7 @@ class GHMClassificationsSuite extends SharedContext {
     val sources = Sources(mco = Some(mco))
 
     // When
-    val result = GhmExtractor.extract(sources, Set.empty)
+    val result = GhmExtractor(BaseExtractorCodes.empty).extract(sources)
 
     // Then
     assertDSs(result, expected)

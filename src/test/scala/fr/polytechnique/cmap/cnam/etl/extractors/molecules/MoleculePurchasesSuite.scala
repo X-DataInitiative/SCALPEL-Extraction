@@ -29,12 +29,12 @@ class MoleculePurchasesSuite extends SharedContext {
       irPha = Some(irPha),
       dosages = Some(dosages)
     )
-    val expected = new DcirMoleculePurchases(config).extract(sources, config.drugClasses.toSet).toDF
+    val expected = new DcirMoleculePurchases(config).extract(sources)
 
     // When
-    val result = new MoleculePurchases(config).extract(sources).toDF
+    val result = new MoleculePurchases(config).extract(sources)
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
   }
 }

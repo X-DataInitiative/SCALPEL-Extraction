@@ -3,39 +3,41 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.drugs
 
 import java.sql.Timestamp
-import scala.reflect.runtime.universe
 import org.apache.commons.codec.binary.Base64
-import org.apache.spark.sql._
+import org.apache.spark.sql.{Column, DataFrame, Row}
 import org.apache.spark.sql.functions.{col, when}
 import org.apache.spark.sql.types.{StringType, TimestampType}
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
-class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
+class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug, DrugConfig] {
 
-  override def extract(
-    sources: Sources,
-    codes: Set[String])
-    (implicit ctag: universe.TypeTag[Drug]): Dataset[Event[Drug]] = {
+  override def getCodes: DrugConfig = drugConfig
 
-    val input: DataFrame = getInput(sources)
+  override def isInStudy(row: Row): Boolean = drugConfig.level.isInFamily(drugConfig.families, row)
 
-    import input.sqlContext.implicits._
+  override def isInExtractorScope(row: Row): Boolean = true
 
-    {
-      if (drugConfig.families.isEmpty) {
-        input.filter(isInExtractorScope _)
-      }
-      else {
-        input.filter(isInExtractorScope _).filter(isInStudy(codes) _)
-      }
-    }.flatMap(builder _).distinct()
+  override def builder(row: Row): Seq[Event[Drug]] = {
+    lazy val classification = drugConfig.level.getClassification(drugConfig.families)(row)
+
+    lazy val patientID = getPatientID(row)
+    lazy val conditioning = getConditioning(row)
+    lazy val date = getEventDate(row)
+    lazy val groupID = extractGroupId(row)
+
+    classification.map(code => Drug(patientID, code, conditioning, groupID, date))
   }
 
+  private def getPatientID(row: Row): String = row.getAs[String](ColNames.PatientId)
+
+  private def getConditioning(row: Row): Int = row.getAs[Int](ColNames.Conditioning)
+
+  private def getEventDate(row: Row): Timestamp = row.getAs[Timestamp](ColNames.Date)
 
   /** It generate a hash using the values of these columns
-    *(FLX_DIS_DTD,FLX_TRT_DTD,FLX_EMT_TYP,FLX_EMT_NUM,FLX_EMT_ORD,ORG_CLE_NUM,DCT_ORD_NUM).
+    * (FLX_DIS_DTD,FLX_TRT_DTD,FLX_EMT_TYP,FLX_EMT_NUM,FLX_EMT_ORD,ORG_CLE_NUM,DCT_ORD_NUM).
     * It allows to identify each prescription in a unique way, it can be used to identify
     * the possible interactions of molecules prescript in the same period.
     *
@@ -58,29 +60,6 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
     ).map(_.toChar).mkString
   }
 
-
-  override def isInStudy(codes: Set[String])
-    (row: Row): Boolean = drugConfig.level.isInFamily(drugConfig.families, row)
-
-  override def isInExtractorScope(row: Row): Boolean = true
-
-  override def builder(row: Row): Seq[Event[Drug]] = {
-    lazy val classification = drugConfig.level.getClassification(drugConfig.families)(row)
-
-    lazy val patientID = getPatientID(row)
-    lazy val conditioning = getConditioning(row)
-    lazy val date = getEventDate(row)
-    lazy val groupID = extractGroupId(row)
-
-    classification.map(code => Drug(patientID, code, conditioning, groupID, date))
-  }
-
-  private def getPatientID(row: Row): String = row.getAs[String](ColNames.PatientId)
-
-  private def getConditioning(row: Row): Int = row.getAs[Int](ColNames.Conditioning)
-
-  private def getEventDate(row: Row): Timestamp = row.getAs[Timestamp](ColNames.Date)
-
   override def getInput(sources: Sources): DataFrame = {
 
     val neededColumns: List[Column] = List(
@@ -94,8 +73,6 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
 
     lazy val irPhaR = sources.irPha.get
     lazy val dcir = sources.dcir.get
-    val spark: SparkSession = dcir.sparkSession
-
     lazy val df: DataFrame = dcir.join(irPhaR, dcir.col("ER_PHA_F__PHA_PRS_C13") === irPhaR.col("PHA_CIP_C13"))
 
     df
@@ -105,11 +82,6 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
   }
 
   final object ColNames extends Serializable {
-    val PatientId = "patientID"
-    val Conditioning = "conditioning"
-    val Date = "eventDate"
-    val Cip13 = "CIP13"
-
     lazy val FluxDate = "FLX_DIS_DTD"
     lazy val FluxProcessingDate = "FLX_TRT_DTD"
     lazy val EmitterType = "FLX_EMT_TYP"
@@ -117,10 +89,17 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug] {
     lazy val FluxSeqNumber = "FLX_EMT_ORD"
     lazy val OrganisationOldId = "ORG_CLE_NUM"
     lazy val OrganisationDecompteNumber = "DCT_ORD_NUM"
-
     lazy val GroupID = List(
       FluxDate, FluxProcessingDate, EmitterType, EmitterId, FluxSeqNumber, OrganisationOldId, OrganisationDecompteNumber
     )
+    val PatientId = "patientID"
+    val Conditioning = "conditioning"
+    val Date = "eventDate"
+    val Cip13 = "CIP13"
   }
 
+}
+
+object DrugExtractor {
+  def apply(drugConfig: DrugConfig): DrugExtractor = new DrugExtractor(drugConfig)
 }

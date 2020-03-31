@@ -19,7 +19,7 @@ class MedicalActsConfig(
   val ssrCECodes: List[String],
   val ssrCSARRCodes: List[String],
   val hadCCAMCodes: List[String]
-  ) extends ExtractorConfig
+) extends ExtractorConfig
 
 object MedicalActsConfig {
 
@@ -41,6 +41,7 @@ object MedicalActsConfig {
       ssrCSARRCodes,
       ssrCCAMCodes,
       ssrCECodes,
-      hadCCAMCodes)
+      hadCCAMCodes
+    )
   }
 }

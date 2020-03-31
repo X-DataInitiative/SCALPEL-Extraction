@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.had
 
-import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.functions.makeTS
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
+import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class HadSourceSuite extends SharedContext with HadSource {
 

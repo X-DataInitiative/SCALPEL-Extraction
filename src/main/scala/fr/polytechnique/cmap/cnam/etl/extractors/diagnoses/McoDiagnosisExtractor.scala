@@ -1,25 +1,28 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.{BaseExtractorCodes, StartsWithStrategy}
+import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoBasicExtractor
 
-class McoMainDiagnosisExtractor extends McoExtractor[Diagnosis] {
-  final override val columnName: String = ColNames.DP
+protected trait BasicMcoDiagnosisExtractor extends McoBasicExtractor[Diagnosis] with StartsWithStrategy[Diagnosis]
+
+case class McoMainDiagnosisExtractor(codes: BaseExtractorCodes) extends BasicMcoDiagnosisExtractor {
+  override val columnName: String = ColNames.DP
   override val eventBuilder: EventBuilder = McoMainDiagnosis
+
+  override def getCodes: BaseExtractorCodes = codes
 }
 
-object McoMainDiagnosisExtractor extends McoMainDiagnosisExtractor
-
-class McoAssociatedDiagnosisExtractor extends McoExtractor[Diagnosis] {
-  final override val columnName: String = ColNames.DA
+case class McoAssociatedDiagnosisExtractor(codes: BaseExtractorCodes) extends BasicMcoDiagnosisExtractor {
+  override val columnName: String = ColNames.DA
   override val eventBuilder: EventBuilder = McoAssociatedDiagnosis
+
+  override def getCodes: BaseExtractorCodes = codes
 }
 
-object McoAssociatedDiagnosisExtractor extends McoAssociatedDiagnosisExtractor
-
-class McoLinkedDiagnosisExtractor extends McoExtractor[Diagnosis] {
-  final override val columnName: String = ColNames.DR
+case class McoLinkedDiagnosisExtractor(codes: BaseExtractorCodes) extends BasicMcoDiagnosisExtractor {
+  override val columnName: String = ColNames.DR
   override val eventBuilder: EventBuilder = McoLinkedDiagnosis
-}
 
-object McoLinkedDiagnosisExtractor extends McoLinkedDiagnosisExtractor
+  override def getCodes: BaseExtractorCodes = codes
+}

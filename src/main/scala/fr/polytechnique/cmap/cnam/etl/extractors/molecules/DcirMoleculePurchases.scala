@@ -3,23 +3,21 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.molecules
 
 import java.sql.Timestamp
-import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{DoubleType, StringType, TimestampType}
 import org.apache.spark.sql.{Column, DataFrame, Row}
+import org.apache.spark.sql.expressions.Window
+import org.apache.spark.sql.functions.{col, sum, udf, when}
+import org.apache.spark.sql.types.{DoubleType, StringType, TimestampType}
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Molecule}
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.DrugEventsTransformerHelper
 
-class DcirMoleculePurchases(config: MoleculePurchasesConfig) extends Extractor[Molecule] {
+class DcirMoleculePurchases(config: MoleculePurchasesConfig) extends Extractor[Molecule, MoleculePurchasesConfig] {
 
-  override def isInStudy(codes: Set[String])(row: Row): Boolean =
-    codes.contains(row.getAs[String](Columns.Category))
+  override def isInStudy(row: Row): Boolean = config.drugClasses.contains(row.getAs[String](Columns.Category))
 
   override def isInExtractorScope(row: Row): Boolean = !row.isNullAt(row.fieldIndex(Columns.EventDate)) &&
     row.getAs[Int](Columns.NBoxes) > 0
-
 
   override def builder(row: Row): Seq[Event[Molecule]] = Seq(
     Molecule(
@@ -29,6 +27,14 @@ class DcirMoleculePurchases(config: MoleculePurchasesConfig) extends Extractor[M
       getEventDate(row)
     )
   )
+
+  def getPatientID(row: Row): String = row.getAs[String](Columns.PatientID)
+
+  def getValue(row: Row): String = row.getAs[String](Columns.MoleculeName)
+
+  def getWeight(row: Row): Double = row.getAs[Double](Columns.TotalDose)
+
+  def getEventDate(row: Row): Timestamp = row.getAs[Timestamp](Columns.EventDate)
 
   override def getInput(sources: Sources): DataFrame = {
     val dcirInputColumns: List[Column] = List(
@@ -52,7 +58,8 @@ class DcirMoleculePurchases(config: MoleculePurchasesConfig) extends Extractor[M
       col("TOTAL_MG_PER_UNIT").cast(DoubleType).as("dosage")
     )
 
-    val groupCols: List[Column] = List(col("patientID"),
+    val groupCols: List[Column] = List(
+      col("patientID"),
       col("moleculeName"),
       col("eventDate")
     )
@@ -66,9 +73,10 @@ class DcirMoleculePurchases(config: MoleculePurchasesConfig) extends Extractor[M
 
     val df = sources.dcir.get
       .select(dcirInputColumns: _*)
-      .withColumn(Columns.NBoxes, when(col(Columns.NBoxes) < 0, 0)
-        .when(col(Columns.NBoxes) > config.maxBoxQuantity, 0)
-        .otherwise(col(Columns.NBoxes))
+      .withColumn(
+        Columns.NBoxes, when(col(Columns.NBoxes) < 0, 0)
+          .when(col(Columns.NBoxes) > config.maxBoxQuantity, 0)
+          .otherwise(col(Columns.NBoxes))
       )
     // get CIP07 drug
     val joinedByCIP07 = df
@@ -88,14 +96,6 @@ class DcirMoleculePurchases(config: MoleculePurchasesConfig) extends Extractor[M
       .withColumn(Columns.TotalDose, sum(col(Columns.Dosage) * col(Columns.NBoxes)) over win) // Compute total dose
   }
 
-  def getPatientID(row: Row): String = row.getAs[String](Columns.PatientID)
-
-  def getValue(row: Row): String = row.getAs[String](Columns.MoleculeName)
-
-  def getWeight(row: Row): Double = row.getAs[Double](Columns.TotalDose)
-
-  def getEventDate(row: Row): Timestamp = row.getAs[Timestamp](Columns.EventDate)
-
   final object Columns extends Serializable {
     val PatientID = "patientID"
     val CIP07 = "CIP07"
@@ -108,5 +108,6 @@ class DcirMoleculePurchases(config: MoleculePurchasesConfig) extends Extractor[M
     val TotalDose = "totalDose"
   }
 
+  override def getCodes: MoleculePurchasesConfig = config
 }
 

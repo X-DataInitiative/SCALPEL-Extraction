@@ -1,10 +1,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
 import java.sql.Timestamp
-
-import fr.polytechnique.cmap.cnam.SharedContext
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
+import fr.polytechnique.cmap.cnam.SharedContext
 
 class HadPatientsSuite extends SharedContext {
 
@@ -88,7 +87,7 @@ class HadPatientsSuite extends SharedContext {
 
     val expected: DataFrame = Seq.empty[
       (String, Timestamp)
-    ].toDF("patientID", "deathDate")
+      ].toDF("patientID", "deathDate")
 
     // Then
     assertDSs(result, expected)

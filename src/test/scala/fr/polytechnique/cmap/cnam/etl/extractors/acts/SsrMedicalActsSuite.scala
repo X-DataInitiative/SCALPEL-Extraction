@@ -2,6 +2,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.acts
 
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.extractors.BaseExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
 
@@ -12,7 +13,7 @@ class SsrMedicalActsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val ccamCodes = Set("AHQP001")
+    val ccamCodes = BaseExtractorCodes(List("AHQP001"))
     val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val expected = Seq[Event[MedicalAct]](
       SsrCCAMAct("Patient_02", "10000123_30000546_200_2019", "AHQP001", makeTS(2019, 8, 11)),
@@ -21,7 +22,7 @@ class SsrMedicalActsSuite extends SharedContext {
 
     val input = Sources(ssr = Some(ssr))
     // When
-    val result = SsrCcamActExtractor.extract(input, ccamCodes)
+    val result = SsrCcamActExtractor(ccamCodes).extract(input)
 
     // Then
     assertDSs(result, expected)
@@ -42,7 +43,7 @@ class SsrMedicalActsSuite extends SharedContext {
 
     val input = Sources(ssr = Some(ssr))
     // When
-    val result = SsrCcamActExtractor.extract(input, Set.empty)
+    val result = SsrCcamActExtractor(BaseExtractorCodes.empty).extract(input)
 
     // Then
     assertDSs(result, expected)
@@ -53,7 +54,7 @@ class SsrMedicalActsSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val ccamCodes = Set("BLR+156")
+    val ccarrCodes = BaseExtractorCodes(List("BLR+156"))
     val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val expected = Seq[Event[MedicalAct]](
       SsrCSARRAct("Patient_02", "10000123_30000546_200_2019", "BLR+156", makeTS(2019, 8, 11)),
@@ -62,7 +63,7 @@ class SsrMedicalActsSuite extends SharedContext {
 
     val input = Sources(ssr = Some(ssr))
     // When
-    val result = SsrCsarrActExtractor.extract(input, ccamCodes)
+    val result = SsrCsarrActExtractor(ccarrCodes).extract(input)
 
     // Then
     assertDSs(result, expected)
@@ -83,7 +84,7 @@ class SsrMedicalActsSuite extends SharedContext {
 
     val input = Sources(ssr = Some(ssr))
     // When
-    val result = SsrCsarrActExtractor.extract(input, Set.empty)
+    val result = SsrCsarrActExtractor(BaseExtractorCodes.empty).extract(input)
 
     // Then
     assertDSs(result, expected)

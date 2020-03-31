@@ -85,7 +85,7 @@ object RosiglitazoneMain extends Main {
         )
     }
 
-    val hospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
+    val hospitalStays = McoHospitalStaysExtractor.extract(sources).cache()
     operationsMetadata += {
       OperationReporter.report(
         "extract_hospital_stays",

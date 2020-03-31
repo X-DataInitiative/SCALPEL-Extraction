@@ -118,7 +118,7 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val rawHospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
+    val rawHospitalStays = McoHospitalStaysExtractor.extract(sources).cache()
     operationsMetadata += {
       OperationReporter.report(
         "extract_hospital_stays",

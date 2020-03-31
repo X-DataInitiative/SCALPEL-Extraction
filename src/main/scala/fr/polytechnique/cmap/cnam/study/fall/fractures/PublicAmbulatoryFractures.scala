@@ -26,7 +26,7 @@ object PublicAmbulatoryFractures extends OutcomesTransformer with FractureCodes 
   }
 
   def isPublicAmbulatory(event: Event[MedicalAct]): Boolean = {
-    event.category == McoCEAct.category
+    event.category == McoCeCcamAct.category
   }
 
   def containsNonHospitalizedCcam(event: Event[MedicalAct]): Boolean = {

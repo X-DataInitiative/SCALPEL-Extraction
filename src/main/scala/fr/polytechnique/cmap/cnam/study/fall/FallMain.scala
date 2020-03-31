@@ -61,7 +61,7 @@ object FallMain extends Main with FractureCodes {
   def computeHospitalStays(sources: Sources, fallConfig: FallConfig): mutable.Buffer[OperationMetadata] = {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
     if (fallConfig.runParameters.hospitalStays) {
-      val hospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
+      val hospitalStays = McoHospitalStaysExtractor.extract(sources).cache()
 
       operationsMetadata += {
         OperationReporter

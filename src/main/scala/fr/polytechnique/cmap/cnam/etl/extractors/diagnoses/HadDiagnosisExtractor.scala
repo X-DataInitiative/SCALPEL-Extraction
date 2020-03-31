@@ -1,14 +1,21 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
-import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.extractors.had.HadExtractor
+import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, EventBuilder, HadAssociatedDiagnosis, HadMainDiagnosis}
+import fr.polytechnique.cmap.cnam.etl.extractors.{BaseExtractorCodes, StartsWithStrategy}
+import fr.polytechnique.cmap.cnam.etl.extractors.had.HadBasicExtractor
 
-object HadMainDiagnosisExtractor extends HadExtractor[Diagnosis] {
-  final override val columnName: String = ColNames.DP
+final case class HadMainDiagnosisExtractor(codes: BaseExtractorCodes) extends HadBasicExtractor[Diagnosis] with
+  StartsWithStrategy[Diagnosis] {
+  override val columnName: String = ColNames.DP
   override val eventBuilder: EventBuilder = HadMainDiagnosis
+
+  override def getCodes: BaseExtractorCodes = codes
 }
 
-object HadAssociatedDiagnosisExtractor extends HadExtractor[Diagnosis] {
-  final override val columnName: String = ColNames.DA
+final case class HadAssociatedDiagnosisExtractor(codes: BaseExtractorCodes) extends HadBasicExtractor[Diagnosis] with
+  StartsWithStrategy[Diagnosis] {
+  override val columnName: String = ColNames.DA
   override val eventBuilder: EventBuilder = HadAssociatedDiagnosis
+
+  override def getCodes: BaseExtractorCodes = codes
 }

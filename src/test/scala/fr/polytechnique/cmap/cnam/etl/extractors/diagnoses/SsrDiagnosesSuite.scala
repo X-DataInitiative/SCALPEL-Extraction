@@ -1,7 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.diagnoses
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events._
+import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, Event, SsrAssociatedDiagnosis, SsrLinkedDiagnosis, SsrMainDiagnosis, SsrTakingOverPurpose}
+import fr.polytechnique.cmap.cnam.etl.extractors.BaseExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
@@ -12,7 +13,7 @@ class SsrDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val dpCodes = Set("C66")
+    val dpCodes = BaseExtractorCodes(List("C66"))
     val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val sources = Sources(ssr = Some(ssr))
 
@@ -24,7 +25,7 @@ class SsrDiagnosesSuite extends SharedContext {
 
 
     // When
-    val result = SsrMainDiagnosisExtractor.extract(sources, dpCodes)
+    val result = SsrMainDiagnosisExtractor(dpCodes).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -46,7 +47,7 @@ class SsrDiagnosesSuite extends SharedContext {
 
 
     // When
-    val result = SsrMainDiagnosisExtractor.extract(sources, Set.empty)
+    val result = SsrMainDiagnosisExtractor(BaseExtractorCodes.empty).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -57,18 +58,18 @@ class SsrDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val linkedCodes = Set("C6")
+    val linkedCodes = BaseExtractorCodes(List("C6"))
     val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val sources = Sources(ssr = Some(ssr))
 
     val expected = Seq[Event[Diagnosis]](
       SsrLinkedDiagnosis("Patient_02", "10000123_30000546_200_2019", "C68", makeTS(2019, 8, 11)),
-      SsrLinkedDiagnosis("Patient_02", "10000123_30000546_300_2019", "C66", makeTS(2019, 8, 11))//,
+      SsrLinkedDiagnosis("Patient_02", "10000123_30000546_300_2019", "C66", makeTS(2019, 8, 11)) //,
       //SsrMainDiagnosis("Patient_01", "10000123_30000801_100_2019", "C55", makeTS(2019, 10, 20))
     ).toDS
 
     // When
-    val result = SsrLinkedDiagnosisExtractor.extract(sources, linkedCodes)
+    val result = SsrLinkedDiagnosisExtractor(linkedCodes).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -79,7 +80,7 @@ class SsrDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val associatedDiagnosis = Set("C6")
+    val associatedDiagnosis = BaseExtractorCodes(List("C6"))
     val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val sources = Sources(ssr = Some(ssr))
 
@@ -89,7 +90,7 @@ class SsrDiagnosesSuite extends SharedContext {
     ).toDS
 
     // When
-    val result = SsrAssociatedDiagnosisExtractor.extract(sources, associatedDiagnosis)
+    val result = SsrAssociatedDiagnosisExtractor(associatedDiagnosis).extract(sources)
 
     // Then
     assertDSs(result, expected)
@@ -100,7 +101,7 @@ class SsrDiagnosesSuite extends SharedContext {
     import sqlCtx.implicits._
 
     // Given
-    val cim10Codes = Set("Z100")
+    val cim10Codes = BaseExtractorCodes(List("Z100"))
     val ssr = spark.read.parquet("src/test/resources/test-joined/SSR.parquet")
     val expected = Seq[Event[Diagnosis]](
       SsrTakingOverPurpose("Patient_02", "10000123_30000546_300_2019", "Z100", makeTS(2019, 8, 11))
@@ -108,7 +109,7 @@ class SsrDiagnosesSuite extends SharedContext {
 
     val input = Sources(ssr = Some(ssr))
     // When
-    val result = SsrTakingOverPurposeExtractor.extract(input, cim10Codes)
+    val result = SsrTakingOverPurposeExtractor(cim10Codes).extract(input)
 
     // Then
     assertDSs(result, expected)
@@ -128,7 +129,7 @@ class SsrDiagnosesSuite extends SharedContext {
 
     val input = Sources(ssr = Some(ssr))
     // When
-    val result = SsrTakingOverPurposeExtractor.extract(input, Set.empty)
+    val result = SsrTakingOverPurposeExtractor(BaseExtractorCodes.empty).extract(input)
 
     // Then
     assertDSs(result, expected)

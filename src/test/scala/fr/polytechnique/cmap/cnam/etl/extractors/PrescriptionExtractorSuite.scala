@@ -6,7 +6,7 @@ import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, EventBuilder, EventCategory}
-import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirRowExtractor
 
 
 trait MockEvent extends AnyEvent with EventBuilder
@@ -17,12 +17,7 @@ object MockEventobject extends MockEvent {
 
 class PrescriptionExtractorSuite extends SharedContext {
 
-  trait DcirMockExtractor extends DcirExtractor[MockEvent]
-
-  object MockPrescriptionExtractor extends DcirMockExtractor {
-    override val columnName: String = ""
-    override val eventBuilder: EventBuilder = MockEventobject
-  }
+  object MockPrescriptionExtractor extends DcirRowExtractor
 
   "extractGroupId" should "return the group ID for done values" in {
     // Given

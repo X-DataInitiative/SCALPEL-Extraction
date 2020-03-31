@@ -1,19 +1,67 @@
+// License: BSD 3 clause
+
 package fr.polytechnique.cmap.cnam.etl.extractors.ngapacts
 
-import scala.reflect.runtime.universe._
+
+import org.apache.spark.sql.{Column, DataFrame, Row}
 import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.{Column, DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{DcirNgapAct, Event, EventBuilder, NgapAct}
-import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
+import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirRowExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
-class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[NgapAct] {
+final case class DcirNgapActExtractor(ngapActsConfig: NgapActConfig[NgapWithNatClassConfig])
+  extends Extractor[NgapAct, NgapActConfig[NgapWithNatClassConfig]] with DcirRowExtractor {
 
-  private final val PrivateInstitutionCodes = Set(4D, 5D, 6D, 7D)
+  val columnName: String = ColNames.NaturePrestation
+  val eventBuilder: EventBuilder = DcirNgapAct
+  val ngapKeyLetterCol: String = "PRS_NAT_CB2"
 
-  override val columnName: String = ColNames.NaturePrestation
-  override val eventBuilder: EventBuilder = DcirNgapAct
-  val ngapKeyLetter: String = "PRS_NAT_CB2"
+  final val PrivateInstitutionCodes = Set(4D, 5D, 6D, 7D)
+
+  override def getInput(sources: Sources): DataFrame = {
+
+    val neededColumns: List[Column] = List(
+      ColNames.PatientID, ColNames.NaturePrestation, ColNames.NgapCoefficient,
+      ColNames.DcirEventStart, ColNames.ExecPSNum, ColNames.DcirFluxDate, ngapKeyLetterCol,
+      ColNames.Sector, ColNames.GHSCode, ColNames.InstitutionCode
+    ).map(col)
+
+    lazy val irNat = sources.irNat.get
+    lazy val dcir = sources.dcir.get
+
+    lazy val df: DataFrame = dcir.join(irNat, dcir(ColNames.NaturePrestation).cast("String") === irNat("PRS_NAT"))
+    df.select(neededColumns: _*)
+  }
+
+  override def isInExtractorScope(row: Row): Boolean = !row.isNullAt(row.fieldIndex(ngapKeyLetterCol))
+
+  override def isInStudy(row: Row): Boolean = {
+
+    lazy val prsNatRef = row.getAs[Int](ColNames.NaturePrestation).toString
+    lazy val ngapKeyLetter = row.getAs[String](ngapKeyLetterCol)
+    lazy val ngapCoefficient = row.getAs[Double](ColNames.NgapCoefficient).toString
+
+    ngapActsConfig.actsCategories
+      .exists(
+        category => {
+          category.ngapPrsNatRefs.contains(prsNatRef) || {
+            category.ngapKeyLetters.contains(ngapKeyLetter) && category.ngapCoefficients.contains(ngapCoefficient)
+          }
+        }
+      )
+  }
+
+  def builder(row: Row): Seq[Event[NgapAct]] = {
+    val patientId = extractPatientId(row)
+    val groupId = extractGroupId(row)
+    val value = extractValue(row)
+    val eventDate = extractStart(row)
+    val endDate = extractEnd(row)
+    val weight = extractWeight(row)
+
+    Seq(eventBuilder[NgapAct](patientId, groupId, value, weight, eventDate, endDate))
+  }
 
   /**
     * We extract Ngap acts as a concatenation of three different ways to identify specific ngap acts in the SNDS :
@@ -25,10 +73,10 @@ class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[
     *
     * @return concatenation of the three codes
     */
-  override def code: Row => String = (row: Row) => {
-    row.getAs[Int](ColNames.NaturePrestation).toString + "_" +
-      row.getAs[String](ngapKeyLetter) + "_" +
+  def extractValue(row: Row): String = {
+    s"${row.getAs[Int](ColNames.NaturePrestation)}_${row.getAs[String](ngapKeyLetterCol)}_${
       row.getAs[Double](ColNames.NgapCoefficient).toString
+    }"
   }
 
   override def extractGroupId(r: Row): String = {
@@ -54,75 +102,11 @@ class DcirNgapActExtractor(ngapActsConfig: NgapActConfig) extends DcirExtractor[
     }
   }
 
-  def getGHS(r: Row): Double = r.getAs[Double](ColNames.GHSCode)
+  private def getGHS(r: Row): Double = r.getAs[Double](ColNames.GHSCode)
 
-  def getInstitutionCode(r: Row): Double = r.getAs[Double](ColNames.InstitutionCode)
+  private def getInstitutionCode(r: Row): Double = r.getAs[Double](ColNames.InstitutionCode)
 
-  def getSector(r: Row): Double = r.getAs[Double](ColNames.Sector)
+  private def getSector(r: Row): Double = r.getAs[Double](ColNames.Sector)
 
-  override def extractWeight(r: Row): Double = 1.0
-
-  override def extract(
-    sources: Sources,
-    codes: Set[String])
-    (implicit ctag: TypeTag[NgapAct]): Dataset[Event[NgapAct]] = {
-
-    val input: DataFrame = getInput(sources)
-
-    import input.sqlContext.implicits._
-
-    {
-      if (ngapActsConfig.actsCategories.isEmpty) {
-        input.filter(isInExtractorScope _)
-      }
-      else {
-        input.filter(isInExtractorScope _).filter(isInStudy(codes) _)
-      }
-    }.flatMap(builder _).distinct()
-  }
-
-  override def getInput(sources: Sources): DataFrame = {
-
-    val neededColumns: List[Column] = List(
-      ColNames.PatientID, ColNames.NaturePrestation, ColNames.NgapCoefficient,
-      ColNames.Date, ColNames.ExecPSNum, ColNames.DcirFluxDate, ngapKeyLetter,
-      ColNames.Sector, ColNames.GHSCode, ColNames.InstitutionCode
-    ).map(colName => col(colName))
-
-    lazy val irNat = sources.irNat.get
-    lazy val dcir = sources.dcir.get
-
-    lazy val df: DataFrame = dcir.join(irNat, dcir("PRS_NAT_REF").cast("String") === irNat("PRS_NAT"))
-    df.select(neededColumns: _*)
-  }
-
-  override def isInExtractorScope(row: Row): Boolean = {
-    !row.isNullAt(row.fieldIndex(ngapKeyLetter))
-  }
-
-  override def isInStudy(codes: Set[String])(row: Row): Boolean = {
-    dcirIsInCategory(
-      ngapActsConfig.actsCategories,
-      row
-    )
-  }
-
-  def dcirIsInCategory(
-    categories: List[NgapActClassConfig],
-    row: Row): Boolean = {
-
-    val ngapKeyLetter: String = row.getAs[String]("PRS_NAT_CB2")
-    val ngapCoefficient: String = row.getAs[Double]("PRS_ACT_CFT").toString
-    val prsNatRef: String = row.getAs[Int]("PRS_NAT_REF").toString
-
-    categories
-      .exists(
-        category =>
-          (
-            category.ngapKeyLetters.contains(ngapKeyLetter) &&
-              category.ngapCoefficients.contains(ngapCoefficient)
-            ) ||
-            category.ngapPrsNatRefs.contains(prsNatRef)
-      )
-  }
+  override def getCodes: NgapActConfig[NgapWithNatClassConfig] = ngapActsConfig
 }

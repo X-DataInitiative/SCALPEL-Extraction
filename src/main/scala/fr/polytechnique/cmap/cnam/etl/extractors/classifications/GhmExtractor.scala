@@ -3,9 +3,13 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.classifications
 
 import fr.polytechnique.cmap.cnam.etl.events.{Classification, EventBuilder, GHMClassification}
-import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.{BaseExtractorCodes, StartsWithStrategy}
+import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoBasicExtractor
 
-object GhmExtractor extends McoExtractor[Classification] {
-  final override val columnName: String = ColNames.GHM
+final case class GhmExtractor(codes: BaseExtractorCodes) extends McoBasicExtractor[Classification]
+  with StartsWithStrategy[Classification] {
+  override val columnName: String = ColNames.GHM
   override val eventBuilder: EventBuilder = GHMClassification
+
+  override def getCodes: BaseExtractorCodes = codes
 }

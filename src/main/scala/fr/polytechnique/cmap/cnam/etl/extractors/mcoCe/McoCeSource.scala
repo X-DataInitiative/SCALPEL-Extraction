@@ -1,10 +1,6 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.mcoCe
 
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{LongType, TimestampType}
-import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
-import fr.polytechnique.cmap.cnam.util.ColumnUtilities.parseTimestamp
 
 trait McoCeSource extends ColumnNames {
 
@@ -12,11 +8,7 @@ trait McoCeSource extends ColumnNames {
     // Essential for all the Extractors
     val PatientID: ColName = "NUM_ENQ"
     val EtaNum: ColName = "ETA_NUM"
-    val SeqNum : ColName = "SEQ_NUM"
-    val Date = "EXE_SOI_DTD"
-    val Year = "year"
-
-    // For the Act extractor
+    val SeqNum: ColName = "SEQ_NUM"
     val CamCode = "MCO_FMSTC__CCAM_COD"
 
     // NGAP from FBSTC
@@ -33,7 +25,20 @@ trait McoCeSource extends ColumnNames {
     // Practionner from FCSTC
     val PractitionnerSpecialtyFcstc = "MCO_FCSTC__EXE_SPE"
 
-    val core = List(PatientID, EtaNum, SeqNum, Date, Year)
+    val StartDate: String = "EXE_SOI_DTD"
+    val EndDate: String = "EXE_SOI_DTF"
+    val ActCode: String = "MCO_FBSTC__ACT_COD"
+
+    val core = List(
+      PatientID, EtaNum, SeqNum, Year, StartDate
+    )
+
+    val all = List(
+      PatientID, EtaNum, SeqNum, Year, CamCode, StartDate,
+      NgapKeyLetterFbstc, NgapCoefficientFbstc, PractitionnerSpecialtyFbstc,
+      NgapKeyLetterFcstc, NgapCoefficientFcstc, PractitionnerSpecialtyFcstc
+    )
+
 
   }
 

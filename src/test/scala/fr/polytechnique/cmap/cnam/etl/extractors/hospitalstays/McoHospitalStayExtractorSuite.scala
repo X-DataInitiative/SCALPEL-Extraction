@@ -28,7 +28,7 @@ class McoHospitalStayExtractorSuite extends SharedContext {
     ).toDS()
 
     //When
-    val result: Dataset[Event[HospitalStay]] = McoHospitalStaysExtractor.extract(sources, Set.empty)
+    val result: Dataset[Event[HospitalStay]] = McoHospitalStaysExtractor.extract(sources)
 
     //Then
     assertDSs(expected, result)
@@ -52,13 +52,13 @@ class McoHospitalStayExtractorSuite extends SharedContext {
     ).toDS()
 
     //When
-    val result: Dataset[Event[HospitalStay]] = McoHospitalStaysExtractor.extract(sources, Set("Test"))
+    val result: Dataset[Event[HospitalStay]] = McoHospitalStaysExtractor.extract(sources)
 
     //Then
     assertDSs(expected, result)
   }
 
-  "extract" should "calculate correct weight from mco sources" in {
+  "extractWeight" should "calculate correct weight from mco sources" in {
     //Given
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
@@ -71,18 +71,10 @@ class McoHospitalStayExtractorSuite extends SharedContext {
       ("Patient_02", "10000123", "20000987", "2007", makeTS(2007, 5, 1), makeTS(2007, 5, 10), null, null)
     ).toDF("NUM_ENQ", "ETA_NUM", "RSA_NUM", "SOR_ANN", "EXE_SOI_DTD", "EXE_SOI_DTF", "MCO_B__ENT_MOD", "MCO_B__ENT_PRV")
 
-    val sources = Sources(mco = Some(df))
-
-    val expected: Dataset[Event[HospitalStay]] = Seq(
-      McoHospitalStay("Patient_02", "10000123_20000123_2007", 8.5D, makeTS(2007, 1, 1), makeTS(2007, 1, 10)),
-      McoHospitalStay("Patient_02", "10000123_20000345_2007", 8.5D, makeTS(2007, 2, 1), makeTS(2007, 2, 10)),
-      McoHospitalStay("Patient_02", "10000123_20000546_2007", 8.8D, makeTS(2007, 3, 1), makeTS(2007, 3, 10)),
-      McoHospitalStay("Patient_02", "10000123_20000852_2007", 8.0D, makeTS(2007, 4, 1), makeTS(2007, 4, 10)),
-      McoHospitalStay("Patient_02", "10000123_20000987_2007", -1.0D, makeTS(2007, 5, 1), makeTS(2007, 5, 10))
-    ).toDS()
+    val expected = Seq(8.5D, 8.5D, 8.8D, 8.0D, -1.0D).toDS()
 
     //When
-    val result: Dataset[Event[HospitalStay]] = McoHospitalStaysExtractor.extract(sources, Set.empty[String])
+    val result = df.map(r => McoHospitalStaysExtractor.extractWeight(r))
 
     //Then
     assertDSs(expected, result)

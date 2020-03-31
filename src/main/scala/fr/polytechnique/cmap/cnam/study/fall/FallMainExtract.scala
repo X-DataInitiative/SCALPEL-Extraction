@@ -43,7 +43,7 @@ object FallMainExtract extends Main with FractureCodes {
   mutable.HashMap[String, OperationMetadata] = {
 
     if (fallConfig.runParameters.hospitalStays) {
-      val hospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
+      val hospitalStays = McoHospitalStaysExtractor.extract(sources).cache()
       meta += {
         "extract_hospital_stays" ->
           OperationReporter
