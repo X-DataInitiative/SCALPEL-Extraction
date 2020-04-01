@@ -3,9 +3,9 @@
 package fr.polytechnique.cmap.cnam.study.fall.extractors
 
 import org.apache.spark.sql.Row
-import fr.polytechnique.cmap.cnam.etl.extractors.BaseExtractorCodes
-import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.{McoAssociatedDiagnosisExtractor, McoLinkedDiagnosisExtractor, McoMainDiagnosisExtractor}
-import fr.polytechnique.cmap.cnam.etl.extractors.mco.McoRowExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.codes.SimpleExtractorCodes
+import fr.polytechnique.cmap.cnam.etl.extractors.events.diagnoses.{McoAssociatedDiagnosisExtractor, McoLinkedDiagnosisExtractor, McoMainDiagnosisExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.sources.mco.McoRowExtractor
 import fr.polytechnique.cmap.cnam.study.fall.fractures.Surgery
 
 trait ClassifyWeight extends Surgery {
@@ -28,20 +28,20 @@ trait ClassifyWeight extends Surgery {
   }
 }
 
-class MainDiagnosisFallExtractor(codes: BaseExtractorCodes) extends McoMainDiagnosisExtractor(codes) with ClassifyWeight
+class MainDiagnosisFallExtractor(codes: SimpleExtractorCodes) extends McoMainDiagnosisExtractor(codes) with ClassifyWeight
 
 object MainDiagnosisFallExtractor {
-  def apply(codes: BaseExtractorCodes): MainDiagnosisFallExtractor = new MainDiagnosisFallExtractor(codes)
+  def apply(codes: SimpleExtractorCodes): MainDiagnosisFallExtractor = new MainDiagnosisFallExtractor(codes)
 }
 
-class AssociatedDiagnosisFallExtractor(codes: BaseExtractorCodes) extends McoAssociatedDiagnosisExtractor(codes) with ClassifyWeight
+class AssociatedDiagnosisFallExtractor(codes: SimpleExtractorCodes) extends McoAssociatedDiagnosisExtractor(codes) with ClassifyWeight
 
 object AssociatedDiagnosisFallExtractor {
-  def apply(codes: BaseExtractorCodes): AssociatedDiagnosisFallExtractor = new AssociatedDiagnosisFallExtractor(codes)
+  def apply(codes: SimpleExtractorCodes): AssociatedDiagnosisFallExtractor = new AssociatedDiagnosisFallExtractor(codes)
 }
 
-class LinkedDiagnosisFallExtractor(codes: BaseExtractorCodes) extends McoLinkedDiagnosisExtractor(codes) with ClassifyWeight
+class LinkedDiagnosisFallExtractor(codes: SimpleExtractorCodes) extends McoLinkedDiagnosisExtractor(codes) with ClassifyWeight
 
 object LinkedDiagnosisFallExtractor {
-  def apply(codes: BaseExtractorCodes): LinkedDiagnosisFallExtractor = new LinkedDiagnosisFallExtractor(codes)
+  def apply(codes: SimpleExtractorCodes): LinkedDiagnosisFallExtractor = new LinkedDiagnosisFallExtractor(codes)
 }

@@ -10,7 +10,7 @@ import me.danielpes.spark.datetime.implicits._
 import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.PharmacologicalLevel
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.level.PharmacologicalLevel
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{LatestPurchaseBased, LimitedExposureAdder}
 
 class FallConfigSuite extends AnyFlatSpec {

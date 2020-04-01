@@ -6,9 +6,9 @@ import java.time.LocalDate
 import pureconfig.generic.auto._
 import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.DrugClassConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.{Cip13Level, DrugClassificationLevel}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.DrugConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification.DrugClassConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.level.{Cip13Level, DrugClassificationLevel}
 
 case class BulkConfig(
   input: StudyConfig.InputPaths,

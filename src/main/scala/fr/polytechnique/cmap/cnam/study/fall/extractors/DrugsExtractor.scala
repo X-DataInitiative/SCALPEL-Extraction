@@ -4,7 +4,7 @@ package fr.polytechnique.cmap.cnam.study.fall.extractors
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugConfig, DrugExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.{DrugConfig, DrugExtractor}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class DrugsExtractor(drugConfig: DrugConfig) {
