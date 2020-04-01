@@ -6,6 +6,10 @@ import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder}
 import fr.polytechnique.cmap.cnam.etl.extractors.codes.SimpleExtractorCodes
 
+/**
+  * This a trait that should
+  * @tparam EventType
+  */
 trait SimpleExtractor[EventType <: AnyEvent] extends Extractor[EventType, SimpleExtractorCodes] {
   self: EventRowExtractor =>
 
