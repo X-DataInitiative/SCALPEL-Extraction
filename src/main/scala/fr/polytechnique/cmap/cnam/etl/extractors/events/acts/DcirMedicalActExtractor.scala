@@ -11,6 +11,14 @@ import fr.polytechnique.cmap.cnam.etl.extractors.codes.SimpleExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.extractors.sources.dcir.DcirSimpleExtractor
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
+/**
+  * Gets all type of Acts from DCIR.
+  *
+  * The main addition of this class is the groupId method that allows to get the
+  * source of the act: Liberal, PublicAmbulatory, PrivateAmbulatory, Unkown and when
+  * the information is not available a default DCIRAct.
+  * @param codes: List of Act codes to be tracked in the study or empty to get all the Acts.
+  */
 abstract sealed class DcirRowActExtractor(codes: SimpleExtractorCodes) extends DcirSimpleExtractor[MedicalAct]
   with StartsWithStrategy[MedicalAct] {
 
@@ -69,6 +77,10 @@ abstract sealed class DcirRowActExtractor(codes: SimpleExtractorCodes) extends D
   private def getSector(r: Row): Double = r.getAs[Double](ColNames.Sector)
 }
 
+/**
+  * Get the CCAM coded acts from the DCIR.
+  * @param codes: List of Act codes to be tracked in the study or empty to get all the Acts.
+  */
 final case class DcirMedicalActExtractor(codes: SimpleExtractorCodes)
   extends DcirRowActExtractor(codes) {
   // Implementation of the BasicExtractor Trait
@@ -76,6 +88,10 @@ final case class DcirMedicalActExtractor(codes: SimpleExtractorCodes)
   override val eventBuilder: EventBuilder = DcirAct
 }
 
+/**
+  * Get the biology acts from the DCIR.
+  * @param codes: List of Act codes to be tracked in the study or empty to get all the Acts.
+  */
 final case class DcirBiologyActExtractor(codes: SimpleExtractorCodes)
   extends DcirRowActExtractor(codes) {
   // Implementation of the BasicExtractor Trait
