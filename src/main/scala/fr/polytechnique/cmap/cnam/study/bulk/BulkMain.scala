@@ -5,10 +5,10 @@ package fr.polytechnique.cmap.cnam.study.bulk
 import java.io.PrintWriter
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.extractors.acts.{DcirMedicalActExtractor, McoCcamActExtractor, McoCeCcamActExtractor}
-import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GhmExtractor
-import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses._
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.events.acts.{DcirMedicalActExtractor, McoCcamActExtractor, McoCeCcamActExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.classifications.GhmExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.events.diagnoses._
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.DrugExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.sources.Sources

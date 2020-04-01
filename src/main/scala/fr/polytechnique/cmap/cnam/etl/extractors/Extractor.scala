@@ -5,13 +5,14 @@ package fr.polytechnique.cmap.cnam.etl.extractors
 import scala.reflect.runtime.universe.TypeTag
 import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event}
+import fr.polytechnique.cmap.cnam.etl.extractors.codes.ExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 trait Extractor[EventType <: AnyEvent, +Codes <: ExtractorCodes] extends Serializable {
 
   def getCodes: Codes
 
-  /** Allows to check if the Row from the Source is considered in the current Study.
+  /** Allows to check if the Row is considered in the current Study.
     *
     * @param row The row itself.
     * @return A boolean value.
@@ -33,10 +34,10 @@ trait Extractor[EventType <: AnyEvent, +Codes <: ExtractorCodes] extends Seriali
     */
   def builder(row: Row): Seq[Event[EventType]]
 
-  /** Gets and prepares all the needed columns from the Source.
+  /** Gets and prepares all the needed columns from the Sources.
     *
     * @param sources Source object [[Sources]] that contains all sources.
-    * @return A dataframe with mco columns.
+    * @return A dataframe with needed columns.
     */
   def getInput(sources: Sources): DataFrame
 
@@ -46,8 +47,8 @@ trait Extractor[EventType <: AnyEvent, +Codes <: ExtractorCodes] extends Seriali
     * This method should be considered the unique callable method from a Study perspective.
     *
     * @param sources Source object [[Sources]] that contains all sources.
-    * @param ctag    An implicit parameter taken from Eventype type.
-    * @return A dataset of Events.
+    * @param ctag    An implicit parameter taken from EventType type.
+    * @return A Dataset of Events of type EventType.
     */
   def extract(sources: Sources)(implicit ctag: TypeTag[EventType]): Dataset[Event[EventType]] = {
     val input: DataFrame = getInput(sources)
@@ -63,5 +64,4 @@ trait Extractor[EventType <: AnyEvent, +Codes <: ExtractorCodes] extends Seriali
       }
     }.flatMap(builder).distinct()
   }
-
 }
