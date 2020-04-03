@@ -37,7 +37,7 @@ trait Extractor[EventType <: AnyEvent, +Codes <: ExtractorCodes] extends Seriali
   /** Gets and prepares all the needed columns from the Sources.
     *
     * @param sources Source object [[Sources]] that contains all sources.
-    * @return A dataframe with needed columns.
+    * @return A [[DataFrame]] with needed columns.
     */
   def getInput(sources: Sources): DataFrame
 

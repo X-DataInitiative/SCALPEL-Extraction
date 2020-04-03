@@ -4,6 +4,9 @@ import java.sql.Timestamp
 import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.etl.extractors.EventRowExtractor
 
+/**
+ * Gets the following fields for HAD sourced events: patientID, start, groupId.
+ */
 trait HadRowExtractor extends HadSource with EventRowExtractor {
 
   override def usedColumns: List[String] = List(

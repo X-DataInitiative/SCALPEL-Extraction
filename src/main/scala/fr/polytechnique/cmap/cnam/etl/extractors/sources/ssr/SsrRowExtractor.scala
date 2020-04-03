@@ -7,6 +7,9 @@ import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder}
 import fr.polytechnique.cmap.cnam.etl.extractors.{EventRowExtractor, Extractor}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
+/**
+ *  Gets the following fields for SSR sourced events: patientID, start, groupId.
+ */
 trait SsrRowExtractor extends SsrSource with EventRowExtractor  {
 
   override def usedColumns: List[String] = ColNames.core ++ super.usedColumns

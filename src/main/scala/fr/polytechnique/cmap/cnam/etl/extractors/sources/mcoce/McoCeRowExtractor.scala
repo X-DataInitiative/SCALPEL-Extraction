@@ -7,6 +7,9 @@ import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.etl.extractors.EventRowExtractor
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 
+/**
+ *  Gets the following fields for MCO_CE sourced events: patientID, start, groupId.
+ */
 trait McoCeRowExtractor extends McoCeSource with EventRowExtractor {
   override def usedColumns: List[String] = super.usedColumns ++ List(
     ColNames.PatientID, ColNames.EtaNum,
