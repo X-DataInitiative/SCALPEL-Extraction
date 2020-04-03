@@ -9,13 +9,16 @@ import fr.polytechnique.cmap.cnam.etl.extractors.EventRowExtractor
 import fr.polytechnique.cmap.cnam.util.datetime
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
-/** IR_IMB_R contains the Chronic Diseases diagnoses (ALD = Affection Longue Duree) for patients once
-  * they have been exonerated for all cares related to this Chronic Disease.
-  * It is the medical service of the health insurance  that grants this ALD on the proposal of the
-  * patient's main physician (Medecin Traitant).
-  * See the [online snds documentation for further details](https://documentation-snds.health-data-hub.fr/fiches/beneficiaires_ald.html#le-dispositif-des-ald)
-  *
-  */
+/**
+ * Gets the following fields for IMB sourced events: patientID, start, end, groupId.
+ *
+ * IR_IMB_R contains the Chronic Diseases Diagnoses or `ALD = Affection Longue Durée` for patients once
+ * they have been exonerated for all cares related to this chronic disease.
+ * It is the medical service of the health insurance that grants this ALD on the proposal of the
+ * patient's GP (Medecin Traitant).
+ * See the [online snds documentation for further details]
+ * (https://documentation-snds.health-data-hub.fr/fiches/beneficiaires_ald.html#le-dispositif-des-ald)
+ */
 trait ImbRowExtractor extends ImbSource with EventRowExtractor {
 
   def extractEncoding(row: Row): String = row.getAs[String](ColNames.Encoding)
@@ -29,13 +32,13 @@ trait ImbRowExtractor extends ImbSource with EventRowExtractor {
   }
 
   /**
-    * The End date of the ALD is not always written. It can takes the value 1600-01-01 which
-    * corresponds to a None value (not set) that we convert to None.
-    * See the CNAM documentation [available here](https://documentation-snds.health-data-hub.fr/fiches/beneficiaires_ald.html#annexe)
-    *
-    * @param r
-    * @return
-    */
+   * The End date of the ALD is not always written. It can takes the value 1600-01-01 which
+   * corresponds to a None value (not set) that we convert to None.
+   * See the CNAM documentation [available here](https://documentation-snds.health-data-hub.fr/fiches/beneficiaires_ald.html#annexe)
+   *
+   * @param r
+   * @return
+   */
   override def extractEnd(r: Row): Option[Timestamp] = {
     import datetime.implicits._
     Try(

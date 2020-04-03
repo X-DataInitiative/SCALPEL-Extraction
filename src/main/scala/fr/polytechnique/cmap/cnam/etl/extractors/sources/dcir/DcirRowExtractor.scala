@@ -9,7 +9,9 @@ import org.apache.spark.sql.Row
 import fr.polytechnique.cmap.cnam.etl.extractors.EventRowExtractor
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 
-
+/**
+ * Gets the following fields for DCIR sourced events: patientID, start, groupId.
+ */
 trait DcirRowExtractor extends DcirSource with EventRowExtractor {
 
   override def usedColumns: List[ColName] = List(
