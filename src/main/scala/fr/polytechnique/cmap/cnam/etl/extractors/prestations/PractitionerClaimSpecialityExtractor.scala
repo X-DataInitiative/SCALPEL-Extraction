@@ -3,13 +3,13 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.prestations
 
 import java.sql.Timestamp
-
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.dcir.DcirExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.mcoCe.McoCeExtractor
-import org.apache.spark.sql.Row
-
+import org.apache.spark.sql.{DataFrame, Row}
 import scala.util.Try
+import org.apache.spark.sql.functions.col
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 /**
   * Get specialties of medical practitionner in the Dcir:
@@ -87,6 +87,10 @@ trait McoCeSpecialtyExtractor extends McoCeExtractor[PractitionerClaimSpeciality
 
   override def isInExtractorScope(row: Row): Boolean = {
     (!row.isNullAt(row.fieldIndex(columnName))) & (row.getAs[Integer](columnName) != 0)
+  }
+
+  override def getInput(sources: Sources): DataFrame = {
+    sources.mcoCe.get.select((columnName :: ColNames.core).map(col): _*)
   }
 }
 
