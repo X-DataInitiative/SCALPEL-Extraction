@@ -4,8 +4,8 @@ package fr.polytechnique.cmap.cnam.study.bulk.extractors
 
 import org.apache.spark.sql.DataFrame
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.Cip13Level
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.DrugConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.level.Cip13Level
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class DcirSourceExtractorSuite extends SharedContext {

@@ -4,9 +4,9 @@ package fr.polytechnique.cmap.cnam.study.fall.extractors
 
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families._
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.TherapeuticLevel
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.{DrugConfig, DrugExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification.families._
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.level.TherapeuticLevel
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.{DrugConfig, DrugExtractor}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 object ControlDrugs {
@@ -17,6 +17,6 @@ object ControlDrugs {
         List(Antihypertenseurs, Opioids, Cardiac, ProtonPumpInhibitors, Antiepileptics)
       )
     )
-      .extract(sources, Set.empty)
+      .extract(sources)
   }
 }

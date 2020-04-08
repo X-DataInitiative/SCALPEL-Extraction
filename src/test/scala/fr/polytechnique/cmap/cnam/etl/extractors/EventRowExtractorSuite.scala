@@ -14,7 +14,19 @@ class EventRowExtractorSuite extends SharedContext {
     def extractStart(r: Row) = new Timestamp(0)
   }
 
-  "extractGroupId" should "return the group ID for imb (always 'imb')" in {
+  "extractGroupId" should "return NA" in {
+
+    // Given
+    val expected = "NA"
+
+    // When
+    val result = MockRowExtractor.extractGroupId(Row())
+
+    // Then
+    assert(result == expected)
+  }
+
+  "extractValue" should "return NA" in {
 
     // Given
     val expected = "NA"
@@ -27,7 +39,7 @@ class EventRowExtractorSuite extends SharedContext {
   }
 
 
-  "weight" should "return the weight value" in {
+  "weight" should "return 0.0" in {
 
     // Given
     val expected = 0.0
@@ -40,7 +52,7 @@ class EventRowExtractorSuite extends SharedContext {
   }
 
 
-  "end" should "compute the end date of the event" in {
+  "end" should "return None" in {
 
     // Given
     val expected: Option[Timestamp] = None

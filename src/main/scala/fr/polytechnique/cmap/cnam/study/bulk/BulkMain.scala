@@ -36,7 +36,7 @@ object BulkMain extends Main {
     // Write Metadata
     val metadata = MainMetadata(
       this.getClass.getName, startTimestamp, new java.util.Date(),
-      sourceExtractor.map(se => se.extract(sources)).flatten ++
+      sourceExtractor.flatMap(se => se.extract(sources)) ++
         new PatientExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.base).extract(sources)
     )
     val metadataJson: String = metadata.toJsonString()

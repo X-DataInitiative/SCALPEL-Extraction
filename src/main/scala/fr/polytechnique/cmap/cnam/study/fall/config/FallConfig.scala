@@ -8,12 +8,12 @@ import me.danielpes.spark.datetime.implicits._
 import pureconfig.generic.auto._
 import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification._
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.{DrugClassificationLevel, TherapeuticLevel}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.acts.MedicalActsConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.diagnoses.DiagnosesConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.DrugConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification._
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification.families.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.level.{DrugClassificationLevel, TherapeuticLevel}
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures._
 import fr.polytechnique.cmap.cnam.etl.transformers.interaction.InteractionTransformerConfig
 import fr.polytechnique.cmap.cnam.study.fall.codes._

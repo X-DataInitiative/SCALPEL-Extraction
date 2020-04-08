@@ -3,14 +3,14 @@
 package fr.polytechnique.cmap.cnam.study.fall.fractures
 
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, McoCEAct, McoCIM10Act, Outcome}
+import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, McoCeCcamAct, McoCIM10Act, Outcome}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class PublicAmbulatoryFracturesSuite extends SharedContext {
 
   "isPublicAmbulatory" should "return true for correct events" in {
     // Given
-    val event = McoCEAct("georgette", "ACE", "angine", makeTS(2010, 2, 6))
+    val event = McoCeCcamAct("georgette", "ACE", "angine", makeTS(2010, 2, 6))
 
     // When
     val result = PublicAmbulatoryFractures.isPublicAmbulatory(event)
@@ -32,7 +32,7 @@ class PublicAmbulatoryFracturesSuite extends SharedContext {
 
   "containsNonHospitalizedCcam" should "return true for correct events" in {
     // Given
-    val event = McoCEAct("georgette", "ACE", "MZMP007", makeTS(2010, 2, 6))
+    val event = McoCeCcamAct("georgette", "ACE", "MZMP007", makeTS(2010, 2, 6))
 
     // When
     val result = PublicAmbulatoryFractures.containsNonHospitalizedCcam(event)
@@ -47,8 +47,8 @@ class PublicAmbulatoryFracturesSuite extends SharedContext {
 
     // Given
     val events = Seq(
-      McoCEAct("georgette", "ACE", "MZMP007", makeTS(2010, 2, 6)),
-      McoCEAct("george", "ACE", "whatever", makeTS(2010, 2, 6)),
+      McoCeCcamAct("georgette", "ACE", "MZMP007", makeTS(2010, 2, 6)),
+      McoCeCcamAct("george", "ACE", "whatever", makeTS(2010, 2, 6)),
       DcirAct("john", "ACE", "MZMP007", makeTS(2010, 2, 6))
     ).toDS
 

@@ -6,7 +6,7 @@ import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event, FollowUp, Outcome}
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.events.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
@@ -61,7 +61,7 @@ object FallMain extends Main with FractureCodes {
   def computeHospitalStays(sources: Sources, fallConfig: FallConfig): mutable.Buffer[OperationMetadata] = {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
     if (fallConfig.runParameters.hospitalStays) {
-      val hospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
+      val hospitalStays = McoHospitalStaysExtractor.extract(sources).cache()
 
       operationsMetadata += {
         OperationReporter
