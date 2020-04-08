@@ -1,3 +1,5 @@
+// License: BSD 3 clause
+
 package fr.polytechnique.cmap.cnam.etl.extractors.events.takeoverreasons
 
 import org.apache.spark.sql.Row
