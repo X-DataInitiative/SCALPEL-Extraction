@@ -8,6 +8,7 @@ import org.apache.log4j.Logger
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
+import fr.polytechnique.cmap.cnam.etl.extractors.codes.ExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.reporting.{OperationMetadata, OperationReporter, OperationTypes}
@@ -31,7 +32,8 @@ abstract class SourceExtractor(val path: String, val saveMode: String) {
   // Second, TypeTag is needed for the Spark encoder for case class, hence the explicit typing instead of AnyEvent.
   // @TODO: Every time you add a new Event type you will need to add it in the "with" clause
   val extractors: List[ExtractorSources[_ >: MedicalAct with HospitalStay with Diagnosis with Drug
-    with MedicalTakeOverReason with NgapAct with PractitionerClaimSpeciality <: AnyEvent with EventBuilder]]
+    with MedicalTakeOverReason with NgapAct with PractitionerClaimSpeciality <: AnyEvent with EventBuilder,
+    ExtractorCodes]]
   private val logger = Logger.getLogger(this.getClass)
 
   /**
@@ -42,7 +44,7 @@ abstract class SourceExtractor(val path: String, val saveMode: String) {
     */
   def extract(sources: Sources): List[OperationMetadata] = extractors.flatMap(es => runAndReport(sources)(es))
 
-  def runAndReport[A <: AnyEvent : TypeTag](sources: Sources)(es: ExtractorSources[A]): Option[OperationMetadata] =
+  def runAndReport[A <: AnyEvent : TypeTag](sources: Sources)(es: ExtractorSources[A, ExtractorCodes]): Option[OperationMetadata] =
     run(es.extractor, sources) match {
       case Success(tde) => Some(report(es, tde))
       case Failure(error) => {
@@ -54,14 +56,14 @@ abstract class SourceExtractor(val path: String, val saveMode: String) {
       }
     }
 
-  def run[A <: AnyEvent : TypeTag](extractor: Extractor[A], sources: Sources): Try[Dataset[Event[A]]] = {
+  def run[A <: AnyEvent : TypeTag](extractor: Extractor[A, ExtractorCodes], sources: Sources): Try[Dataset[Event[A]]] = {
     Try {
-      extractor.extract(sources, Set.empty)(typeTag[A])
+      extractor.extract(sources)(typeTag[A])
     }
   }
 
   def report[A <: AnyEvent : TypeTag](
-    extractorSources: ExtractorSources[A],
+    extractorSources: ExtractorSources[A, ExtractorCodes],
     result: Dataset[Event[A]]): OperationMetadata = OperationReporter
     .report(
       extractorSources.name,
@@ -74,7 +76,7 @@ abstract class SourceExtractor(val path: String, val saveMode: String) {
 }
 
 
-case class ExtractorSources[EventType <: AnyEvent : TypeTag](
-  extractor: Extractor[EventType],
+case class ExtractorSources[EventType <: AnyEvent : TypeTag, +Codes <: ExtractorCodes](
+  extractor: Extractor[EventType, Codes],
   sources: List[String],
   name: String)

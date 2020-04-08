@@ -10,6 +10,7 @@ trait McoCeSource extends ColumnNames {
     val EtaNum: ColName = "ETA_NUM"
     val SeqNum: ColName = "SEQ_NUM"
     val CamCode = "MCO_FMSTC__CCAM_COD"
+    val Year = "year"
 
     // NGAP from FBSTC
     val NgapKeyLetterFbstc = "MCO_FBSTC__ACT_COD"

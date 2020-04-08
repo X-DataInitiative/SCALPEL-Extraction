@@ -5,17 +5,12 @@ package fr.polytechnique.cmap.cnam.study.bulk
 import java.io.PrintWriter
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
-import fr.polytechnique.cmap.cnam.etl.extractors.events.acts.{DcirMedicalActExtractor, McoCcamActExtractor, McoCeCcamActExtractor}
-import fr.polytechnique.cmap.cnam.etl.extractors.events.classifications.GhmExtractor
-import fr.polytechnique.cmap.cnam.etl.extractors.events.diagnoses._
-import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.DrugExtractor
-import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.bulk.extractors._
 import fr.polytechnique.cmap.cnam.util.reporting.MainMetadata
 
-/*object BulkMain extends Main {
+object BulkMain extends Main {
   override def appName: String = "BulkMain"
 
   override def run(
@@ -41,7 +36,7 @@ import fr.polytechnique.cmap.cnam.util.reporting.MainMetadata
     // Write Metadata
     val metadata = MainMetadata(
       this.getClass.getName, startTimestamp, new java.util.Date(),
-      sourceExtractor.map(se => se.extract(sources)).flatten ++
+      sourceExtractor.flatMap(se => se.extract(sources)) ++
         new PatientExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.base).extract(sources)
     )
     val metadataJson: String = metadata.toJsonString()
@@ -53,4 +48,4 @@ import fr.polytechnique.cmap.cnam.util.reporting.MainMetadata
 
     None
   }
-}*/
+}

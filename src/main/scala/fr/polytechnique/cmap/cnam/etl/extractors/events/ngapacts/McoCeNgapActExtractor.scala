@@ -68,8 +68,6 @@ final case class McoCeFbstcNgapActExtractor(ngapConfig: NgapActConfig[NgapActCla
   val keyLetterColumn: String = ColNames.NgapKeyLetterFbstc
   val coeffColumn: String = ColNames.NgapCoefficientFbstc
   override val eventBuilder: EventBuilder = McoCeFbstcNgapAct
-  val ngapActsConfig: NgapActConfig = ngapConfig
-  val coeffColumn: String = ColNames.NgapCoefficientFbstc
 }
 
 final case class McoCeFcstcNgapActExtractor(ngapConfig: NgapActConfig[NgapActClassConfig]) extends McoCeNgapActExtractor(ngapConfig) {
@@ -77,6 +75,4 @@ final case class McoCeFcstcNgapActExtractor(ngapConfig: NgapActConfig[NgapActCla
   val coeffColumn: String = ColNames.NgapCoefficientFcstc
 
   override val eventBuilder: EventBuilder = McoCeFcstcNgapAct
-  val ngapActsConfig: NgapActConfig = ngapConfig
-  val coeffColumn: String = ColNames.NgapCoefficientFcstc
 }
