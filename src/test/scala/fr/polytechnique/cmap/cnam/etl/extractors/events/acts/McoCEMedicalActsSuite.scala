@@ -20,7 +20,7 @@ class McoCEMedicalActsSuite extends SharedContext {
     val schema = StructType(
       StructField(colNames.PatientID, StringType) ::
         StructField(colNames.CamCode, StringType) ::
-        StructField(colNames.Date, StringType) :: Nil
+        StructField(colNames.StartDate, StringType) :: Nil
     )
     val data = Array[Any]("George", "coloscopie", "23012010")
     val input = new GenericRowWithSchema(data, schema)

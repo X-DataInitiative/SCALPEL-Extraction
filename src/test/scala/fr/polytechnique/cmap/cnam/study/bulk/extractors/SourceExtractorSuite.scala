@@ -8,6 +8,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row, SQLContext}
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.events.{Event, McoCIM10Act, MedicalAct}
+import fr.polytechnique.cmap.cnam.etl.extractors.codes.{ExtractorCodes, SimpleExtractorCodes}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 import fr.polytechnique.cmap.cnam.util.reporting.{OperationMetadata, OperationTypes}
@@ -19,9 +20,10 @@ class SourceExtractorSuite extends SharedContext {
   // This shouldn't be replicated anywhere and Mocking should be the preferred technique.
   // Mocking the Extractor is not possible because of type erasure. Type erasure make the typing of the implicit
   // in the extractor method of trait Extractor as the type is not known at compile time, but only at run time.
-  val  testExtractor = new Extractor[MedicalAct] with Serializable {
-    override def isInStudy(codes: Set[String])
-      (row: Row): Boolean = true
+  val testExtractor = new Extractor[MedicalAct, SimpleExtractorCodes] {
+    override def getCodes: SimpleExtractorCodes = SimpleExtractorCodes.empty
+
+    override def isInStudy(row: Row): Boolean = true
 
     override def isInExtractorScope(row: Row): Boolean = true
 
@@ -38,8 +40,7 @@ class SourceExtractorSuite extends SharedContext {
     }
 
     override def extract(
-      sources: Sources,
-      codes: Set[String])
+      sources: Sources)
       (implicit ctag: universe.TypeTag[MedicalAct]): Dataset[Event[MedicalAct]] = {
       import sqlCtx.implicits._
       Seq[Event[MedicalAct]](
@@ -75,8 +76,8 @@ class SourceExtractorSuite extends SharedContext {
     // When
     val se: SourceExtractor = new SourceExtractor(path, "overwrite") {
       override val sourceName: String = "Test"
-      override val extractors: List[ExtractorSources[MedicalAct]] =
-        List(ExtractorSources[MedicalAct](testExtractor, List("Mock"), "Mock"))
+      override val extractors: List[ExtractorSources[MedicalAct, ExtractorCodes]] =
+        List(ExtractorSources[MedicalAct, SimpleExtractorCodes](testExtractor, List("Mock"), "Mock"))
     }
 
     val result = se.extract(sources)
