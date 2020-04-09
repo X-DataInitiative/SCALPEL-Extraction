@@ -89,8 +89,9 @@ object FallConfig extends FallConfigLoader with FractureCodes {
 
   /** Parameters needed for the Interaction Transformer **/
   case class InteractionConfig(
-    override val level: Int = 2
-  ) extends InteractionTransformerConfig(level = level)
+    override val level: Int = 2,
+    override val minimumDuration: Period = 30.days
+  ) extends InteractionTransformerConfig(level = level, minimumDuration)
 
   /** Parameters needed for the diagnosesConfig **/
   case class SitesConfig(sites: List[BodySite] = List(BodySites)) {

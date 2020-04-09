@@ -65,11 +65,12 @@ class FallConfigSuite extends AnyFlatSpec {
         |      to_exposure_strategy  = "latest_purchase_based"
         |    }
         |  }
-        |  interaction {
+        |  interactions {
         |    level: 5
+        |    minimum_duration: 50 days
         |  }
         |  patients {
-        |  start_gap_in_months: 2
+        |    start_gap_in_months: 2
         |  }
         |  drugs {
         |    level: "Pharmacological"
@@ -97,7 +98,11 @@ class FallConfigSuite extends AnyFlatSpec {
           endThresholdGc = 900.days,
           toExposureStrategy = LatestPurchaseBased
         )
-      ), drugs = defaultConf.drugs.copy(
+      ), interactions = defaultConf.interactions.copy(
+        5,
+        50.days
+      ),
+      drugs = defaultConf.drugs.copy(
         level = PharmacologicalLevel
       ), runParameters = defaultConf.runParameters.copy(exposure = List("Patients", "DrugPurchases", "Exposures"))
     )
