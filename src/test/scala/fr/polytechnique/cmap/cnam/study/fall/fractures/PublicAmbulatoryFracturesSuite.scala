@@ -2,8 +2,9 @@
 
 package fr.polytechnique.cmap.cnam.study.fall.fractures
 
+import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, McoCeCcamAct, McoCIM10Act, Outcome}
+import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, McoCeCcamAct, McoCIM10Act, Outcome}
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class PublicAmbulatoryFracturesSuite extends SharedContext {
@@ -52,8 +53,8 @@ class PublicAmbulatoryFracturesSuite extends SharedContext {
       DcirAct("john", "ACE", "MZMP007", makeTS(2010, 2, 6))
     ).toDS
 
-    val expected = Seq(
-      Outcome("georgette", "MembreSuperieurDistal", PublicAmbulatoryFractures.outcomeName, makeTS(2010, 2, 6))
+    val expected: Dataset[Event[Outcome]] = Seq[Event[Outcome]](
+      Outcome("georgette", "MembreSuperieurDistal", PublicAmbulatoryFractures.outcomeName, 1D, makeTS(2010, 2, 6), None)
     ).toDS
 
     // When

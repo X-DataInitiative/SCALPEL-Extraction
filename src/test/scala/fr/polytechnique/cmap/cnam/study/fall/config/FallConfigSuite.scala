@@ -80,7 +80,7 @@ class FallConfigSuite extends AnyFlatSpec {
         |    sites: ["BodySites"]
         |  }
         |  run_parameters {
-        |    outcome: ["Acts", "Diagnoses", "Outcomes"] // pipeline of calculation of outcome, possible values : Acts, Diagnoses, and Outcomes
+        |    outcome: ["Acts", "Diagnoses", "HospitalDeaths", "Outcomes"] // pipeline of calculation of outcome, possible values : Acts, Diagnoses, and Outcomes
         |    exposure: ["Patients", "DrugPurchases", "Exposures"] // pipeline of the calculation of exposure, possible values : Patients, StartGapPatients, DrugPurchases, Exposures
         |  }
         |  """.trim.stripMargin
