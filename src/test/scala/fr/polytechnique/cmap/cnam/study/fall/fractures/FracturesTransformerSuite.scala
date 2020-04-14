@@ -9,6 +9,7 @@ import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.study.fall.FallMain.CCAMExceptions
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig.FracturesConfig
+import fr.polytechnique.cmap.cnam.study.fall.extractors.Death
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 
@@ -24,10 +25,10 @@ class FracturesTransformerSuite extends SharedContext {
     val testConf = defaultConf.copy(outcomes = FracturesConfig(fallFrame = 3.months))
     val acts: Dataset[Event[MedicalAct]] = Seq(
       //pubic ambulatory acts
-      McoCeCcamAct("georgette", DcirAct.groupID.PublicAmbulatory, "MZMP007", 1.0, makeTS(2010, 2, 6)),
-      McoCeCcamAct("georgettebis", DcirAct.groupID.PublicAmbulatory, "MZMP007", 1.0, makeTS(2010, 2, 6)),
-      McoCeCcamAct("george", DcirAct.groupID.PublicAmbulatory, "whatever", 1.0, makeTS(2010, 2, 6)),
-      DcirAct("john", DcirAct.groupID.PublicAmbulatory, "MZMP007", 1.0, makeTS(2010, 2, 6)),
+      McoCeCcamAct("georgette", McoCeCcamAct.category, "MZMP007", 1.0, makeTS(2010, 2, 6)),
+      McoCeCcamAct("georgettebis", McoCeCcamAct.category, "MZMP007", 1.0, makeTS(2010, 2, 6)),
+      McoCeCcamAct("george", McoCeCcamAct.category, "whatever", 1.0, makeTS(2010, 2, 6)),
+      DcirAct("john", McoCeCcamAct.category, "MZMP007", 1.0, makeTS(2010, 2, 6)),
       //private ambulatory acts
       DcirAct("riri", DcirAct.groupID.PrivateAmbulatory, "NBEP002", 1.0, makeTS(2007, 1, 1)),
       DcirAct("fifi", DcirAct.groupID.PrivateAmbulatory, "stupidcode", 1.0, makeTS(2007, 1, 1)),
@@ -47,18 +48,26 @@ class FracturesTransformerSuite extends SharedContext {
       McoMainDiagnosis("emile", "3", "S222", 2.0, makeTS(2017, 7, 18)),
       McoMainDiagnosis("emile", "3", "S222", 3.0, makeTS(2017, 7, 18)),
       McoMainDiagnosis("emile", "3", "S222", 4.0, makeTS(2017, 7, 18)),
-      McoMainDiagnosis("kevin", "BassinRachis", "S327", 3.0, makeTS(2017, 7, 18)),
+      McoMainDiagnosis("kevin", "1", "S327", 3.0, makeTS(2017, 7, 18)),
       McoMainDiagnosis("jean", "4", "S120", 4.0, makeTS(2017, 7, 18)),
       McoMainDiagnosis("Paul", "1", "S42.54678", makeTS(2017, 7, 20)),
-      McoMainDiagnosis("Paul", "7", "hemorroides", makeTS(2017, 1, 2)),
+      McoMainDiagnosis("Paul", "7", "S42.54678", makeTS(2017, 1, 2)),
       McoAssociatedDiagnosis("Jacques", "8", "qu'est-ce-que tu fais là?", makeTS(2017, 7, 18))
     ).toDS
+
+    val surgeries: Dataset[Event[MedicalAct]] = Seq[Event[MedicalAct]](
+      McoCCAMAct("kevin", "1", "NHDA007", makeTS(2017, 7, 18))
+    ).toDS()
+
+    val hospitalDeaths: Dataset[Event[HospitalStay]] = Seq[Event[HospitalStay]](
+      HospitalStay("emile", "3", Death.value, 0D, makeTS(2017, 7, 18), Some(makeTS(2017, 7, 18)))
+    ).toDS()
 
     val expectedOutcomes = Seq(
       //hospitalization
       Outcome("emile", "Ribs", "hospitalized_fall", 4.0, makeTS(2017, 7, 18)),
       Outcome("kevin", "BassinRachis", "hospitalized_fall", 3.0, makeTS(2017, 7, 18)),
-      Outcome("jean", "Rachis", "hospitalized_fall", 4.0, makeTS(2017, 7, 18)),
+      Outcome("jean", "Rachis", "hospitalized_fall", 2.0, makeTS(2017, 7, 18)),
       //private ambulatory
       Outcome("riri", "FemurExclusionCol", PrivateAmbulatoryFractures.outcomeName, 1.0, makeTS(2007, 1, 1)),
       //public ambulatory
@@ -69,11 +78,10 @@ class FracturesTransformerSuite extends SharedContext {
       Outcome("Ben", "MembreSuperieurDistal", "Liberal", 1.0, makeTS(2017, 7, 18)),
       Outcome("Beni", "MembreSuperieurDistal", "Liberal", 1.0, makeTS(2017, 7, 18)),
       Outcome("Sam", "CraneFace", "Liberal", 1.0, makeTS(2015, 7, 18))
-
     ).toDS
 
     //When
-    val result = new FracturesTransformer(testConf).transform(liberalActs, acts, diagnoses)
+    val result = new FracturesTransformer(testConf).transform(liberalActs, acts, diagnoses, surgeries, hospitalDeaths)
 
     //Then
     assertDSs(result, expectedOutcomes)

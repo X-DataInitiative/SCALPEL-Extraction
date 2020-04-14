@@ -33,7 +33,7 @@ class FallMainExtractorTransformSuite extends SharedContext {
     assertDSs(new DiagnosisExtractor(fallConfig.diagnoses).extract(sources),
       spark.read.parquet(meta.get("diagnoses").get.outputPath)
         .as(Encoders.bean(classOf[Event[Diagnosis]])))
-    assertDSs(new ActsExtractor(fallConfig.medicalActs).extract(sources),
+    assertDSs(new ActsExtractor(fallConfig.medicalActs).extract(sources)._1,
       spark.read.parquet(meta.get("acts").get.outputPath)
         .as(Encoders.bean(classOf[Event[MedicalAct]])))
     assertDSs(new Patients(PatientsConfig(fallConfig.base.studyStart)).extract(sources),
