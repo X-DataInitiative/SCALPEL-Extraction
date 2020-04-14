@@ -3,8 +3,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.events.ngapacts
 
 
-import org.apache.spark.sql.{Column, DataFrame, Row}
 import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.{Column, DataFrame, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{DcirNgapAct, Event, EventBuilder, NgapAct}
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.extractors.sources.dcir.DcirRowExtractor

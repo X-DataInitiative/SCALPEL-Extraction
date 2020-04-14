@@ -3,9 +3,9 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.events.ngapacts
 
 import scala.util.Try
-import org.apache.spark.sql.{DataFrame, Row}
 import org.apache.spark.sql.functions.col
-import fr.polytechnique.cmap.cnam.etl.events.{Event, EventBuilder, McoCeFbstcNgapAct, McoCeFcstcNgapAct, NgapAct}
+import org.apache.spark.sql.{DataFrame, Row}
+import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.extractors.sources.mcoce.McoCeRowExtractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources

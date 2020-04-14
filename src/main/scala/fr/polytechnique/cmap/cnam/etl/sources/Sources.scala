@@ -3,11 +3,10 @@
 package fr.polytechnique.cmap.cnam.etl.sources
 
 import java.sql.Timestamp
-
 import org.apache.spark.sql.{DataFrame, SQLContext}
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.InputPaths
-import fr.polytechnique.cmap.cnam.etl.sources.data.{DcirSource, HadSource, McoCeSource, McoSource, SsrCeSource, SsrSource}
-import fr.polytechnique.cmap.cnam.etl.sources.value.{DosagesSource, IrBenSource, IrImbSource, IrNatSource, IrPhaSource}
+import fr.polytechnique.cmap.cnam.etl.sources.data._
+import fr.polytechnique.cmap.cnam.etl.sources.value._
 
 case class Sources(
   dcir: Option[DataFrame] = None,

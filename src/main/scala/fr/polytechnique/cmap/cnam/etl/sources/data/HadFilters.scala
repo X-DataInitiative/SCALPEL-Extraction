@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.sources.data
 
-import fr.polytechnique.cmap.cnam.etl.sources.data.DoublonFinessPmsi.specialHospitalCodes
 import org.apache.spark.sql.{Column, DataFrame}
+import fr.polytechnique.cmap.cnam.etl.sources.data.DoublonFinessPmsi.specialHospitalCodes
 
 private[data] class HadFilters(rawHad: DataFrame) {
   /** Filter out Had corrupted stays as returned by the ATIH.

@@ -4,8 +4,8 @@ package fr.polytechnique.cmap.cnam.etl.transformers.follow_up
 
 import java.sql.Timestamp
 import scala.util.Try
-import org.apache.spark.sql.functions._
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 
@@ -35,8 +35,8 @@ class FollowUpTransformer(config: FollowUpTransformerConfig) {
     tracklosses: Dataset[Event[Trackloss]]): Dataset[Event[FollowUp]] = {
 
     import patients.sparkSession.implicits._
-    import FollowUpTransformerUtilities._
     import Columns._
+    import FollowUpTransformerUtilities._
 
 
     val delayMonths = config.delayMonths

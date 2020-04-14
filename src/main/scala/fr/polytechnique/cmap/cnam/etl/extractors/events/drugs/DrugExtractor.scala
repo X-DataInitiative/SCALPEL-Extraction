@@ -4,9 +4,9 @@ package fr.polytechnique.cmap.cnam.etl.extractors.events.drugs
 
 import java.sql.Timestamp
 import org.apache.commons.codec.binary.Base64
-import org.apache.spark.sql.{Column, DataFrame, Row}
 import org.apache.spark.sql.functions.{col, when}
 import org.apache.spark.sql.types.{StringType, TimestampType}
+import org.apache.spark.sql.{Column, DataFrame, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event}
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources

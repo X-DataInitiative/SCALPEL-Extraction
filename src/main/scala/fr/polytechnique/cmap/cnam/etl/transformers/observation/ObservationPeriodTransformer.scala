@@ -3,8 +3,8 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.observation
 
 import java.sql.Timestamp
-import org.apache.spark.sql.functions._
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.functions._
 import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, Molecule, ObservationPeriod}
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 

@@ -3,7 +3,6 @@
 package fr.polytechnique.cmap.cnam.etl.events
 
 import java.sql.Timestamp
-import org.apache.spark.sql.Row
 
 /** Factory for FollowUp instances. */
 object FollowUp extends FollowUp

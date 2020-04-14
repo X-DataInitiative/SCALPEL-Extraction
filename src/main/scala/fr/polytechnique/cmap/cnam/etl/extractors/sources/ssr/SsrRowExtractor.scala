@@ -1,11 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.sources.ssr
 
 import java.sql.Timestamp
-import org.apache.spark.sql.{DataFrame, Row}
-import org.apache.spark.sql.functions.col
-import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, Event, EventBuilder}
-import fr.polytechnique.cmap.cnam.etl.extractors.{EventRowExtractor, Extractor}
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import org.apache.spark.sql.Row
+import fr.polytechnique.cmap.cnam.etl.extractors.EventRowExtractor
 
 /**
  *  Gets the following fields for SSR sourced events: patientID, start, groupId.

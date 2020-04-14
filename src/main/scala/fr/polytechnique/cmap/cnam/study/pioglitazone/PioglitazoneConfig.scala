@@ -3,9 +3,8 @@
 package fr.polytechnique.cmap.cnam.study.pioglitazone
 
 import java.time.LocalDate
-import pureconfig.generic.auto._
-import me.danielpes.spark.datetime.Period
 import me.danielpes.spark.datetime.implicits._
+import pureconfig.generic.auto._
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 import fr.polytechnique.cmap.cnam.etl.config.{BaseConfig, ConfigLoader}
 import fr.polytechnique.cmap.cnam.etl.extractors.events.acts.MedicalActsConfig
