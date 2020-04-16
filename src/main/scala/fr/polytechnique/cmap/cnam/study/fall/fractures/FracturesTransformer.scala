@@ -22,10 +22,18 @@ class FracturesTransformer(config: FallConfig) extends OutcomesTransformer with 
   def transform(
     liberalActs: Dataset[Event[MedicalAct]],
     acts: Dataset[Event[MedicalAct]],
-    diagnoses: Dataset[Event[Diagnosis]]): Dataset[Event[Outcome]] = {
+    diagnoses: Dataset[Event[Diagnosis]],
+    surgeries: Dataset[Event[MedicalAct]],
+    hospitalDeaths: Dataset[Event[HospitalStay]]): Dataset[Event[Outcome]] = {
 
     // Hospitalized fractures
-    val hospitalizedFractures = HospitalizedFractures.transform(diagnoses, acts, config.sites.sites)
+    val hospitalizedFractures = HospitalizedFractures.transform(
+      diagnoses,
+      acts.filter(_.category == McoCCAMAct.category),
+      hospitalDeaths,
+      surgeries,
+      config.sites.sites
+    )
 
     // Liberal Fractures
     val liberalFractures = LiberalFractures.transform(liberalActs)

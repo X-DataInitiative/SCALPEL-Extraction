@@ -2,7 +2,7 @@
 
 package fr.polytechnique.cmap.cnam.study.fall.fractures
 
-trait Surgery {
+object Surgery {
   val surgeryCodes = Set(
     "QAGA004",
     "QZGA003",
