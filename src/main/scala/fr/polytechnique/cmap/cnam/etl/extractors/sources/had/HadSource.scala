@@ -1,8 +1,8 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.sources.had
 
-import org.apache.spark.sql.{Column, DataFrame}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.TimestampType
+import org.apache.spark.sql.{Column, DataFrame}
 import fr.polytechnique.cmap.cnam.etl.extractors.ColumnNames
 
 trait HadSource extends ColumnNames {

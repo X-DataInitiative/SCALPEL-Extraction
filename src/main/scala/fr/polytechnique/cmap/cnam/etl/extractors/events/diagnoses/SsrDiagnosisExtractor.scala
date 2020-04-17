@@ -2,7 +2,7 @@
 
 package fr.polytechnique.cmap.cnam.etl.extractors.events.diagnoses
 
-import fr.polytechnique.cmap.cnam.etl.events.{Diagnosis, EventBuilder, SsrAssociatedDiagnosis, SsrLinkedDiagnosis, SsrMainDiagnosis, SsrTakingOverPurpose}
+import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.extractors.StartsWithStrategy
 import fr.polytechnique.cmap.cnam.etl.extractors.codes.SimpleExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.extractors.sources.ssr.SsrSimpleExtractor

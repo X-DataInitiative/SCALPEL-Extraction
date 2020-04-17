@@ -1,9 +1,7 @@
 package fr.polytechnique.cmap.cnam.etl.sources.data
 
 import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.{Column, DataFrame, SQLContext}
-import org.apache.spark.sql.functions.to_date
-import org.apache.spark.sql.functions.year
+import org.apache.spark.sql.{Column, DataFrame}
 
 /**
   * Extractor class for the SSR table

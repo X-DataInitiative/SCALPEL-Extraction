@@ -3,10 +3,10 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.events.molecules
 
 import java.sql.Timestamp
-import org.apache.spark.sql.{Column, DataFrame, Row}
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{col, sum, udf, when}
 import org.apache.spark.sql.types.{DoubleType, StringType, TimestampType}
+import org.apache.spark.sql.{Column, DataFrame, Row}
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Molecule}
 import fr.polytechnique.cmap.cnam.etl.extractors.Extractor
 import fr.polytechnique.cmap.cnam.etl.sources.Sources

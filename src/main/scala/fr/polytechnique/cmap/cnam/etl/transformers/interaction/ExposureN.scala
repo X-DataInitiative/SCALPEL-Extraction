@@ -3,8 +3,7 @@
 package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 
 import cats.syntax.functor._
-import me.danielpes.spark.datetime.{Period => Duration}
-import fr.polytechnique.cmap.cnam.etl.datatypes.{NullRemainingPeriod, Period, Subtractable, RemainingPeriod}
+import fr.polytechnique.cmap.cnam.etl.datatypes.{NullRemainingPeriod, Period, RemainingPeriod, Subtractable}
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Interaction}
 
 case class ExposureN(patientID: String, values: Set[String], period: Period) extends Subtractable[ExposureN] {
@@ -12,6 +11,7 @@ case class ExposureN(patientID: String, values: Set[String], period: Period) ext
 
   /**
    * Returns duration of this ExposureN in milliseconds
+   *
    * @return duration in millisecond as Long
    */
   def toDuration: Long = self.period.end.getTime - self.period.start.getTime
