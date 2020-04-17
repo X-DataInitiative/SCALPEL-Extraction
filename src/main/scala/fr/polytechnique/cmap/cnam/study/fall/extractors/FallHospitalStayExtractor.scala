@@ -28,7 +28,15 @@ class FallHospitalStayExtractor(codes: SimpleExtractorCodes) extends McoSimpleEx
 
   override def neededColumns: List[String] = List(ColNames.EndDate, ColNames.ExitMode) ++ super.usedColumns
 
-  override def extractEnd(r: Row): Option[Timestamp] = Some(new Timestamp(r.getAs[Date](ColNames.EndDate).getTime))
+  override def extractEnd(r: Row): Option[Timestamp] = Some {
+    if (!r.isNullAt(r.fieldIndex(ColNames.EndDate))) {
+      new Timestamp(r.getAs[Date](ColNames.EndDate).getTime)
+    }
+    else { // This shouldn't happen, but some hospital stays come without an EndDate
+      extractStart(r)
+    }
+
+  }
 
   override def extractValue(row: Row): String = exitCodes(row.getAs[String](columnName)).value
 }
