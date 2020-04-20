@@ -4,7 +4,6 @@ import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.{DcirAct, Event, Outcome}
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.HospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
@@ -33,16 +32,12 @@ object FallMain extends Main with FractureCodes {
     import implicits.SourceReader
     val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input))
     val dcir = sources.dcir.get.repartition(4000).persist()
-    val mco = sources.mco.get.repartition(4000).persist()
+    val mco = sources.mco.get.cache()
 
-    val operationsMetadata = computeHospitalStays(sources, fallConfig) ++ computeOutcomes(
-      sources,
-      fallConfig
-    ) ++ computeExposures(sources, fallConfig)
+    val operationsMetadata = computeExposures(sources, fallConfig) ++ computeOutcomes(sources, fallConfig)
 
     dcir.unpersist()
     mco.unpersist()
-
 
     // Write Metadata
     val metadata = MainMetadata(this.getClass.getName, startTimestamp, new java.util.Date(), operationsMetadata.toList)
@@ -52,26 +47,6 @@ object FallMain extends Main with FractureCodes {
       .writeMetaData(metadataJson, "metadata_fall_" + format.format(startTimestamp) + ".json", argsMap("env"))
 
     None
-  }
-
-  def computeHospitalStays(sources: Sources, fallConfig: FallConfig): mutable.Buffer[OperationMetadata] = {
-    val operationsMetadata = mutable.Buffer[OperationMetadata]()
-    if (fallConfig.runParameters.hospitalStays) {
-      val hospitalStays = HospitalStaysExtractor.extract(sources, Set.empty).cache()
-
-      operationsMetadata += {
-        OperationReporter
-          .report(
-            "extract_hospital_stays",
-            List("MCO"),
-            OperationTypes.HospitalStays,
-            hospitalStays.toDF,
-            Path(fallConfig.output.outputSavePath),
-            fallConfig.output.saveMode
-          )
-      }
-    }
-    operationsMetadata
   }
 
   def computeExposures(sources: Sources, fallConfig: FallConfig): mutable.Buffer[OperationMetadata] = {
