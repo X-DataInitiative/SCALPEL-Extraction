@@ -39,7 +39,7 @@ object FallMain extends Main with FractureCodes {
     val fallConfig = FallConfig.load(argsMap("conf"), argsMap("env"))
 
     import implicits.SourceReader
-    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input))
+    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input,fallConfig.fileFormat))
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
 

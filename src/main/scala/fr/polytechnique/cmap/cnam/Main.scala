@@ -20,6 +20,7 @@ trait Main extends LoggerLevels with Locales {
   def main(args: Array[String]): Unit = {
     startContext()
     val sqlCtx = sqlContext
+    sqlContext.setConf("spark.sql.orc.impl", "native")
     val argsMap = args.map(
       arg => arg.split("=")(0) -> arg.split("=")(1)
     ).toMap

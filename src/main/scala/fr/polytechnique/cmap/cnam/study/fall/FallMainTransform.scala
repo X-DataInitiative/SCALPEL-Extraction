@@ -53,10 +53,16 @@ object FallMainTransform extends Main with FractureCodes {
     = spark.read.parquet(meta.get("extract_filtered_patients").get.outputPath)
       .as[Patient].cache()
     val drugPurchases: Dataset[Event[Drug]]
-    = spark.read.parquet(meta.get("drug_purchases").get.outputPath)
-      .as[Event[Drug]].cache()
-    val controlDrugPurchases = spark.read.parquet(meta.get("control_drugs_purchases").get.outputPath)
-      .as[Event[Drug]].cache()
+    = fallConfig.fileFormat match {
+      case "orc" => spark.read.orc(meta.get("drug_purchases").get.outputPath).as[Event[Drug]].cache()
+      case _ => spark.read.parquet(meta.get("drug_purchases").get.outputPath).as[Event[Drug]].cache()
+    }
+
+    val controlDrugPurchases =
+      fallConfig.fileFormat match {
+        case "orc" => spark.read.orc(meta.get("control_drugs_purchases").get.outputPath).as[Event[Drug]].cache()
+        case _ => spark.read.parquet(meta.get("control_drugs_purchases").get.outputPath).as[Event[Drug]].cache()
+      }
 
     if (fallConfig.runParameters.startGapPatients) {
       import PatientFilters._
@@ -181,24 +187,35 @@ object FallMainTransform extends Main with FractureCodes {
     val spark = SparkSession.builder.getOrCreate()
     import spark.implicits._
 
-    val diagnoses = spark.read.parquet(meta("diagnoses").outputPath)
-      .as[Event[Diagnosis]]
+    val diagnoses =
+      fallConfig.fileFormat match {
+        case "orc" => spark.read.orc(meta("diagnoses").outputPath).as[Event[Diagnosis]].cache()
+        case _ => spark.read.parquet(meta("diagnoses").outputPath).as[Event[Diagnosis]].cache()
+      }
 
-    val acts = spark.read.parquet(meta("acts").outputPath)
-      .as[Event[MedicalAct]]
+    val acts =  fallConfig.fileFormat match {
+      case "orc" => spark.read.orc(meta("acts").outputPath).as[Event[MedicalAct]].cache()
+      case _ => spark.read.parquet(meta("acts").outputPath).as[Event[MedicalAct]].cache()
+    }
 
-    val liberalActs = spark.read.parquet(meta("liberal_acts").outputPath)
-      .as[Event[MedicalAct]]
+    val liberalActs = fallConfig.fileFormat match {
+      case "orc" => spark.read.orc(meta("liberal_acts").outputPath).as[Event[MedicalAct]].cache()
+      case _ => spark.read.parquet(meta("liberal_acts").outputPath).as[Event[MedicalAct]].cache()
+    }
 
-    val surgeries = spark.read.parquet(meta("surgeries").outputPath)
-      .as[Event[MedicalAct]]
+    val surgeries = fallConfig.fileFormat match {
+      case "orc" => spark.read.orc(meta("surgeries").outputPath).as[Event[MedicalAct]].cache()
+      case _ => spark.read.parquet(meta("surgeries").outputPath).as[Event[MedicalAct]].cache()
+    }
 
-    val hospitalDeaths = spark.read.parquet(meta("hospital_deaths").outputPath)
-      .as[Event[HospitalStay]]
+    val hospitalDeaths = fallConfig.fileFormat match {
+      case "orc" => spark.read.orc(meta("hospital_deaths").outputPath).as[Event[HospitalStay]].cache()
+      case _ => spark.read.parquet(meta("hospital_deaths").outputPath).as[Event[HospitalStay]].cache()
+    }
 
     if (fallConfig.runParameters.outcomes) {
       val fractures: Dataset[Event[Outcome]] = new FracturesTransformer(fallConfig)
-              .transform(liberalActs, acts, diagnoses, surgeries, hospitalDeaths)
+        .transform(liberalActs, acts, diagnoses, surgeries, hospitalDeaths)
       val fractures_report = OperationReporter.reportAsDataSet(
         "fractures",
         List("acts"),
