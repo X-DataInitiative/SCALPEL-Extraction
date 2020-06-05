@@ -22,7 +22,8 @@ case class PioglitazoneConfig(
   output: StudyConfig.OutputPaths,
   exposures: PioglitazoneConfig.ExposuresConfig = PioglitazoneConfig.ExposuresConfig(),
   outcomes: PioglitazoneConfig.OutcomesConfig = PioglitazoneConfig.OutcomesConfig(),
-  filters: PioglitazoneConfig.FiltersConfig = PioglitazoneConfig.FiltersConfig())
+  filters: PioglitazoneConfig.FiltersConfig = PioglitazoneConfig.FiltersConfig(),
+  fileFormat: String = "parquet")
   extends StudyConfig {
 
   // The following config items are not overridable by the config file
@@ -38,12 +39,12 @@ case class PioglitazoneConfig(
 object PioglitazoneConfig extends ConfigLoader with PioglitazoneStudyCodes {
 
   /**
-    * Reads a configuration file and merges it with the default file.
-    *
-    * @param path The path of the given file.
-    * @param env  The environment in the config file (usually can be "cmap", "cnam" or "test").
-    * @return An instance of PioglitazoneConfig containing all parameters.
-    */
+   * Reads a configuration file and merges it with the default file.
+   *
+   * @param path The path of the given file.
+   * @param env  The environment in the config file (usually can be "cmap", "cnam" or "test").
+   * @return An instance of PioglitazoneConfig containing all parameters.
+   */
   def load(path: String, env: String): PioglitazoneConfig = {
     val defaultPath = "config/pioglitazone/default.conf"
     loadConfigWithDefaults[PioglitazoneConfig](path, defaultPath, env)

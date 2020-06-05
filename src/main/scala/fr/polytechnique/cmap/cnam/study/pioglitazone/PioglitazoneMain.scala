@@ -48,7 +48,7 @@ object PioglitazoneMain extends Main {
     val config = PioglitazoneConfig.load(argsMap("conf"), argsMap("env"))
 
     import implicits.SourceReader
-    val sources = Sources.sanitize(sqlContext.readSources(config.input))
+    val sources = Sources.sanitize(sqlContext.readSources(config.input,config.fileFormat))
 
     // Extraction: get all events
     val rawPatients: Dataset[Patient] = AllPatientExtractor.extract(sources).cache()

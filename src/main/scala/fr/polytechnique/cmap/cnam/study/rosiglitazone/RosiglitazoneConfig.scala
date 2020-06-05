@@ -21,7 +21,8 @@ case class RosiglitazoneConfig(
   output: StudyConfig.OutputPaths,
   exposures: RosiglitazoneConfig.ExposureConfig = RosiglitazoneConfig.ExposureConfig(),
   outcomes: RosiglitazoneConfig.OutcomesConfig = RosiglitazoneConfig.OutcomesConfig(),
-  filters: RosiglitazoneConfig.FiltersConfig = RosiglitazoneConfig.FiltersConfig())
+  filters: RosiglitazoneConfig.FiltersConfig = RosiglitazoneConfig.FiltersConfig(),
+  fileFormat: String = "parquet")
   extends StudyConfig {
 
   // The following config items are not overridable by the config file

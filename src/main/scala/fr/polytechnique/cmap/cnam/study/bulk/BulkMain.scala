@@ -22,7 +22,7 @@ object BulkMain extends Main {
     val bulkConfig = BulkConfig.load(argsMap("conf"), argsMap("env"))
 
     import implicits.SourceReader
-    val sources = Sources.sanitize(sqlContext.readSources(bulkConfig.input))
+    val sources = Sources.sanitize(sqlContext.readSources(bulkConfig.input,bulkConfig.fileFormat))
 
     val sourceExtractor: List[SourceExtractor] = List(
       new DcirSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.drugs),

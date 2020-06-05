@@ -27,7 +27,7 @@ object FallMainExtract extends Main with FractureCodes {
   override def run(sqlContext: SQLContext, argsMap: Map[String, String]): Option[Dataset[_]] = {
     import implicits.SourceReader
     val fallConfig = FallConfig.load(argsMap("conf"), argsMap("env"))
-    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input))
+    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input,fallConfig.fileFormat))
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
     val meta = mutable.HashMap[String, OperationMetadata]()
