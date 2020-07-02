@@ -4,7 +4,6 @@ package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
 import org.apache.spark.sql.{Column, DataFrame, Dataset}
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.etl.events.Event
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
@@ -93,7 +92,8 @@ class PatientsSuite extends SharedContext {
       mco = Some(mcoDf),
       irBen = Some(irBenDf),
       mcoCe = Some(mcoceDf),
-      ssr = Some(ssrDf))
+      ssr = Some(ssrDf)
+    )
 
     // When
     val result = new Patients(config).extract(sources)

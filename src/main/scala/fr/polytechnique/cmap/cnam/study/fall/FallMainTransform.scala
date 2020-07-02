@@ -190,10 +190,15 @@ object FallMainTransform extends Main with FractureCodes {
     val liberalActs = spark.read.parquet(meta("liberal_acts").outputPath)
       .as[Event[MedicalAct]]
 
+    val surgeries = spark.read.parquet(meta("surgeries").outputPath)
+      .as[Event[MedicalAct]]
+
+    val hospitalDeaths = spark.read.parquet(meta("hospital_deaths").outputPath)
+      .as[Event[HospitalStay]]
+
     if (fallConfig.runParameters.outcomes) {
-      logger.info("Fractures")
       val fractures: Dataset[Event[Outcome]] = new FracturesTransformer(fallConfig)
-        .transform(liberalActs, acts, diagnoses)
+              .transform(liberalActs, acts, diagnoses, surgeries, hospitalDeaths)
       val fractures_report = OperationReporter.reportAsDataSet(
         "fractures",
         List("acts"),

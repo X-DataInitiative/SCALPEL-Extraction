@@ -7,8 +7,8 @@ import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
-import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
+import fr.polytechnique.cmap.cnam.etl.extractors.events.hospitalstays.McoHospitalStaysExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.events.molecules.MoleculePurchases
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.Patients
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
@@ -85,7 +85,7 @@ object RosiglitazoneMain extends Main {
         )
     }
 
-    val hospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
+    val hospitalStays = McoHospitalStaysExtractor.extract(sources).cache()
     operationsMetadata += {
       OperationReporter.report(
         "extract_hospital_stays",

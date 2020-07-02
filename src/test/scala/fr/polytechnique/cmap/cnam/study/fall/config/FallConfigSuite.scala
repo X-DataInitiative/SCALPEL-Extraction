@@ -10,7 +10,7 @@ import me.danielpes.spark.datetime.implicits._
 import org.scalatest.flatspec.AnyFlatSpec
 import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig.{InputPaths, OutputPaths}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.PharmacologicalLevel
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.level.PharmacologicalLevel
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.{LatestPurchaseBased, LimitedExposureAdder}
 
 class FallConfigSuite extends AnyFlatSpec {
@@ -65,11 +65,12 @@ class FallConfigSuite extends AnyFlatSpec {
         |      to_exposure_strategy  = "latest_purchase_based"
         |    }
         |  }
-        |  interaction {
+        |  interactions {
         |    level: 5
+        |    minimum_duration: 50 days
         |  }
         |  patients {
-        |  start_gap_in_months: 2
+        |    start_gap_in_months: 2
         |  }
         |  drugs {
         |    level: "Pharmacological"
@@ -79,7 +80,7 @@ class FallConfigSuite extends AnyFlatSpec {
         |    sites: ["BodySites"]
         |  }
         |  run_parameters {
-        |    outcome: ["Acts", "Diagnoses", "Outcomes"] // pipeline of calculation of outcome, possible values : Acts, Diagnoses, and Outcomes
+        |    outcome: ["Acts", "Diagnoses", "HospitalDeaths", "Outcomes"] // pipeline of calculation of outcome, possible values : Acts, Diagnoses, and Outcomes
         |    exposure: ["Patients", "DrugPurchases", "Exposures"] // pipeline of the calculation of exposure, possible values : Patients, StartGapPatients, DrugPurchases, Exposures
         |  }
         |  """.trim.stripMargin
@@ -97,7 +98,11 @@ class FallConfigSuite extends AnyFlatSpec {
           endThresholdGc = 900.days,
           toExposureStrategy = LatestPurchaseBased
         )
-      ), drugs = defaultConf.drugs.copy(
+      ), interactions = defaultConf.interactions.copy(
+        5,
+        50.days
+      ),
+      drugs = defaultConf.drugs.copy(
         level = PharmacologicalLevel
       ), runParameters = defaultConf.runParameters.copy(exposure = List("Patients", "DrugPurchases", "Exposures"))
     )

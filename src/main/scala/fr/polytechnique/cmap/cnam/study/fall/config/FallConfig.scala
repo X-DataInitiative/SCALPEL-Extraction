@@ -8,12 +8,12 @@ import me.danielpes.spark.datetime.implicits._
 import pureconfig.generic.auto._
 import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification._
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.{DrugClassificationLevel, TherapeuticLevel}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.acts.MedicalActsConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.diagnoses.DiagnosesConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.DrugConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification._
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification.families.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.level.{DrugClassificationLevel, TherapeuticLevel}
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures._
 import fr.polytechnique.cmap.cnam.etl.transformers.interaction.InteractionTransformerConfig
 import fr.polytechnique.cmap.cnam.study.fall.codes._
@@ -89,8 +89,9 @@ object FallConfig extends FallConfigLoader with FractureCodes {
 
   /** Parameters needed for the Interaction Transformer **/
   case class InteractionConfig(
-    override val level: Int = 2
-  ) extends InteractionTransformerConfig(level = level)
+    override val level: Int = 2,
+    override val minimumDuration: Period = 30.days
+  ) extends InteractionTransformerConfig(level = level, minimumDuration)
 
   /** Parameters needed for the diagnosesConfig **/
   case class SitesConfig(sites: List[BodySite] = List(BodySites)) {
@@ -99,7 +100,7 @@ object FallConfig extends FallConfigLoader with FractureCodes {
 
   /** Parameters if run the calculation of outcome or exposure **/
   case class RunConfig(
-    outcome: List[String] = List("Acts", "Diagnoses", "Outcomes"),
+    outcome: List[String] = List("Acts", "Diagnoses", "HospitalDeaths", "Outcomes"),
     exposure: List[String] = List("Patients", "StartGapPatients", "DrugPurchases", "Exposures"),
     hospitalStay: List[String] = List("HospitalStay")) {
     //exposures
@@ -110,7 +111,8 @@ object FallConfig extends FallConfigLoader with FractureCodes {
     //outcomes
     val diagnoses: Boolean = outcome contains "Diagnoses"
     val acts: Boolean = outcome contains "Acts"
-    val outcomes: Boolean = List("Diagnoses", "Acts", "Outcomes").forall(outcome.contains)
+    val hospitalDeaths: Boolean = outcome contains "HospitalDeaths"
+    val outcomes: Boolean = List("Diagnoses", "Acts", "HospitalDeaths", "Outcomes").forall(outcome.contains)
     // Hospital Stays
     val hospitalStays: Boolean = hospitalStay contains "HospitalStay"
   }

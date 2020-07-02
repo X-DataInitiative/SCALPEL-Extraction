@@ -2,8 +2,8 @@
 
 package fr.polytechnique.cmap.cnam.study.fall.config
 
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification._
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.families.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification._
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification.families.{Antidepresseurs, Antihypertenseurs, Hypnotiques, Neuroleptiques}
 
 
 object FallDrugClassConfig {

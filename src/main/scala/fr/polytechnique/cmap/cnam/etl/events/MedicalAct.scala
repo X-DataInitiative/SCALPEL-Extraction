@@ -3,7 +3,6 @@
 package fr.polytechnique.cmap.cnam.etl.events
 
 import java.sql.Timestamp
-import org.apache.spark.sql.Row
 
 trait MedicalAct extends AnyEvent with EventBuilder {
 
@@ -40,7 +39,7 @@ object McoCIM10Act extends MedicalAct {
   val category: EventCategory[MedicalAct] = "mco_cim10_act"
 }
 
-object McoCEAct extends MedicalAct {
+object McoCeCcamAct extends MedicalAct {
   val category: EventCategory[MedicalAct] = "mco_ce_act"
 }
 

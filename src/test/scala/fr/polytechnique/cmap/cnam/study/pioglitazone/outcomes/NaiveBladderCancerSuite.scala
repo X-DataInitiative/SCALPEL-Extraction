@@ -18,7 +18,7 @@ class NaiveBladderCancerSuite extends SharedContext {
       McoMainDiagnosis("PatientA", "C67", makeTS(2010, 1, 1)),
       McoLinkedDiagnosis("PatientA", "C67", makeTS(2010, 2, 1)),
       McoAssociatedDiagnosis("PatientA", "C67", makeTS(2010, 3, 1)),
-      ImbDiagnosis("PatientA", "C67", makeTS(2010, 4, 1)),
+      ImbCcamDiagnosis("PatientA", "C67", makeTS(2010, 4, 1)),
       McoMainDiagnosis("PatientA", "ABC", makeTS(2010, 5, 1))
     ).toDS
 

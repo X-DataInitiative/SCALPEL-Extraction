@@ -2,6 +2,7 @@
 
 package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 
+import me.danielpes.spark.datetime.implicits._
 import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.datatypes.Period
@@ -31,8 +32,7 @@ class NLevelInteractionTransformerSuite extends SharedContext {
         ExposureN("Federer", Set("Dopamine", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
         ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 3, 1), makeTS(2019, 5, 1))),
         ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
-        ExposureN("Federer", Set("Paracetamol", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 6, 1))),
-        ExposureN("Federer", Set("Alprazolam", "Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1)))
+        ExposureN("Federer", Set("Paracetamol", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 6, 1)))
       ).toDS(),
       Seq[ExposureN](
         ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 3, 1), makeTS(2019, 8, 1))),
@@ -43,9 +43,10 @@ class NLevelInteractionTransformerSuite extends SharedContext {
       ).toDS()
     )
 
-    val result = NLevelInteractionTransformer(InteractionTransformerConfig(3)).elevateToExposureN(exposures, 3)
+    val result = NLevelInteractionTransformer(InteractionTransformerConfig(3, 30.days)).elevateToExposureN(exposures, 3)
     // The mapping is necessary for now as Spark seems to struggle with nested Data Structures
-    result.zip(expected).foreach(e => assertDSs(e._1.map(_.toInteraction).distinct(), e._2.distinct().map(_.toInteraction).distinct()))
+    result.zip(expected)
+      .foreach(e => assertDSs(e._1.map(_.toInteraction).distinct(), e._2.distinct().map(_.toInteraction).distinct()))
 
   }
 
@@ -101,7 +102,8 @@ class NLevelInteractionTransformerSuite extends SharedContext {
 
     val result = NLevelInteractionTransformer(InteractionTransformerConfig(3)).trickleDownExposureN(input)
     // The mapping is necessary for now as Spark seems to struggle with nested Data Structures
-    result.zip(expected).foreach(e => assertDSs(e._1.map(_.toInteraction).distinct(), e._2.distinct().map(_.toInteraction).distinct()))
+    result.zip(expected)
+      .foreach(e => assertDSs(e._1.map(_.toInteraction).distinct(), e._2.distinct().map(_.toInteraction).distinct()))
   }
 
   "reduceHigherExposuresNFromLowerExposures" should "reduce the time period of higher ExposureN from lower ExposureN" in {
@@ -158,8 +160,17 @@ class NLevelInteractionTransformerSuite extends SharedContext {
       ).toDS()
     )
 
-    val result = NLevelInteractionTransformer(InteractionTransformerConfig(3)).reduceHigherExposuresNFromLowerExposures(interactions, higherInteractionInvolvement)
-    result.zip(expected).foreach(e => assertDSs(e._1.map(_.e.toInteraction).distinct(), e._2.distinct().map(_.toInteraction).distinct()))
+    val result = NLevelInteractionTransformer(InteractionTransformerConfig(3)).reduceHigherExposuresNFromLowerExposures(
+      interactions,
+      higherInteractionInvolvement
+    )
+    result.zip(expected)
+      .foreach(
+        e => assertDSs(
+          e._1.map(_.e.toInteraction).distinct(),
+          e._2.distinct().map(_.toInteraction).distinct()
+        )
+      )
   }
 
   "transform" should "create interactions of level N" in {
@@ -176,14 +187,14 @@ class NLevelInteractionTransformerSuite extends SharedContext {
     ).toDS()
 
     val expected: Dataset[Event[Interaction]] = Seq[ExposureN](
-        ExposureN("Federer", Set("Paracetamol", "Dopamine", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
-        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 3, 1), makeTS(2019, 4, 1))),
-        ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
-        ExposureN("Federer", Set("Paracetamol", "Diazepam"), Period(makeTS(2019, 5, 1), makeTS(2019, 6, 1))),
-        ExposureN("Federer", Set("Alprazolam", "Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1))),
-        ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 6, 1), makeTS(2019, 7, 1))),
-        ExposureN("Federer", Set("Alprazolam"), Period(makeTS(2019, 1, 1), makeTS(2019, 2, 1)))
-      ).toDS.map[Event[Interaction]]((e: ExposureN) => e.toInteraction)
+      ExposureN("Federer", Set("Paracetamol", "Dopamine", "Diazepam"), Period(makeTS(2019, 4, 1), makeTS(2019, 5, 1))),
+      ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 3, 1), makeTS(2019, 4, 1))),
+      ExposureN("Federer", Set("Paracetamol", "Dopamine"), Period(makeTS(2019, 7, 1), makeTS(2019, 8, 1))),
+      ExposureN("Federer", Set("Paracetamol", "Diazepam"), Period(makeTS(2019, 5, 1), makeTS(2019, 6, 1))),
+      ExposureN("Federer", Set("Dopamine"), Period(makeTS(2019, 2, 1), makeTS(2019, 3, 1))),
+      ExposureN("Federer", Set("Paracetamol"), Period(makeTS(2019, 6, 1), makeTS(2019, 7, 1))),
+      ExposureN("Federer", Set("Alprazolam"), Period(makeTS(2019, 1, 1), makeTS(2019, 3, 1)))
+    ).toDS.map[Event[Interaction]]((e: ExposureN) => e.toInteraction)
 
     val result = NLevelInteractionTransformer(InteractionTransformerConfig(6)).transform(exposures)
 

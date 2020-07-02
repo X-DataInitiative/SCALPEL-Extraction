@@ -6,7 +6,8 @@ import scala.collection.mutable
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.DcirAct
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.codes.SimpleExtractorCodes
+import fr.polytechnique.cmap.cnam.etl.extractors.events.hospitalstays.McoHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
@@ -43,7 +44,7 @@ object FallMainExtract extends Main with FractureCodes {
   mutable.HashMap[String, OperationMetadata] = {
 
     if (fallConfig.runParameters.hospitalStays) {
-      val hospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
+      val hospitalStays = McoHospitalStaysExtractor.extract(sources).cache()
       meta += {
         "extract_hospital_stays" ->
           OperationReporter
@@ -114,10 +115,9 @@ object FallMainExtract extends Main with FractureCodes {
   mutable.HashMap[String, OperationMetadata] = {
 
     if (fallConfig.runParameters.diagnoses) {
-      logger.info("diagnoses")
       val diagnoses = new DiagnosisExtractor(fallConfig.diagnoses).extract(sources).persist()
       val diagnosesPopulation = DiagnosisCounter.process(diagnoses)
-      val diagnoses_report = OperationReporter.reportDataAndPopulationAsDataSet(
+      val diagnosesReport = OperationReporter.reportDataAndPopulationAsDataSet(
         "diagnoses",
         List("MCO", "IR_IMB_R"),
         OperationTypes.Diagnosis,
@@ -127,14 +127,15 @@ object FallMainExtract extends Main with FractureCodes {
         fallConfig.output.saveMode
       )
       meta += {
-        diagnoses_report.name -> diagnoses_report
+        diagnosesReport.name -> diagnosesReport
       }
     }
 
     if (fallConfig.runParameters.acts) {
-      logger.info("Medical Acts")
-      val acts = new ActsExtractor(fallConfig.medicalActs).extract(sources).persist()
-      val acts_report = OperationReporter.reportAsDataSet(
+      val (acts, surgeries) = new ActsExtractor(fallConfig.medicalActs).extract(sources)
+      acts.persist()
+      surgeries.persist()
+      val actsReport = OperationReporter.reportAsDataSet(
         "acts",
         List("DCIR", "MCO", "MCO_CE"),
         OperationTypes.MedicalActs,
@@ -143,9 +144,21 @@ object FallMainExtract extends Main with FractureCodes {
         fallConfig.output.saveMode
       )
       meta += {
-        acts_report.name -> acts_report
+        actsReport.name -> actsReport
       }
-      logger.info("Liberal Medical Acts")
+
+      val surgeriesReport = OperationReporter.reportAsDataSet(
+        "surgeries",
+        List("MCO"),
+        OperationTypes.MedicalActs,
+        surgeries,
+        Path(fallConfig.output.outputSavePath),
+        fallConfig.output.saveMode
+      )
+      meta += {
+        surgeriesReport.name -> surgeriesReport
+      }
+
       val liberalActs = acts
         .filter(act => act.groupID == DcirAct.groupID.Liberal && !CCAMExceptions.contains(act.value)).persist()
       val liberal_acts_report = OperationReporter.reportAsDataSet(
@@ -158,6 +171,19 @@ object FallMainExtract extends Main with FractureCodes {
       )
       meta += {
         liberal_acts_report.name -> liberal_acts_report
+      }
+
+      val hospitalDeaths = new FallHospitalStayExtractor(SimpleExtractorCodes(List(Death.value))).extract(sources)
+      val hospitalDeathsReport = OperationReporter.reportAsDataSet(
+        "hospital_deaths",
+        List("MCO"),
+        OperationTypes.HospitalStays,
+        hospitalDeaths,
+        Path(fallConfig.output.outputSavePath),
+        fallConfig.output.saveMode
+      )
+      meta += {
+        hospitalDeathsReport.name -> hospitalDeathsReport
       }
     }
     meta
