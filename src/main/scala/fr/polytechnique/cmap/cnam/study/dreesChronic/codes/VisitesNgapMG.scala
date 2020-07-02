@@ -1,9 +1,9 @@
 package fr.polytechnique.cmap.cnam.study.dreesChronic.codes
 
-import fr.polytechnique.cmap.cnam.etl.extractors.ngapacts.NgapActClassConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.ngapacts.NgapWithNatClassConfig
 
-object VisitesNgapMG extends NgapActClassConfig {
-  override val ngapKeyLetters: Seq[String] = Seq(
+object VisitesNgapMG extends NgapWithNatClassConfig(
+  ngapKeyLetters = Seq(
     "TTE",
     "TDT",
     "CCX",
@@ -31,10 +31,10 @@ object VisitesNgapMG extends NgapActClassConfig {
     "ADC",
     "ADE",
     "ATM",
-    "ADI")
+    "ADI"),
 
-  val ngapCoefficients: Seq[String] = Seq()
-  override val ngapPrsNatRefs: Seq[String] = Seq(
+  ngapCoefficients = Seq(),
+  ngapPrsNatRefs = Seq(
     "1096",
     "1097",
     "1105",
@@ -65,4 +65,4 @@ object VisitesNgapMG extends NgapActClassConfig {
     "1352",
     "1351"
   )
-}
+)

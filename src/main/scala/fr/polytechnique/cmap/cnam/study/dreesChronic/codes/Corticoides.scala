@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.study.dreesChronic.codes
 
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.{DrugClassConfig, PharmacologicalClassConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification.{DrugClassConfig, PharmacologicalClassConfig}
 
 object Corticoides extends DrugClassConfig {
 

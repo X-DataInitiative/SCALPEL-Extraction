@@ -6,13 +6,13 @@ import java.time.LocalDate
 import pureconfig.generic.auto._
 import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.acts.MedicalActsConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.DiagnosesConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.prestations.PractitionerClaimSpecialityConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.ngapacts.NgapActConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification._
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.{DrugClassificationLevel, PharmacologicalLevel}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.DrugConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.acts.MedicalActsConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.diagnoses.DiagnosesConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.prestations.PractitionerClaimSpecialityConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.ngapacts.NgapActConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification._
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.level.{DrugClassificationLevel, PharmacologicalLevel}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.DrugConfig
 import fr.polytechnique.cmap.cnam.study.dreesChronic.codes._
 import fr.polytechnique.cmap.cnam.study.dreesChronic.config.DreesChronicConfig.{DrugsConfig, PatientsConfig, RunConfig}
 
@@ -75,7 +75,7 @@ object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
   )
 
   final object NgapActConfig extends NgapActConfig(
-    actsCategories = List.empty
+    List.empty
   )
 
   /** Fixed parameters needed for the acts extractors. */

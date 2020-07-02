@@ -1,6 +1,6 @@
 package fr.polytechnique.cmap.cnam.study.dreesChronic.config
 
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification._
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification._
 import fr.polytechnique.cmap.cnam.study.dreesChronic.codes._
 
 object DreesChronicDrugClassConfig {

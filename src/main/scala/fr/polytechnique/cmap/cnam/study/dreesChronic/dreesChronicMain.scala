@@ -1,6 +1,7 @@
 package fr.polytechnique.cmap.cnam.study.dreesChronic
 
 import fr.polytechnique.cmap.cnam.Main
+import fr.polytechnique.cmap.cnam.etl.extractors.codes.SimpleExtractorCodes
 import org.apache.spark.sql.{Dataset, SQLContext}
 
 import scala.collection.mutable
@@ -17,8 +18,8 @@ import fr.polytechnique.cmap.cnam.study.dreesChronic.extractors.TakeOverReasonEx
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
 import fr.polytechnique.cmap.cnam.util.reporting.{MainMetadata, OperationMetadata, OperationReporter, OperationTypes}
-import fr.polytechnique.cmap.cnam.etl.extractors.classifications.GhmExtractor
-import fr.polytechnique.cmap.cnam.etl.extractors.diagnoses.ImbDiagnosisExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.events.classifications.GhmExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.events.diagnoses.ImbCimDiagnosisExtractor
 
 object dreesChronicMain extends Main with BpcoCodes {
 
@@ -169,7 +170,7 @@ object dreesChronicMain extends Main with BpcoCodes {
     val operationsMetadata = mutable.Buffer[OperationMetadata]()
 
     if (dreesChronicConfig.runParameters.aldDiagnoses) {
-      val aldDiagnoses = ImbDiagnosisExtractor.extract(sources, dreesChronicConfig.diagnoses.imbCodes.toSet)//.cache()
+      val aldDiagnoses = ImbCimDiagnosisExtractor(SimpleExtractorCodes(dreesChronicConfig.diagnoses.imbCodes)).extract(sources)//.cache()
 
       operationsMetadata += {
         OperationReporter.report(
@@ -187,7 +188,7 @@ object dreesChronicMain extends Main with BpcoCodes {
 
     if (dreesChronicConfig.runParameters.ghmGroups) {
       // extract all ghm codes...
-      val ghms = GhmExtractor.extract(sources, Set.empty)//.persist()
+      val ghms = GhmExtractor(SimpleExtractorCodes.empty).extract(sources)//.persist()
 
       operationsMetadata += {
         OperationReporter.report(

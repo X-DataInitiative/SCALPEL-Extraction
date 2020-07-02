@@ -1,7 +1,7 @@
 package fr.polytechnique.cmap.cnam.study.bulkDrees
 
 import fr.polytechnique.cmap.cnam.etl.config.ConfigLoader
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.classification.DrugClassConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification.DrugClassConfig
 import fr.polytechnique.cmap.cnam.study.fall.config.FallDrugClassConfig
 import pureconfig.ConfigReader
 
