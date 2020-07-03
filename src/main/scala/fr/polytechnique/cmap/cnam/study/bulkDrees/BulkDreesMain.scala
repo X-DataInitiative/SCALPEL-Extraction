@@ -29,13 +29,13 @@ object BulkDreesMain extends Main {
     val sources = Sources.sanitize(sqlContext.readSources(bulkConfig.input))
 
     val sourceExtractor: List[SourceExtractor] = List(
-      new DcirSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.drugs),
-      new McoSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
-      new McoCeSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
-      new SsrSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
       new SsrCeSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
       new HadSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
-      new ImbSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode)
+      new ImbSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
+      new McoCeSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
+      new McoSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
+      new SsrSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
+      new DcirSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.drugs)
     )
 
     // Write Metadata
