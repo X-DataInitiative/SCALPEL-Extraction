@@ -3,13 +3,14 @@
 package fr.polytechnique.cmap.cnam.study.dreesChronic.config
 
 import java.time.LocalDate
+
 import pureconfig.generic.auto._
 import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
 import fr.polytechnique.cmap.cnam.etl.config.study.StudyConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.events.acts.MedicalActsConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.events.diagnoses.DiagnosesConfig
 import fr.polytechnique.cmap.cnam.etl.extractors.events.prestations.PractitionerClaimSpecialityConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.events.ngapacts.NgapActConfig
+import fr.polytechnique.cmap.cnam.etl.extractors.events.ngapacts.{NgapActConfig, NgapWithNatClassConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.classification._
 import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.level.{DrugClassificationLevel, PharmacologicalLevel}
 import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.DrugConfig
@@ -27,7 +28,7 @@ case class DreesChronicConfig(
   val medicalActs: MedicalActsConfig = DreesChronicConfig.MedicalActsConfig
   val diagnoses: DiagnosesConfig = DreesChronicConfig.DiagnosesConfig
   val practionnerClaimSpeciality: PractitionerClaimSpecialityConfig = DreesChronicConfig.PrestationsConfig
-  val ngapActs: NgapActConfig = DreesChronicConfig.NgapActConfig
+  val ngapActs: NgapActConfig[NgapWithNatClassConfig] = DreesChronicConfig.NgapActConfig
 }
 
 object DreesChronicConfig extends DreesChronicConfigLoader with BpcoCodes {
