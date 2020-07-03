@@ -67,7 +67,7 @@ class DrugExtractor(drugConfig: DrugConfig) extends Extractor[Drug, DrugConfig] 
       col("ER_PHA_F__PHA_PRS_C13").cast(StringType).as("CIP13"),
       col("PHA_ATC_C07").cast(StringType).as("ATC5"),
       col("EXE_SOI_DTD").cast(TimestampType).as("eventDate"),
-      col("molecule_combination").cast(StringType).as("molecules"),
+      //col("molecule_combination").cast(StringType).as("molecules"), // does not exist in Drees IR_PHA_R table
       col("PHA_CND_TOP").cast(StringType).as("conditioning")
     ) ::: ColNames.GroupID.map(col)
 
