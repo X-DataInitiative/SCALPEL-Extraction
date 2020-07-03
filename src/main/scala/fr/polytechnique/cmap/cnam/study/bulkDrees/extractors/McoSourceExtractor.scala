@@ -39,11 +39,11 @@ class McoSourceExtractor(override val path: String, override val saveMode: Strin
       McoHospitalStaysExtractor,
       List("MCO_C", "MCO_B"),
       "MCO_HOSPITAL_STAY"
+    ),
+    ExtractorSources[Classification, SimpleExtractorCodes](
+      GhmExtractor(SimpleExtractorCodes.empty),
+      List("MCO_C", "MCO_B"),
+      "MCO_GHM"
     )
-//    ,ExtractorSources[Classification, SimpleExtractorCodes](
-//      GhmExtractor, // error with GhmExtractor type
-//      List("MCO_C", "MCO_B"),
-//      "MCO_GHM"
-//    )
   )
 }
