@@ -20,26 +20,27 @@ class McoCeSourceExtractor(override val path: String, override val saveMode: Str
       List("MCO_CSTC", "MCO_FMSTC"),
       "MCO_CE_CCAM_ACTS"
     ),
-    ExtractorSources[NgapAct, NgapActConfig[NgapActClassConfig]](
-      new McoCeFbstcNgapActExtractor(NgapActConfig(List.empty)),
-      List("MCO_CSTC", "MCO_FBSTC"),
-      "MCO_CE_FBSTC_NGAP_ACTS"
-    ),
-    ExtractorSources[NgapAct, NgapActConfig[NgapActClassConfig]](
-      new McoCeFcstcNgapActExtractor(NgapActConfig(List.empty)),
-      List("MCO_CSTC", "MCO_FCSTC"),
-      "MCO_CE_FCSTC_NGAP_ACTS"
-    ),
-    ExtractorSources[PractitionerClaimSpeciality, SimpleExtractorCodes](
-      McoCeFbstcSpecialtyExtractor(SimpleExtractorCodes.empty),
-      List("MCO_CSTC", "MCO_FBSTC"),
-      "MCO_CE_FBSTC_PRACTITIONER_SPECIALITY"
-    ),
-    ExtractorSources[PractitionerClaimSpeciality, SimpleExtractorCodes](
-      McoCeFcstcSpecialtyExtractor(SimpleExtractorCodes.empty),
-      List("MCO_CSTC", "MCO_FCSTC"),
-      "MCO_CE_FCSTC_PRACTITIONER_SPECIALITY"
-    ),
+    //@todo fbstc and fcstc are not flattened and thus cannot be called here.
+//    ExtractorSources[NgapAct, NgapActConfig[NgapActClassConfig]](
+//      new McoCeFbstcNgapActExtractor(NgapActConfig(List.empty)),
+//      List("MCO_CSTC", "MCO_FBSTC"),
+//      "MCO_CE_FBSTC_NGAP_ACTS"
+//    ),
+//    ExtractorSources[NgapAct, NgapActConfig[NgapActClassConfig]](
+//      new McoCeFcstcNgapActExtractor(NgapActConfig(List.empty)),
+//      List("MCO_CSTC", "MCO_FCSTC"),
+//      "MCO_CE_FCSTC_NGAP_ACTS"
+//    ),
+//    ExtractorSources[PractitionerClaimSpeciality, SimpleExtractorCodes](
+//      McoCeFbstcSpecialtyExtractor(SimpleExtractorCodes.empty),
+//      List("MCO_CSTC", "MCO_FBSTC"),
+//      "MCO_CE_FBSTC_PRACTITIONER_SPECIALITY"
+//    ),
+//    ExtractorSources[PractitionerClaimSpeciality, SimpleExtractorCodes](
+//      McoCeFcstcSpecialtyExtractor(SimpleExtractorCodes.empty),
+//      List("MCO_CSTC", "MCO_FCSTC"),
+//      "MCO_CE_FCSTC_PRACTITIONER_SPECIALITY"
+//    ),
     ExtractorSources[HospitalStay, SimpleExtractorCodes](
       McoceEmergenciesExtractor,
       List("MCO_CSTC", "MCO_FBSTC"),
