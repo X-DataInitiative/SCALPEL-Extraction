@@ -9,8 +9,8 @@ import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
-import fr.polytechnique.cmap.cnam.study.bulk.BulkConfig
-import fr.polytechnique.cmap.cnam.study.bulk.extractors._
+import fr.polytechnique.cmap.cnam.study.bulkDrees.BulkDreesConfig
+import fr.polytechnique.cmap.cnam.study.bulkDrees.extractors._
 import fr.polytechnique.cmap.cnam.util.reporting.MainMetadata
 
 
@@ -23,19 +23,19 @@ object BulkDreesMain extends Main {
 
     val format = new java.text.SimpleDateFormat("yyyy_MM_dd_HH_mm_ss")
     val startTimestamp = new java.util.Date()
-    val bulkConfig = BulkConfig.load(argsMap("conf"), argsMap("env"))
+    val bulkConfig = BulkDreesConfig.load(argsMap("conf"), argsMap("env"))
 
     import implicits.SourceReader
     val sources = Sources.sanitize(sqlContext.readSources(bulkConfig.input))
 
     val sourceExtractor: List[SourceExtractor] = List(
       new DcirSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.drugs),
+      new McoSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
+      new McoCeSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
+      new SsrSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
       new SsrCeSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
       new HadSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
-      new ImbSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
-      new McoCeSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
-      new McoSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
-      new SsrSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode)
+      new ImbSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode)
     )
 
     // Write Metadata
