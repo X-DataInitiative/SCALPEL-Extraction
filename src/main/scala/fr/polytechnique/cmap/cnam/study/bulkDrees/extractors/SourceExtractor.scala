@@ -33,7 +33,7 @@ abstract class SourceExtractor(val path: String, val saveMode: String) {
   // Second, TypeTag is needed for the Spark encoder for case class, hence the explicit typing instead of AnyEvent.
   // @TODO: Every time you add a new Event type you will need to add it in the "with" clause
   val extractors: List[ExtractorSources[_ >: MedicalAct with HospitalStay with Diagnosis with Drug
-    with MedicalTakeOverReason with NgapAct with PractitionerClaimSpeciality <: AnyEvent with EventBuilder,
+    with MedicalTakeOverReason with NgapAct with PractitionerClaimSpeciality with ProductOrService <: AnyEvent with EventBuilder,
     ExtractorCodes]]
   private val logger = Logger.getLogger(this.getClass)
 

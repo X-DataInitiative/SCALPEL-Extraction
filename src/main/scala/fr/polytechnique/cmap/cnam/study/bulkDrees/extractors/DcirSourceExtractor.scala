@@ -2,12 +2,13 @@
 
 package fr.polytechnique.cmap.cnam.study.bulkDrees.extractors
 
-import fr.polytechnique.cmap.cnam.etl.events.{Drug, MedicalAct, NgapAct, PractitionerClaimSpeciality}
+import fr.polytechnique.cmap.cnam.etl.events.{Drug, MedicalAct, NgapAct, PractitionerClaimSpeciality, ProductOrService}
 import fr.polytechnique.cmap.cnam.etl.extractors.codes.SimpleExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.extractors.events.acts.{DcirBiologyActExtractor, DcirMedicalActExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.{DrugConfig, DrugExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.events.ngapacts.{DcirNgapActExtractor, NgapActConfig, NgapWithNatClassConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.events.prestations.{MedicalPractitionerClaimExtractor, NonMedicalPractitionerClaimExtractor}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.productsorservices.DcirProductOrServiceExtractor
 
 class DcirSourceExtractor(
   override val path: String,
@@ -16,6 +17,11 @@ class DcirSourceExtractor(
   override val sourceName: String = "DCIR"
 
   override val extractors = List(
+    ExtractorSources[ProductOrService, SimpleExtractorCodes](
+      DcirProductOrServiceExtractor(SimpleExtractorCodes.empty),
+      List("ER_PRS_F", "ER_TIP_F"),
+      "DCIR_LPP"
+    ),
     ExtractorSources[MedicalAct, SimpleExtractorCodes](
       DcirMedicalActExtractor(SimpleExtractorCodes.empty),
       List("ER_PRS_F", "ER_CAM_F", "ER_ETE_F"),
