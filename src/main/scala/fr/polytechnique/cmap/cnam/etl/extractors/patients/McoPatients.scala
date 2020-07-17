@@ -2,60 +2,78 @@
 
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{Column, DataFrame}
+import java.sql.Timestamp
+import org.apache.spark.sql.functions.{col, lit}
+import org.apache.spark.sql.types.{IntegerType, StringType, TimestampType}
+import org.apache.spark.sql.{Column, Dataset}
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.computeDateUsingMonthYear
 
-private[patients] object McoPatients {
+case class PatientMco(patientID: String, exitMode: Int, exitMonth: String, exitYear: String, gender: Int, birthDate: Timestamp, deathDate: Option[Timestamp])
+  extends DerivedPatient
 
-  val inputColumns: List[Column] = List(
-    col("NUM_ENQ").as("patientID"),
-    col("MCO_B__SOR_MOD").as("SOR_MOD"),
-    col("SOR_MOI"),
-    col("SOR_ANN")
-  )
+private[patients] object McoPatients extends PatientExtractor[PatientMco] {
 
-  val outputColumns: List[Column] = List(
-    col("patientID"),
-    col("deathDate")
-  )
-
-  implicit class McoPatientsDataFrame(data: DataFrame) {
-
-    def getDeathDates(deathCode: Int): DataFrame = {
-      // TODO: We may need to check the consistency of {SOR_MOI, SOR_ANN} against SOR_DAT in MCO_C.
-      val deathDates: DataFrame = data.filter(col("SOR_MOD") === deathCode)
-        .withColumn("deathDate", computeDateUsingMonthYear(col("SOR_MOI"), col("SOR_ANN")))
-
-      val result = deathDates
-        .groupBy("patientID")
-        .agg(
-          countDistinct(col("deathDate")).as("count"),
-          min(col("deathDate")).as("deathDate")
-        ).cache()
-      /*
-      val conflicts = result
-        .filter(col("count") > 1)
-        .select(col("patientID"))
-        .distinct
-        .collect
-
-      if(conflicts.length != 0)
-        Logger.getLogger(getClass).warn("The patients in " +
-          conflicts.deep.mkString("\n") +
-          "\nhave conflicting DEATH DATES in MCO." +
-          "\nTaking Minimum Death Dates")
-    */
-      result
-    }
+  /** Find birth date of patients.
+   *
+   * @param patients that contains all patients.
+   * @return A [[Dataset]] of patients with birth date.
+   */
+  override def findPatientBirthDate(patients: Dataset[PatientMco]): Dataset[PatientMco] = {
+    patients
   }
 
-  def extract(mco: DataFrame, mcoDeathCode: Int = 9): DataFrame = {
+  /** Find gender of patients.
+   *
+   * @param patients that contains all patients.
+   * @return A [[Dataset]] of patients with gender.
+   */
+  override def findPatientGender(patients: Dataset[PatientMco]): Dataset[PatientMco] = {
+    patients
+  }
 
-    mco
-      .select(inputColumns: _*)
-      .distinct
-      .getDeathDates(mcoDeathCode)
-      .select(outputColumns: _*)
+  /** Find death date of patients.
+   *
+   * @param patients that contains all patients.
+   * @return A [[Dataset]] of patients with death date.
+   */
+  override def findPatientDeathDate(patients: Dataset[PatientMco]): Dataset[PatientMco] = {
+    import patients.sparkSession.implicits._
+    val deathCode = 9
+    patients
+      .filter(_.exitMode == deathCode)
+      .groupByKey(p => p.patientID)
+      .reduceGroups((p1, p2) => if ((p2.deathDate.isEmpty && p1.deathDate.isEmpty) || p2.deathDate.isEmpty || (p1.deathDate.isDefined && p1.deathDate.get.before(p2.deathDate.get))) p1 else p2)
+      .map(p =>
+        PatientMco(
+          p._2.patientID,
+          p._2.exitMode,
+          p._2.exitMonth,
+          p._2.exitYear,
+          p._2.gender,
+          p._2.birthDate,
+          p._2.deathDate
+        ))
+  }
+
+  /** Gets and prepares all the needed columns from the Sources.
+   *
+   * @param sources Source object [[Sources]] that contains all sources.
+   * @return A [[Dataset]] with needed columns.
+   */
+  override def getInput(sources: Sources): Dataset[PatientMco] = {
+    val inputColumns: List[Column] = List(
+      col("NUM_ENQ").cast(StringType).as("patientID"),
+      col("MCO_B__SOR_MOD").cast(IntegerType).as("exitMode"),
+      col("SOR_MOI").cast(StringType).as("exitMonth"),
+      col("SOR_ANN").cast(StringType).as("exitYear"),
+      lit(0).cast(IntegerType).as("gender"),
+      lit(null).cast(TimestampType).as("birthDate"),
+      computeDateUsingMonthYear(col("SOR_MOI"), col("SOR_ANN")).cast(TimestampType).as("deathDate")
+    )
+
+    val mco = sources.mco.get
+    import mco.sqlContext.implicits._
+    mco.select(inputColumns: _*).as[PatientMco]
   }
 }

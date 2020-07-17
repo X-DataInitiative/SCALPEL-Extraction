@@ -3,78 +3,142 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
 import java.sql.Timestamp
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class McoPatientsSuite extends SharedContext {
 
-  import fr.polytechnique.cmap.cnam.etl.extractors.patients.McoPatients.McoPatientsDataFrame
-
-  "getDeathDates" should "collect death dates correctly from flat MCO" in {
+  "findBirthDate" should "return the same dataset" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val input: DataFrame = Seq(
-      ("Patient_01", 1, 2, 1985),
-      ("Patient_02", 9, 3, 1986)
-    ).toDF("patientID", "SOR_MOD", "SOR_MOI", "SOR_ANN")
+    val input: Dataset[PatientMco] = Seq(
+      PatientMco("Patient_01", 9, "01", "2009", 1, null, Some(Timestamp.valueOf("2009-01-01 00:00:00"))),
+      PatientMco("Patient_02", 9, "03", "2010", 2, null, Some(Timestamp.valueOf("2010-03-01 00:00:00")))
+    ).toDS()
 
-    val expected: DataFrame = Seq(
-      ("Patient_02", Timestamp.valueOf("1986-03-01 00:00:00"))
-    ).toDF("patientID", "deathDate")
+    val expected: Dataset[PatientMco] = Seq(
+      PatientMco("Patient_01", 9, "01", "2009", 1, null, Some(Timestamp.valueOf("2009-01-01 00:00:00"))),
+      PatientMco("Patient_02", 9, "03", "2010", 2, null, Some(Timestamp.valueOf("2010-03-01 00:00:00")))
+    ).toDS()
 
     // When
-    val result: DataFrame = input.getDeathDates(9).select(col("patientID"), col("deathDate"))
+    val result: Dataset[PatientMco] = McoPatients.findPatientBirthDate(input)
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
   }
 
-  it should "choose minimum death date if a patient has more than one death dates" in {
+  "findGender" should "return the same dataset" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val input: DataFrame = Seq(
-      ("Patient_01", 9, 2, 1985),
-      ("Patient_01", 9, 4, 1980)
-    ).toDF("patientID", "SOR_MOD", "SOR_MOI", "SOR_ANN")
+    val input: Dataset[PatientMco] = Seq(
+      PatientMco("Patient_01", 9, "01", "2009", 1, null, Some(Timestamp.valueOf("2009-01-01 00:00:00"))),
+      PatientMco("Patient_02", 9, "03", "2010", 2, null, Some(Timestamp.valueOf("2010-03-01 00:00:00")))
+    ).toDS()
 
-    val expected: DataFrame = Seq(
-      ("Patient_01", Timestamp.valueOf("1980-04-01 00:00:00"))
-    ).toDF("patientID", "deathDate")
+    val expected: Dataset[PatientMco] = Seq(
+      PatientMco("Patient_01", 9, "01", "2009", 1, null, Some(Timestamp.valueOf("2009-01-01 00:00:00"))),
+      PatientMco("Patient_02", 9, "03", "2010", 2, null, Some(Timestamp.valueOf("2010-03-01 00:00:00")))
+    ).toDS()
 
     // When
-    val result: DataFrame = input.getDeathDates(9).select(col("patientID"), col("deathDate"))
+    val result: Dataset[PatientMco] = McoPatients.findPatientGender(input)
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
   }
 
-  "transform" should "return correct Dataset" in {
+  "findDeathDate" should "choose minimum death date if a patient has more than one death dates" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val mco: DataFrame = Seq(
-      ("Patient_01", 1, 2, 1985),
-      ("Patient_02", 9, 3, 1986),
-      ("Patient_03", 9, 4, 1980),
-      ("Patient_03", 9, 4, 1984),
-      ("Patient_04", 3, 5, 1995)
-    ).toDF("NUM_ENQ", "MCO_B__SOR_MOD", "SOR_MOI", "SOR_ANN")
+    val input: Dataset[PatientMco] = Seq(
+      PatientMco("Patient_01", 1, "2", "1985", 1, null, None),
+      PatientMco("Patient_02", 9, "3", "1986", 1, null, Some(Timestamp.valueOf("1986-03-01 00:00:00"))),
+      PatientMco("Patient_03", 9, "4", "1980", 1, null, Some(Timestamp.valueOf("1980-04-01 00:00:00"))),
+      PatientMco("Patient_03", 9, "4", "1984", 1, null, Some(Timestamp.valueOf("1984-04-01 00:00:00"))),
+      PatientMco("Patient_04", 3, "5", "1995", 1, null, None)
+    ).toDS()
 
-    val expected: DataFrame = Seq(
-      ("Patient_02", Timestamp.valueOf("1986-03-01 00:00:00")),
-      ("Patient_03", Timestamp.valueOf("1980-04-01 00:00:00"))
-    ).toDF("patientID", "deathDate")
+    val expected: Dataset[PatientMco] = Seq(
+      PatientMco("Patient_02", 9, "3", "1986", 1, null, Some(Timestamp.valueOf("1986-03-01 00:00:00"))),
+      PatientMco("Patient_03", 9, "4", "1980", 1, null, Some(Timestamp.valueOf("1980-04-01 00:00:00")))
+    ).toDS()
 
     // When
-    val result = McoPatients.extract(mco)
+    val result: Dataset[PatientMco] = McoPatients.findPatientDeathDate(input)
 
     // Then
-    assertDFs(result.toDF, expected)
+    assertDSs(result, expected)
+  }
+
+  "convert PatientMcotoPatient" should "return Dataset of Patients" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input: Dataset[PatientMco] = Seq(
+      PatientMco("Patient_01", 9, "1", "2009", 1, null, Some(Timestamp.valueOf("2009-01-01 00:00:00"))),
+      PatientMco("Patient_02", 9, "3", "2000", 2, null, Some(Timestamp.valueOf("2000-03-01 00:00:00")))
+    ).toDS()
+
+    val expected: Dataset[Patient] = Seq(
+      Patient("Patient_01", 1, null, Some(Timestamp.valueOf("2009-01-01 00:00:00"))),
+      Patient("Patient_02", 2, null, Some(Timestamp.valueOf("2000-03-01 00:00:00")))
+    ).toDS()
+
+    // When
+    val result = McoPatients.fromDerivedPatienttoPatient(input)
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "getInput" should "read file" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
+    val sources = Sources(mco = Some(mco))
+
+    val expected: Dataset[PatientMco] = Seq(
+      PatientMco("Patient_02", 5, "2", "2007", 0, null, Some(Timestamp.valueOf("2007-02-01 00:00:00"))),
+      PatientMco("Patient_02", 5, "2", "2007", 0, null, Some(Timestamp.valueOf("2007-02-01 00:00:00"))),
+      PatientMco("Patient_02", 5, "1", "2006", 0, null, Some(Timestamp.valueOf("2006-01-01 00:00:00"))),
+      PatientMco("Patient_02", 5, "1", "2006", 0, null, Some(Timestamp.valueOf("2006-01-01 00:00:00"))),
+      PatientMco("Patient_02", 5, "3", "2008", 0, null, Some(Timestamp.valueOf("2008-03-01 00:00:00"))),
+      PatientMco("Patient_02", 5, "3", "2008", 0, null, Some(Timestamp.valueOf("2008-03-01 00:00:00")))
+    ).toDS()
+
+    // When
+    val result = McoPatients.getInput(sources)
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "extract" should "build patients with actual data" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
+    val sources = Sources(mco = Some(mco))
+
+    val expected: Dataset[Patient] = Seq.empty[Patient].toDS()
+
+    // When
+    val result = McoPatients.extract(sources)
+
+    // Then
+    assertDSs(result, expected)
   }
 }

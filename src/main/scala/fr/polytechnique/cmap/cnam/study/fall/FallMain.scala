@@ -8,7 +8,7 @@ import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.{Drug, Event, FollowUp, Outcome}
 import fr.polytechnique.cmap.cnam.etl.extractors.codes.SimpleExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.extractors.events.hospitalstays.McoHospitalStaysExtractor
-import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.patients.{AllPatientExtractor, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
@@ -16,6 +16,7 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.drugprescription.DrugPrescriptionTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposureTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.interaction.NLevelInteractionTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.patients.PatientFilters
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.extractors._
@@ -99,27 +100,40 @@ object FallMain extends Main with FractureCodes {
       None
     }
 
-    val optionPatients = if (fallConfig.runParameters.patients) {
-      val patients = new Patients(PatientsConfig(fallConfig.base.studyStart)).extract(sources).cache()
+    val optionAllPatients = if (fallConfig.runParameters.patients) {
+      val allpatients = AllPatientExtractor.extract(sources).cache()
       operationsMetadata += {
         OperationReporter
           .report(
-            "extract_patients",
+            "extract_raw_patients",
             List("DCIR", "MCO", "IR_BEN_R", "MCO_CE"),
             OperationTypes.Patients,
-            patients.toDF,
+            allpatients.toDF,
             Path(fallConfig.output.outputSavePath),
             fallConfig.output.saveMode
           )
       }
-      Some(patients)
+      Some(allpatients)
     } else {
       None
     }
 
+    val filteredpatientsconfig = new PatientFilters(PatientsConfig(fallConfig.base.studyStart)).filterPatients(optionAllPatients.get).cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "extract_filtered_patients",
+          List("DCIR", "MCO", "IR_BEN_R", "MCO_CE"),
+          OperationTypes.Patients,
+          filteredpatientsconfig.toDF,
+          Path(fallConfig.output.outputSavePath),
+          fallConfig.output.saveMode
+        )
+    }
+
     if (fallConfig.runParameters.startGapPatients) {
       import PatientFilters._
-      val filteredPatients: Dataset[Patient] = optionPatients.get
+      val filteredPatients: Dataset[Patient] = filteredpatientsconfig
         .filterNoStartGap(optionDrugPurchases.get, fallConfig.base.studyStart, fallConfig.patients.startGapInMonths)
       operationsMetadata += {
         OperationReporter
@@ -139,7 +153,7 @@ object FallMain extends Main with FractureCodes {
         val definition = fallConfig.exposures
         val patientsWithFollowUp: Dataset[(Patient, Event[FollowUp])] = FallStudyFollowUps
           .transform(
-            optionPatients.get,
+            filteredpatientsconfig,
             fallConfig.base.studyStart,
             fallConfig.base.studyEnd,
             fallConfig.patients.followupStartDelay
