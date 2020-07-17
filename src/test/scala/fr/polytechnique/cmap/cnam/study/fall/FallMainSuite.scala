@@ -6,7 +6,6 @@ import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
-import org.apache.spark.sql.functions.lit
 
 class FallMainSuite extends SharedContext {
 
@@ -45,8 +44,9 @@ class FallMainSuite extends SharedContext {
     import implicits.SourceReader
     val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input))
     val expectedOutputPaths = List(
-      "target/test/output/drug_purchases/data", "target/test/output/extract_patients/data",
-      "target/test/output/filter_patients/data", "target/test/output/exposures/data"
+      "target/test/output/drug_purchases/data", "target/test/output/extract_raw_patients/data",
+      "target/test/output/extract_filtered_patients/data", "target/test/output/filter_patients/data",
+      "target/test/output/exposures/data"
     )
     val expectedOutputTypes = List("dispensations", "patients", "exposures")
 

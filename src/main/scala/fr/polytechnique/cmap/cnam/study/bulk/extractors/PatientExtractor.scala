@@ -3,14 +3,15 @@
 package fr.polytechnique.cmap.cnam.study.bulk.extractors
 
 import fr.polytechnique.cmap.cnam.etl.config.BaseConfig
-import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.patients.{AllPatientExtractor, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.etl.transformers.patients.PatientFilters
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.reporting.{OperationMetadata, OperationReporter, OperationTypes}
 
 class PatientExtractor(val path: String, val saveMode: String, val baseConfig: BaseConfig) {
   def extract(sources: Sources): List[OperationMetadata] = {
-    val patients = new Patients(PatientsConfig(baseConfig.studyStart)).extract(sources)
+    val patients = new PatientFilters(PatientsConfig(baseConfig.studyStart)).filterPatients(AllPatientExtractor.extract(sources))
     List(
       OperationReporter
         .report(

@@ -50,7 +50,7 @@ object FallMainTransform extends Main with FractureCodes {
     val spark = SparkSession.builder.getOrCreate()
     import spark.implicits._
     val patients: Dataset[Patient]
-    = spark.read.parquet(meta.get("extract_patients").get.outputPath)
+    = spark.read.parquet(meta.get("extract_filtered_patients").get.outputPath)
       .as[Patient].cache()
     val drugPurchases: Dataset[Event[Drug]]
     = spark.read.parquet(meta.get("drug_purchases").get.outputPath)

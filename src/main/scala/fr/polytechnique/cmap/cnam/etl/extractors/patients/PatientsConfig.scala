@@ -4,6 +4,7 @@ package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
 import java.sql.Timestamp
 import java.time.LocalDate
+
 import fr.polytechnique.cmap.cnam.etl.extractors.ExtractorConfig
 
 class PatientsConfig(
@@ -14,7 +15,7 @@ class PatientsConfig(
   val maxYear: Int = 2020,
   val minGender: Int = 1,
   val maxGender: Int = 2,
-  val mcoDeathCode: Int = 9) extends ExtractorConfig
+  val mcoDeathCode: Int = 9) extends ExtractorConfig with Serializable
 
 object PatientsConfig {
 

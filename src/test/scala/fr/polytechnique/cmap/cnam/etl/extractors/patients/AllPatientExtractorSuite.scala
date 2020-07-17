@@ -8,39 +8,37 @@ import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions._
 
-class PatientsSuite extends SharedContext {
+class AllPatientExtractorSuite extends SharedContext {
 
   "isDeathDateValid" should "remove absurd deathDate" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val df: DataFrame = Seq(
-      (makeTS(1989, 3, 13), makeTS(2029, 3, 13)),
-      (makeTS(1989, 3, 13), makeTS(2009, 3, 13)),
-      (makeTS(1989, 3, 13), makeTS(1979, 3, 13))
-    ).toDF("birthDate", "deathDate")
+    val ds: Dataset[Patient] = Seq(
+      Patient("Patient_01", 1, makeTS(1989, 3, 13), Some(makeTS(2009, 3, 13))),
+      Patient("Patient_02", 2, makeTS(1989, 3, 13), Some(makeTS(1979, 3, 13)))
+    ).toDS()
 
-    val deathDates: Column = df("deathDate")
-    val birthDates: Column = df("birthDate")
+    val deathDates: Column = ds("deathDate")
+    val birthDates: Column = ds("birthDate")
 
     val expected = 1
 
     // When
-    val result = df
-      .filter(Patients.validateDeathDate(deathDates, birthDates, 2020) === true)
+    val result = ds
+      .filter(AllPatientExtractor.validateDeathDate(deathDates, birthDates) === true)
       .count
 
     // Then
     assert(result == expected)
   }
 
-  "transform" should "return the correct data in a Dataset[Patient] for a known input" in {
+  "extract" should "return the correct data in a Dataset[Patient] for a known input" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val config = PatientsConfig(ageReferenceDate = makeTS(2006, 1, 1))
     val dcirDf: DataFrame = Seq(
       ("Patient_01", 2, 31, 1945, Some(makeTS(2006, 1, 15)), None),
       ("Patient_01", 2, 31, 1945, Some(makeTS(2006, 1, 30)), None),
@@ -58,11 +56,6 @@ class PatientsSuite extends SharedContext {
       ("Patient_03", 9, 4, 1980),
       ("Patient_04", 3, 5, 1995)
     ).toDF("NUM_ENQ", "MCO_B__SOR_MOD", "SOR_MOI", "SOR_ANN")
-
-    val ssrDf: DataFrame = Seq(
-      "Patient_01",
-      "Patient_05"
-    ).toDF("SSR_C__NUM_ENQ")
 
     val irBenDf: DataFrame = Seq(
       ("Patient_01", 1, 1, 1945, None),
@@ -91,17 +84,69 @@ class PatientsSuite extends SharedContext {
       dcir = Some(dcirDf),
       mco = Some(mcoDf),
       irBen = Some(irBenDf),
-      mcoCe = Some(mcoceDf),
-      ssr = Some(ssrDf)
+      mcoCe = Some(mcoceDf)
     )
 
     // When
-    val result = new Patients(config).extract(sources)
+    val result = AllPatientExtractor.extract(sources)
     val expected: Dataset[Patient] = Seq(
       Patient("Patient_01", 1, makeTS(1945, 1, 1), None),
       Patient("Patient_02", 1, makeTS(1956, 2, 1), Some(makeTS(2009, 3, 13))),
       Patient("Patient_03", 2, makeTS(1937, 3, 1), Some(makeTS(1980, 4, 1))),
-      Patient("Patient_04", 2, makeTS(1966, 2, 1), Some(makeTS(2009, 3, 13))),
+      Patient("Patient_04", 2, makeTS(1966, 2, 1), Some(makeTS(2020, 3, 13))),
+      Patient("Patient_05", 1, makeTS(1935, 4, 1), Some(makeTS(2008, 3, 13))),
+      Patient("Patient_06", 1, makeTS(1920, 8, 1), Some(makeTS(1980, 8, 1)))
+    ).toDS()
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "extractBis" should "return the correct data in a Dataset[Patient] without MCO_CE" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val dcirDf: DataFrame = Seq(
+      ("Patient_01", 2, 31, 1945, Some(makeTS(2006, 1, 15)), None),
+      ("Patient_01", 2, 31, 1945, Some(makeTS(2006, 1, 30)), None),
+      ("Patient_02", 1, 47, 1959, Some(makeTS(2006, 1, 15)), Some(makeTS(2009, 3, 13))),
+      ("Patient_02", 1, 47, 1959, Some(makeTS(2006, 1, 30)), Some(makeTS(2009, 3, 13))),
+      ("Patient_03", 1, 47, 1959, Some(makeTS(2006, 1, 30)), None),
+      ("Patient_04", 1, 51, 1966, Some(makeTS(2006, 1, 5)), Some(makeTS(2009, 3, 13))),
+      ("Patient_04", 1, 51, 1966, Some(makeTS(2006, 2, 5)), None),
+      ("Patient_04", 2, 51, 1966, Some(makeTS(2006, 3, 5)), None)
+    ).toDF("NUM_ENQ", "BEN_SEX_COD", "BEN_AMA_COD", "BEN_NAI_ANN", "EXE_SOI_DTD", "BEN_DCD_DTE")
+
+    val mcoDf: DataFrame = Seq(
+      ("Patient_01", 1, 2, 1985),
+      ("Patient_02", 9, 3, 1986),
+      ("Patient_03", 9, 4, 1980),
+      ("Patient_04", 3, 5, 1995)
+    ).toDF("NUM_ENQ", "MCO_B__SOR_MOD", "SOR_MOI", "SOR_ANN")
+
+    val irBenDf: DataFrame = Seq(
+      ("Patient_01", 1, 1, 1945, None),
+      ("Patient_02", 1, 2, 1956, Some(makeTS(2009, 3, 13))),
+      ("Patient_03", 2, 3, 1937, Some(makeTS(1936, 3, 13))),
+      ("Patient_04", 2, 2, 1966, Some(makeTS(2020, 3, 13))),
+      ("Patient_05", 1, 4, 1935, Some(makeTS(2008, 3, 13))),
+      ("Patient_06", 1, 8, 1920, Some(makeTS(1980, 8, 1)))
+    ).toDF("NUM_ENQ", "BEN_SEX_COD", "BEN_NAI_MOI", "BEN_NAI_ANN", "BEN_DCD_DTE")
+
+    val sources = new Sources(
+      dcir = Some(dcirDf),
+      mco = Some(mcoDf),
+      irBen = Some(irBenDf)
+    )
+
+    // When
+    val result = AllPatientExtractor.extract(sources)
+    val expected: Dataset[Patient] = Seq(
+      Patient("Patient_01", 1, makeTS(1945, 1, 1), None),
+      Patient("Patient_02", 1, makeTS(1956, 2, 1), Some(makeTS(2009, 3, 13))),
+      Patient("Patient_03", 2, makeTS(1937, 3, 1), Some(makeTS(1980, 4, 1))),
+      Patient("Patient_04", 2, makeTS(1966, 2, 1), Some(makeTS(2020, 3, 13))),
       Patient("Patient_05", 1, makeTS(1935, 4, 1), Some(makeTS(2008, 3, 13))),
       Patient("Patient_06", 1, makeTS(1920, 8, 1), Some(makeTS(1980, 8, 1)))
     ).toDS()

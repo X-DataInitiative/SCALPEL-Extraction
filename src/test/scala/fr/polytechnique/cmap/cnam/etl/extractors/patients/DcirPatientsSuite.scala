@@ -2,140 +2,160 @@
 
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
-import java.sql.{Date, Timestamp}
-import org.apache.spark.sql.DataFrame
+import java.sql.Timestamp
+import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class DcirPatientsSuite extends SharedContext {
 
-  import fr.polytechnique.cmap.cnam.etl.extractors.patients.DcirPatients.DcirPatientsDataFrame
-
-  "findBirthYears" should "return a DataFrame with the birth year for each patient" in {
+  "findPatientBirthDate" should "return a Dataset with the birth date for each patient" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val input: DataFrame = Seq(
-      ("Patient_01", "1975"),
-      ("Patient_01", "1975"),
-      ("Patient_01", "000000"),
-      ("Patient_01", "999999"),
-      ("Patient_01", "2075"),
-      ("Patient_01", "1975"),
-      ("Patient_02", "1959"),
-      ("Patient_02", "1959"),
-      ("Patient_02", "9999"),
-      ("Patient_02", "9999")
-    ).toDF("patientID", "birthYear")
+    val input: Dataset[PatientDcir] = Seq(
+      PatientDcir("Patient_01", 2, 31, "1975", null, Timestamp.valueOf("2006-01-15 00:00:00"), None),
+      PatientDcir("Patient_02", 1, 47, "1959", null, Timestamp.valueOf("2006-01-05 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00")))
+    ).toDS()
 
-    val expectedResult: DataFrame = Seq(
-      ("Patient_01", "1975"),
-      ("Patient_02", "1959")
-    ).toDF("patientID", "birthYear")
+    val expected: Dataset[PatientDcir] = Seq(
+      PatientDcir("Patient_01", 2, 31, "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Timestamp.valueOf("2006-01-15 00:00:00"), None),
+      PatientDcir("Patient_02", 1, 47, "1959", Timestamp.valueOf("1959-01-01 00:00:00"), Timestamp.valueOf("2006-01-05 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00")))
+    ).toDS()
 
     // When
-    val result = input.findBirthYears
+    val result = DcirPatients.findPatientBirthDate(input)
 
     // Then
-    assertDFs(result, expectedResult)
+    assertDSs(result, expected)
   }
 
-  "groupByIdAndAge" should "return a DataFrame with data aggregated by patient ID and age" in {
+  "findGender" should "return a Dataset with the correct gender for each patient" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val givenDf: DataFrame = sqlContext.read.parquet("src/test/resources/expected/DCIR.parquet")
-    val input: DataFrame = Seq(
-      ("Patient_01", 31, 2, Date.valueOf("2006-01-15"), None),
-      ("Patient_01", 31, 2, Date.valueOf("2006-01-15"), None),
-      ("Patient_01", 31, 2, Date.valueOf("2006-01-30"), None),
-      ("Patient_02", 47, 1, Date.valueOf("2006-01-05"), Some(Date.valueOf("2009-03-13"))),
-      ("Patient_02", 47, 1, Date.valueOf("2006-01-15"), Some(Date.valueOf("2009-03-13"))),
-      ("Patient_02", 47, 1, Date.valueOf("2006-01-30"), Some(Date.valueOf("2009-03-13"))),
-      ("Patient_02", 47, 1, Date.valueOf("2006-01-30"), Some(Date.valueOf("2009-03-13")))
-    ).toDF("patientID", "age", "gender", "eventDate", "deathDate")
+    val input: Dataset[PatientDcir] = Seq(
+      PatientDcir("Patient_01", 2, 31, "1975", null, Timestamp.valueOf("2006-01-15 00:00:00"), None),
+      PatientDcir("Patient_01", 1, 31, "1975", null, Timestamp.valueOf("2006-01-15 00:00:00"), None),
+      PatientDcir("Patient_01", 2, 31, "1975", null, Timestamp.valueOf("2006-01-30 00:00:00"), None),
+      PatientDcir("Patient_02", 1, 47, "1975", null, Timestamp.valueOf("2006-01-05 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientDcir("Patient_02", 1, 47, "1975", null, Timestamp.valueOf("2006-01-15 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientDcir("Patient_02", 1, 47, "1975", null, Timestamp.valueOf("2006-01-30 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientDcir("Patient_02", 1, 47, "1975", null, Timestamp.valueOf("2006-01-30 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00")))
+    ).toDS()
 
-    val expected: DataFrame = Seq(
-      ("Patient_01", 31, 3L, 6L, Date.valueOf("2006-01-15"), Date.valueOf("2006-01-30"),
-        None),
-      ("Patient_02", 47, 4L, 4L, Date.valueOf("2006-01-05"), Date.valueOf("2006-01-30"),
-        Some(Date.valueOf("2009-03-13")))
-    ).toDF(
-      "patientID", "age", "genderCount", "genderSum", "minEventDate", "maxEventDate",
-      "deathDate"
-    )
+    val expected: Dataset[PatientDcir] = Seq(
+      PatientDcir("Patient_01", 2, 31, "1975", null, Timestamp.valueOf("2006-01-15 00:00:00"), None),
+      PatientDcir("Patient_01", 2, 31, "1975", null, Timestamp.valueOf("2006-01-15 00:00:00"), None),
+      PatientDcir("Patient_01", 2, 31, "1975", null, Timestamp.valueOf("2006-01-30 00:00:00"), None),
+      PatientDcir("Patient_02", 1, 47, "1975", null, Timestamp.valueOf("2006-01-05 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientDcir("Patient_02", 1, 47, "1975", null, Timestamp.valueOf("2006-01-15 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientDcir("Patient_02", 1, 47, "1975", null, Timestamp.valueOf("2006-01-30 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientDcir("Patient_02", 1, 47, "1975", null, Timestamp.valueOf("2006-01-30 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00")))
+    ).toDS()
 
     // When
-    val result = input.groupByIdAndAge
+    val result = DcirPatients.findPatientGender(input)
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
   }
 
-  "estimateFields" should "return a Dataset[Patient] from a DataFrame with aggregated data" in {
+  "findDeathDate" should "return a Dataset with the correct death date for each patient" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val input: DataFrame = Seq(
-      ("Patient_01", 31, 3, 6, "1975", Date.valueOf("2006-01-15"),
-        Date.valueOf("2006-01-30"), None),
-      ("Patient_02", 47, 4, 4, "1959", Date.valueOf("2006-01-05"),
-        Date.valueOf("2006-01-30"), Some(Date.valueOf("2009-03-13")))
-    ).toDF(
-      "patientID", "age", "genderCount", "genderSum", "birthYear", "minEventDate",
-      "maxEventDate", "deathDate"
-    )
+    val input: Dataset[PatientDcir] = Seq(
+      PatientDcir("Patient_01", 1, 1, "1975", null, Timestamp.valueOf("1975-01-01 00:00:00"), Some(null.asInstanceOf[Timestamp])),
+      PatientDcir("Patient_02", 1, 34, "1975", null, Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientDcir("Patient_02", 1, 30, "1975", null, Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2015-03-13 00:00:00"))),
+      PatientDcir("Patient_03", 1, 1, "1975", null, Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("1976-03-13 00:00:00"))),
+      PatientDcir("Patient_04", 1, 45, "1975", null, Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2020-03-13 00:00:00")))
+    ).toDS()
 
-    val expected: DataFrame = Seq(
-      Patient(
-        patientID = "Patient_01",
-        gender = 2,
-        birthDate = Timestamp.valueOf("1975-01-01 00:00:00"),
-        deathDate = None
-      ),
-      Patient(
-        patientID = "Patient_02",
-        gender = 1,
-        birthDate = Timestamp.valueOf("1959-01-01 00:00:00"),
-        deathDate = Some(Timestamp.valueOf("2009-03-13 00:00:00"))
-      )
-    ).toDF
+    val expected: Dataset[PatientDcir] = Seq(
+      PatientDcir("Patient_01", 1, 1, "1975", null, Timestamp.valueOf("1975-01-01 00:00:00"), Some(null.asInstanceOf[Timestamp])),
+      PatientDcir("Patient_04", 1, 45, "1975", null, Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2020-03-13 00:00:00"))),
+      PatientDcir("Patient_03", 1, 1, "1975", null, Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("1976-03-13 00:00:00"))),
+      PatientDcir("Patient_02", 1, 34, "1975", null, Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientDcir("Patient_02", 1, 30, "1975", null, Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00")))
+    ).toDS()
 
     // When
-    val result = input.estimateFields.toDF
+    val result = DcirPatients.findPatientDeathDate(input)
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
   }
 
-  "transform" should "return the correct data in a Dataset[Patient] for a known input" in {
+  "convert PatientDcirtoPatient" should "return Dataset of Patients" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val dcir: DataFrame = sqlCtx.read.parquet("src/test/resources/expected/DCIR.parquet")
-    val expected: DataFrame = Seq(
-      Patient(
-        patientID = "Patient_01",
-        gender = 2,
-        birthDate = Timestamp.valueOf("1975-01-01 00:00:00"),
-        deathDate = None
-      ),
-      Patient(
-        patientID = "Patient_02",
-        gender = 1,
-        birthDate = Timestamp.valueOf("1959-01-01 00:00:00"),
-        deathDate = Some(Timestamp.valueOf("2009-03-13 00:00:00"))
-      )
-    ).toDF
+    val input: Dataset[PatientDcir] = Seq(
+      PatientDcir("Patient_01", 2, 45, "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Timestamp.valueOf("1975-01-01 00:00:00"), None),
+      PatientDcir("Patient_02", 1, 49, "1959", Timestamp.valueOf("1959-01-01 00:00:00"), Timestamp.valueOf("1959-01-01 00:00:00"), Some(Timestamp.valueOf("2008-01-25 00:00:00")))
+    ).toDS()
+
+    val expected: Dataset[Patient] = Seq(
+      Patient("Patient_01", 2, Timestamp.valueOf("1975-01-01 00:00:00"), None),
+      Patient("Patient_02", 1, Timestamp.valueOf("1959-01-01 00:00:00"), Some(Timestamp.valueOf("2008-01-25 00:00:00")))
+    ).toDS()
 
     // When
-    val result = DcirPatients.extract(dcir, 1, 2, 1900, 2020).toDF
+    val result = DcirPatients.fromDerivedPatienttoPatient(input)
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
+  }
+
+  "getInput" should "read file" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val dcir = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
+    val sources = Sources(dcir = Some(dcir))
+
+    val expected: Dataset[PatientDcir] = Seq(
+      PatientDcir("Patient_01", 2, 31, "1975", null, null, null),
+      PatientDcir("Patient_01", 2, 31, "1975", null, Timestamp.valueOf("2006-01-15 00:00:00"), null),
+      PatientDcir("Patient_01", 2, 31, "1975", null, Timestamp.valueOf("2006-01-30 00:00:00"), null),
+      PatientDcir("Patient_02", 1, 47, "1959", null, Timestamp.valueOf("2006-01-15 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientDcir("Patient_02", 1, 47, "1959", null, Timestamp.valueOf("2006-01-30 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientDcir("Patient_02", 1, 47, "1959", null, Timestamp.valueOf("2006-01-30 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientDcir("Patient_02", 1, 47, "1959", null, Timestamp.valueOf("2006-01-05 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00")))
+    ).toDS()
+
+    // When
+    val result = DcirPatients.getInput(sources)
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "extract" should "build patients with actual data" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val dcir = spark.read.parquet("src/test/resources/test-input/DCIR.parquet")
+    val sources = Sources(dcir = Some(dcir))
+
+    val expected: Dataset[Patient] = Seq(
+      Patient("Patient_01", 2, Timestamp.valueOf("1975-01-01 00:00:00"), None),
+      Patient("Patient_02", 1, Timestamp.valueOf("1959-01-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00")))
+    ).toDS()
+
+    // When
+    val result = DcirPatients.extract(sources)
+
+    // Then
+    assertDSs(result, expected)
   }
 }

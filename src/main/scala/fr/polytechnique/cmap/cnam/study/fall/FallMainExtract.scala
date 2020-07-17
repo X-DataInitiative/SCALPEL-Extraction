@@ -8,10 +8,11 @@ import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events.DcirAct
 import fr.polytechnique.cmap.cnam.etl.extractors.codes.SimpleExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.extractors.events.hospitalstays.McoHospitalStaysExtractor
-import fr.polytechnique.cmap.cnam.etl.extractors.patients.{Patients, PatientsConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.patients.{AllPatientExtractor, PatientsConfig}
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
+import fr.polytechnique.cmap.cnam.etl.transformers.patients.PatientFilters
 import fr.polytechnique.cmap.cnam.study.fall.codes._
 import fr.polytechnique.cmap.cnam.study.fall.config.FallConfig
 import fr.polytechnique.cmap.cnam.study.fall.extractors._
@@ -93,21 +94,41 @@ object FallMainExtract extends Main with FractureCodes {
       }
     }
 
-    if (fallConfig.runParameters.patients) {
-      val patients: Dataset[Patient] = new Patients(PatientsConfig(fallConfig.base.studyStart)).extract(sources).cache()
+    val optionAllPatients = if (fallConfig.runParameters.patients) {
+      val allpatients: Dataset[Patient] = AllPatientExtractor.extract(sources).cache()
       meta += {
-        "extract_patients" ->
+        "extract_raw_patients" ->
           OperationReporter
             .reportAsDataSet(
-              "extract_patients",
+              "raw_patients",
               List("DCIR", "MCO", "IR_BEN_R", "MCO_CE"),
               OperationTypes.Patients,
-              patients,
+              allpatients,
               Path(fallConfig.output.outputSavePath),
               fallConfig.output.saveMode
             )
       }
+
+      Some(allpatients)
+    } else {
+      None
     }
+
+      if (fallConfig.runParameters.patients) {
+        val filteredpatients: Dataset[Patient] = new PatientFilters(PatientsConfig(fallConfig.base.studyStart)).filterPatients(optionAllPatients.get).cache()
+        meta += {
+          "extract_filtered_patients" ->
+            OperationReporter
+              .reportAsDataSet(
+                "filtered_patients",
+                List("DCIR", "MCO", "IR_BEN_R", "MCO_CE"),
+                OperationTypes.Patients,
+                filteredpatients,
+                Path(fallConfig.output.outputSavePath),
+                fallConfig.output.saveMode
+              )
+        }
+      }
     meta
   }
 
