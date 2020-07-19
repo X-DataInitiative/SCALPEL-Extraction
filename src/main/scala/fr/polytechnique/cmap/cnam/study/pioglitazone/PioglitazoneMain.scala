@@ -48,7 +48,7 @@ object PioglitazoneMain extends Main {
     val config = PioglitazoneConfig.load(argsMap("conf"), argsMap("env"))
 
     import implicits.SourceReader
-    val sources = Sources.sanitize(sqlContext.readSources(config.input,config.fileFormat))
+    val sources = Sources.sanitize(sqlContext.readSources(config.input,config.readFileFormat))
 
     // Extraction: get all events
     val rawPatients: Dataset[Patient] = AllPatientExtractor.extract(sources).cache()
@@ -60,7 +60,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.Patients,
           rawPatients.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -73,7 +74,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.Patients,
           filteredPatients.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -86,7 +88,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.Dispensations,
           rawDrugPurchases.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -99,7 +102,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.Diagnosis,
           rawDiagnoses.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -112,7 +116,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.MedicalActs,
           rawMedicalActs.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -128,7 +133,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.AnyEvents,
           rawTracklosses.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -140,7 +146,8 @@ object PioglitazoneMain extends Main {
         OperationTypes.HospitalStays,
         rawHospitalStays.toDF,
         Path(config.output.outputSavePath),
-        config.output.saveMode
+        config.output.saveMode,
+        config.writeFileFormat
       )
     }
 
@@ -156,7 +163,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.Patients,
           patients.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -175,7 +183,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.Dispensations,
           drugPurchases.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -188,7 +197,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.Diagnosis,
           diagnoses.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -201,7 +211,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.MedicalActs,
           medicalActs.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -214,7 +225,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.AnyEvents,
           rawTracklosses.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -233,7 +245,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.Outcomes,
           outcomes.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -263,7 +276,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.AnyEvents,
           followups.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -284,7 +298,8 @@ object PioglitazoneMain extends Main {
               OperationTypes.Patients,
               delayedFreePatients.toDF,
               Path(config.output.outputSavePath),
-              config.output.saveMode
+              config.output.saveMode,
+              config.writeFileFormat
             )
         }
         delayedFreePatients
@@ -307,7 +322,8 @@ object PioglitazoneMain extends Main {
               OperationTypes.Patients,
               earlyDiagnosedPatients.toDF,
               Path(config.output.outputSavePath),
-              config.output.saveMode
+              config.output.saveMode,
+              config.writeFileFormat
             )
         }
         earlyDiagnosedPatients
@@ -325,7 +341,8 @@ object PioglitazoneMain extends Main {
             OperationTypes.AnyEvents,
             cleanFollowUps.toDF,
             Path(config.output.outputSavePath),
-            config.output.saveMode
+            config.output.saveMode,
+            config.writeFileFormat
           )
       }
       filteredPatientsAncestors += "clean_followup"
@@ -343,7 +360,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.Patients,
           RichDataFrame.renameTupleColumns(cnamPaperBaseCohort).toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
 
         )
     }
@@ -361,7 +379,8 @@ object PioglitazoneMain extends Main {
           OperationTypes.Exposures,
           exposures.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 

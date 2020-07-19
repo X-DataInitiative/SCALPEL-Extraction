@@ -39,7 +39,7 @@ object FallMain extends Main with FractureCodes {
     val fallConfig = FallConfig.load(argsMap("conf"), argsMap("env"))
 
     import implicits.SourceReader
-    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input,fallConfig.fileFormat))
+    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input,fallConfig.readFileFormat))
     val dcir = sources.dcir.get.repartition(4000).persist()
     val mco = sources.mco.get.repartition(4000).persist()
 
@@ -71,7 +71,8 @@ object FallMain extends Main with FractureCodes {
             OperationTypes.HospitalStays,
             hospitalStays.toDF,
             Path(fallConfig.output.outputSavePath),
-            fallConfig.output.saveMode
+            fallConfig.output.saveMode,
+            fallConfig.writeFileFormat
           )
       }
     }
@@ -92,7 +93,8 @@ object FallMain extends Main with FractureCodes {
             OperationTypes.Dispensations,
             drugPurchases.toDF,
             Path(fallConfig.output.outputSavePath),
-            fallConfig.output.saveMode
+            fallConfig.output.saveMode,
+            fallConfig.writeFileFormat
           )
       }
       Some(drugPurchases)
@@ -110,7 +112,8 @@ object FallMain extends Main with FractureCodes {
             OperationTypes.Patients,
             allpatients.toDF,
             Path(fallConfig.output.outputSavePath),
-            fallConfig.output.saveMode
+            fallConfig.output.saveMode,
+            fallConfig.writeFileFormat
           )
       }
       Some(allpatients)
@@ -127,7 +130,8 @@ object FallMain extends Main with FractureCodes {
           OperationTypes.Patients,
           filteredpatientsconfig.toDF,
           Path(fallConfig.output.outputSavePath),
-          fallConfig.output.saveMode
+          fallConfig.output.saveMode,
+          fallConfig.writeFileFormat
         )
     }
 
@@ -143,7 +147,8 @@ object FallMain extends Main with FractureCodes {
             OperationTypes.Patients,
             filteredPatients.toDF,
             Path(fallConfig.output.outputSavePath),
-            fallConfig.output.saveMode
+            fallConfig.output.saveMode,
+            fallConfig.writeFileFormat
           )
       }
     }
@@ -168,7 +173,8 @@ object FallMain extends Main with FractureCodes {
               OperationTypes.AnyEvents,
               followUps.toDF,
               Path(fallConfig.output.outputSavePath),
-              fallConfig.output.saveMode
+              fallConfig.output.saveMode,
+              fallConfig.writeFileFormat
             )
         }
         val controlDrugPurchases = ControlDrugs.extract(sources).cache()
@@ -180,7 +186,8 @@ object FallMain extends Main with FractureCodes {
               OperationTypes.Dispensations,
               controlDrugPurchases.toDF,
               Path(fallConfig.output.outputSavePath),
-              fallConfig.output.saveMode
+              fallConfig.output.saveMode,
+              fallConfig.writeFileFormat
             )
         }
 
@@ -194,7 +201,8 @@ object FallMain extends Main with FractureCodes {
               OperationTypes.Exposures,
               controlDrugExposures.toDF,
               Path(fallConfig.output.outputSavePath),
-              fallConfig.output.saveMode
+              fallConfig.output.saveMode,
+              fallConfig.writeFileFormat
             )
         }
 
@@ -208,7 +216,8 @@ object FallMain extends Main with FractureCodes {
               OperationTypes.Dispensations,
               prescriptions.toDF,
               Path(fallConfig.output.outputSavePath),
-              fallConfig.output.saveMode
+              fallConfig.output.saveMode,
+              fallConfig.writeFileFormat
             )
         }
 
@@ -222,7 +231,8 @@ object FallMain extends Main with FractureCodes {
               OperationTypes.Exposures,
               prescriptionsExposures.toDF,
               Path(fallConfig.output.outputSavePath),
-              fallConfig.output.saveMode
+              fallConfig.output.saveMode,
+              fallConfig.writeFileFormat
             )
         }
 
@@ -237,7 +247,8 @@ object FallMain extends Main with FractureCodes {
             OperationTypes.Exposures,
             exposures.toDF,
             Path(fallConfig.output.outputSavePath),
-            fallConfig.output.saveMode
+            fallConfig.output.saveMode,
+            fallConfig.writeFileFormat
           )
       }
 
@@ -250,7 +261,8 @@ object FallMain extends Main with FractureCodes {
             OperationTypes.Exposures,
             interactions.toDF,
             Path(fallConfig.output.outputSavePath),
-            fallConfig.output.saveMode
+            fallConfig.output.saveMode,
+            fallConfig.writeFileFormat
           )
       }
     }
@@ -272,7 +284,8 @@ object FallMain extends Main with FractureCodes {
           diagnoses,
           diagnosesPopulation,
           Path(fallConfig.output.outputSavePath),
-          fallConfig.output.saveMode
+          fallConfig.output.saveMode,
+          fallConfig.writeFileFormat
         )
       }
       Some(diagnoses)
@@ -292,7 +305,8 @@ object FallMain extends Main with FractureCodes {
             OperationTypes.MedicalActs,
             acts.toDF,
             Path(fallConfig.output.outputSavePath),
-            fallConfig.output.saveMode
+            fallConfig.output.saveMode,
+            fallConfig.writeFileFormat
           )
       }
       operationsMetadata += {
@@ -303,7 +317,8 @@ object FallMain extends Main with FractureCodes {
             OperationTypes.MedicalActs,
             surgeries.toDF,
             Path(fallConfig.output.outputSavePath),
-            fallConfig.output.saveMode
+            fallConfig.output.saveMode,
+            fallConfig.writeFileFormat
           )
       }
       val liberalActs = LiberalActsTransformer.transform(acts).persist()
@@ -315,7 +330,8 @@ object FallMain extends Main with FractureCodes {
             OperationTypes.MedicalActs,
             liberalActs.toDF,
             Path(fallConfig.output.outputSavePath),
-            fallConfig.output.saveMode
+            fallConfig.output.saveMode,
+            fallConfig.writeFileFormat
           )
       }
       (Some(acts), Some(liberalActs), Some(surgeries))
@@ -332,7 +348,8 @@ object FallMain extends Main with FractureCodes {
             OperationTypes.HospitalStays,
             hospitalDeaths.toDF,
             Path(fallConfig.output.outputSavePath),
-            fallConfig.output.saveMode
+            fallConfig.output.saveMode,
+            fallConfig.writeFileFormat
           )
       }
       Some(hospitalDeaths)
@@ -351,7 +368,8 @@ object FallMain extends Main with FractureCodes {
             OperationTypes.Outcomes,
             fractures.toDF,
             Path(fallConfig.output.outputSavePath),
-            fallConfig.output.saveMode
+            fallConfig.output.saveMode,
+            fallConfig.writeFileFormat
           )
       }
     }
@@ -370,7 +388,8 @@ object FallMain extends Main with FractureCodes {
           OperationTypes.Dispensations,
           opioids.toDF,
           Path(fallConfig.output.outputSavePath),
-          fallConfig.output.saveMode
+          fallConfig.output.saveMode,
+          fallConfig.writeFileFormat
         )
     }
 
@@ -383,7 +402,8 @@ object FallMain extends Main with FractureCodes {
           OperationTypes.Dispensations,
           ipp.toDF,
           Path(fallConfig.output.outputSavePath),
-          fallConfig.output.saveMode
+          fallConfig.output.saveMode,
+          fallConfig.writeFileFormat
         )
     }
 
@@ -396,7 +416,8 @@ object FallMain extends Main with FractureCodes {
           OperationTypes.Dispensations,
           cardiac.toDF,
           Path(fallConfig.output.outputSavePath),
-          fallConfig.output.saveMode
+          fallConfig.output.saveMode,
+          fallConfig.writeFileFormat
         )
     }
 
@@ -409,7 +430,8 @@ object FallMain extends Main with FractureCodes {
           OperationTypes.Diagnosis,
           epileptics.toDF,
           Path(fallConfig.output.outputSavePath),
-          fallConfig.output.saveMode
+          fallConfig.output.saveMode,
+          fallConfig.writeFileFormat
         )
     }
 
@@ -422,7 +444,8 @@ object FallMain extends Main with FractureCodes {
           OperationTypes.Dispensations,
           hta.toDF,
           Path(fallConfig.output.outputSavePath),
-          fallConfig.output.saveMode
+          fallConfig.output.saveMode,
+          fallConfig.writeFileFormat
         )
     }
     operationsMetadata

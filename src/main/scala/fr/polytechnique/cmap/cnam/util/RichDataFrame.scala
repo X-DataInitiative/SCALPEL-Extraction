@@ -55,6 +55,21 @@ class RichDataFrame(dataFrame: DataFrame) {
       .parquet(path)
   }
 
+  def writeOrc(path: String, mode: String = "errorIfExists"): Unit = {
+    dataFrame.write
+      .mode(saveMode(mode))
+      .orc(path)
+  }
+
+  def write(path: String, mode: String = "errorIfExists", format: String = "parquet"): Unit = {
+    format match {
+      case "orc" => writeOrc(path, mode)
+      case "csv" => writeCSV(path, mode)
+      case _ => writeParquet(path, mode)
+    }
+  }
+
+
   private def saveMode(mode: String): SaveMode = mode match {
     case "overwrite" => SaveMode.Overwrite
     case "append" => SaveMode.Append

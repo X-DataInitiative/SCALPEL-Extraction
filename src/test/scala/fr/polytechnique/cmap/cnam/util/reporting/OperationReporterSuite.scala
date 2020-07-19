@@ -26,8 +26,7 @@ class OperationReporterSuite extends SharedContext {
     )
 
     // When
-    val result: OperationMetadata = OperationReporter
-      .report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path)
+    val result: OperationMetadata = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path)
 
     // Then
     assert(result == expected)

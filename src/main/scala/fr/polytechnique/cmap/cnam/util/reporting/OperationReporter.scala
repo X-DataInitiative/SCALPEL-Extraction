@@ -41,6 +41,7 @@ object OperationReporter {
     data: DataFrame,
     basePath: Path,
     saveMode: String = "errorIfExists",
+    format: String = "parquet",
     patientIdColName: String = "patientID"): OperationMetadata = {
 
     val dataPath: Path = Path(basePath, operationName, "data")
@@ -52,14 +53,14 @@ object OperationReporter {
 
     outputType match {
       case OperationTypes.Patients =>
-        data.writeParquet(dataPath.toString, saveMode)
+        data.write(dataPath.toString, saveMode, format)
         baseMetadata.copy(
           outputPath = dataPath.toString
         )
 
       case OperationTypes.Sources =>
         val patients = data.select(patientIdColName).distinct
-        patients.writeParquet(patientsPath.toString, saveMode)
+        patients.write(patientsPath.toString, saveMode, format)
         baseMetadata.copy(
           populationPath = patientsPath.toString
         )
@@ -67,7 +68,7 @@ object OperationReporter {
       case _ =>
         data.writeParquet(dataPath.toString, saveMode)
         val patients = data.select(patientIdColName).distinct
-        patients.writeParquet(patientsPath.toString, saveMode)
+        patients.write(patientsPath.toString, saveMode, format)
         baseMetadata.copy(
           outputPath = dataPath.toString,
           populationPath = patientsPath.toString
@@ -75,6 +76,19 @@ object OperationReporter {
     }
   }
 
+  /**
+    * The main method for generating the report for the given operation
+    *
+    * @param operationName
+    * @param operationInputs
+    * @param outputType
+    * @param data
+    * @param basePath
+    * @param saveMode
+    * @param patientIdColName
+    * @tparam A
+    * @return
+    */
   def reportAsDataSet[A](
     operationName: String,
     operationInputs: List[String],
@@ -82,6 +96,7 @@ object OperationReporter {
     data: Dataset[A],
     basePath: Path,
     saveMode: String = "errorIfExists",
+    format: String = "parquet",
     patientIdColName: String = "patientID"): OperationMetadata = {
 
     val dataPath: Path = Path(basePath, operationName, "data")
@@ -93,14 +108,14 @@ object OperationReporter {
 
     outputType match {
       case OperationTypes.Patients =>
-        data.write.mode(saveModeFrom(saveMode)).parquet(dataPath.toString)
+        writeDataSet(data, dataPath.toString, saveMode, format)
         baseMetadata.copy(
           outputPath = dataPath.toString
         )
       case _ =>
-        data.write.mode(saveModeFrom(saveMode)).parquet(dataPath.toString)
+        writeDataSet(data, dataPath.toString, saveMode, format)
         val patients = data.select(patientIdColName).distinct
-        patients.write.mode(saveMode).parquet(patientsPath.toString)
+        writeDataSet(patients, patientsPath.toString, saveMode, format)
         baseMetadata.copy(
           outputPath = dataPath.toString,
           populationPath = patientsPath.toString
@@ -108,6 +123,20 @@ object OperationReporter {
     }
   }
 
+  /**
+    * The main method for generating the report for the given operation
+    *
+    * @param operationName
+    * @param operationInputs
+    * @param outputType
+    * @param data
+    * @param population
+    * @param basePath
+    * @param saveMode
+    * @tparam A
+    * @tparam B
+    * @return
+    */
   def reportDataAndPopulationAsDataSet[A, B](
     operationName: String,
     operationInputs: List[String],
@@ -115,7 +144,8 @@ object OperationReporter {
     data: Dataset[A],
     population: Dataset[B],
     basePath: Path,
-    saveMode: String = "errorIfExists"): OperationMetadata = {
+    saveMode: String = "errorIfExists",
+    format: String = "parquet"): OperationMetadata = {
     val dataPath: Path = Path(basePath, operationName, "data")
     val dataPathStr = dataPath.toString
     logger.info(s"""=> Reporting operation "$operationName" of output type "$outputType" to "$dataPathStr"""")
@@ -123,14 +153,14 @@ object OperationReporter {
     val patientsPath: Path = Path(basePath, operationName, "patients")
     val baseMetadata = OperationMetadata(operationName, operationInputs, outputType)
 
-    data.write.mode(saveModeFrom(saveMode)).parquet(dataPath.toString)
+    writeDataSet(data, dataPath.toString, saveMode, format)
     outputType match {
       case OperationTypes.Patients =>
         baseMetadata.copy(
           outputPath = dataPath.toString
         )
       case _ =>
-        population.write.mode(saveModeFrom(saveMode)).parquet(patientsPath.toString)
+        writeDataSet(population, patientsPath.toString, saveMode, format)
         baseMetadata.copy(
           outputPath = dataPath.toString,
           populationPath = patientsPath.toString
@@ -151,6 +181,21 @@ object OperationReporter {
         write(metaData)
         close()
       }
+    }
+  }
+
+  private def writeDataSet[A](data: Dataset[A], path: String, mode: String, format: String = "parquet") = {
+    format match {
+      case "orc" => data.write.mode(saveModeFrom(mode)).orc(path)
+      case "csv" =>
+        data
+          .coalesce(1)
+          .write
+          .mode(saveModeFrom(mode))
+          .option("delimiter", ",")
+          .option("header", "true")
+          .csv(path)
+      case _ => data.write.mode(saveModeFrom(mode)).parquet(path)
     }
   }
 

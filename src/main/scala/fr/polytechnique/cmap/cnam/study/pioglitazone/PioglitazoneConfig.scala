@@ -23,7 +23,8 @@ case class PioglitazoneConfig(
   exposures: PioglitazoneConfig.ExposuresConfig = PioglitazoneConfig.ExposuresConfig(),
   outcomes: PioglitazoneConfig.OutcomesConfig = PioglitazoneConfig.OutcomesConfig(),
   filters: PioglitazoneConfig.FiltersConfig = PioglitazoneConfig.FiltersConfig(),
-  fileFormat: String = "parquet")
+  readFileFormat: String = "parquet",
+  writeFileFormat: String = "parquet")
   extends StudyConfig {
 
   // The following config items are not overridable by the config file

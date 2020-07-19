@@ -13,8 +13,8 @@ package object implicits {
     */
   implicit class SourceReader(sqlContext: SQLContext) {
 
-    def readSources(paths: InputPaths,fileFormat: String): Sources = {
-      Sources.read(sqlContext, paths,fileFormat)
+    def readSources(paths: InputPaths, fileFormat: String): Sources = {
+      Sources.read(sqlContext, paths, fileFormat)
     }
   }
 
