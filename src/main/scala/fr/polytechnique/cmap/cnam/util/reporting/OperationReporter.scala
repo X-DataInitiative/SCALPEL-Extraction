@@ -66,7 +66,7 @@ object OperationReporter {
         )
 
       case _ =>
-        data.writeParquet(dataPath.toString, saveMode)
+        data.write(dataPath.toString, saveMode, format)
         val patients = data.select(patientIdColName).distinct
         patients.write(patientsPath.toString, saveMode, format)
         baseMetadata.copy(
