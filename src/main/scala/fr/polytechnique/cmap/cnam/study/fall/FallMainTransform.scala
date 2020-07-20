@@ -40,7 +40,7 @@ object FallMainTransform extends Main with FractureCodes {
       operationsMetadata.values.toList
     )
 
-    OperationReporter.writeMetaData(metadata.toJsonString(), "metadata_fall_" + format.format(startTimestamp) + ".json", argsMap("env"))
+    OperationReporter.writeMetaData(metadata.toJsonString(), "metadata_fall_transform_" + format.format(startTimestamp) + ".json", argsMap("env"))
     None
   }
 
