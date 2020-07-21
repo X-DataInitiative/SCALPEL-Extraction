@@ -2,9 +2,9 @@
 
 package fr.polytechnique.cmap.cnam.study.bulk.extractors
 
-import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.SharedContext
 import fr.polytechnique.cmap.cnam.etl.extractors.sources.ssrce.SsrCeSource
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
 
 class SsrCeSourceExtractorSuite extends SharedContext {
@@ -24,7 +24,7 @@ class SsrCeSourceExtractorSuite extends SharedContext {
     )
     val source = new Sources(ssrCe = Some(ssrCe))
     val path = "target/test/output"
-    val ssrCeSource = new SsrCeSourceExtractor(path, "overwrite")
+    val ssrCeSource = new SsrCeSourceExtractor(path, "overwrite", "parquet")
     // When
     ssrCeSource.extract(source)
     // Then, make sure everything is running.

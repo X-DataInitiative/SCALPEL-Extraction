@@ -30,7 +30,7 @@ object OperationReporter {
     * @param outputType       The type of the operation output
     * @param data             The output data (ex: diagnoses)
     * @param basePath         The base path where the data and patients will be written
-    * @param saveMode         The strategy of output data(default = overwrite)
+    * @param saveMode         The strategy of output data(default = errorIfExists)
     * @param patientIdColName (default="patientID") The column name of the patientID in the output data
     * @return an instance of OperationMetadata
     */
@@ -79,15 +79,16 @@ object OperationReporter {
   /**
     * The main method for generating the report for the given operation
     *
-    * @param operationName
-    * @param operationInputs
-    * @param outputType
-    * @param data
-    * @param basePath
-    * @param saveMode
-    * @param patientIdColName
+    * @param operationName The unique name (ex: "diagnoses")
+    * @param operationInputs The unique names of the previous operations on which this one depends
+    * @param outputType The type of the operation output
+    * @param data The output data (ex: diagnoses)
+    * @param basePath The base path where the data and patients will be written
+    * @param saveMode The strategy of output data(default = errorIfExists)
+    * @param format The format to save file(default = parquet)
+    * @param patientIdColName (default="patientID") The column name of the patientID in the output data
     * @tparam A
-    * @return
+    * @return an instance of OperationMetadata
     */
   def reportAsDataSet[A](
     operationName: String,
@@ -126,16 +127,16 @@ object OperationReporter {
   /**
     * The main method for generating the report for the given operation
     *
-    * @param operationName
-    * @param operationInputs
-    * @param outputType
-    * @param data
-    * @param population
-    * @param basePath
-    * @param saveMode
+    * @param operationName The unique name (ex: "diagnoses")
+    * @param operationInputs The unique names of the previous operations on which this one depends
+    * @param outputType The type of the operation output
+    * @param data The output data (ex: diagnoses)
+    * @param basePath The base path where the data and patients will be written
+    * @param saveMode The strategy of output data(default = errorIfExists)
+    * @param format The format to save file(default = parquet)
     * @tparam A
     * @tparam B
-    * @return
+    * @return an instance of OperationMetadata
     */
   def reportDataAndPopulationAsDataSet[A, B](
     operationName: String,

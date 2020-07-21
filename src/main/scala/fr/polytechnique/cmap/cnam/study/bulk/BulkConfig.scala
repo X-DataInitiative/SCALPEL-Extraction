@@ -14,7 +14,8 @@ case class BulkConfig(
   input: StudyConfig.InputPaths,
   output: StudyConfig.OutputPaths,
   drugs: DrugConfig = BulkConfig.DrugsConfig(),
-  fileFormat: String = "parquet") extends StudyConfig {
+  readFileFormat: String = "parquet",
+  writeFileFormat: String = "parquet") extends StudyConfig {
   val base: BaseConfig = BulkConfig.BaseConfig
 }
 

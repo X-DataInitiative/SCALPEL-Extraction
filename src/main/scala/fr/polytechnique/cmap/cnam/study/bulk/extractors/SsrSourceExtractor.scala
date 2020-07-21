@@ -8,10 +8,8 @@ import fr.polytechnique.cmap.cnam.etl.extractors.events.acts.{SsrCcamActExtracto
 import fr.polytechnique.cmap.cnam.etl.extractors.events.diagnoses._
 import fr.polytechnique.cmap.cnam.etl.extractors.events.hospitalstays.SsrHospitalStaysExtractor
 
-class SsrSourceExtractor(override val path: String, override val saveMode: String) extends SourceExtractor(
-  path,
-  saveMode
-) {
+class SsrSourceExtractor(override val path: String, override val saveMode: String, override val fileFormat: String)
+  extends SourceExtractor(path, saveMode, fileFormat) {
   override val sourceName: String = "SSR"
   override val extractors = List(
     ExtractorSources[MedicalAct, SimpleExtractorCodes](

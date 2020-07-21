@@ -9,10 +9,8 @@ import fr.polytechnique.cmap.cnam.etl.extractors.events.diagnoses.{HadAssociated
 import fr.polytechnique.cmap.cnam.etl.extractors.events.hospitalstays.HadHospitalStaysExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.events.takeoverreasons.{HadAssociatedTakeOverExtractor, HadMainTakeOverExtractor}
 
-class HadSourceExtractor(override val path: String, override val saveMode: String) extends SourceExtractor(
-  path,
-  saveMode
-) {
+class HadSourceExtractor(override val path: String, override val saveMode: String, override val fileFormat: String)
+  extends SourceExtractor(path, saveMode, fileFormat) {
   override val sourceName: String = "HAD"
   override val extractors = List(
     ExtractorSources[MedicalAct, SimpleExtractorCodes](HadCcamActExtractor(SimpleExtractorCodes.empty), List("HAD_C", "HAD_A"), "HAD_CCAM_ACT"),

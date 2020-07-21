@@ -22,22 +22,22 @@ object BulkMain extends Main {
     val bulkConfig = BulkConfig.load(argsMap("conf"), argsMap("env"))
 
     import implicits.SourceReader
-    val sources = Sources.sanitize(sqlContext.readSources(bulkConfig.input,bulkConfig.fileFormat))
+    val sources = Sources.sanitize(sqlContext.readSources(bulkConfig.input, bulkConfig.readFileFormat))
 
     val sourceExtractor: List[SourceExtractor] = List(
-      new DcirSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.drugs),
-      new McoSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
-      new McoCeSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
-      new SsrSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
-      new SsrCeSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode),
-      new HadSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode)
+      new DcirSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.writeFileFormat, bulkConfig.drugs),
+      new McoSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.writeFileFormat),
+      new McoCeSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.writeFileFormat),
+      new SsrSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.writeFileFormat),
+      new SsrCeSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.writeFileFormat),
+      new HadSourceExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.writeFileFormat)
     )
 
     // Write Metadata
     val metadata = MainMetadata(
       this.getClass.getName, startTimestamp, new java.util.Date(),
       sourceExtractor.flatMap(se => se.extract(sources)) ++
-        new PatientExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.base).extract(sources)
+        new PatientExtractor(bulkConfig.output.root, bulkConfig.output.saveMode, bulkConfig.base, bulkConfig.writeFileFormat).extract(sources)
     )
     val metadataJson: String = metadata.toJsonString()
 

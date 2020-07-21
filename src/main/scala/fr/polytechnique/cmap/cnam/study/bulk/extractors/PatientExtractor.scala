@@ -9,7 +9,7 @@ import fr.polytechnique.cmap.cnam.etl.transformers.patients.PatientFilters
 import fr.polytechnique.cmap.cnam.util.Path
 import fr.polytechnique.cmap.cnam.util.reporting.{OperationMetadata, OperationReporter, OperationTypes}
 
-class PatientExtractor(val path: String, val saveMode: String, val baseConfig: BaseConfig) {
+class PatientExtractor(val path: String, val saveMode: String, val baseConfig: BaseConfig, val fileFormat: String = "parquet") {
   def extract(sources: Sources): List[OperationMetadata] = {
     val patients = new PatientFilters(PatientsConfig(baseConfig.studyStart)).filterPatients(AllPatientExtractor.extract(sources))
     List(
@@ -20,7 +20,8 @@ class PatientExtractor(val path: String, val saveMode: String, val baseConfig: B
           OperationTypes.Patients,
           patients.toDF,
           Path(path),
-          saveMode
+          saveMode,
+          fileFormat
         )
     )
 

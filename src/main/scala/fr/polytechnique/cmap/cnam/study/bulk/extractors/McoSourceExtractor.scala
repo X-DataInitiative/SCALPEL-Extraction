@@ -8,10 +8,8 @@ import fr.polytechnique.cmap.cnam.etl.extractors.events.acts.McoCcamActExtractor
 import fr.polytechnique.cmap.cnam.etl.extractors.events.diagnoses.{McoAssociatedDiagnosisExtractor, McoLinkedDiagnosisExtractor, McoMainDiagnosisExtractor}
 import fr.polytechnique.cmap.cnam.etl.extractors.events.hospitalstays.McoHospitalStaysExtractor
 
-class McoSourceExtractor(override val path: String, override val saveMode: String) extends SourceExtractor(
-  path,
-  saveMode
-) {
+class McoSourceExtractor(override val path: String, override val saveMode: String, override val fileFormat: String)
+  extends SourceExtractor(path, saveMode, fileFormat) {
   override val sourceName: String = "MCO"
   override val extractors = List(
     ExtractorSources[MedicalAct, SimpleExtractorCodes](

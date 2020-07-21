@@ -9,10 +9,8 @@ import fr.polytechnique.cmap.cnam.etl.extractors.events.hospitalstays.McoceEmerg
 import fr.polytechnique.cmap.cnam.etl.extractors.events.ngapacts.{McoCeFbstcNgapActExtractor, McoCeFcstcNgapActExtractor, NgapActClassConfig, NgapActConfig}
 import fr.polytechnique.cmap.cnam.etl.extractors.events.prestations.{McoCeFbstcSpecialtyExtractor, McoCeFcstcSpecialtyExtractor}
 
-class McoCeSourceExtractor(override val path: String, override val saveMode: String) extends SourceExtractor(
-  path,
-  saveMode
-) {
+class McoCeSourceExtractor(override val path: String, override val saveMode: String, override val fileFormat: String)
+  extends SourceExtractor(path, saveMode, fileFormat) {
   override val sourceName: String = "MCO_CE"
   override val extractors = List(
     ExtractorSources[MedicalAct, SimpleExtractorCodes](
