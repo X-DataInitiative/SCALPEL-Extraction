@@ -20,7 +20,7 @@ assemblyMergeStrategy in assembly := {
 }
 
 scalacOptions := Seq("-Xmacro-settings:materialize-derivations", "-Ypartial-unification", "-deprecation")
-resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
+resolvers += "Spark Packages Repo" at "https://dl.bintray.com/spark-packages/maven"
 
 val sparkDependencies = List(
   "org.apache.spark" %% "spark-core" % sparkVersion % "provided",
