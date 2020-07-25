@@ -11,7 +11,7 @@ import me.danielpes.spark.datetime.implicits._
 import pureconfig._
 import pureconfig.configurable.{localDateConfigConvert, localDateTimeConfigConvert}
 import pureconfig.generic.{CoproductHint, EnumCoproductHint, FieldCoproductHint, ProductHint}
-import fr.polytechnique.cmap.cnam.etl.extractors.drugs.level.DrugClassificationLevel
+import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.level.DrugClassificationLevel
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposurePeriodAdder
 
 trait ConfigLoader {

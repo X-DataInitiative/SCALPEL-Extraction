@@ -8,10 +8,9 @@ import scala.collection.mutable.ListBuffer
 import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
-import fr.polytechnique.cmap.cnam.etl.extractors.hospitalstays.McoHospitalStaysExtractor
-import fr.polytechnique.cmap.cnam.etl.extractors.molecules.MoleculePurchases
-import fr.polytechnique.cmap.cnam.etl.extractors.patients.Patients
-import fr.polytechnique.cmap.cnam.etl.extractors.tracklosses.{Tracklosses, TracklossesConfig}
+import fr.polytechnique.cmap.cnam.etl.extractors.events.hospitalstays.McoHospitalStaysExtractor
+import fr.polytechnique.cmap.cnam.etl.extractors.events.molecules.MoleculePurchases
+import fr.polytechnique.cmap.cnam.etl.extractors.patients.AllPatientExtractor
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.implicits
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
@@ -19,6 +18,8 @@ import fr.polytechnique.cmap.cnam.etl.sources.Sources
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposureTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.follow_up.FollowUpTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.observation.ObservationPeriodTransformer
+import fr.polytechnique.cmap.cnam.etl.transformers.patients.PatientFilters
+import fr.polytechnique.cmap.cnam.etl.transformers.tracklosses.{TracklossTransformer, TracklossesConfig}
 import fr.polytechnique.cmap.cnam.study.pioglitazone.extractors.{Diagnoses, MedicalActs}
 import fr.polytechnique.cmap.cnam.study.pioglitazone.outcomes._
 import fr.polytechnique.cmap.cnam.util.datetime.implicits._
@@ -50,7 +51,7 @@ object PioglitazoneMain extends Main {
     val sources = Sources.sanitize(sqlContext.readSources(config.input))
 
     // Extraction: get all events
-    val rawPatients: Dataset[Patient] = new Patients(config.patients).extract(sources).cache()
+    val rawPatients: Dataset[Patient] = AllPatientExtractor.extract(sources).cache()
     operationsMetadata += {
       OperationReporter
         .report(
@@ -58,6 +59,19 @@ object PioglitazoneMain extends Main {
           List("DCIR", "MCO", "IR_BEN_R"),
           OperationTypes.Patients,
           rawPatients.toDF,
+          Path(config.output.outputSavePath),
+          config.output.saveMode
+        )
+    }
+
+    val filteredPatients: Dataset[Patient] = new PatientFilters(config.patients).filterPatients(rawPatients).cache()
+    operationsMetadata += {
+      OperationReporter
+        .report(
+          "filtered_subjects",
+          List("DCIR", "MCO", "IR_BEN_R"),
+          OperationTypes.Patients,
+          filteredPatients.toDF,
           Path(config.output.outputSavePath),
           config.output.saveMode
         )
@@ -104,7 +118,7 @@ object PioglitazoneMain extends Main {
 
     val rawTracklosses = {
       val tracklossConfig = TracklossesConfig(studyEnd = config.base.studyEnd)
-      new Tracklosses(tracklossConfig).extract(sources).cache()
+      new TracklossTransformer(tracklossConfig).transform(rawDrugPurchases).cache()
     }
     operationsMetadata += {
       OperationReporter
@@ -118,7 +132,7 @@ object PioglitazoneMain extends Main {
         )
     }
 
-    val rawHospitalStays = McoHospitalStaysExtractor.extract(sources, Set.empty).cache()
+    val rawHospitalStays = McoHospitalStaysExtractor.extract(sources).cache()
     operationsMetadata += {
       OperationReporter.report(
         "extract_hospital_stays",

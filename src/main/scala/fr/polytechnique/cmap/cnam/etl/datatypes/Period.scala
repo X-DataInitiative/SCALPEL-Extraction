@@ -3,7 +3,6 @@
 package fr.polytechnique.cmap.cnam.etl.datatypes
 
 import java.sql.Timestamp
-import fr.polytechnique.cmap.cnam.etl.transformers.interaction._
 import fr.polytechnique.cmap.cnam.util.functions._
 
 case class Period(start: Timestamp, end: Timestamp) extends Subtractable[Period] with Addable[Period]{

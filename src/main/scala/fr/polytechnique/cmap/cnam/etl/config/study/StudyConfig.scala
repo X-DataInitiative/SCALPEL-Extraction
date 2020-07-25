@@ -12,12 +12,13 @@ object StudyConfig {
     dcir: Option[String] = None,
     mco: Option[String] = None,
     mcoCe: Option[String] = None,
-    ssr: Option[List[String]] = None,
+    ssr: Option[String] = None,
     ssrCe: Option[String] = None,
     had: Option[String] = None,
     irBen: Option[String] = None,
     irImb: Option[String] = None,
     irPha: Option[String] = None,
+    irNat: Option[String] = None,
     dosages: Option[String] = None)
 
   case class OutputPaths(

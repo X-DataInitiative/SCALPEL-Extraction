@@ -48,6 +48,8 @@ case class ExposureDuration(patientID: String, value: String, period: Period, sp
               RightRemainingPeriod(ExposureDuration(self.patientID, self.value, p2, self.span))
             )
           }
+        // avoid scala match may not be exhaustive
+        case _ => NullRemainingPeriod
       }
     }
 }

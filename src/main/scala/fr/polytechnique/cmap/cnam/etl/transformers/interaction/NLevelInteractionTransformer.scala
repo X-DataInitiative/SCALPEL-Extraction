@@ -2,7 +2,7 @@
 
 package fr.polytechnique.cmap.cnam.etl.transformers.interaction
 
-import org.apache.spark.sql.{Dataset, functions}
+import org.apache.spark.sql.{functions, Dataset}
 import fr.polytechnique.cmap.cnam.etl.datatypes._
 import fr.polytechnique.cmap.cnam.etl.events.{Event, Exposure, Interaction}
 import fr.polytechnique.cmap.cnam.util.functions._
@@ -13,12 +13,14 @@ case class NLevelInteractionTransformer(config: InteractionTransformerConfig) ex
   def joinTwoExposureNDataSet(right: Dataset[ExposureN], left: Dataset[ExposureN]): Dataset[ExposureN] = {
     val sqlCtx = right.sqlContext
     import sqlCtx.implicits._
+    val minimumDuration = config.minimumDuration.totalMilliseconds
     right
       .joinWith(
         left,
         left(Event.Columns.PatientID) === right(Event.Columns.PatientID) && !left("values").geq(right("values"))
       )
       .flatMap(e => e._1.intersect(e._2))
+      .filter(i => i.toDuration >= minimumDuration)
       .repartition(functions.col("patientID"), functions.col("values"))
       .cache()
   }

@@ -17,7 +17,7 @@ object LiberalFractures extends OutcomesTransformer {
       .map(
         event => {
           val fractureSite = BodySite.getSiteFromCode(event.value, BodySites.sites, CodeType.CCAM)
-          Outcome(event.patientID, fractureSite, outcomeName, event.weight, event.start)
+          Outcome(event.patientID, fractureSite, outcomeName, 1.0D, event.start)
         }
       )
   }

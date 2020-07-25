@@ -3,157 +3,144 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.patients
 
 import java.sql.Timestamp
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.Dataset
 import fr.polytechnique.cmap.cnam.SharedContext
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
 class IrBenPatientsSuite extends SharedContext {
 
-  import fr.polytechnique.cmap.cnam.etl.extractors.patients.IrBenPatients.IrBenPatientsDataFrame
-
-  "getBirthDates" should "collect birth dates correctly from IR_BEN_R" in {
+  "findBirthDate" should "return correct birth dates" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val irBen: DataFrame = Seq(
-      ("Patient_01", 1, 1975),
-      ("Patient_02", 2, 1976),
-      ("Patient_03", 3, 1977),
-      ("Patient_04", 4, 1895)
-    ).toDF("patientID", "BEN_NAI_MOI", "BEN_NAI_ANN")
+    val irBen: Dataset[PatientIrBen] = Seq(
+      PatientIrBen("Patient_01", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(null.asInstanceOf[Timestamp])),
+      PatientIrBen("Patient_02", 2, "2", "1976", Timestamp.valueOf("1976-02-01 00:00:00"), Some(null.asInstanceOf[Timestamp]))
+    ).toDS()
 
-    val expected: DataFrame = Seq(
-      ("Patient_01", Timestamp.valueOf("1975-01-01 00:00:00")),
-      ("Patient_02", Timestamp.valueOf("1976-02-01 00:00:00")),
-      ("Patient_03", Timestamp.valueOf("1977-03-01 00:00:00"))
-    ).toDF("patientID", "birthDate")
+    val expected: Dataset[PatientIrBen] = Seq(
+      PatientIrBen("Patient_01", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(null.asInstanceOf[Timestamp])),
+      PatientIrBen("Patient_02", 2, "2", "1976", Timestamp.valueOf("1976-02-01 00:00:00"), Some(null.asInstanceOf[Timestamp]))
+    ).toDS()
+
+    //When
+    val result = IrBenPatients.findPatientBirthDate(irBen)
+
+    //Then
+    assertDSs(result, expected)
+  }
+
+  "findGender" should "return correct gender" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input: Dataset[PatientIrBen] = Seq(
+      PatientIrBen("Patient_01", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(null.asInstanceOf[Timestamp])),
+      PatientIrBen("Patient_02", 2, "2", "1976", Timestamp.valueOf("1976-02-01 00:00:00"), Some(null.asInstanceOf[Timestamp]))
+    ).toDS()
+
+    val expected: Dataset[PatientIrBen] = Seq(
+      PatientIrBen("Patient_01", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(null.asInstanceOf[Timestamp])),
+      PatientIrBen("Patient_02", 2, "2", "1976", Timestamp.valueOf("1976-02-01 00:00:00"), Some(null.asInstanceOf[Timestamp]))
+    ).toDS()
 
     // When
-    val result = irBen.getBirthDate()
+    val result = IrBenPatients.findPatientGender(input)
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
   }
 
-  it should "throw an exception in case of conflicting birth dates" in {
+  "findDeathDate" should "find death dates correctly" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val irBen: DataFrame = Seq(
-      ("Patient_01", 1, 1975),
-      ("Patient_01", 2, 1976)
-    ).toDF("patientID", "BEN_NAI_MOI", "BEN_NAI_ANN")
+    val input: Dataset[PatientIrBen] = Seq(
+      PatientIrBen("Patient_01", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(null.asInstanceOf[Timestamp])),
+      PatientIrBen("Patient_02", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientIrBen("Patient_02", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2015-03-13 00:00:00"))),
+      PatientIrBen("Patient_03", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("1976-03-13 00:00:00"))),
+      PatientIrBen("Patient_04", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2020-03-13 00:00:00")))
+    ).toDS()
 
-    // Then
-    intercept[Exception] {
-      irBen.getBirthDate()
-    }
-  }
-
-  "getGender" should "return correct gender" in {
-    val sqlCtx = sqlContext
-    import sqlCtx.implicits._
-
-    // Given
-    val input: DataFrame = Seq(
-      ("Patient_01", 1),
-      ("Patient_02", 2),
-      ("Patient_02", 2)
-    ).toDF("patientID", "BEN_SEX_COD")
-
-    val expected: DataFrame = Seq(
-      ("Patient_01", 1),
-      ("Patient_02", 2)
-    ).toDF("patientID", "gender")
+    val expected: Dataset[PatientIrBen] = Seq(
+      PatientIrBen("Patient_01", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(null.asInstanceOf[Timestamp])),
+      PatientIrBen("Patient_04", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2020-03-13 00:00:00"))),
+      PatientIrBen("Patient_03", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("1976-03-13 00:00:00"))),
+      PatientIrBen("Patient_02", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientIrBen("Patient_02", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00")))
+    ).toDS()
 
     // When
-    val result = input.getGender
+    val result = IrBenPatients.findPatientDeathDate(input)
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
   }
 
-  it should "throw an exception in case of conflicting sex code" in {
+  "convert PatientIrBentoPatient" should "return Dataset of Patients" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val input: DataFrame = Seq(
-      ("Patient_01", 1),
-      ("Patient_01", 2)
-    ).toDF("patientID", "BEN_SEX_COD")
+    val input: Dataset[PatientIrBen] = Seq(
+      PatientIrBen("Patient_01", 1, "1", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      PatientIrBen("Patient_02", 2, "3", "1977", Timestamp.valueOf("1977-03-01 00:00:00"), Some(null.asInstanceOf[Timestamp]))
+    ).toDS()
 
-    // Then
-    intercept[Exception] {
-      input.getGender
-    }
-  }
-
-  "getDeathDate" should "collect death dates correctly from IR_BEN_R" in {
-    val sqlCtx = sqlContext
-    import sqlCtx.implicits._
-
-    // Given
-    val irBen: DataFrame = Seq(
-      ("Patient_01", None),
-      ("Patient_02", Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
-      ("Patient_03", Some(Timestamp.valueOf("1976-03-13 00:00:00"))),
-      ("Patient_04", Some(Timestamp.valueOf("2020-03-13 00:00:00")))
-    ).toDF("patientID", "BEN_DCD_DTE")
-
-    val expected: DataFrame = Seq(
-      ("Patient_04", Timestamp.valueOf("2020-03-13 00:00:00")),
-      ("Patient_03", Timestamp.valueOf("1976-03-13 00:00:00")),
-      ("Patient_02", Timestamp.valueOf("2009-03-13 00:00:00"))
-    ).toDF("patientID", "deathDate")
+    val expected: Dataset[Patient] = Seq(
+      Patient("Patient_01", 1, Timestamp.valueOf("1975-01-01 00:00:00"), Some(Timestamp.valueOf("2009-03-13 00:00:00"))),
+      Patient("Patient_02", 2, Timestamp.valueOf("1977-03-01 00:00:00"), Some(null.asInstanceOf[Timestamp]))
+    ).toDS()
 
     // When
-    val result = irBen.getDeathDate
+    val result = IrBenPatients.fromDerivedPatienttoPatient(input)
 
     // Then
-    assertDFs(result, expected)
+    assertDSs(result, expected)
   }
 
-  "transform" should "return correct result" in {
+  "getInput" should "read file" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val irBen: DataFrame = Seq(
-      ("Patient_01", 1, 1, 1975, Timestamp.valueOf("2009-03-13 00:00:00")),
-      ("Patient_02", 2, 3, 1977, null.asInstanceOf[Timestamp]),
-      ("Patient_02", 2, 4, 1895, null.asInstanceOf[Timestamp])
-    ).toDF("NUM_ENQ", "BEN_SEX_COD", "BEN_NAI_MOI", "BEN_NAI_ANN", "BEN_DCD_DTE")
+    val irBen = spark.read.parquet("src/test/resources/test-input/IR_BEN_R.parquet")
+    val sources = Sources(irBen = Some(irBen))
 
-    val expected: DataFrame = Seq(
-      ("Patient_01", 1, Timestamp.valueOf("1975-01-01 00:00:00"), Timestamp.valueOf("2009-03-13 00:00:00")),
-      ("Patient_02", 2, Timestamp.valueOf("1977-03-01 00:00:00"), null.asInstanceOf[Timestamp])
-    ).toDF("patientID", "gender", "birthDate", "deathDate")
+    val expected: Dataset[PatientIrBen] = Seq(
+      PatientIrBen("Patient_01", 2, "01", "1975", Timestamp.valueOf("1975-01-01 00:00:00"), null),
+      PatientIrBen("Patient_02", 1, "10", "1959", Timestamp.valueOf("1959-10-01 00:00:00"), Some(Timestamp.valueOf("2008-01-25 00:00:00")))
+    ).toDS()
 
     // When
-    val result = IrBenPatients.extract(irBen, 1900, 2020)
+    val result = IrBenPatients.getInput(sources)
 
     // Then
-    assertDFs(result.toDF, expected)
+    assertDSs(result, expected)
   }
 
-  it should "deal with actual data" in {
+  "extract" should "build patients with actual data" in {
     val sqlCtx = sqlContext
     import sqlCtx.implicits._
 
     // Given
-    val irBen = sqlCtx.read.load("src/test/resources/expected/IR_BEN_R.parquet")
+    val irBen = spark.read.parquet("src/test/resources/test-input/IR_BEN_R.parquet")
+    val sources = Sources(irBen = Some(irBen))
 
-    val expected: DataFrame = Seq(
-      ("Patient_01", 2, Timestamp.valueOf("1975-01-01 00:00:00"), null.asInstanceOf[Timestamp]),
-      ("Patient_02", 1, Timestamp.valueOf("1959-10-01 00:00:00"), Timestamp.valueOf("2008-01-25 00:00:00"))
-    ).toDF("patientID", "gender", "birthDate", "deathDate")
+    val expected: Dataset[Patient] = Seq(
+      Patient("Patient_01", 2, Timestamp.valueOf("1975-01-01 00:00:00"), null),
+      Patient("Patient_02", 1, Timestamp.valueOf("1959-10-01 00:00:00"), Some(Timestamp.valueOf("2008-01-25 00:00:00")))
+    ).toDS()
 
     // When
-    val result = IrBenPatients.extract(irBen, 1900, 2020)
+    val result = IrBenPatients.extract(sources)
 
     // Then
-    assertDFs(result.toDF, expected)
+    assertDSs(result, expected)
   }
 }

@@ -11,8 +11,7 @@ trait DataSourceManager extends SourceManager {
 
   val EXE_SOI_DTD: Column = col("EXE_SOI_DTD")
 
-  /**
-    * This method santize the sources based on the passed dates.
+  /** Sanitize the sources based on the passed dates.
     *
     * @param sourceData the data source that will be sanitized
     * @param studyStart the study start date

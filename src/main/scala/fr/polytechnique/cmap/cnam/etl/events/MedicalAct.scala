@@ -3,27 +3,10 @@
 package fr.polytechnique.cmap.cnam.etl.events
 
 import java.sql.Timestamp
-import org.apache.spark.sql.Row
 
 trait MedicalAct extends AnyEvent with EventBuilder {
 
   override val category: EventCategory[MedicalAct]
-
-  def fromRow(
-    r: Row,
-    patientIDCol: String = "patientID",
-    groupIDCol: String = "groupID",
-    codeCol: String = "code",
-    weightCol: String = "weight",
-    dateCol: String = "eventDate"): Event[MedicalAct] = {
-    this.apply(
-      r.getAs[String](patientIDCol),
-      r.getAs[String](groupIDCol),
-      r.getAs[String](codeCol),
-      r.getAs[Double](weightCol),
-      r.getAs[Timestamp](dateCol)
-    )
-  }
 
   def apply(patientID: String, groupID: String, code: String, weight: Double, date: Timestamp): Event[MedicalAct] = {
     Event(patientID, category, groupID, code, weight, date, None)
@@ -56,7 +39,7 @@ object McoCIM10Act extends MedicalAct {
   val category: EventCategory[MedicalAct] = "mco_cim10_act"
 }
 
-object McoCEAct extends MedicalAct {
+object McoCeCcamAct extends MedicalAct {
   val category: EventCategory[MedicalAct] = "mco_ce_act"
 }
 
