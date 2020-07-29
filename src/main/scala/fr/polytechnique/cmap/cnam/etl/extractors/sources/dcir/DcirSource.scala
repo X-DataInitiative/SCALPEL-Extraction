@@ -15,6 +15,8 @@ trait DcirSource extends ColumnNames {
     lazy val CamCode: String = "ER_CAM_F__CAM_PRS_IDE"
     lazy val BioCode: String = "ER_BIO_F__BIO_PRS_IDE"
     lazy val GHSCode: String = "ER_ETE_F__ETE_GHS_NUM"
+    lazy val TipCode: ColName = "ER_TIP_F__TIP_PRS_IDE"
+    lazy val TipQuantity: ColName = "ER_TIP_F__TIP_ACT_QSN"
     lazy val InstitutionCode: String = "ER_ETE_F__ETE_TYP_COD"
     lazy val Sector: String = "ER_ETE_F__PRS_PPU_SEC"
     lazy val NaturePrestation: ColName = "PRS_NAT_REF"
@@ -26,7 +28,6 @@ trait DcirSource extends ColumnNames {
     lazy val FlowEmitterNumber: ColName = "FLX_EMT_ORD"
     lazy val OrgId: ColName = "ORG_CLE_NUM"
     lazy val OrderId: ColName = "DCT_ORD_NUM"
-
   }
 
 }
