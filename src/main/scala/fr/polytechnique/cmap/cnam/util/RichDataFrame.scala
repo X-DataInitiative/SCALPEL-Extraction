@@ -63,6 +63,7 @@ class RichDataFrame(dataFrame: DataFrame) {
 
   def write(path: String, mode: String = "errorIfExists", format: String = "parquet"): Unit = {
     format match {
+      case "parquet" => writeParquet(path, mode)
       case "orc" => writeOrc(path, mode)
       case "csv" => writeCSV(path, mode)
       case _ => writeParquet(path, mode)

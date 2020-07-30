@@ -42,7 +42,7 @@ class FallMainSuite extends SharedContext {
     val fallConfig = FallConfig.load("", "test")
 
     import implicits.SourceReader
-    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input, fallConfig.writeFileFormat))
+    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input, fallConfig.readFileFormat))
     val expectedOutputPaths = List(
       "target/test/output/drug_purchases/data", "target/test/output/extract_raw_patients/data",
       "target/test/output/extract_filtered_patients/data", "target/test/output/filter_patients/data",
@@ -66,7 +66,7 @@ class FallMainSuite extends SharedContext {
     val fallConfig = FallConfig.load("", "test")
 
     import implicits.SourceReader
-    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input, fallConfig.writeFileFormat))
+    val sources = Sources.sanitize(sqlContext.readSources(fallConfig.input, fallConfig.readFileFormat))
     val expectedOutputPaths = List(
       "target/test/output/diagnoses/data", "target/test/output/acts/data",
       "target/test/output/liberal_acts/data", "target/test/output/fractures/data"

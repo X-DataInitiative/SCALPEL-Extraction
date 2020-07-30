@@ -79,13 +79,13 @@ object OperationReporter {
   /**
     * The main method for generating the report for the given operation
     *
-    * @param operationName The unique name (ex: "diagnoses")
-    * @param operationInputs The unique names of the previous operations on which this one depends
-    * @param outputType The type of the operation output
-    * @param data The output data (ex: diagnoses)
-    * @param basePath The base path where the data and patients will be written
-    * @param saveMode The strategy of output data(default = errorIfExists)
-    * @param format The format to save file(default = parquet)
+    * @param operationName    The unique name (ex: "diagnoses")
+    * @param operationInputs  The unique names of the previous operations on which this one depends
+    * @param outputType       The type of the operation output
+    * @param data             The output data (ex: diagnoses)
+    * @param basePath         The base path where the data and patients will be written
+    * @param saveMode         The strategy of output data(default = errorIfExists)
+    * @param format           The format to save file(default = parquet)
     * @param patientIdColName (default="patientID") The column name of the patientID in the output data
     * @tparam A
     * @return an instance of OperationMetadata
@@ -127,13 +127,13 @@ object OperationReporter {
   /**
     * The main method for generating the report for the given operation
     *
-    * @param operationName The unique name (ex: "diagnoses")
+    * @param operationName   The unique name (ex: "diagnoses")
     * @param operationInputs The unique names of the previous operations on which this one depends
-    * @param outputType The type of the operation output
-    * @param data The output data (ex: diagnoses)
-    * @param basePath The base path where the data and patients will be written
-    * @param saveMode The strategy of output data(default = errorIfExists)
-    * @param format The format to save file(default = parquet)
+    * @param outputType      The type of the operation output
+    * @param data            The output data (ex: diagnoses)
+    * @param basePath        The base path where the data and patients will be written
+    * @param saveMode        The strategy of output data(default = errorIfExists)
+    * @param format          The format to save file(default = parquet)
     * @tparam A
     * @tparam B
     * @return an instance of OperationMetadata
@@ -187,6 +187,7 @@ object OperationReporter {
 
   private def writeDataSet[A](data: Dataset[A], path: String, mode: String, format: String = "parquet") = {
     format match {
+      case "parquet" => data.write.mode(saveModeFrom(mode)).parquet(path)
       case "orc" => data.write.mode(saveModeFrom(mode)).orc(path)
       case "csv" =>
         data
