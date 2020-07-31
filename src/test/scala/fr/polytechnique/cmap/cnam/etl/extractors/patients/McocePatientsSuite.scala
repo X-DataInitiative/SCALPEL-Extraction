@@ -16,31 +16,51 @@ class McocePatientsSuite extends SharedContext {
 
     // Given
     val input: Dataset[PatientMcoce] = Seq(
-      PatientMcoce("200410", 1, 79, null, Timestamp.valueOf("2014-04-18 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 73, null, Timestamp.valueOf("2014-01-09 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 73, null, Timestamp.valueOf("2014-02-11 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-07-18 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-12-12 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-04-15 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-10-27 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-04-04 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-11-06 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-05-02 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-09-26 00:00:00"), None)
+      PatientMcoce("200410", 1, Some(79), null, Timestamp.valueOf("2014-04-18 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(73), null, Timestamp.valueOf("2014-01-09 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(73), null, Timestamp.valueOf("2014-02-11 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-07-18 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-12-12 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-04-15 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-10-27 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-04-04 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-11-06 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-05-02 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-09-26 00:00:00"), None)
     ).toDS()
 
     val expected: Dataset[PatientMcoce] = Seq(
-      PatientMcoce("200410", 1, 79, Timestamp.valueOf("1935-04-01 00:00:00"), Timestamp.valueOf("2014-04-18 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 73, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-01-09 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 73, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-02-11 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-07-18 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-12-12 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-04-15 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-10-27 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-04-04 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-11-06 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-05-02 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-09-26 00:00:00"), None)
+      PatientMcoce("200410", 1, Some(79), Timestamp.valueOf("1935-04-01 00:00:00"), Timestamp.valueOf("2014-04-18 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(73), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-01-09 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(73), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-02-11 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-07-18 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-12-12 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-04-15 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-10-27 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-04-04 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-11-06 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-05-02 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-09-26 00:00:00"), None)
+    ).toDS()
+
+    // When
+    val result = McocePatients.findPatientBirthDate(input)
+
+    // Then
+    assertDSs(result, expected)
+  }
+
+  "findPatientBirthDateWithNullAge" should "return a Dataset with the null birth date for each patient when patient have no age" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val input: Dataset[PatientMcoce] = Seq(
+      PatientMcoce("200410", 1, None, null, Timestamp.valueOf("2014-04-18 00:00:00"), None)
+    ).toDS()
+
+    val expected: Dataset[PatientMcoce] = Seq(
+      PatientMcoce("200410", 1, None, null, Timestamp.valueOf("2014-04-18 00:00:00"), None)
     ).toDS()
 
     // When
@@ -56,32 +76,33 @@ class McocePatientsSuite extends SharedContext {
 
     // Given
     val input: Dataset[PatientMcoce] = Seq(
-      PatientMcoce("200410", 1, 79, Timestamp.valueOf("1935-04-01 00:00:00"), Timestamp.valueOf("2014-04-18 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 73, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-01-09 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 73, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-02-11 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-07-18 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-12-12 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-04-15 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-10-27 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-04-04 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-11-06 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-05-02 00:00:00"), None),
-      PatientMcoce("2004100010", 2, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-09-26 00:00:00"), None)
+      PatientMcoce("200410", 1, Some(79), Timestamp.valueOf("1935-04-01 00:00:00"), Timestamp.valueOf("2014-04-18 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(73), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-01-09 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(73), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-02-11 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-07-18 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-12-12 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-04-15 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-10-27 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-04-04 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-11-06 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-05-02 00:00:00"), None),
+      PatientMcoce("2004100010", 2, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-09-26 00:00:00"), None)
     ).toDS()
 
     val expected: Dataset[PatientMcoce] = Seq(
-      PatientMcoce("200410", 1, 79, Timestamp.valueOf("1935-04-01 00:00:00"), Timestamp.valueOf("2014-04-18 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 73, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-01-09 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 73, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-02-11 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-07-18 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-12-12 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-04-15 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-10-27 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-04-04 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-11-06 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-05-02 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-09-26 00:00:00"), None)
+      PatientMcoce("200410", 1, Some(79), Timestamp.valueOf("1935-04-01 00:00:00"), Timestamp.valueOf("2014-04-18 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(73), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-01-09 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(73), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-02-11 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-07-18 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-12-12 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-04-15 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-10-27 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-04-04 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-11-06 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-05-02 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), Timestamp.valueOf("1940-03-01 00:00:00"), Timestamp.valueOf("2014-09-26 00:00:00"), None)
     ).toDS()
+
 
     // When
     val result = McocePatients.findPatientGender(input)
@@ -96,13 +117,13 @@ class McocePatientsSuite extends SharedContext {
 
     // Given
     val input: Dataset[PatientMcoce] = Seq(
-      PatientMcoce("Patient_01", 2, 45, Timestamp.valueOf("1975-01-01 00:00:00"), Timestamp.valueOf("2020-01-01 00:00:00"), None),
-      PatientMcoce("Patient_02", 1, 50, Timestamp.valueOf("1959-01-01 00:00:00"), Timestamp.valueOf("2010-01-01 00:00:00"), None)
+      PatientMcoce("Patient_01", 2, Some(45), Timestamp.valueOf("1975-01-01 00:00:00"), Timestamp.valueOf("2020-01-01 00:00:00"), None),
+      PatientMcoce("Patient_02", 1, Some(50), Timestamp.valueOf("1959-01-01 00:00:00"), Timestamp.valueOf("2010-01-01 00:00:00"), None)
     ).toDS()
 
     val expected: Dataset[PatientMcoce] = Seq(
-      PatientMcoce("Patient_01", 2, 45, Timestamp.valueOf("1975-01-01 00:00:00"), Timestamp.valueOf("2020-01-01 00:00:00"), None),
-      PatientMcoce("Patient_02", 1, 50, Timestamp.valueOf("1959-01-01 00:00:00"), Timestamp.valueOf("2010-01-01 00:00:00"), None)
+      PatientMcoce("Patient_01", 2, Some(45), Timestamp.valueOf("1975-01-01 00:00:00"), Timestamp.valueOf("2020-01-01 00:00:00"), None),
+      PatientMcoce("Patient_02", 1, Some(50), Timestamp.valueOf("1959-01-01 00:00:00"), Timestamp.valueOf("2010-01-01 00:00:00"), None)
     ).toDS()
 
     // When
@@ -118,8 +139,8 @@ class McocePatientsSuite extends SharedContext {
 
     // Given
     val input: Dataset[PatientMcoce] = Seq(
-      PatientMcoce("Patient_01", 2, 45, Timestamp.valueOf("1975-01-01 00:00:00"), Timestamp.valueOf("2020-01-01 00:00:00"), None),
-      PatientMcoce("Patient_02", 1, 50, Timestamp.valueOf("1959-01-01 00:00:00"), Timestamp.valueOf("2010-01-01 00:00:00"), None)
+      PatientMcoce("Patient_01", 2, Some(45), Timestamp.valueOf("1975-01-01 00:00:00"), Timestamp.valueOf("2020-01-01 00:00:00"), None),
+      PatientMcoce("Patient_02", 1, Some(50), Timestamp.valueOf("1959-01-01 00:00:00"), Timestamp.valueOf("2010-01-01 00:00:00"), None)
     ).toDS()
 
     val expected: Dataset[Patient] = Seq(
@@ -143,17 +164,17 @@ class McocePatientsSuite extends SharedContext {
     val sources = Sources(mcoCe = Some(mcoce))
 
     val expected: Dataset[PatientMcoce] = Seq(
-      PatientMcoce("200410", 1, 79, null, Timestamp.valueOf("2014-04-18 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 73, null, Timestamp.valueOf("2014-01-09 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 73, null, Timestamp.valueOf("2014-02-11 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-07-18 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-12-12 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-04-15 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-10-27 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-04-04 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-11-06 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-05-02 00:00:00"), None),
-      PatientMcoce("2004100010", 1, 74, null, Timestamp.valueOf("2014-09-26 00:00:00"), None)
+      PatientMcoce("200410", 1, Some(79), null, Timestamp.valueOf("2014-04-18 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(73), null, Timestamp.valueOf("2014-01-09 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(73), null, Timestamp.valueOf("2014-02-11 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-07-18 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-12-12 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-04-15 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-10-27 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-04-04 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-11-06 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-05-02 00:00:00"), None),
+      PatientMcoce("2004100010", 1, Some(74), null, Timestamp.valueOf("2014-09-26 00:00:00"), None)
     ).toDS()
 
     // When

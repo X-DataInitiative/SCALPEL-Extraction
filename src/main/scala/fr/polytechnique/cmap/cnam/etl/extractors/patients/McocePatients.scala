@@ -10,7 +10,7 @@ import org.apache.spark.sql.{Column, Dataset}
 import fr.polytechnique.cmap.cnam.etl.extractors.patients.PatientUtils.estimateBirthDateCol
 import fr.polytechnique.cmap.cnam.etl.sources.Sources
 
-case class PatientMcoce(patientID: String, gender: Int, age: Int, birthDate: Timestamp, eventDate: Timestamp, deathDate: Option[Timestamp])
+case class PatientMcoce(patientID: String, gender: Int, age: Option[Int], birthDate: Timestamp, eventDate: Timestamp, deathDate: Option[Timestamp])
   extends DerivedPatient
 
 
