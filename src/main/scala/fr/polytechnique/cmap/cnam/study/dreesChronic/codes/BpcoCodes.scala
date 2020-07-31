@@ -14,7 +14,7 @@ trait BpcoCodes {
    *  Diagnoses
    */
   val ALDcodes: List[String] = List(
-    "J45", "J961", "J42", "J43", "J44", // BPCO et asthmes ald 14
+    "J45", "J961", "J42", "J43", "J44", // BPCO et asthmes : ald 14
     // "J47", "J459", "L209", "J420", "J451", "J841", "J440", "J849" presents in ALD14 with less than 5 occurrences in the echantillon
     "F00", "F03", "F02", "F01", "G30", // ald 15 alzheimer,
     "E84", // ald 18 mucovisidose
@@ -28,8 +28,15 @@ trait BpcoCodes {
     "J448", // Autres maladies pulmonaires obstructives précisées
     "J449", // Maladie pulmonaire obstructive sans précision
     "J960", // Insuffisance respi aigue (à chercher avec DA = J44*)
-    "J181", // Pneumopathie lombaire (à chercher avec DA = J44*)
-    "Z515" // Soins palliatifs
+    "J180", // bronchopneumopathie (à chercher avec DA = J44*)
+    "J189", // Pneumonie (à chercher avec DA = J44*)
+    "I269", // Embolie pumonaire (à chercher avec DA = J44*)
+    "I509", // Insuffisance cardiaque aigue (à chercher avec DA = J44*)
+    "J181", // Pneumopathie lobaire (à chercher avec DA = J44*)
+    "J069", // infection des voies aériennes (à chercher avec DA = J44*)
+    "J681", // oedème aigu du poumon (à chercher avec DA = J44*)
+    "J10", // Grippe (à chercher avec DA = J44*)
+    "Z515"// Soins palliatifs
   )
   val secondaryDiagCodes: List[String] = List("J44")
 
