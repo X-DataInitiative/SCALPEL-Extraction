@@ -10,7 +10,6 @@ import fr.polytechnique.cmap.cnam.util.functions._
 import org.apache.spark.sql.DataFrame
 
 class DcirProductOrServiceSuite extends SharedContext {
-  override val debug: Boolean = true
 
   "extract" should "extract lpp products from raw data of the dcir (er_tip_f table)" in {
 

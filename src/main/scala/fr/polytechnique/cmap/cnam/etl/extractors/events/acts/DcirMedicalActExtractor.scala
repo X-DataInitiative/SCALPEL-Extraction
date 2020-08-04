@@ -3,13 +3,15 @@
 package fr.polytechnique.cmap.cnam.etl.extractors.events.acts
 
 import java.sql.Timestamp
+
 import scala.util.Try
 import org.apache.spark.sql.Row
-import fr.polytechnique.cmap.cnam.etl.events.{BiologyDcirAct, DcirAct, EventBuilder, MedicalAct}
+import fr.polytechnique.cmap.cnam.etl.events.{AnyEvent, BiologyDcirAct, DcirAct, EventBuilder, MedicalAct, ProductOrService}
 import fr.polytechnique.cmap.cnam.etl.extractors.StartsWithStrategy
 import fr.polytechnique.cmap.cnam.etl.extractors.codes.SimpleExtractorCodes
 import fr.polytechnique.cmap.cnam.etl.extractors.sources.dcir.DcirSimpleExtractor
 import fr.polytechnique.cmap.cnam.util.functions.makeTS
+import fr.polytechnique.cmap.cnam.etl.events.AnyEvent
 
 /**
   * Gets all type of Acts from DCIR.
@@ -19,8 +21,9 @@ import fr.polytechnique.cmap.cnam.util.functions.makeTS
   * the information is not available a default DCIRAct.
   * @param codes: List of Act codes to be tracked in the study or empty to get all the Acts.
   */
-abstract sealed class DcirRowActExtractor(codes: SimpleExtractorCodes) extends DcirSimpleExtractor[MedicalAct]
-  with StartsWithStrategy[MedicalAct] {
+//TODO This abstract class should be an indepedent class
+abstract class DcirRowActExtractor[EventType <: AnyEvent](codes: SimpleExtractorCodes) extends DcirSimpleExtractor[EventType]
+  with StartsWithStrategy[EventType] {
 
   final val PrivateInstitutionCodes = Set(4D, 5D, 6D, 7D)
 
@@ -44,7 +47,7 @@ abstract sealed class DcirRowActExtractor(codes: SimpleExtractorCodes) extends D
     * @param r the row of DCIR to be investigated.
     * @return Try[String]
     */
-  // TODO: REMOVE THIS
+  // TODO: Unification of extractGroupId in DCIR
   override def extractGroupId(r: Row): String = {
     Try {
 
@@ -82,7 +85,7 @@ abstract sealed class DcirRowActExtractor(codes: SimpleExtractorCodes) extends D
   * @param codes: List of Act codes to be tracked in the study or empty to get all the Acts.
   */
 final case class DcirMedicalActExtractor(codes: SimpleExtractorCodes)
-  extends DcirRowActExtractor(codes) {
+  extends DcirRowActExtractor[MedicalAct](codes) {
   // Implementation of the BasicExtractor Trait
   override val columnName: String = ColNames.CamCode
   override val eventBuilder: EventBuilder = DcirAct
@@ -93,7 +96,7 @@ final case class DcirMedicalActExtractor(codes: SimpleExtractorCodes)
   * @param codes: List of Act codes to be tracked in the study or empty to get all the Acts.
   */
 final case class DcirBiologyActExtractor(codes: SimpleExtractorCodes)
-  extends DcirRowActExtractor(codes) {
+  extends DcirRowActExtractor[MedicalAct](codes) {
   // Implementation of the BasicExtractor Trait
   override val columnName: String = ColNames.BioCode
   override val eventBuilder: EventBuilder = BiologyDcirAct
