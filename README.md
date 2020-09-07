@@ -162,16 +162,16 @@ Transformers combine multiple events produced by the extractors to produce highe
 ## Citation
 
 If you use a library part of _SCALPEL3_ in a scientific publication, we would appreciate citations. You can use the following bibtex entry:
-
-    @article{2019arXiv191007045,
-      author = {{Bacry}, E and {Ga{\"{i}}ffas}, S. and {Leroy}, F. and {Morel}, M. and {Nguyen}, D. P. and {Sebiat}, Y. and {Sun}, D.}
-      title = {{SCALPEL3: a scalable open-source library for healthcare claims databases}},
-      journal = {ArXiv e-prints},
-      eprint = {1910.07045},
-      url = {http://arxiv.org/abs/1910.07045},
-      year = 2019,
-      month = oct
+    
+    @article{bacry2020scalpel3,
+      title={SCALPEL3: a scalable open-source library for healthcare claims databases},
+      author={Bacry, Emmanuel and Gaiffas, St{\'e}phane and Leroy, Fanny and Morel, Maryan and Nguyen, Dinh-Phong and Sebiat, Youcef and Sun, Dian},
+      journal={International Journal of Medical Informatics},
+      pages={104203},
+      year={2020},
+      publisher={Elsevier}
     }
+    
 
 ## Contributing
 
@@ -190,7 +190,7 @@ Among them :
 
 
 ### Imports
-
+http://arxiv.org/abs/1910.07045
 Our imports are based on the style suggested at the following 
 **[link](https://github.com/databricks/scala-style-guide#imports)**, with a few modifications.
 
