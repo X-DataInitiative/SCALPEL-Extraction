@@ -190,7 +190,6 @@ Among them :
 
 
 ### Imports
-http://arxiv.org/abs/1910.07045
 Our imports are based on the style suggested at the following 
 **[link](https://github.com/databricks/scala-style-guide#imports)**, with a few modifications.
 
