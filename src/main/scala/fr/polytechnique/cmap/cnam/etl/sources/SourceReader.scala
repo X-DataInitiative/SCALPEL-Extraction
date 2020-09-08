@@ -9,6 +9,7 @@ private[sources] trait SourceReader {
   def read(sqlContext: SQLContext, path: String, fileFormat: String = "parquet"): DataFrame = {
     fileFormat match {
       case "orc" => sqlContext.read.orc(path)
+      case "parquet" =>  sqlContext.read.parquet(path)
       case _ => sqlContext.read.parquet(path)
     }
   }
