@@ -17,7 +17,7 @@ class DcirSourceExtractorSuite extends SharedContext {
     val source = new Sources(dcir = Some(dcir))
     val path = "target/test/output"
     val drugConfig = new DrugConfig(Cip13Level, List.empty)
-    val dcirSource = new DcirSourceExtractor(path, "overwrite", drugConfig)
+    val dcirSource = new DcirSourceExtractor(path, "overwrite", "parquet", drugConfig)
 
     dcirSource.extract(source)
 

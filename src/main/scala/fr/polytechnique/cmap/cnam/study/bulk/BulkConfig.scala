@@ -13,7 +13,9 @@ import fr.polytechnique.cmap.cnam.etl.extractors.events.drugs.level.{Cip13Level,
 case class BulkConfig(
   input: StudyConfig.InputPaths,
   output: StudyConfig.OutputPaths,
-  drugs: DrugConfig = BulkConfig.DrugsConfig()) extends StudyConfig {
+  drugs: DrugConfig = BulkConfig.DrugsConfig(),
+  readFileFormat: String = "parquet",
+  writeFileFormat: String = "parquet") extends StudyConfig {
   val base: BaseConfig = BulkConfig.BaseConfig
 }
 

@@ -13,7 +13,7 @@ class McoSourceExtractorSuite extends SharedContext {
     val mco = spark.read.parquet("src/test/resources/test-input/MCO.parquet")
     val source = new Sources(mco = Some(mco))
     val path = "target/test/output"
-    val mcoSource = new McoSourceExtractor(path, "overwrite")
+    val mcoSource = new McoSourceExtractor(path, "overwrite", "parquet")
     // When
     mcoSource.extract(source)
     // Then, make sure everything is running.

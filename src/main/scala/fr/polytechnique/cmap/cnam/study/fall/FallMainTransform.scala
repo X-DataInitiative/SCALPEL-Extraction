@@ -3,11 +3,12 @@
 package fr.polytechnique.cmap.cnam.study.fall
 
 import scala.collection.mutable
-import org.apache.spark.sql.{Dataset, SQLContext, SparkSession}
+import org.apache.spark.sql.{Dataset, SQLContext}
 import fr.polytechnique.cmap.cnam.Main
 import fr.polytechnique.cmap.cnam.etl.events._
 import fr.polytechnique.cmap.cnam.etl.filters.PatientFilters
 import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.sources.general.GeneralSource
 import fr.polytechnique.cmap.cnam.etl.transformers.drugprescription.DrugPrescriptionTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.exposures.ExposureTransformer
 import fr.polytechnique.cmap.cnam.etl.transformers.interaction.NLevelInteractionTransformer
@@ -28,8 +29,8 @@ object FallMainTransform extends Main with FractureCodes {
     val startTimestamp = new java.util.Date()
     val fallConfig = FallConfig.load(argsMap("conf"), argsMap("env"))
     val operationsMetadata = OperationMetadata.deserialize(argsMap("meta_bin"))
-    transformExposures(operationsMetadata, fallConfig)
-    transformOutcomes(operationsMetadata, fallConfig)
+    transformExposures(sqlContext, operationsMetadata, fallConfig)
+    transformOutcomes(sqlContext, operationsMetadata, fallConfig)
 
     // Write Metadata
     val metadata = MainMetadata(
@@ -38,25 +39,18 @@ object FallMainTransform extends Main with FractureCodes {
       new java.util.Date(),
       operationsMetadata.values.toList
     )
-    val metadataJson: String = metadata.toJsonString()
 
-    OperationReporter.writeMetaData(metadataJson, "metadata_fall.json", argsMap("env"))
+    OperationReporter.writeMetaData(metadata.toJsonString(), "metadata_fall_transform_" + format.format(startTimestamp) + ".json", argsMap("env"))
     None
   }
 
-  def transformExposures(meta: mutable.Map[String, OperationMetadata], fallConfig: FallConfig):
-  mutable.Map[String, OperationMetadata] = {
+  def transformExposures(sqlContext: SQLContext, meta: mutable.Map[String, OperationMetadata], fallConfig: FallConfig): mutable.Map[String, OperationMetadata] = {
 
-    val spark = SparkSession.builder.getOrCreate()
-    import spark.implicits._
-    val patients: Dataset[Patient]
-    = spark.read.parquet(meta.get("extract_filtered_patients").get.outputPath)
-      .as[Patient].cache()
-    val drugPurchases: Dataset[Event[Drug]]
-    = spark.read.parquet(meta.get("drug_purchases").get.outputPath)
-      .as[Event[Drug]].cache()
-    val controlDrugPurchases = spark.read.parquet(meta.get("control_drugs_purchases").get.outputPath)
-      .as[Event[Drug]].cache()
+    import sqlContext.implicits._
+
+    val patients: Dataset[Patient] = GeneralSource.read(sqlContext, meta.get("extract_filtered_patients").get.outputPath, fallConfig.readFileFormat).as[Patient].cache()
+    val drugPurchases: Dataset[Event[Drug]] = GeneralSource.read(sqlContext, meta.get("drug_purchases").get.outputPath, fallConfig.readFileFormat).as[Event[Drug]].cache()
+    val controlDrugPurchases: Dataset[Event[Drug]] = GeneralSource.read(sqlContext, meta.get("control_drugs_purchases").get.outputPath, fallConfig.readFileFormat).as[Event[Drug]].cache()
 
     if (fallConfig.runParameters.startGapPatients) {
       import PatientFilters._
@@ -69,7 +63,8 @@ object FallMainTransform extends Main with FractureCodes {
         OperationTypes.Patients,
         filteredPatients,
         Path(fallConfig.output.outputSavePath),
-        fallConfig.output.saveMode
+        fallConfig.output.saveMode,
+        fallConfig.writeFileFormat
       )
       meta += {
         filteredPatientsReport.name -> filteredPatientsReport
@@ -93,7 +88,8 @@ object FallMainTransform extends Main with FractureCodes {
           OperationTypes.AnyEvents,
           followUps,
           Path(fallConfig.output.outputSavePath),
-          fallConfig.output.saveMode
+          fallConfig.output.saveMode,
+          fallConfig.writeFileFormat
         )
         meta += {
           followUpReport.name -> followUpReport
@@ -109,7 +105,8 @@ object FallMainTransform extends Main with FractureCodes {
                 OperationTypes.Exposures,
                 controlDrugExposures.toDF,
                 Path(fallConfig.output.outputSavePath),
-                fallConfig.output.saveMode
+                fallConfig.output.saveMode,
+                fallConfig.writeFileFormat
               )
         }
 
@@ -124,7 +121,8 @@ object FallMainTransform extends Main with FractureCodes {
                 OperationTypes.Dispensations,
                 prescriptions.toDF,
                 Path(fallConfig.output.outputSavePath),
-                fallConfig.output.saveMode
+                fallConfig.output.saveMode,
+                fallConfig.writeFileFormat
               )
         }
 
@@ -139,7 +137,8 @@ object FallMainTransform extends Main with FractureCodes {
                 OperationTypes.Exposures,
                 prescriptionsExposures.toDF,
                 Path(fallConfig.output.outputSavePath),
-                fallConfig.output.saveMode
+                fallConfig.output.saveMode,
+                fallConfig.writeFileFormat
               )
         }
 
@@ -151,7 +150,8 @@ object FallMainTransform extends Main with FractureCodes {
         OperationTypes.Exposures,
         exposures,
         Path(fallConfig.output.outputSavePath),
-        fallConfig.output.saveMode
+        fallConfig.output.saveMode,
+        fallConfig.writeFileFormat
       )
       meta += {
         exposuresReport.name -> exposuresReport
@@ -164,7 +164,8 @@ object FallMainTransform extends Main with FractureCodes {
         OperationTypes.Exposures,
         interactions.toDF,
         Path(fallConfig.output.outputSavePath),
-        fallConfig.output.saveMode
+        fallConfig.output.saveMode,
+        fallConfig.writeFileFormat
       )
 
       meta += {
@@ -175,37 +176,27 @@ object FallMainTransform extends Main with FractureCodes {
     meta
   }
 
-  def transformOutcomes(meta: mutable.Map[String, OperationMetadata], fallConfig: FallConfig):
-  mutable.Map[String, OperationMetadata] = {
+  def transformOutcomes(sqlContext: SQLContext, meta: mutable.Map[String, OperationMetadata], fallConfig: FallConfig): mutable.Map[String, OperationMetadata] = {
 
-    val spark = SparkSession.builder.getOrCreate()
-    import spark.implicits._
+    import sqlContext.implicits._
 
-    val diagnoses = spark.read.parquet(meta("diagnoses").outputPath)
-      .as[Event[Diagnosis]]
-
-    val acts = spark.read.parquet(meta("acts").outputPath)
-      .as[Event[MedicalAct]]
-
-    val liberalActs = spark.read.parquet(meta("liberal_acts").outputPath)
-      .as[Event[MedicalAct]]
-
-    val surgeries = spark.read.parquet(meta("surgeries").outputPath)
-      .as[Event[MedicalAct]]
-
-    val hospitalDeaths = spark.read.parquet(meta("hospital_deaths").outputPath)
-      .as[Event[HospitalStay]]
+    val diagnoses: Dataset[Event[Diagnosis]] = GeneralSource.read(sqlContext, meta.get("diagnoses").get.outputPath, fallConfig.readFileFormat).as[Event[Diagnosis]].cache()
+    val acts: Dataset[Event[MedicalAct]] = GeneralSource.read(sqlContext, meta.get("acts").get.outputPath, fallConfig.readFileFormat).as[Event[MedicalAct]].cache()
+    val liberalActs = GeneralSource.read(sqlContext, meta.get("liberal_acts").get.outputPath, fallConfig.readFileFormat).as[Event[MedicalAct]].cache()
+    val surgeries = GeneralSource.read(sqlContext, meta.get("surgeries").get.outputPath, fallConfig.readFileFormat).as[Event[MedicalAct]].cache()
+    val hospitalDeaths = GeneralSource.read(sqlContext, meta.get("hospital_deaths").get.outputPath, fallConfig.readFileFormat).as[Event[HospitalStay]].cache()
 
     if (fallConfig.runParameters.outcomes) {
       val fractures: Dataset[Event[Outcome]] = new FracturesTransformer(fallConfig)
-              .transform(liberalActs, acts, diagnoses, surgeries, hospitalDeaths)
+        .transform(liberalActs, acts, diagnoses, surgeries, hospitalDeaths)
       val fractures_report = OperationReporter.reportAsDataSet(
         "fractures",
         List("acts"),
         OperationTypes.Outcomes,
         fractures,
         Path(fallConfig.output.outputSavePath),
-        fallConfig.output.saveMode
+        fallConfig.output.saveMode,
+        fallConfig.writeFileFormat
       )
       meta += {
         fractures_report.name -> fractures_report

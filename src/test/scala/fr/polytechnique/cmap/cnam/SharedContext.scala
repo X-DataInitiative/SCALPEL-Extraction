@@ -84,7 +84,8 @@ abstract class SharedContext
         .config("spark.default.parallelism", 2)
         .config("spark.sql.shuffle.partitions", 2)
         .config("spark.sql.testkey", "true")
-        .config( "spark.driver.host", "localhost" )
+        .config("spark.driver.host", "localhost")
+        .config("spark.sql.orc.impl", "native")
         .getOrCreate()
     }
     // Ensure we have initialized the context before calling parent code

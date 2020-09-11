@@ -6,5 +6,11 @@ import org.apache.spark.sql.{DataFrame, SQLContext}
 
 private[sources] trait SourceReader {
   self: SourceManager =>
-  def read(sqlContext: SQLContext, path: String): DataFrame = sqlContext.read.parquet(path)
+  def read(sqlContext: SQLContext, path: String, fileFormat: String = "parquet"): DataFrame = {
+    fileFormat match {
+      case "orc" => sqlContext.read.orc(path)
+      case "parquet" =>  sqlContext.read.parquet(path)
+      case _ => sqlContext.read.parquet(path)
+    }
+  }
 }

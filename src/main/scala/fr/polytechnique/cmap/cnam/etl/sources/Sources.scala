@@ -23,10 +23,10 @@ case class Sources(
 
 object Sources {
   /** Sanitize all sources with usual filters for snds analysis.
-    *
-    * @param sources An instance containing all available SNDS data and value tables.
-    * @return
-    */
+   *
+   * @param sources An instance containing all available SNDS data and value tables.
+   * @return
+   */
   def sanitize(sources: Sources): Sources = {
     sources.copy(
       dcir = sources.dcir.map(DcirSource.sanitize),
@@ -44,12 +44,12 @@ object Sources {
   }
 
   /** Filter sources to keep only data concerning the study period.
-    *
-    * @param sources An instance containing all available SNDS data and value tables.
-    * @param studyStart
-    * @param studyEnd
-    * @return
-    */
+   *
+   * @param sources An instance containing all available SNDS data and value tables.
+   * @param studyStart
+   * @param studyEnd
+   * @return
+   */
   def sanitizeDates(sources: Sources, studyStart: Timestamp, studyEnd: Timestamp): Sources = {
     sources.copy(
       dcir = sources.dcir.map(DcirSource.sanitizeDates(_, studyStart, studyEnd)),
@@ -67,12 +67,13 @@ object Sources {
   }
 
   /** Read all source dataframe.
-    *
-    * @param sqlContext Spark Context needed to fetch data
-    * @param paths
-    * @return
-    */
-  def read(sqlContext: SQLContext, paths: InputPaths): Sources = {
+   *
+   * @param sqlContext Spark Context needed to fetch data
+   * @param paths
+   * @param fileFormat
+   * @return
+   */
+  def read(sqlContext: SQLContext, paths: InputPaths, fileFormat: String): Sources = {
     this.read(
       sqlContext,
       dcirPath = paths.dcir,
@@ -85,7 +86,8 @@ object Sources {
       irImbPath = paths.irImb,
       irPhaPath = paths.irPha,
       irNatPath = paths.irNat,
-      dosagesPath = paths.dosages
+      dosagesPath = paths.dosages,
+      fileFormat = fileFormat
     )
   }
 
@@ -101,19 +103,20 @@ object Sources {
     irImbPath: Option[String] = None,
     irPhaPath: Option[String] = None,
     irNatPath: Option[String] = None,
-    dosagesPath: Option[String] = None): Sources = {
+    dosagesPath: Option[String] = None,
+    fileFormat: String): Sources = {
 
     Sources(
-      dcir = dcirPath.map(DcirSource.read(sqlContext, _)),
-      mco = mcoPath.map(McoSource.read(sqlContext, _)),
-      mcoCe = mcoCePath.map(McoCeSource.read(sqlContext, _)),
-      ssr = ssrPaths.map(SsrSource.read(sqlContext, _)),
-      ssrCe = ssrCePath.map(SsrCeSource.read(sqlContext, _)),
-      had = hadPath.map(HadSource.read(sqlContext, _)),
-      irBen = irBenPath.map(IrBenSource.read(sqlContext, _)),
-      irImb = irImbPath.map(IrImbSource.read(sqlContext, _)),
-      irPha = irPhaPath.map(IrPhaSource.read(sqlContext, _)),
-      irNat = irNatPath.map(IrNatSource.read(sqlContext, _)),
+      dcir = dcirPath.map(DcirSource.read(sqlContext, _, fileFormat)),
+      mco = mcoPath.map(McoSource.read(sqlContext, _, fileFormat)),
+      mcoCe = mcoCePath.map(McoCeSource.read(sqlContext, _, fileFormat)),
+      ssr = ssrPaths.map(SsrSource.read(sqlContext, _, fileFormat)),
+      ssrCe = ssrCePath.map(SsrCeSource.read(sqlContext, _, fileFormat)),
+      had = hadPath.map(HadSource.read(sqlContext, _, fileFormat)),
+      irBen = irBenPath.map(IrBenSource.read(sqlContext, _, fileFormat)),
+      irImb = irImbPath.map(IrImbSource.read(sqlContext, _, fileFormat)),
+      irPha = irPhaPath.map(IrPhaSource.read(sqlContext, _, fileFormat)),
+      irNat = irNatPath.map(IrNatSource.read(sqlContext, _, fileFormat)),
       dosages = dosagesPath.map(DosagesSource.read(sqlContext, _))
     )
   }

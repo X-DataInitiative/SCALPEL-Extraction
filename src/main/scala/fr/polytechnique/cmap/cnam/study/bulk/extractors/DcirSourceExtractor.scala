@@ -12,7 +12,8 @@ import fr.polytechnique.cmap.cnam.etl.extractors.events.prestations.{MedicalPrac
 class DcirSourceExtractor(
   override val path: String,
   override val saveMode: String,
-  val drugConfig: DrugConfig) extends SourceExtractor(path, saveMode) {
+  override val fileFormat: String,
+  val drugConfig: DrugConfig) extends SourceExtractor(path, saveMode, fileFormat) {
   override val sourceName: String = "DCIR"
 
   override val extractors = List(

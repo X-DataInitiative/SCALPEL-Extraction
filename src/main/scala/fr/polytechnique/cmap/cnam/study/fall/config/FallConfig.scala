@@ -30,7 +30,9 @@ case class FallConfig(
   sites: SitesConfig = FallConfig.SitesConfig(),
   patients: FallConfig.PatientsConfig = FallConfig.PatientsConfig(),
   outcomes: FracturesConfig = FallConfig.FracturesConfig(),
-  runParameters: FallConfig.RunConfig = FallConfig.RunConfig()) extends StudyConfig {
+  runParameters: FallConfig.RunConfig = FallConfig.RunConfig(),
+  readFileFormat: String = "parquet",
+  writeFileFormat: String = "parquet") extends StudyConfig {
 
   val medicalActs: MedicalActsConfig = FallConfig.MedicalActsConfig
   val diagnoses: DiagnosesConfig = DiagnosesConfig(

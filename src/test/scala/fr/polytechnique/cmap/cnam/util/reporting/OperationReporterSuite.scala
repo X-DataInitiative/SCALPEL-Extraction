@@ -6,7 +6,9 @@ import java.io.File
 import scala.io.Source
 import org.apache.spark.sql.{AnalysisException, SQLContext}
 import fr.polytechnique.cmap.cnam.SharedContext
-import fr.polytechnique.cmap.cnam.util.Path
+import fr.polytechnique.cmap.cnam.etl.patients.Patient
+import fr.polytechnique.cmap.cnam.etl.sources.general.GeneralSource
+import fr.polytechnique.cmap.cnam.util.{Path, functions}
 
 class OperationReporterSuite extends SharedContext {
 
@@ -26,8 +28,7 @@ class OperationReporterSuite extends SharedContext {
     )
 
     // When
-    val result: OperationMetadata = OperationReporter
-      .report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path)
+    val result: OperationMetadata = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, path)
 
     // Then
     assert(result == expected)
@@ -154,6 +155,37 @@ class OperationReporterSuite extends SharedContext {
     assert(!metadataFileInTest.exists())
 
     metadataFileInEnv1.delete()
+
+  }
+
+  it should "report in the orc or parquet" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+    //Given
+    val data = Seq(("Patient_A", 1), ("Patient_A", 2), ("Patient_B", 3)).toDF("patientID", "other_col")
+    val pathParquet = Path("target/test/output/parquet")
+    val pathOrc = Path("target/test/output/orc")
+    val patients = Seq(
+      Patient("Patient_A", 1, functions.makeTS(1990, 2, 10), None),
+      Patient("Patient_B", 1, functions.makeTS(1992, 5, 15), None),
+      Patient("Patient_C", 1, functions.makeTS(1995, 8, 20), None)
+    ).toDS()
+    val pathDSParquet = Path("target/test/output/ds/parquet")
+    val pathDSOrc = Path("target/test/output/ds/orc")
+    //When
+    var meta = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, pathParquet, "overwrite")
+    val result1 = GeneralSource.read(sqlCtx, meta.outputPath)
+    meta = OperationReporter.report("test", List("input"), OperationTypes.AnyEvents, data.toDF, pathOrc, "overwrite", "orc")
+    val result2 = GeneralSource.read(sqlCtx, meta.outputPath, "orc")
+    meta = OperationReporter.reportAsDataSet("test", List("input"), OperationTypes.AnyEvents, patients, pathDSParquet, "overwrite")
+    val result3 = GeneralSource.read(sqlCtx, meta.outputPath).as[Patient]
+    meta = OperationReporter.reportAsDataSet("test", List("input"), OperationTypes.AnyEvents, patients, pathDSOrc, "overwrite", "orc")
+    val result4 = GeneralSource.read(sqlCtx, meta.outputPath, "orc").as[Patient]
+    //Then
+    assertDFs(data, result1)
+    assertDFs(data, result2)
+    assertDSs(patients, result3)
+    assertDSs(patients, result4)
 
   }
 

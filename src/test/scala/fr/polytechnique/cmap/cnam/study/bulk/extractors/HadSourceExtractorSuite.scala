@@ -13,7 +13,7 @@ class HadSourceExtractorSuite extends SharedContext {
     val had = spark.read.parquet("src/test/resources/test-input/HAD.parquet")
     val source = new Sources(had = Some(had))
     val path = "target/test/output"
-    val hadSource = new HadSourceExtractor(path, "overwrite")
+    val hadSource = new HadSourceExtractor(path, "overwrite", "parquet")
     // When
     hadSource.extract(source)
     // Then, make sure everything is running.

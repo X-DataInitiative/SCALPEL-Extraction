@@ -23,7 +23,7 @@ import fr.polytechnique.cmap.cnam.util.reporting.{OperationMetadata, OperationRe
   * Every implementation of this abstract class must updated whenever a new Extractor that works on the given Source is
   * added.
   */
-abstract class SourceExtractor(val path: String, val saveMode: String) {
+abstract class SourceExtractor(val path: String, val saveMode: String, val fileFormat: String = "parquet") {
   val sourceName: String
 
   // This the ugliest bit of this implementation, and there is no way getting around it because of Spark.
@@ -71,7 +71,8 @@ abstract class SourceExtractor(val path: String, val saveMode: String) {
       OperationTypes.AnyEvents,
       result.toDF,
       Path(path),
-      saveMode
+      saveMode,
+      fileFormat
     )
 }
 

@@ -13,7 +13,7 @@ class SsrSourceExtractorSuite extends SharedContext {
     val ssr = spark.read.parquet("src/test/resources/test-input/SSR.parquet")
     val source = new Sources(ssr = Some(ssr))
     val path = "target/test/output"
-    val ssrSource = new SsrSourceExtractor(path, "overwrite")
+    val ssrSource = new SsrSourceExtractor(path, "overwrite", "parquet")
     // When
     ssrSource.extract(source)
     // Then, make sure everything is running.

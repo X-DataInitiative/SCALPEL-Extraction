@@ -43,7 +43,7 @@ object RosiglitazoneMain extends Main {
 
     logger.info("Reading sources")
     import implicits.SourceReader
-    val sources = Sources.sanitize(sqlContext.readSources(config.input))
+    val sources = Sources.sanitize(sqlContext.readSources(config.input,config.readFileFormat))
 
     //Extracting Patients
     val rawpatients: Dataset[Patient] = AllPatientExtractor.extract(sources).cache()
@@ -54,7 +54,8 @@ object RosiglitazoneMain extends Main {
         OperationTypes.Patients,
         rawpatients.toDF(),
         Path(config.output.outputSavePath),
-        config.output.saveMode
+        config.output.saveMode,
+        config.writeFileFormat
       )
     }
 
@@ -67,7 +68,8 @@ object RosiglitazoneMain extends Main {
         OperationTypes.Patients,
         patients.toDF(),
         Path(config.output.outputSavePath),
-        config.output.saveMode
+        config.output.saveMode,
+        config.writeFileFormat
       )
     }
 
@@ -81,7 +83,8 @@ object RosiglitazoneMain extends Main {
           OperationTypes.Dispensations,
           drugPurchases.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -95,7 +98,8 @@ object RosiglitazoneMain extends Main {
           OperationTypes.Diagnosis,
           diagnoses.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -107,7 +111,8 @@ object RosiglitazoneMain extends Main {
         OperationTypes.HospitalStays,
         hospitalStays.toDF,
         Path(config.output.outputSavePath),
-        config.output.saveMode
+        config.output.saveMode,
+        config.writeFileFormat
       )
     }
 
@@ -124,7 +129,8 @@ object RosiglitazoneMain extends Main {
           OperationTypes.Outcomes,
           outcomes.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -143,7 +149,8 @@ object RosiglitazoneMain extends Main {
             OperationTypes.AnyEvents,
             tracklosses.toDF,
             Path(config.output.outputSavePath),
-            config.output.saveMode
+            config.output.saveMode,
+            config.writeFileFormat
           )
       }
 
@@ -170,7 +177,8 @@ object RosiglitazoneMain extends Main {
             OperationTypes.AnyEvents,
             cachedFollowups.toDF,
             Path(config.output.outputSavePath),
-            config.output.saveMode
+            config.output.saveMode,
+            config.writeFileFormat
           )
       }
 
@@ -196,7 +204,8 @@ object RosiglitazoneMain extends Main {
               OperationTypes.Patients,
               delayedFreePatients.toDF,
               Path(config.output.outputSavePath),
-              config.output.saveMode
+              config.output.saveMode,
+              config.writeFileFormat
             )
         }
         delayedFreePatients
@@ -221,7 +230,8 @@ object RosiglitazoneMain extends Main {
           OperationTypes.Patients,
           filteredPatients.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 
@@ -242,7 +252,8 @@ object RosiglitazoneMain extends Main {
           OperationTypes.Exposures,
           exposures.toDF,
           Path(config.output.outputSavePath),
-          config.output.saveMode
+          config.output.saveMode,
+          config.writeFileFormat
         )
     }
 

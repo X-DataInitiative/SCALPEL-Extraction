@@ -11,7 +11,7 @@ object DosagesSource extends SourceManager {
 
   val MoleculeName: Column = col("MOLECULE_NAME")
 
-  override def read(sqlContext: SQLContext, path: String): DataFrame = {
+  override def read(sqlContext: SQLContext, path: String, fileFormat: String = "parquet"): DataFrame = {
     sqlContext.read
       .format("csv")
       .option("header", "true")
