@@ -181,7 +181,7 @@ class DcirBiologyActsSuite extends SharedContext {
     // Given
     val codes = SimpleExtractorCodes(List("238"))
 
-    val input = sqlCtx.read.parquet("src/test/resources/test-input/DCIR_w_BIO.parquet")
+    val input = sqlCtx.read.parquet("src/test/resources/test-input/DCIR_all.parquet")
 
     val sources = Sources(dcir = Some(input))
 
