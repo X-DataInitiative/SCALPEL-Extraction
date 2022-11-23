@@ -51,26 +51,28 @@ class McoFiltersSuite extends SharedContext {
     // Given
     val colNames = List(
       McoSource.SEJ_TYP,
+      McoSource.ENT_MOD,
+      McoSource.SOR_MOD,
       McoSource.GRG_GHM
     ).map(col => col.toString)
 
     val input = Seq(
-      (None, "28XXXX"),
-      (Some("A"), "15A94Z"),
-      (Some("B"), "15A94Z"),
-      (Some("A"), "28XXXX"),
-      (Some("A"), "28Z14Z"),
-      (Some("B"), "28XXXX"),
-      (Some("B"), "28Z14Z")
+      (None, "2", "3", "28XXXX"),
+      (Some("A"), "2", "3", "15A94Z"),
+      (Some("B"), "1", "1", "15A94Z"),
+      (Some("A"), "2", "3", "28XXXX"),
+      (Some("A"), "2", "3", "28Z14Z"),
+      (Some("B"), "1", "1", "28XXXX"),
+      (Some("B"), "1", "1", "28Z14Z")
     ).toDF(colNames: _*)
 
 
     val expected = Seq(
-      (None, "28XXXX"),
-      (Some("A"), "15A94Z"),
-      (Some("A"), "28XXXX"),
-      (Some("A"), "28Z14Z"),
-      (Some("B"), "28XXXX")
+      (None, "2", "3", "28XXXX"),
+      (Some("A"), "2", "3", "15A94Z"),
+      (Some("A"), "2", "3", "28XXXX"),
+      (Some("A"), "2", "3", "28Z14Z"),
+      (Some("B"), "1", "1", "28XXXX")
     ).toDF(colNames: _*)
 
     // When

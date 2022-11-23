@@ -69,4 +69,42 @@ class SsrFiltersSuite extends SharedContext {
     // Then
     assertDFs(result, expected)
   }
+
+  "filterSharedHospitalStays" should "remove lines that indicates shared hospital stays" in {
+    val sqlCtx = sqlContext
+    import sqlCtx.implicits._
+
+    // Given
+    val colNames = List(
+      SsrSource.ENT_MOD,
+      SsrSource.SOR_MOD,
+      SsrSource.GRG_GME
+    ).map(col => col.toString)
+
+    val input = Seq(
+      ("2", "3", "28XXXX"),
+      ("2", "3", "15A94Z"),
+      ("1", "1", "15A94Z"),
+      ("2", "3", "28XXXX"),
+      ("2", "3", "28Z14Z"),
+      ("1", "1", "28XXXX"),
+      ("1", "1", "28Z14Z")
+    ).toDF(colNames: _*)
+
+
+    val expected = Seq(
+      ("2", "3", "28XXXX"),
+      ("2", "3", "15A94Z"),
+      ("2", "3", "28XXXX"),
+      ("2", "3", "28Z14Z"),
+      ("1", "1", "28XXXX")
+    ).toDF(colNames: _*)
+
+    // When
+    val instance = new SsrFilters(input)
+    val result = instance.filterSharedHospitalStays
+
+    // Then
+    assertDFs(result, expected)
+  }
 }

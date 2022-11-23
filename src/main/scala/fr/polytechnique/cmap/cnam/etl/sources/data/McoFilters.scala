@@ -19,8 +19,8 @@ private[data] class McoFilters(rawMco: DataFrame) {
     * @return
     */
   def filterSharedHospitalStays: DataFrame = {
-    val duplicateHospitalsFilter: Column = McoSource.SEJ_TYP.isNull or McoSource
-      .SEJ_TYP =!= "B" or (McoSource.GRG_GHM.like("28%") and !McoSource.GRG_GHM
+    val duplicateHospitalsFilter: Column = McoSource.SEJ_TYP.isNull or
+      !(McoSource.ENT_MOD === 1 and McoSource.SOR_MOD === 1) or (McoSource.GRG_GHM.like("28%") and !McoSource.GRG_GHM
       .isin(McoFilters.GRG_GHMExceptions: _*))
     rawMco.filter(duplicateHospitalsFilter)
   }
@@ -69,5 +69,4 @@ private[data] class McoFilters(rawMco: DataFrame) {
 private[data] object McoFilters {
   // radiotherapie & dialyse exceptions
   val GRG_GHMExceptions = List("28Z14Z", "28Z15Z", "28Z16Z")
-
 }

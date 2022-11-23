@@ -18,6 +18,9 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
   val MOI_ANN_SOR_SEJ: Column = col("SSR_B__MOI_ANN_SOR_SEJ")
   val RHS_ANT_SEJ_ENT: Column = col("SSR_B__RHS_ANT_SEJ_ENT")
   val FP_PEC: Column = col("SSR_B__FP_PEC")
+
+  val ENT_MOD: Column = col("SSR_B__ENT_MOD")
+  val SOR_MOD: Column = col("SSR_B__SOR_MOD")
   val GRG_GME: Column = col("SSR_B__GRG_GME")
   val NIR_RET: Column = col("NIR_RET")
   val SEJ_RET: Column = col("SEJ_RET")
@@ -39,6 +42,7 @@ object SsrSource extends DataSourceManager with SsrSourceSanitizer {
       */
     rawSsr
       .filterSpecialHospitals
+      .filterSharedHospitalStays
       .filterSsrCorruptedHospitalStays
   }
 }
